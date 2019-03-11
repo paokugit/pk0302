@@ -34,10 +34,6 @@
 				<li class=""><a data-toggle="tab" href="#tab-sns" aria-expanded="false">社区信息</a></li>
 				{/if}
 
-				{if $helpList}
-				<li class=""><a data-toggle="tab" href="#tab-help" aria-expanded="false">好友助力信息</a></li>
-				{/if}
-
 			</ul>
 			<div class="tab-content ">
 				<div id="tab-basic" class="tab-pane active">{template 'member/detail/basic'}</div>
@@ -70,10 +66,6 @@
 
 				{if $hassns}
 				<div id="tab-sns" class="tab-pane ">{template 'member/detail/sns'}</div>
-				{/if}
-
-				{if $helpList}
-				<div id="tab-help" class="tab-pane ">{template 'member/detail/helplist'}</div>
 				{/if}
 				
 			</div>
