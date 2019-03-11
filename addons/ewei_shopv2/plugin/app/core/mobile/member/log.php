@@ -53,12 +53,16 @@ class Log_EweiShopV2Page extends AppMobilePage
 
 		}elseif ($type==1){
 		   //好友助力
-            $addwhere.=" and remark like '%邀请%'";
+            $addwhere.=" and remark like '%好友%'";
+            $addwhere.=" or remark like '%邀请%'";
         }elseif ($type==2){
-            $addwhere.=" and remark like '%捐赠%'";
+            $addwhere.=" and remark like '%签到%'";
         }elseif ($type==3){
             //步数兑换
-            $addwhere.=" and remark like '%兑换%'";
+            $addwhere.=" and remark like '%步数%'";
+        }elseif ($type==4){
+            //订单消费
+            $addwhere.=" and remark like '%消费%'";
         }
 
 

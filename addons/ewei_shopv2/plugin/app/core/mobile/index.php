@@ -313,7 +313,14 @@ class Index_EweiShopV2Page extends AppMobilePage
                 if (($jinri*$exchange + $keduihuan) > $bushu) {
                     $keduihuan = $bushu - $jinri*$exchange;
                 }
-                m('member')->setCredit($openid, 'credit1', $keduihuan, $day . "步数兑换");
+                if ($step["type"]==0){
+                m('member')->setCredit($openid, 'credit1', $keduihuan,"步数兑换");
+                }elseif ($step["type"]==1){
+                    m('member')->setCredit($openid, 'credit1', $keduihuan,"好友助力");
+                }elseif ($step["type"]==2) {
+                    m('member')->setCredit($openid, 'credit1', $keduihuan,"签到获取");
+                }
+                
                 pdo_update('ewei_shop_member_getstep', array('status' => 1), array('id' => $step['id']));
             }
             app_error(0,"兑换成功");
