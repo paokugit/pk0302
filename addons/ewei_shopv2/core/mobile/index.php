@@ -5,16 +5,14 @@ if (!defined('IN_IA')) {
 
 class Index_EweiShopV2Page extends MobilePage
 {
-   
 	public function main()
 	{
-	    
 		global $_W;
 		global $_GPC;
 		$_SESSION['newstoreid'] = 0;
 		$this->diypage('home');
 		$trade = m('common')->getSysset('trade');
-        //var_dump($_W);die;
+
 		if (empty($trade['shop_strengthen'])) {
 			$order = pdo_fetch('select id,price  from ' . tablename('ewei_shop_order') . ' where uniacid=:uniacid and status = 0 and paytype<>3 and openid=:openid order by createtime desc limit 1', array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
 
@@ -55,7 +53,7 @@ class Index_EweiShopV2Page extends MobilePage
 		if (com('coupon')) {
 			$cpinfos = com('coupon')->getInfo();
 		}
-       
+
 		include $this->template();
 	}
 

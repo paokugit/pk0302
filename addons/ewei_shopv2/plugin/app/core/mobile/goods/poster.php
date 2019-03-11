@@ -25,7 +25,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
 			$member = array( );
 		}
 		$imgurl = $this->createPoster($goods, $member);
-		if( empty($imgurl) ) 
+		if( empty($imgurl) )
 		{
 			app_error(AppError::$PosterCreateFail, "海报生成失败");
 		}
@@ -52,7 +52,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
 		$target = imagecreatetruecolor(750, 1127);
 		$white = imagecolorallocate($target, 255, 255, 255);
 		imagefill($target, 0, 0, $white);
-		if( !empty($goods["thumb"]) ) 
+		if( !empty($goods["thumb"]) )
 		{
 			if( stripos($goods["thumb"], "//") === false ) 
 			{
@@ -273,5 +273,78 @@ class Poster_EweiShopV2Page extends AppMobilePage
 		imagedestroy($image);
 		return $target;
 	}
+
+
+    private function createHelpPoster($member = array( ))
+    {
+        global $_W;
+        set_time_limit(0);
+        @ini_set("memory_limit", "256M");
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/helpposter/";
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "openid" => $member["openid"])));
+        $filename = $md5 . ".png";
+        $filepath = $path . $filename;
+        if( is_file($filepath) )
+        {
+            return $this->getImgUrl($filename);
+        }
+        $target = imagecreatetruecolor(550, 978);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+        $thumb = "/addons/ewei_shopv2/static/images/1.png";
+        $thumb = $this->createImage(tomedia($thumb));
+        imagecopyresized($target, $thumb, 0, 0, 0, 0, 550, 978, imagesx($thumb), imagesy($thumb));
+
+        $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/pingfang.ttf";
+        if( !is_file($font) )
+        {
+            $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
+        }
+        $black = imagecolorallocate($target, 0, 0, 0);
+        imagettftext($target, 26, 0, 32, 782, $black, $font, '快来帮我助力一下');
+        imagettftext($target, 16, 0, 32, 820, $black, $font, '微信步数兑现金，收入可提现！');
+
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $member["id"], "page" => "pages/helphand/friendhelp/friendhelp" ));
+        if( !is_error($qrcode) )
+        {
+            $qrcode = imagecreatefromstring($qrcode);
+            imagecopyresized($target, $qrcode, 400, 785, 0, 0, 110, 110, imagesx($qrcode), imagesy($qrcode));
+        }
+
+        //微信头像显示
+        $avatartarget = imagecreatetruecolor(70, 70);
+        $avatarwhite = imagecolorallocate($avatartarget, 255, 255, 255);
+        imagefill($avatartarget, 0, 0, $avatarwhite);
+        $memberthumb = tomedia($member["avatar"]);
+        $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
+        $image = $this->mergeImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
+        imagecopyresized($target, $image, 32, 860, 0, 0, 70, 70, imagesx($image), imagesy($image));
+        imagettftext($target, 16, 0, 110, 875 , $black, $font, $member["nickname"]);
+        $nameColor = imagecolorallocate($target, 102, 102, 102);
+        imagettftext($target, 12, 0, 110, 900 , $nameColor, $font, '每一步，都值得鼓励');
+        imagepng($target, $filepath);
+        imagedestroy($target);
+        return $_W["siteroot"] . "addons/ewei_shopv2/data/helpposter/".$filename . "?v=1.0";
+    }
+
+    public function gethelpimage()
+    {
+        $member = $this->member;
+        if( empty($member) )
+        {
+            $member = array( );
+        }
+        $imgurl = $this->createHelpPoster( $member);
+        if( empty($imgurl))
+        {
+            app_error(AppError::$PosterCreateFail, "海报生成失败");
+        }
+        app_json(array( "url" => $imgurl ));
+    }
 }
 ?>

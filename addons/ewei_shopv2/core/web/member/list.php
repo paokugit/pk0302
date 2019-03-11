@@ -4,7 +4,7 @@
 }
 class List_EweiShopV2Page extends WebPage 
 {
-	public function main() 
+	public function main()
 	{
 		global $_W;
 		global $_GPC;
@@ -177,7 +177,6 @@ class List_EweiShopV2Page extends WebPage
 	}
 	public function detail() 
 	{
-	   
 		global $_W;
 		global $_GPC;
 		$area_set = m("util")->get_area_config_set();
@@ -657,9 +656,20 @@ class List_EweiShopV2Page extends WebPage
 				$diyform_flag_abonus = 1;
 				$aafields = iunserializer($member["diyaagentfields"]);
 			}
+            $pindex = max(1, intval($_GPC["page"]));
+            $psize = 20;
+            $page = $_GPC["page"]+1;
+            $total = pdo_fetchcolumn("select count(*) from" . tablename("ewei_shop_member_getstep")." where openid=:openid and bang is not null and type=1", array(':openid' => $member["openid"]));
+            $url = "c=site&a=entry&m=ewei_shopv2&do=web&r=member.list.detail&id=".$_GPC['id'].'&page='.$page.'#tab-help';
+            $pager = pagination2($total, $pindex, $psize,$url);
+            $helpList = m('getstep')->getHelpList($member["openid"],0,$pindex,$psize);
+
 		}
 		include($this->template());
 	}
+
+
+
 	public function view() 
 	{
 		global $_W;

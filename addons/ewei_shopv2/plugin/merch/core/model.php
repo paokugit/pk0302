@@ -330,11 +330,17 @@ class MerchModel extends PluginModel
         return pdo_fetchall("select " . $res["field"] . " from " . tablename("ewei_shop_merch_category_swipe") . $res["condition"], $res["params"], $res["column"]);
     }
 
-    public function getMerch($data = array(  ))
+    public function getMerch($data = array(  ),$notcateid=false)
     {
         global $_W;
-        $condition = " WHERE `uniacid` = :uniacid";
-        $params = array( ":uniacid" => $_W["uniacid"] );
+        if($notcateid){
+            $condition = " WHERE `uniacid` = :uniacid and `cateid` != :notcateid";
+            $params = array( ":uniacid" => $_W["uniacid"], ":notcateid" => $notcateid);
+        }else{
+            $condition = " WHERE `uniacid` = :uniacid";
+            $params = array( ":uniacid" => $_W["uniacid"] );
+        }
+
         $res = $this->build($condition, $params, $data);
         return pdo_fetchall("select " . $res["field"] . " from " . tablename("ewei_shop_merch_user") . $res["condition"], $res["params"], $res["column"]);
     }
