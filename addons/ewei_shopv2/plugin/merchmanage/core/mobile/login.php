@@ -12,7 +12,7 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 		global $_W;
 		global $_GPC;
 		$check = $this->isLogin();
-
+       
 		if ($check) {
 			header('location: ' . mobileUrl('merchmanage'));
 		}
@@ -68,9 +68,9 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 		$logo = tomedia($shopset['shop']['logo']);
 		if (is_weixin() || (!(empty($shopset['wap']['open'])) && empty($shopset['wap']['inh5app']))) {
 			$goshop = true;
+			
 		}
-
-
+		
 		include $this->template();
 	}
 
