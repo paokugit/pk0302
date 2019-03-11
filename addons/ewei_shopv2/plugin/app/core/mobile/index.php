@@ -347,11 +347,12 @@ class Index_EweiShopV2Page extends AppMobilePage
             if ($member["qiandao"]==$yesterday){
                 //连签天数<7
                 if ($member["sign_days"]!=7){
-                    if ($member["sign_days"]>0){
-                    $step=[1+2*($member["sign_days"]-1)]*$shopset['qiandao'];
-                    }else{
-                        $step=$shopset['qiandao'];
-                    }
+//                     if ($member["sign_days"]>0){
+//                     $step=[1+2*($member["sign_days"]-1)]*$shopset['qiandao'];
+//                     }else{
+//                         $step=$shopset['qiandao'];
+//                     }
+                    $step=$shopset['qiandao'];
                 $data = array(
                     'timestamp' => time(),
                     'openid' => trim($_W["openid"]),

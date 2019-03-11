@@ -20,6 +20,7 @@ class MobilePage extends Page
         $wap = m("common")->getSysset("wap");
 //         var_dump(is_weixin());
 //         var_dump($preview);
+//         var_dump($wap["open"]);
         if( !empty($wap["open"]) && !is_weixin() && empty($preview) )
         {
             
