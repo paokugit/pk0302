@@ -1,8 +1,7 @@
 .env
 .idea
 /attachment
-/api
-/app
+
 /data
 /framework
 /img
