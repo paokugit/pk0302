@@ -1,0 +1,14 @@
+.env
+.idea
+/attachment
+/api
+/app
+/data
+/framework
+/img
+/payment
+/pcsite
+/web
+/api.php
+/index.php
+/install.php
