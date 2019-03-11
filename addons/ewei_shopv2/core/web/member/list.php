@@ -177,6 +177,7 @@ class List_EweiShopV2Page extends WebPage
 	}
 	public function detail() 
 	{
+	   
 		global $_W;
 		global $_GPC;
 		$area_set = m("util")->get_area_config_set();

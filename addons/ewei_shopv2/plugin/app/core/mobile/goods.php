@@ -5,6 +5,8 @@
 require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
 class Goods_EweiShopV2Page extends AppMobilePage 
 {
+    
+   
 	public function get_list() 
 	{
 		global $_GPC;

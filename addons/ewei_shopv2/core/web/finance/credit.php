@@ -10,9 +10,9 @@ class Credit_EweiShopV2Page extends WebPage
 		global $_GPC;
 		$pindex = max(1, intval($_GPC["page"]));
 		$psize = 20;
-		$condition = " and log.uniacid=:uniacid and (log.module=:module1  or log.module=:module2) and log.credittype=:credittype";
+		$condition = " and log.uniacid=:uniacid and (log.module=:module1  or log.module=:module2) and log.credittype=:credittype and log.num!=:num";
 		$condition1 = " and log.uniacid=:uniacid";
-		$params = array( ":uniacid" => $_W["uniacid"], ":module1" => "ewei_shopv2", ":module2" => "ewei_shop", ":credittype" => $type );
+		$params = array( ":uniacid" => $_W["uniacid"], ":module1" => "ewei_shopv2", ":module2" => "ewei_shop", ":credittype" => $type,":num"=>0 );
 		if( !empty($_GPC["keyword"]) ) 
 		{
 			$_GPC["keyword"] = trim($_GPC["keyword"]);

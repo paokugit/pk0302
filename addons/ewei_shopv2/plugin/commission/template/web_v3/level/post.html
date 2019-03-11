@@ -27,6 +27,47 @@
 						</div>
 					</div>
 				</div>
+				
+				<div class="form-group">
+					<label class="col-sm-2 control-label">兑换比例步数的设置</label>
+					<div class="col-sm-9 col-xs-12">
+						<div class='input-group'>
+							<input type="text" name="step" class="form-control" value="{$level['step']}" />
+							<div class='input-group-addon'>步</div>
+						</div>
+					</div>
+				</div>
+				{if $id!='default'}
+				
+				<div class="form-group">
+					<label class="col-sm-2 control-label">兑换卡路里比例</label>
+					<div class="col-sm-9 col-xs-12">
+						<div class='input-group'>
+							<input type="text" name="subscription_ratio" class="form-control" value="{$level['subscription_ratio']}" />
+							<div class='input-group-addon'>卡路里</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">加速天卡路里</label>
+					<div class="col-sm-9 col-xs-12">
+						<div class='input-group'>
+							<input type="text" name="accelerate" class="form-control" value="{$level['accelerate']}" />
+							<div class='input-group-addon'>卡路里</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">加速天数</label>
+					<div class="col-sm-9 col-xs-12">
+						<div class='input-group'>
+							<input type="text" name="accelerate_day" class="form-control" value="{$level['accelerate_day']}" />
+							<div class='input-group-addon'>天</div>
+						</div>
+					</div>
+				</div>
+				{/if}
+				
 				<div class="form-group">
 					<label class="col-sm-2 control-label">极差奖</label>
 					<div class="col-sm-9 col-xs-12">
