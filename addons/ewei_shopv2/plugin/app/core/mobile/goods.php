@@ -29,6 +29,14 @@ class Goods_EweiShopV2Page extends AppMobilePage
 			{
 				$args["nocommission"] = intval($_GPC["nocommission"]);
 			}
+
+            if( isset($_GPC["deduct"]) )
+            {
+                $args["order"] = 'deduct desc';
+                $args["ishot"] = 1;
+                
+            }
+
 			$goods = m("goods")->getList($args);
 			$saleout = (!empty($_W["shopset"]["shop"]["saleout"]) ? tomedia($_W["shopset"]["shop"]["saleout"]) : "/static/images/saleout-2.png");
 			$goods_list = array( );
