@@ -1981,7 +1981,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$openid = $_W["openid"];
 		$uniacid = $_W["uniacid"];
 		$member = m("member")->getMember($openid);
-		if( $member["isblack"] == 1 ) 
+		if( $member["isblack"] == 1 )
 		{
 			app_error(AppError::$UserIsBlack);
 		}
@@ -2001,7 +2001,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		if( !empty($packageid) ) 
 		{
 			$package = pdo_fetch("SELECT id,title,price,freight,cash,starttime,endtime,dispatchtype FROM " . tablename("ewei_shop_package") . "\r\n                    WHERE uniacid = " . $uniacid . " and id = " . $packageid . " and deleted = 0 and status = 1  ORDER BY id DESC");
-			if( empty($package) ) 
+			if( empty($package) )
 			{
 				app_error(AppError::$OrderCreateNoPackage);
 			}
@@ -2048,11 +2048,11 @@ class Create_EweiShopV2Page extends AppMobilePage
 		{
 			$allow_sale = false;
 		}
-		if( empty($goods) || !is_array($goods) ) 
+		if( empty($goods) || !is_array($goods) )
 		{
 			app_error(AppError::$OrderCreateNoGoods);
 		}
-		$allgoods = array( );
+        $allgoods = array( );
 		$tgoods = array( );
 		$totalprice = 0;
 		$goodsprice = 0;
@@ -3429,5 +3429,13 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$return_array["cardid"] = $cardid;
 		return $return_array;
 	}
+
+
+
+    public function reward(){
+        global $_GPC;
+        $res = m('reward')->addReward($_GPC['openid']);
+        var_dump($res);
+    }
 }
 ?>

@@ -198,6 +198,8 @@ class Index_EweiShopV2Page extends AppMobilePage
 		$result["hasdividend"] = $hasdividend;
 		$result["isheads"] = $member["isheads"];
 		$result["headsstatus"] = $member["headsstatus"];
+        $level = m("member")->agentlevel($_W["openid"]);
+        $result["levelname"] = $level;
 		app_json($result);
 	}
 }
