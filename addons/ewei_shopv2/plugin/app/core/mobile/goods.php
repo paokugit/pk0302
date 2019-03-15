@@ -31,6 +31,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
             {
                 $args["order"] = 'deduct desc';
                 $args["ishot"] = 1;
+                
             }
 
 			$goods = m("goods")->getList($args);
