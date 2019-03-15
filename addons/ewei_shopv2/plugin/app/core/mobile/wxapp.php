@@ -187,7 +187,8 @@ class Wxapp_EweiShopV2Page extends Page
         }
         app_json(array("uniacid" => $member["uniacid"], "openid" => $member["openid"], "id" => $member["id"], "nickname" => $member["nickname"], "avatarUrl" => tomedia($member["avatar"]), "isblack" => $member["isblack"]), $member["openid"]);
     }
-   
+    
+    
 }
 
 function app_error($errcode = 0, $message = "")
