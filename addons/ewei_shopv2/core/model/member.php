@@ -1053,5 +1053,27 @@ class Member_EweiShopV2Model
 			}
 		}
 	}
+
+
+    public function agentlevel($openid)
+    {
+        global $_W;
+        global $_S;
+        if( empty($openid) )
+        {
+            return false;
+        }
+        $member = m("member")->getMember($openid);
+        if( !empty($member) && !empty($member["agentlevel"]) )
+        {
+            $level = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where id=:id and uniacid=:uniacid limit 1", array( ":id" => $member["agentlevel"], ":uniacid" => $_W["uniacid"] ));
+            if( !empty($level) )
+            {
+                return $level['levelname'];
+            }
+            return '普通会员';
+        }
+        return '普通会员';
+    }
 }
 ?>

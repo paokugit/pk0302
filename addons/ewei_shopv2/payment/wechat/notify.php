@@ -293,7 +293,7 @@ class EweiShopWechatPay
 				$method = "payResult";
 				if( method_exists($site, $method) ) 
 				{
-					$ret = array( );
+					$ret = array();
 					$ret["acid"] = $log["acid"];
 					$ret["uniacid"] = $log["uniacid"];
 					$ret["result"] = "success";
@@ -321,6 +321,7 @@ class EweiShopWechatPay
 			$this->fail();
 		}
 	}
+
 	public function recharge() 
 	{
 		global $_W;
