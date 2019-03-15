@@ -466,6 +466,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
      * 获取来源店铺信息
      */
     public function get_from_store(){
+
         global $_GPC;
         global $_W;
         $uniacid = $_W['uniacid'];
@@ -488,6 +489,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
         $data['merchInfo'] = $merchInfo;
         $data['goodList'] = $goodList;
         show_json(0,$data);
+
     }
 
     /**
