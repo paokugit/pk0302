@@ -159,6 +159,9 @@ class Order_EweiShopV2Model
 					}
 					else 
 					{
+
+					    //vewen
+                        //支付成功回掉，写会员支付逻辑
 						$change_data["status"] = 1;
 					}
 					$change_data["paytime"] = $time;
@@ -361,7 +364,12 @@ class Order_EweiShopV2Model
 			}
 			p("task")->checkTaskProgress($order["price"], "order_all", "", $order["openid"]);
 			$goodslist = pdo_fetchall("SELECT goodsid FROM " . tablename("ewei_shop_order_goods") . " WHERE orderid = :orderid AND uniacid = :uniacid", array( ":orderid" => $order["id"], ":uniacid" => $order["uniacid"] ));
-			foreach( $goodslist as $item ) 
+
+            $this->write_log('===='.$order['status'].'====');
+            if($order['status']==1){
+                $this->reward($goodslist,$order['openid']);//lihanwen 会员推荐返佣金
+            }
+			foreach( $goodslist as $item )
 			{
 				p("task")->checkTaskProgress(1, "goods", 0, $order["openid"], $item["goodsid"]);
 			}
@@ -386,6 +394,37 @@ class Order_EweiShopV2Model
 				p("lottery")->getLotteryList($order["openid"], array( "lottery_id" => $res ));
 			}
 		}
+
+	}
+
+
+    /**
+     * 记录log
+     * @param $data
+     */
+    public function write_log($data){
+        $url  = 'log.txt';
+        $dir_name = dirname($url);
+        if(!file_exists($dir_name)) {
+            $res = mkdir(iconv("UTF-8","GBK",$dir_name),0777,true);
+        }
+        $fp = fopen($url,"a");//打开文件资源通道 不存在则自动创建
+        fwrite($fp,var_export($data,true)."\r\n");//写入文件
+        fclose($fp);//关闭资源通道
+    }
+
+    /**
+     *  会员推荐返佣金
+     * @param $goodslist
+     */
+	public function reward($goodslist,$openid){
+	    foreach ($goodslist as $val){
+	        if($val['cates']=='4'){
+	            m('reward')->addReward($openid);
+                $this->write_log('===='.$val['cates'].'====');
+	            break;
+            }
+        }
 	}
 	public function getGoodsCredit($goods) 
 	{
