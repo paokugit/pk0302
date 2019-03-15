@@ -12,7 +12,7 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 		global $_W;
 		global $_GPC;
 		$check = $this->isLogin();
-       
+        //var_dump($check);
 		if ($check) {
 			header('location: ' . mobileUrl('merchmanage'));
 		}

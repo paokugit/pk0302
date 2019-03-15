@@ -9,6 +9,7 @@ class Index_EweiShopV2Page extends WebPage
 		global $_W;
 		global $_GPC;
 		$category = m("plugin")->getList(1);
+		//var_dump($category);
 		$wxapp_array = array( "commission", "creditshop", "diyform", "bargain", "quick", "cycelbuy", "seckill", "groups", "dividend", "membercard" );
 		$apps = false;
 		if( $_W["role"] == "founder" || empty($_W["role"]) ) 

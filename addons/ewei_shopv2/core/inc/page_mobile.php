@@ -16,12 +16,13 @@ class MobilePage extends Page
         global $_W;
         global $_GPC;
         m("shop")->checkClose();
+        
         $preview = intval($_GPC["preview"]);
         $wap = m("common")->getSysset("wap");
-        
+       
         if( !empty($wap["open"]) && !is_weixin() && empty($preview) )
         {
-            
+           
             if( $this instanceof MobileLoginPage || $this instanceof PluginMobileLoginPage )
             {
                 if( empty($_W["openid"]) )
@@ -38,7 +39,7 @@ class MobilePage extends Page
         }
         else
         {
-            
+           
             if( $preview && !is_weixin() )
             {
                 $_W["openid"] = "ooyv91cPbLRIz1qaX7Fim_cRfjZk";
