@@ -19,7 +19,7 @@ class MobilePage extends Page
         
         $preview = intval($_GPC["preview"]);
         $wap = m("common")->getSysset("wap");
-       
+
         if( !empty($wap["open"]) && !is_weixin() && empty($preview) )
         {
            

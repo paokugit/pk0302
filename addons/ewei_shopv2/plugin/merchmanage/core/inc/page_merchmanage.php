@@ -16,8 +16,8 @@ class MerchmanageMobilePage extends PluginMobilePage
 
 		$GLOBALS['_W']['uniacid'] = intval($_GPC['i']);
 		parent::__construct(false);
- 		$this->set = m('common')->getPluginset('merchmanage');
- 		//var_dump($this->set);die;
+
+		$this->set = m('common')->getPluginset('merchmanage');
 		if (empty($this->set['open'])) {
 			$this->message('暂未开放', mobileUrl());
 			

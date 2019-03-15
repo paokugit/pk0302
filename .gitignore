@@ -1,15 +1,8 @@
 .env
 .idea
-.settings
-.buildpath
-.project
-1.微擎安装教程.docx
-favicon.ico
-coin.mp3
-
 /attachment
-/app
 /api
+/app
 /data
 /framework
 /img
