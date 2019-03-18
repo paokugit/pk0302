@@ -334,6 +334,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
 
     public function gethelpimage()
     {
+        
         $member = $this->member;
         if( empty($member) )
         {
