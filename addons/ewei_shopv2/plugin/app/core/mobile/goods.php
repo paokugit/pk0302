@@ -5,6 +5,8 @@
 require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
 class Goods_EweiShopV2Page extends AppMobilePage 
 {
+    
+   
 	public function get_list() 
 	{
 		global $_GPC;
@@ -23,10 +25,11 @@ class Goods_EweiShopV2Page extends AppMobilePage
 			{
 				$args["merchid"] = intval($_GPC["merchid"]);
 			}
-			if( isset($_GPC["nocommission"]) )
+			if( isset($_GPC["nocommission"]) ) 
 			{
 				$args["nocommission"] = intval($_GPC["nocommission"]);
 			}
+
             if( isset($_GPC["deduct"]) )
             {
                 $args["order"] = 'deduct desc';

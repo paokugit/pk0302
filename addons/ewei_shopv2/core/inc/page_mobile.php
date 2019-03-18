@@ -16,10 +16,13 @@ class MobilePage extends Page
         global $_W;
         global $_GPC;
         m("shop")->checkClose();
+        
         $preview = intval($_GPC["preview"]);
         $wap = m("common")->getSysset("wap");
+
         if( !empty($wap["open"]) && !is_weixin() && empty($preview) )
         {
+           
             if( $this instanceof MobileLoginPage || $this instanceof PluginMobileLoginPage )
             {
                 if( empty($_W["openid"]) )
@@ -36,6 +39,7 @@ class MobilePage extends Page
         }
         else
         {
+           
             if( $preview && !is_weixin() )
             {
                 $_W["openid"] = "ooyv91cPbLRIz1qaX7Fim_cRfjZk";
@@ -47,8 +51,9 @@ class MobilePage extends Page
             }
 
         }
-
-        $member = m("member")->checkMember();
+       
+// $member = m("member")->checkMember();
+       // var_dump($member);
         $_W["mid"] = (!empty($member) ? $member["id"] : "");
         $_W["mopenid"] = (!empty($member) ? $member["openid"] : "");
         $merch_plugin = p("merch");
@@ -57,7 +62,7 @@ class MobilePage extends Page
         {
             $this->merch_user = pdo_fetch("select * from " . tablename("ewei_shop_merch_user") . " where id=:id limit 1", array( ":id" => intval($_GPC["merchid"]) ));
         }
-
+        
     }
 
     public function followBar($diypage = false, $merch = false)

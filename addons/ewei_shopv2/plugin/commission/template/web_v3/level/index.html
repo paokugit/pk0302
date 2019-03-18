@@ -22,15 +22,26 @@
                    <!--     {if $set['level']>=1}<th>一级佣金比例</th>{/if}
                         {if $set['level']>=2}<th>二级佣金比例</th>{/if}
                         {if $set['level']>=3}<th>三级佣金比例</th>{/if}-->
+                        <th>每日兑换卡路里</th>
+                        <th>加速天数</th>
                         <th>极差奖</th>
                         <th>店主收益</th>
-                        <th>升级条件</th>
+                        <th>升级条件</th> 
                         <th style="width: 65px;">操作</th>
                     </tr>
                 </thead>
                 <tbody>
                     {loop $list $row}
                     <tr {if $row['id']=='default'}style='background:#f2f2f2'{/if}>
+                    <td>{$row['levelname']}</td>
+                    <td>{$row['duihuan']}</td>
+                    {if $row['id']=='default'}
+                  <td>  0天</td>
+                  {else}
+                    <td>{$row['accelerate_day']}天</td>
+                    
+                    {/if}
+                  
                     <td>{$row['jicha']}</td>
                     <td>{$row['dianzhu']}</td>
     <!--                    <td>{$row['levelname']}{if $row['id']=='default'}【默认等级】{/if}</td>

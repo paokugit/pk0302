@@ -12,6 +12,7 @@ class Refund_EweiShopV2Page extends WebPage
 		$id = intval($_GPC['id']);
 		$refundid = intval($_GPC['refundid']);
 		$item = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_order') . ' WHERE id = :id and uniacid=:uniacid Limit 1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
+		//var_dump($item);die;
 		if (empty($item)) 
 		{
 			if ($_W['isajax']) 
@@ -329,10 +330,15 @@ class Refund_EweiShopV2Page extends WebPage
 				{
 					m('order')->fullbackstop($item['id']);
 				}
+				//余额抵扣
 				if (0 < $dededuct__refund_price) 
 				{
 					$item['deductcredit2'] = $dededuct__refund_price;
 					m('order')->setDeductCredit2($item);
+				}
+				//用户消费卡路里修改
+				if ($item["deductprice"]>0){
+				    m('member')->setCredit($item['openid'], 'credit1', $item["deductprice"], array(0, $shopset['name'] . '购物返还抵扣卡路里 卡路里' . $item["deductprice"] . '订单号: ' . $item['ordersn']));
 				}
 				$change_refund['reply'] = '';
 				$change_refund['status'] = 1;
@@ -343,6 +349,7 @@ class Refund_EweiShopV2Page extends WebPage
 				{
 					$change_refund['operatetime'] = $time;
 				}
+				//退订单记录更改
 				pdo_update('ewei_shop_order_refund', $change_refund, array('id' => $item['refundid']));
 				m('order')->setGiveBalance($item['id'], 2);
 				m('order')->setStocksAndCredits($item['id'], 2);
@@ -353,7 +360,9 @@ class Refund_EweiShopV2Page extends WebPage
 						com('coupon')->returnConsumeCoupon($item['id']);
 					}
 				}
+				//订单更改
 				pdo_update('ewei_shop_order', array('refundstate' => 0, 'status' => -1, 'refundtime' => $time), array('id' => $item['id'], 'uniacid' => $uniacid));
+				
 				foreach ($goods as $g ) 
 				{
 					$salesreal = pdo_fetchcolumn('select ifnull(sum(total),0) from ' . tablename('ewei_shop_order_goods') . ' og ' . ' left join ' . tablename('ewei_shop_order') . ' o on o.id = og.orderid ' . ' where og.goodsid=:goodsid and o.status>=1 and o.uniacid=:uniacid limit 1', array(':goodsid' => $g['id'], ':uniacid' => $uniacid));

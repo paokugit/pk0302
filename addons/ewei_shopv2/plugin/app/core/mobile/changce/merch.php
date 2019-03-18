@@ -34,9 +34,8 @@ class Merch_EweiShopV2Page extends AppMobilePage
             if (!(empty($sorttype))) {
                 $data['orderby'] = array('id' => 'desc');
             }
-            $notcateid = $this->from_merch_cate();
-            $merchuser = $merch_plugin->getMerch($data,$notcateid);
-            //pdo_debug();exit;
+            $merchuser = $merch_plugin->getMerch($data);
+            //print_r($data);print_r($merchuser);pdo_debug();exit;
             $data = array();
             $data = array_merge($data, array('status' => 1, 'orderby' => array('displayorder' => 'desc', 'id' => 'asc')));
             $category = $merch_plugin->getCategory($data);
@@ -111,24 +110,6 @@ class Merch_EweiShopV2Page extends AppMobilePage
         $disopt[] = array('range' => 10, 'title' => '10KM以内');
         //$disopt[] = array('range'=>20, 'title'=>'20KM以内');
         app_json(array('list' => $merchuser, 'total' => intval($total), 'pagesize' => intval($psize), 'cates' => $category, 'disopt' => $disopt, 'citysel' => $citysel, 'citys' => $citys));
-    }
-
-
-    /**
-     * 获取来源店铺类目
-     */
-    public function from_merch_cate(){
-        global $_GPC;
-        $member = m('member')->getMember($_GPC['openid']);
-        if($member && $member['from_merchid']!=0){
-            $merch = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where id=:merchid Limit 1', array(':merchid' => $member['from_merchid']));
-            if($merch && $merch['cateid']>0){
-                return $merch['cateid'];
-            }
-            return false;
-        }
-        return false;
-
     }
 
     public function goods_list()

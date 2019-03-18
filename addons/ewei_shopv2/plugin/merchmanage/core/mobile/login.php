@@ -68,9 +68,9 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 		$logo = tomedia($shopset['shop']['logo']);
 		if (is_weixin() || (!(empty($shopset['wap']['open'])) && empty($shopset['wap']['inh5app']))) {
 			$goshop = true;
+			
 		}
-
-
+		
 		include $this->template();
 	}
 

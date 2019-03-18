@@ -6,6 +6,8 @@ if (!defined('IN_IA')) {
 require EWEI_SHOPV2_PLUGIN . 'app/core/page_mobile.php';
 class Shop_EweiShopV2Page extends AppMobilePage
 {
+    
+    
 	public function get_shopindex()
 	{
 		global $_W;

@@ -8,14 +8,15 @@ class Wxapp_EweiShopV2Page extends Page
 {
     protected $appid = NULL;
     protected $appsecret = NULL;
-
+    
     public function __construct()
     {
         $data = m("common")->getSysset("app");
+      //  var_dump($data);
         $this->appid = $data["appid"];
         $this->appsecret = $data["secret"];
     }
-
+    
     public function login()
     {
         global $_GPC;
@@ -38,14 +39,25 @@ class Wxapp_EweiShopV2Page extends Page
         if (!is_array($arr) || !isset($arr["openid"])) {
             app_error(AppError::$WxAppLoginError);
         }
+        //判断是否是第一次登录
+        $openid="sns_wa_".$arr["openid"];
+        $member=pdo_get('ewei_shop_member',array('openid'=>$openid));
+        if ($member){
+            //表示不是第一次登录
+            $arr["login"]=1;
+        }else{
+            //第一次登录
+            $arr["login"]=0;
+        }
         app_json($arr, $arr["openid"]);
     }
-
+    
+    //登陆成功--获取微信步数 
     public function urundata()
     {
         global $_GPC;
         global $_W;
-
+        
         $encryptedData = trim($_GPC["res"]['encryptedData']);
         $iv = trim($_GPC['res']["iv"]);
         $sessionKey = trim($_GPC['res']["sessionKey"]);
@@ -59,6 +71,7 @@ class Wxapp_EweiShopV2Page extends Page
             $data = json_decode($data, true);
             foreach ($data['stepInfoList'] as $vv) {
                 $set = pdo_get('ewei_shop_member_step', array('timestamp' => $vv['timestamp'], 'openid' => trim($_GPC["openid"])));
+                //set表中不存在该时间戳的步数
                 if (empty($set)) {
                     $array = array(
                         'timestamp' => $vv['timestamp'],
@@ -68,8 +81,11 @@ class Wxapp_EweiShopV2Page extends Page
                         'step' => $vv['step']
                     );
                     pdo_insert('ewei_shop_member_step', $array);
-
+                    //判断是否是当日
                     if (date('Y-m-d', $vv['timestamp'])==date('Y-m-d')&&$vv['step']>0) {
+                        if ($vv["step"]>=1000){
+                            spin_step(trim($_GPC["openid"]),$vv["step"],$vv['timestamp'],$_W['uniacid']);
+                        }else{
                         $data = array(
                             'timestamp' => time(),
                             'openid' => trim($_GPC["openid"]),
@@ -78,11 +94,19 @@ class Wxapp_EweiShopV2Page extends Page
                             'step' => $vv['step']
                         );
                         pdo_insert('ewei_shop_member_getstep', $data);
+                        }
                     }
-
+                    
                 }else if (date('Y-m-d', $vv['timestamp'])==date('Y-m-d')){
-
+                    
                     if ($vv['step']>$set['step']){
+                        //获取数据库中未兑换步数总数
+                        $count=pdo_fetchcolumn("select count(*) from ".tablename('ewei_shop_member_getstep')."where openid=:openid and day=:day and type=:type and status=:status",array(':openid'=>trim($_GPC["openid"]),':day'=>date('Y-m-d', $vv['timestamp']),':type'=>0,':status'=>0));
+                        $current_step=$vv["step"]-$set["step"];
+                       
+                        if ($count<2&&$current_step>=1000){
+                            spin_step(trim($_GPC["openid"]),$current_step,$vv['timestamp'],$_W['uniacid']);
+                        }else{
                         $data = array(
                             'timestamp' => time(),
                             'openid' => trim($_GPC["openid"]),
@@ -91,17 +115,19 @@ class Wxapp_EweiShopV2Page extends Page
                             'step' => $vv['step']-$set['step']
                         );
                         pdo_insert('ewei_shop_member_getstep', $data);
+                        }
+                        
                     }
-
+                    
                     pdo_update('ewei_shop_member_step',array('step'=>$vv['step']), array( 'timestamp' => $vv['timestamp'], 'openid' => trim($_GPC["openid"])));
-
-
+                    
+                    
                 }
             }
         }
         show_json();
     }
-
+    
     public function auth()
     {
         global $_GPC;
@@ -140,7 +166,7 @@ class Wxapp_EweiShopV2Page extends Page
         }
         app_error(AppError::$WxAppError, "登录错误, 错误代码: " . $errCode);
     }
-
+    
     public function check()
     {
         global $_GPC;
@@ -161,6 +187,8 @@ class Wxapp_EweiShopV2Page extends Page
         }
         app_json(array("uniacid" => $member["uniacid"], "openid" => $member["openid"], "id" => $member["id"], "nickname" => $member["nickname"], "avatarUrl" => tomedia($member["avatar"]), "isblack" => $member["isblack"]), $member["openid"]);
     }
+    
+    
 }
 
 function app_error($errcode = 0, $message = "")
@@ -182,5 +210,32 @@ function app_json($result = NULL, $openid)
     m("cache")->set($auth["authkey"], 1);
     exit(json_encode(array_merge($ret, $auth, $result)));
 }
+ //步数分拆 
+ function spin_step($openid="",$step=0,$timestep="",$uniacid=""){
+            
+             $step1=intval(rand(10,90)*$step/100);
+             $step2=$step-$step1;
+             if ($step1!=0){
+             $data = array(
+                 'timestamp' => time(),
+                 'openid' => trim($openid),
+                 'day' => date('Y-m-d', $timestep),
+                 'uniacid' => $uniacid,
+                 'step' => $step1
+             );
+             pdo_insert('ewei_shop_member_getstep', $data);
+             }
+             if ($step2!=0){
+             $data = array(
+                 'timestamp' => time(),
+                 'openid' => trim($openid),
+                 'day' => date('Y-m-d', $timestep),
+                 'uniacid' => $uniacid,
+                 'step' => $step2
+             );
+             pdo_insert('ewei_shop_member_getstep', $data);
+             }
 
+ }
+ 
 ?>

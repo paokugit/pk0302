@@ -330,17 +330,11 @@ class MerchModel extends PluginModel
         return pdo_fetchall("select " . $res["field"] . " from " . tablename("ewei_shop_merch_category_swipe") . $res["condition"], $res["params"], $res["column"]);
     }
 
-    public function getMerch($data = array(  ),$notcateid=false)
+    public function getMerch($data = array(  ))
     {
         global $_W;
-        if($notcateid){
-            $condition = " WHERE `uniacid` = :uniacid and `cateid` != :notcateid";
-            $params = array( ":uniacid" => $_W["uniacid"], ":notcateid" => $notcateid);
-        }else{
-            $condition = " WHERE `uniacid` = :uniacid";
-            $params = array( ":uniacid" => $_W["uniacid"] );
-        }
-
+        $condition = " WHERE `uniacid` = :uniacid";
+        $params = array( ":uniacid" => $_W["uniacid"] );
         $res = $this->build($condition, $params, $data);
         return pdo_fetchall("select " . $res["field"] . " from " . tablename("ewei_shop_merch_user") . $res["condition"], $res["params"], $res["column"]);
     }
@@ -1500,7 +1494,8 @@ class MerchModel extends PluginModel
             $list["commission"] = $commission;
         }
 
-        $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
+       // $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
+        $list["orderprice"] = $list["price"] + $list["dispatchprice"] + $list["changeprice"];
         $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice - $list["seckilldiscountprice"];
         if( $deduct_commission ) 
         {
@@ -1574,7 +1569,8 @@ class MerchModel extends PluginModel
             }
 
             $list["commission"] = m("order")->getOrderCommission($list["id"], $list["agentid"]);
-            $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
+          //  $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
+            $list["orderprice"] = $list["price"] + $list["dispatchprice"] + $list["changeprice"];
             $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice;
             if( $deduct_commission ) 
             {

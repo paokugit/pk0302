@@ -17,65 +17,10 @@ class Index_EweiShopV2Page extends MerchWebPage
 		unset($value);
 		$order_ok = $order;
 		$merchid = $_W['merchid'];
-		$qrcode  = $this->getshopcode();
-
-		$sql = "select count(*) as count from " . tablename("ewei_shop_member")." where from_merchid = :from_merchid";
-		$fromcount = pdo_fetch($sql,  array(':from_merchid' => $_W['from_merchid']));
-
+		$url = mobileUrl('merch', array('merchid' => $merchid), true);
+		$qrcode = m('qrcode')->createQrcode($url);
 		include $this->template('shop/index');
 	}
-
-	public function getshopcode($width = 430){
-		global $_W;
-		$path = IA_ROOT . "/addons/ewei_shopv2/data/storecode/";
-		if( !is_dir($path) )
-		{
-			load()->func("file");
-			mkdirs($path);
-		}
-		$md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "id" => $_W['merchid'],'width'=>$width)));
-		$filename = $md5 . ".png";
-		$filepath = $path . $filename;
-		if( is_file($filepath) )
-		{
-			return $_W["siteroot"] . "addons/ewei_shopv2/data/storecode/".$filename . "?v=1.0";
-		}
-		$qrcode = p("app")->getCodeUnlimit(array( "scene" => "&id=".$_W['merchid']."&fromid=".$_W['merchid'], "page" => 'pages/changce/merch/detail',"width"=>$width));
-		if( !is_error($qrcode) )
-		{
-			$qrcode = imagecreatefromstring($qrcode);
-		}
-		imagepng($qrcode, $filepath);
-		imagedestroy($qrcode);
-		return $_W["siteroot"] . "addons/ewei_shopv2/data/storecode/".$filename . "?v=1.0";
-	}
-
-	public function download_shopcode(){
-		global $_W;
-		$path = IA_ROOT . "/addons/ewei_shopv2/data/storecode/";
-		$md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "id" => $_W['merchid'],'width'=>1280)));
-		$filename = $md5 . ".png";
-		$filepath = $path . $filename;
-		$this->getshopcode(1280);
-		if(file_exists($filepath)){
-			$file = fopen ( $filepath, "r" );
-			//输入文件标签
-			Header ( "Content-type: application/octet-stream" );
-			Header ( "Accept-Ranges: bytes" );
-			Header ( "Accept-Length: " . filesize ( $filepath ) );
-			Header ( "Content-Disposition: attachment; filename=" . $filename);
-			//输出文件内容
-			//读取文件内容并直接输出到浏览器
-			echo fread ( $file, filesize ( $filepath ) );
-			fclose ( $file );
-			exit ();
-		}else{
-			echo "<script>alert('文件不存在')</script>";
-			exit();die();
-		}
-	}
-
-
 
 	public function quit()
 	{

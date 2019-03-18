@@ -324,6 +324,10 @@ class Refund_EweiShopV2Page extends MerchWebPage
 					$item['deductcredit2'] = $dededuct__refund_price;
 					m('order')->setDeductCredit2($item);
 				}
+				//用户消费卡路里修改
+				if ($item["deductprice"]>0){
+				    m('member')->setCredit($item['openid'], 'credit1', $item["deductprice"], array(0, $shopset['name'] . '购物返还抵扣卡路里 卡路里' . $item["deductprice"] . '订单号: ' . $item['ordersn']));
+				}
 				$change_refund['reply'] = '';
 				$change_refund['status'] = 1;
 				$change_refund['refundtype'] = $refundtype;

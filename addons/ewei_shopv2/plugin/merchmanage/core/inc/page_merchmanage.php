@@ -9,7 +9,6 @@ class MerchmanageMobilePage extends PluginMobilePage
 	{
 		global $_W;
 		global $_GPC;
-
 		if (empty($_GPC['i'])) {
 			$this->message('公众号参数错误');
 		}
@@ -17,10 +16,11 @@ class MerchmanageMobilePage extends PluginMobilePage
 
 		$GLOBALS['_W']['uniacid'] = intval($_GPC['i']);
 		parent::__construct(false);
-		$this->set = m('common')->getPluginset('merchmanage');
 
+		$this->set = m('common')->getPluginset('merchmanage');
 		if (empty($this->set['open'])) {
 			$this->message('暂未开放', mobileUrl());
+			
 		}
 
 
@@ -32,11 +32,12 @@ class MerchmanageMobilePage extends PluginMobilePage
 	{
 		global $_W;
 		global $_GPC;
-
+		
 		if ($_W['controller'] != 'login') {
+		   
 			load()->model('user');
 			$islogin = $this->isLogin();
-
+           
 			if ($islogin) {
 				$GLOBALS['_W']['merchmanage'] = $islogin;
 				$GLOBALS['_W']['role'] = empty($islogin['uid'])?'manager':uni_permission($islogin['uid'], $_W['uniacid']);
