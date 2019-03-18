@@ -8,6 +8,7 @@ class List_EweiShopV2Page extends MerchWebPage
 	protected function orderData($status, $st) 
 	{
 		global $_W;
+		
 		global $_GPC;
 		$merch_user = $_W["merch_user"];
 		$pindex = max(1, intval($_GPC["page"]));
@@ -20,6 +21,9 @@ class List_EweiShopV2Page extends MerchWebPage
 		{
 			$st = "." . $st;
 		}
+// 		var_dump($_W["shopset"]["notice"]);
+// 		var_dump(m("common")->getSysset("notice"));
+// 		var_dump(m("common")->getAccount());
 		$sendtype = (!isset($_GPC["sendtype"]) ? 0 : $_GPC["sendtype"]);
 		$condition = " o.uniacid = :uniacid and o.merchid = :merchid and o.deleted=0 and o.isparent=0";
 		$uniacid = $_W["uniacid"];
