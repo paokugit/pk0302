@@ -24,6 +24,8 @@ class List_EweiShopV2Page extends MerchWebPage
 // 		var_dump($_W["shopset"]["notice"]);
 // 		var_dump(m("common")->getSysset("notice"));
 // 		var_dump(m("common")->getAccount());
+// 		var_dump(m("common")->getSysset("app"));
+// 		var_dump(m("common")->getSysset("notice_redis"));
 		$sendtype = (!isset($_GPC["sendtype"]) ? 0 : $_GPC["sendtype"]);
 		$condition = " o.uniacid = :uniacid and o.merchid = :merchid and o.deleted=0 and o.isparent=0";
 		$uniacid = $_W["uniacid"];

@@ -460,6 +460,56 @@ class Index_EweiShopV2Page extends AppMobilePage
         $m["step_today"]=$step_today;
         show_json(1, $m);
     }
+    
+    public function message(){
+        $touser="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
+        $template_id="_z-2ZdOYhmyqTEnByOjyWPhkux8Sw0LpUDs9Dwfq2qo";
+//         $postdata["keyword1"]=array("value"=>"11","color"=>'#ff510');
+//         $postdata["keyword2"]=array("value"=>"2");
+//         $postdata["keyword3"]=array("value"=>3);
+//         $postdata["keyword4"]=array("value"=>"11","color"=>'#ff510');
+//         $postdata["keyword5"]=array("value"=>"2");
+//         $postdata["keyword6"]=array("value"=>3);
+        $postdata=array(
+            'keyword1'=>array(
+                'value'=>"11",
+                'color' => '#ff510'
+            ),
+            'keyword2'=>array(
+                'value'=>"22",
+                'color' => '#ff510'
+            ),
+            'keyword3'=>array(
+                'value'=>"3",
+                'color' => '#ff510'
+            ),
+            'keyword4'=>array(
+                'value'=>"4",
+                'color' => '#ff510'
+            ),
+            'keyword5'=>array(
+                'value'=>"5",
+                'color' => '#ff510'
+            ),
+            'keyword6'=>array(
+                'value'=>"6",
+                'color' => '#ff510'
+            ),
+            'keyword6'=>array(
+                'value'=>"6",
+                'color' => '#ff510'
+            ),
+            
+        );
+        
+//         $miniprogram=array(
+//             "appid"=>"wx4b602a36aa1c67d1",
+//             "pagepath"=>"/pages/index/index"
+//         );
+       
+        var_dump(p("app")->mysendNotice($touser, $postdata, "wx15091439077813980aed9da41044252876", 50, "PJlt5K7VTo9AaLWG4EM2pOTdxpNc6Ua029yKWhDYl6E"));
+    }
+  
 }
 //获取兑换比例
 function exchange($openid=""){

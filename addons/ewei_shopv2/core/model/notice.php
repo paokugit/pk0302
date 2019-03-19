@@ -1956,7 +1956,7 @@ class Notice_EweiShopV2Model
 		else 
 		{
 			$ret = m("message")->sendTexts($touser, $cusdefault_message, "", $account);
-			if( is_error($ret) ) 
+			if( is_error($ret)) 
 			{
 				$templatetype = pdo_fetch("select templateid  from " . tablename("ewei_shop_member_message_template_default") . " where typecode=:typecode and uniacid=:uniacid  limit 1", array( ":typecode" => $tag, ":uniacid" => $_W["uniacid"] ));
 				if( !empty($templatetype["templateid"]) ) 
