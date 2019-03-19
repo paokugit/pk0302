@@ -9,13 +9,13 @@ class Setting_EweiShopV2Page extends PluginWebPage
 	{
 		global $_W;
 		global $_GPC;
-
+       
 		if (empty($_W['shopversion'])) {
 			$this->message('请使用新版本访问');
 		}
-
+      
 		$sets = m('common')->getSysset(array('app', 'pay'));
-
+		
 		if (cv('app.setting.pay')) {
 			$sec = m('common')->getSec();
 			$sec = iunserializer($sec['sec']);
