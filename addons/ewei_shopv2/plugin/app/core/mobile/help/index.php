@@ -8,11 +8,11 @@ class Index_EweiShopV2Page extends AppMobilePage{
     /**
      * 添加助力
      */
-	public function addhelp(){
+    public function addhelp(){
         global $_GPC;
         global $_W;
         if($_GPC['step']>2000 || $_GPC['step']<1) app_error(1,'好友助力步数每日步数范围为：1-2000步');
-        $mid = $_GPC['mid'];
+        $mid = $_GPC['mids'];
         if (!empty($mid) && !empty($_W["openid"])) {
             $pid = m('member')->getMember($mid);
             $iset = pdo_get('ewei_shop_member_getstep', array('bang' => $_W['openid'], 'type' => 1, 'day' => date('Y-m-d'), 'openid' => $pid['openid']));
@@ -25,7 +25,8 @@ class Index_EweiShopV2Page extends AppMobilePage{
                     'uniacid' => $_W['uniacid'],
                     'step' => $_GPC['step'],
                     'type' => 1,
-                    'bang' => $_W['openid']
+                    'bang' => $_W['openid'],
+                    'remark'=>$_GPC['message']
                 );
                 pdo_insert('ewei_shop_member_getstep', $data);
                 app_json('助力成功啦！');
@@ -33,6 +34,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
                 app_error(2,'哎呀，助力人数太多啦，稍后再试哦');
             }
         }
+        app_error(3,'mid:'.$mid.'openid'.$_W["openid"]);
     }
 
     /**
@@ -41,7 +43,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
     public function helplist(){
         global $_GPC;
         global $_W;
-        $mid = $_GPC['mid'];//被助力人的mid
+        $mid = $_GPC['mids'];//被助力人的mid
         if (!empty($mid) && !empty($_W["openid"])) {
             $memberInfo = m('member')->getMember($mid);
             if(!$memberInfo) app_error(1,'信息不存在');

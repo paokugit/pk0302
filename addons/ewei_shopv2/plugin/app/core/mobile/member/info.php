@@ -156,6 +156,12 @@ class Info_EweiShopV2Page extends AppMobilePage
 
 		app_json($member);
 	}
+
+	public function getMemberInfo(){
+		global $_GPC;
+		$memberInfo = $this->member = m('member')->getInfo($_GPC['passive_openid']);
+		app_json($memberInfo);
+	}
 }
 
 ?>
