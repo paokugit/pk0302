@@ -41,6 +41,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
      * 获取助力列表
      */
     public function helplist(){
+
         global $_GPC;
         global $_W;
         $mid = $_GPC['mids'];//被助力人的mid
