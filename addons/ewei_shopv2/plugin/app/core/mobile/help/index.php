@@ -13,7 +13,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
         global $_W;
         if($_GPC['step']>2000 || $_GPC['step']<1) app_error(1,'好友助力步数每日步数范围为：1-2000步');
         $mid = $_GPC['mids'];
-        if (!empty($mid) && !empty($_W["openid"])) {
+        if (!empty($mid) && !empty($_GPC["openid"])) {
             $pid = m('member')->getMember($mid);
             $iset = pdo_get('ewei_shop_member_getstep', array('bang' => $_GPC['openid'], 'type' => 1, 'day' => date('Y-m-d'), 'openid' => $pid['openid']));
             if($iset) app_error(0,'助力成功');
@@ -45,10 +45,10 @@ class Index_EweiShopV2Page extends AppMobilePage{
         global $_GPC;
         global $_W;
         $mid = $_GPC['mids'];//被助力人的mid
-        if (!empty($mid) && !empty($_W["openid"])) {
+        if (!empty($mid) && !empty($_GPC["openid"])) {
             $memberInfo = m('member')->getMember($mid);
             if(!$memberInfo) app_error(1,'信息不存在');
-            if($memberInfo['openid'] == $_W['openid']){//本人查看自己信息
+            if($memberInfo['openid'] == $_GPC['openid']){//本人查看自己信息
                 $data['isonwer'] = 1;
             }
             $helpList = m('getstep')->getHelpList($memberInfo["openid"]);
@@ -62,7 +62,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
    public function helpstep_today(){
        global $_GPC;
        global $_W;
-       $openid=$_W["openid"];
+       $openid=$_GPC["openid"];
        if (empty($openid)){
            app_error(AppError::$ParamsError);
        }
