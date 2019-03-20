@@ -426,7 +426,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     public function refresh_step(){
         global $_GPC;
         global $_W;
-        $openid = trim($_W["openid"]);
+        $openid = trim($_GPC["openid"]);
         
         if (empty($openid)) {
             app_error(AppError::$ParamsError);

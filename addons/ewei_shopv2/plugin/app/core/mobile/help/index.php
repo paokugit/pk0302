@@ -15,7 +15,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $mid = $_GPC['mids'];
         if (!empty($mid) && !empty($_W["openid"])) {
             $pid = m('member')->getMember($mid);
-            $iset = pdo_get('ewei_shop_member_getstep', array('bang' => $_W['openid'], 'type' => 1, 'day' => date('Y-m-d'), 'openid' => $pid['openid']));
+            $iset = pdo_get('ewei_shop_member_getstep', array('bang' => $_GPC['openid'], 'type' => 1, 'day' => date('Y-m-d'), 'openid' => $pid['openid']));
             if($iset) app_error(0,'助力成功');
             if (!empty($pid)) {
                 $data = array(
@@ -25,7 +25,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
                     'uniacid' => $_W['uniacid'],
                     'step' => $_GPC['step'],
                     'type' => 1,
-                    'bang' => $_W['openid'],
+                    'bang' => $_GPC['openid'],
                     'remark'=>$_GPC['message']
                 );
                 pdo_insert('ewei_shop_member_getstep', $data);
@@ -34,7 +34,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
                 app_error(2,'哎呀，助力人数太多啦，稍后再试哦');
             }
         }
-        app_error(3,'mid:'.$mid.'openid'.$_W["openid"]);
+        app_error(3,'mid:'.$mid.'openid'.$_GPC["openid"]);
     }
 
     /**
