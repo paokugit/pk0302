@@ -1058,7 +1058,6 @@ class Member_EweiShopV2Model
     public function agentlevel($openid)
     {
         global $_W;
-        global $_S;
         if( empty($openid) )
         {
             return false;
@@ -1069,11 +1068,26 @@ class Member_EweiShopV2Model
             $level = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where id=:id and uniacid=:uniacid limit 1", array( ":id" => $member["agentlevel"], ":uniacid" => $_W["uniacid"] ));
             if( !empty($level) )
             {
-                return $level['levelname'];
+                $nodate = date('Y-m-d',time());
+                $thisdate = date('Y-m-d',$member['agenttime']);
+                $data = array();
+                $data['thisdate'] = $thisdate;
+                $data['levelid'] = $level['id'];
+                $hasdate = $nodate-$thisdate;//剩余天数
+                if($level['id']==1){
+                    $enddate = date('Y-m-d',time()+($hasdate*3600*24));
+                    $hastime = $nodate-$thisdate;
+                    $data['nodate'] = $nodate;
+                    $data['levelname'] = $level['levelname'];
+                    $data['leveltime'] = date('Y-m-d',$member['agenttime']);
+                    $data['hasday'] = $hastime;
+                    $data['endtime'] = $enddate;
+                }
+                return $data;
             }
-            return '普通会员';
+            return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
         }
-        return '普通会员';
+        return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
     }
 }
 ?>

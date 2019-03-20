@@ -199,7 +199,15 @@ class Index_EweiShopV2Page extends AppMobilePage
 		$result["isheads"] = $member["isheads"];
 		$result["headsstatus"] = $member["headsstatus"];
         $level = m("member")->agentlevel($_W["openid"]);
-        $result["levelname"] = $level;
+        $result["levelid"] = $level['levelid'];
+        $result["levelname"] = $level['levelname'];
+        $result["leveltime"] = $level['leveltime'];
+        if($level['hasday'] || $level['hasday']==0){
+            $result["hasday"] = $level['hasday'];
+        }
+        if($level['endtime']!=''){
+            $result["endtime"] = $level['endtime'];
+        }
 		app_json($result);
 	}
 }
