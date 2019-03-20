@@ -58,6 +58,23 @@ class Index_EweiShopV2Page extends AppMobilePage{
         app_error(0,'暂无助力信息');
     }
 
-
+   //今日助力步数
+   public function helpstep_today(){
+       global $_GPC;
+       global $_W;
+       $openid=$_W["openid"];
+       if (empty($openid)){
+           app_error(AppError::$ParamsError);
+       }
+       $day=date("Y-m-d",time());
+       $step_today = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type=:type", array(':today' => $day, ':openid' => $openid,':type'=>1));
+       if (empty($step_today)){
+           $m["step"]=0;
+       }else{
+           $m["step"]=$step_today;
+       }
+       $m["openid"]=$openid;
+       show_json(1, $m);
+   }
 }
 ?>
