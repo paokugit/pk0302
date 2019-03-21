@@ -226,7 +226,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         
         foreach ($result as &$vv) {
             //var_dump($vv['step'] / $proportion["value"]);
-            $vv['currency'] = $vv['step']*$exchange;
+            $vv['currency'] = round($vv['step']*$exchange,2);
         }
         unset($vv);
         
