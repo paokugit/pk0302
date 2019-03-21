@@ -308,7 +308,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $black = imagecolorallocate($target, 0, 0, 0);
         imagettftext($target, 26, 0, 32, 782, $black, $font, '快来帮我助力一下');
         imagettftext($target, 16, 0, 32, 820, $black, $font, '微信步数兑现金，收入可提现！');
-
+//lihanwen
         $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $member["id"], "page" => "pages/helphand/friendhelp/friendhelp" ));
         if( !is_error($qrcode) )
         {
