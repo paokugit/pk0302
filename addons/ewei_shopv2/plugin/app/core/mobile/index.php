@@ -203,16 +203,16 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($member['agentlevel'])||$member['agentlevel']>5) {
            // $bushu = 5;
             //  $subscription_ratio=1;
-            $exchange=5/1500;
+            $exchange=0.5/1500;
             $exchange_step=exchange_step($openid);
-            $bushu=ceil($exchange_step*1500/5);
+            $bushu=ceil($exchange_step*1500/0.5);
         } else {
             $memberlevel = pdo_get('ewei_shop_commission_level', array('id' => $member['agentlevel']));
            // $bushu = $memberlevel['duihuan'];
            $subscription_ratio=$memberlevel["subscription_ratio"];
            $exchange=$subscription_ratio/1500;
            $exchange_step=exchange_step($openid);
-           $bushu=ceil($exchange_step*1500/5);
+           $bushu=ceil($exchange_step*1500/$subscription_ratio);
         }
         
         
@@ -302,9 +302,9 @@ class Index_EweiShopV2Page extends AppMobilePage
             if (empty($member['agentlevel'])) {
                // $bushu = 5;
                 $subscription_ratio=5;
-                $exchange=5/1500;
+                $exchange=0.5/1500;
                 $exchange_step=exchange_step($openid);
-                $bushu=ceil($exchange_step*1500/5);
+                $bushu=ceil($exchange_step*1500/0.5);
             } else {
                 $memberlevel = pdo_get('ewei_shop_commission_level', array('id' => $member['agentlevel']));
               //  $bushu = $memberlevel['duihuan'];
@@ -439,7 +439,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $member=pdo_get('ewei_shop_member',array('openid'=>$openid));
         if ($member["agentlevel"]==0){
           //  $step_count=floor(5/$exchange);
-            $exchange=5/1500;
+            $exchange=0.5/1500;
             $exchange_step=exchange_step($openid);
             $step_count=ceil($exchange_step/$exchange);
         }else{
@@ -466,12 +466,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     public function message(){
         $touser="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
         $template_id="_z-2ZdOYhmyqTEnByOjyWPhkux8Sw0LpUDs9Dwfq2qo";
-//         $postdata["keyword1"]=array("value"=>"11","color"=>'#ff510');
-//         $postdata["keyword2"]=array("value"=>"2");
-//         $postdata["keyword3"]=array("value"=>3);
-//         $postdata["keyword4"]=array("value"=>"11","color"=>'#ff510');
-//         $postdata["keyword5"]=array("value"=>"2");
-//         $postdata["keyword6"]=array("value"=>3);
+
         $postdata=array(
             'keyword1'=>array(
                 'value'=>"11",
@@ -504,11 +499,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             
         );
         
-//         $miniprogram=array(
-//             "appid"=>"wx4b602a36aa1c67d1",
-//             "pagepath"=>"/pages/index/index"
-//         );
-       
+
         var_dump(p("app")->mysendNotice($touser, $postdata, "wx15091439077813980aed9da41044252876", 50, "PJlt5K7VTo9AaLWG4EM2pOTdxpNc6Ua029yKWhDYl6E"));
     }
   
