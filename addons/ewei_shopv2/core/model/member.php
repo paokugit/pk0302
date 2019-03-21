@@ -1073,12 +1073,12 @@ class Member_EweiShopV2Model
                 $data = array();
                 $data['thisdate'] = $thisdate;
                 $data['levelid'] = $level['id'];
+                $data['levelname'] = $level['levelname'];
                 $hasdate = $nodate-$thisdate;//剩余天数
                 if($level['id']==1){
                     $enddate = date('Y-m-d',time()+($hasdate*3600*24));
                     $hastime = $nodate-$thisdate;
                     $data['nodate'] = $nodate;
-                    $data['levelname'] = $level['levelname'];
                     $data['leveltime'] = date('Y-m-d',$member['agenttime']);
                     $data['hasday'] = $hastime;
                     $data['endtime'] = $enddate;
