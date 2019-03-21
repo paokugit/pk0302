@@ -465,6 +465,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
         }
         $args['order'] = 'isrecommand';
         $goodList = m('goods')->getList($args);
+        $merchInfo['logo'] = tomedia($merchInfo['logo']);
         $data['merchInfo'] = $merchInfo;
         $data['goodList'] = $goodList;
         show_json(0,$data);
