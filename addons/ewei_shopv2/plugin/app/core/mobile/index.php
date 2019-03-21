@@ -290,32 +290,31 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($openid)) {
             app_error(AppError::$ParamsError, '系统错误');
         }
+       
         $day = date('Y-m-d');
         $member = m('member')->getMember($_W['openid']);
         $shopset = m("common")->getSysset("shop");
         //获取当前用户卡路里兑换比例
-       // $exchange=exchange($openid);
-         
+    
         if (empty($_GPC["id"])){
             app_error(-1,"id未获取");
         }else{
             if (empty($member['agentlevel'])) {
                // $bushu = 5;
                 $subscription_ratio=5;
-                $exchange=number_format(5/1500,2);
+                $exchange=5/1500;
                 $exchange_step=exchange_step($openid);
                 $bushu=ceil($exchange_step*1500/5);
             } else {
                 $memberlevel = pdo_get('ewei_shop_commission_level', array('id' => $member['agentlevel']));
               //  $bushu = $memberlevel['duihuan'];
                 $subscription_ratio=$memberlevel["subscription_ratio"];
-                $exchange=number_format($subscription_ratio/1500,2);
+                $exchange=$subscription_ratio/1500;
                 $exchange_step=exchange_step($openid);
                 $bushu=ceil($exchange_step*1500/$subscription_ratio);
             }
-            
-            $step = pdo_get('ewei_shop_member_getstep', array('day' => $day, 'openid' => trim($_GPC["openid"]), 'id' => $_GPC['id']));
-            
+
+            $step = pdo_get('ewei_shop_member_getstep', array('id' => $_GPC['id']));
             $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and status=1 ", array(':today' => $day, ':openid' => $openid));
           
             if ($jinri*$exchange > $bushu) {
@@ -328,16 +327,19 @@ class Index_EweiShopV2Page extends AppMobilePage
                 if (($jinri*$exchange + $keduihuan) > $bushu) {
                     $keduihuan = $bushu - $jinri*$exchange;
                 }
+//                 var_dump($openid);
+//                 var_dump($keduihuan);
                 if ($step["type"]==0){
-                    m('member')->setCredit($openid, 'credit1', $keduihuan,"步数兑换");
+                    m('member')->setCredit($openid, 'credit1', $keduihuan, "步数兑换");
                 }elseif ($step["type"]==1){
-                    m('member')->setCredit($openid, 'credit1', $keduihuan,"好友助力");
+                    m('member')->setCredit($openid, 'credit1', $keduihuan, "好友助力");
                 }elseif ($step["type"]==2) {
-                    m('member')->setCredit($openid, 'credit1', $keduihuan,"签到获取");
+                    m('member')->setCredit($openid, 'credit1', $keduihuan, "签到获取");
                 }
-                
+//                 die;
                 pdo_update('ewei_shop_member_getstep', array('status' => 1), array('id' => $step['id']));
             }
+            
             app_error(0,"兑换成功");
         }
         

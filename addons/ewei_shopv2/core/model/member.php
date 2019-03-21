@@ -214,9 +214,13 @@ class Member_EweiShopV2Model
 	public function setCredit($openid = "", $credittype = "credit1", $credits = 0, $log = array( )) 
 	{
 		global $_W;
+		
 		load()->model("mc");
 		$uid = mc_openid2uid($openid);
+	   
 		$member = $this->getMember($openid);
+// 		var_dump($openid);
+		
 		if( empty($uid) ) 
 		{
 			$uid = intval($member["uid"]);
@@ -294,6 +298,11 @@ class Member_EweiShopV2Model
 			{
 				$newcredit = 0;
 			}
+// 			var_dump($value);
+// 			var_dump($newcredit);
+// 			var_dump($credittype);
+// 			var_dump(pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid )));
+// 			die;
 			pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid ));
 			$log_data["remark"] = $log_data["remark"];
             $log_data["openid"]=$openid;
