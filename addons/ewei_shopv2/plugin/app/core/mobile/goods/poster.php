@@ -291,7 +291,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $filepath = $path . $filename;
         if( is_file($filepath) )
         {
-            return $this->getImgUrl($filename);
+            return $_W["siteroot"] . "addons/ewei_shopv2/data/helpposter/".$filename;
         }
         $target = imagecreatetruecolor(550, 978);
         $white = imagecolorallocate($target, 255, 255, 255);
