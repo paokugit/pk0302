@@ -11,7 +11,6 @@ class Merch_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         global $_W;
-
         $merch_plugin = p('merch');
         $merch_data = m('common')->getPluginset('merch');
         $citysel = false;
@@ -46,12 +45,11 @@ class Merch_EweiShopV2Page extends AppMobilePage
                         $cate_list[$v['id']] = $v;
                     }
                 }
-
                 if ($pindex==1){
                     $member=m('member')->getMember($_W['openid']);
                     if (!empty($member['agentid'])){
                         $agent=m('member')->getMember($member['agentid']);
-                        $isstore=pdo_getll('ewei_shop_merch_user',array('payopenid'=>$agent['openid']));
+                        $isstore=pdo_getall('ewei_shop_merch_user',array('payopenid'=>$agent['openid']));
                     }
                 }
                 if (!empty($isstore)){
@@ -500,7 +498,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
                 $data['orderby'] = array('id' => 'desc');
             }
             $merchuser = $merch_plugin->getMerch($data);
-            //print_r($data);print_r($merchuser);pdo_debug();exit;
+           // print_r($data);print_r($merchuser);pdo_debug();exit;
             $data = array();
             $data = array_merge($data, array('status' => 1, 'orderby' => array('displayorder' => 'desc', 'id' => 'asc')));
             $category = $merch_plugin->getCategory($data);
@@ -516,7 +514,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
                     $member = m('member')->getMember($_W['openid']);
                     if (!empty($member['agentid'])) {
                         $agent = m('member')->getMember($member['agentid']);
-                        $isstore = pdo_getll('ewei_shop_merch_user', array('payopenid' => $agent['openid']));
+                        $isstore = pdo_getall('ewei_shop_merch_user', array('payopenid' => $agent['openid']));
                     }
                 }
                 if (!empty($isstore)) {
