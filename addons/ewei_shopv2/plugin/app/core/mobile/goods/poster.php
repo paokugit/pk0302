@@ -275,7 +275,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
 	}
 
 
-    private function createHelpPoster($member = array( ))
+    private function createHelpPoster($member = array( ),$mid,$hlpid)
     {
         global $_W;
         set_time_limit(0);
@@ -309,7 +309,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         imagettftext($target, 26, 0, 32, 782, $black, $font, '快来帮我助力一下');
         imagettftext($target, 16, 0, 32, 820, $black, $font, '微信步数兑现金，收入可提现！');
 //lihanwen
-        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $member["id"]."&hlpid=", "page" => "pages/helphand/helpshare/helpshare" ));
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=".$mid."&hlpid=".$hlpid, "page" => "pages/helphand/helpshare/helpshare" ));
         if( !is_error($qrcode) )
         {
             $qrcode = imagecreatefromstring($qrcode);
@@ -334,13 +334,16 @@ class Poster_EweiShopV2Page extends AppMobilePage
 
     public function gethelpimage()
     {
+        global $_GPC;
+        $mid = $_GPC['mid'];
+        $hlpid = $_GPC['hlpid'];
 
         $member = $this->member;
         if( empty($member) )
         {
             $member = array( );
         }
-        $imgurl = $this->createHelpPoster( $member);
+        $imgurl = $this->createHelpPoster( $member,$mid,$hlpid);
         if( empty($imgurl))
         {
             app_error(AppError::$PosterCreateFail, "海报生成失败");
