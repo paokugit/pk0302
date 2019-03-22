@@ -236,38 +236,38 @@ class Member_EweiShopV2Model
 				$log = array( 0, $log );
 			}
 		}
-		if( $credittype == "credit1" && empty($log[0]) && 0 < $credits ) 
-		{
-			$shopset = m("common")->getSysset("trade");
-			if( empty($member["diymaxcredit"]) ) 
-			{
-				if( 0 < $shopset["maxcredit"] ) 
-				{
-					if( $shopset["maxcredit"] <= $member["credit1"] ) 
-					{
-						return error(-1, "用户卡路里已达上限");
-					}
-					if( $shopset["maxcredit"] < $member["credit1"] + $credits ) 
-					{
-						$credits = $shopset["maxcredit"] - $member["credit1"];
-					}
-				}
-			}
-			else 
-			{
-				if( 0 < $member["maxcredit"] ) 
-				{
-					if( $member["maxcredit"] <= $member["credit1"] ) 
-					{
-						return error(-1, "用户卡路里已达上限");
-					}
-					if( $member["maxcredit"] < $member["credit1"] + $credits ) 
-					{
-						$credits = $member["maxcredit"] - $member["credit1"];
-					}
-				}
-			}
-		}
+// 		if( $credittype == "credit1" && empty($log[0]) && 0 < $credits ) 
+// 		{
+// 			$shopset = m("common")->getSysset("trade");
+// 			if( empty($member["diymaxcredit"]) ) 
+// 			{
+// 				if( 0 < $shopset["maxcredit"] ) 
+// 				{
+// 					if( $shopset["maxcredit"] <= $member["credit1"] ) 
+// 					{
+// 						return error(-1, "用户卡路里已达上限");
+// 					}
+// 					if( $shopset["maxcredit"] < $member["credit1"] + $credits ) 
+// 					{
+// 						$credits = $shopset["maxcredit"] - $member["credit1"];
+// 					}
+// 				}
+// 			}
+// 			else 
+// 			{
+// 				if( 0 < $member["maxcredit"] ) 
+// 				{
+// 					if( $member["maxcredit"] <= $member["credit1"] ) 
+// 					{
+// 						return error(-1, "用户卡路里已达上限");
+// 					}
+// 					if( $member["maxcredit"] < $member["credit1"] + $credits ) 
+// 					{
+// 						$credits = $member["maxcredit"] - $member["credit1"];
+// 					}
+// 				}
+// 			}
+// 		}
 		if( empty($log) ) 
 		{
 			$log = array( $uid, "未记录" );

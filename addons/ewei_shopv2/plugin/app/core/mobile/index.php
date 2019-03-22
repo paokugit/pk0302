@@ -216,7 +216,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         
         
-        $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and status=1 ", array(':today' => $day, ':openid' => $_W['openid']));
+        $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $_W['openid'],':type'=>2));
         
         $proportion=pdo_get('ewei_setting',array('type_id'=>$member['agentlevel'],'type'=>'level'));
         $step_number=$jinri*$exchange;
@@ -269,9 +269,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         $member = m('member')->getMember($openid);
         $member = array('credit1' => $member['credit1']);
         $day = date('Y-m-d');
-        $bushu = pdo_get('ewei_shop_member_step', array('day' => $day, 'openid' => $openid));
+        $bushu = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day`=:today and openid=:openid and type!=:type", array(':today' => $day, ':openid' => $openid,':type'=>2));
         $member['todaystep'] = $bushu['step'] ? $bushu['step'] : 0;
-        
         $yaoqing = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day`=:today and openid=:openid ", array(':today' => $day, ':openid' => $openid));
         if(empty($yaoqing)){
             $yaoqing=0;
@@ -299,6 +298,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($_GPC["id"])){
             app_error(-1,"id未获取");
         }else{
+            
             if (empty($member['agentlevel'])) {
                // $bushu = 5;
                 $subscription_ratio=5;
@@ -315,20 +315,28 @@ class Index_EweiShopV2Page extends AppMobilePage
             }
 
             $step = pdo_get('ewei_shop_member_getstep', array('id' => $_GPC['id']));
-            $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and status=1 ", array(':today' => $day, ':openid' => $openid));
-          
+            $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $openid,':type'=>2));
+            
+            if ($step["type"]!=2){
+                
             if ($jinri*$exchange > $bushu) {
                 app_error(-2,"您每天最多可兑换".$bushu."卡路里");
             }
+            
+            }
+            
             if (!empty($step) && $step['status'] == 0) {
                 
                 $keduihuan =$step["step"]*$exchange;
                 
+                if ($step["type"]!=2){
+                    
                 if (($jinri*$exchange + $keduihuan) > $bushu) {
                     $keduihuan = $bushu - $jinri*$exchange;
                 }
-//                 var_dump($openid);
-//                 var_dump($keduihuan);
+                
+                }
+
                 if ($step["type"]==0){
                     m('member')->setCredit($openid, 'credit1', $keduihuan, "步数兑换");
                 }elseif ($step["type"]==1){
@@ -336,7 +344,6 @@ class Index_EweiShopV2Page extends AppMobilePage
                 }elseif ($step["type"]==2) {
                     m('member')->setCredit($openid, 'credit1', $keduihuan, "签到获取");
                 }
-//                 die;
                 pdo_update('ewei_shop_member_getstep', array('status' => 1), array('id' => $step['id']));
             }
             
@@ -441,17 +448,20 @@ class Index_EweiShopV2Page extends AppMobilePage
           //  $step_count=floor(5/$exchange);
             $exchange=0.5/1500;
             $exchange_step=exchange_step($openid);
+
             $step_count=ceil($exchange_step/$exchange);
+
+            
         }else{
            $level=pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
-          // $step_count=floor($level["duihuan"]/$exchange);
+       
            $exchange=$level["subscription_ratio"]/1500;
            $exchange_step=exchange_step($openid);
            $step_count=ceil($exchange_step/$exchange);
         }
         //获取用户今天总步数
         $day=date("Y-m-d",time());
-        $step_today = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid", array(':today' => $day, ':openid' => $openid));
+        $step_today = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type", array(':today' => $day, ':openid' => $openid,':type'=>2));
         $step=$step_count-$step_today;
         if ($step<0){
             $step=0;
