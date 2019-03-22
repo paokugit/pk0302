@@ -43,8 +43,12 @@ class Goods_EweiShopV2Page extends AppMobilePage
 			if( 0 < $goods["total"] ) 
 			{
 				$goods_list = $goods["list"];
-				foreach( $goods_list as $index => $item ) 
+				foreach( $goods_list as $index => $item )
 				{
+				    if($_GPC['cate']==4){//会员产品获取有效期
+                        $agentlevel = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where id=:id limit 1", array( ":id" => $item['agentlevel']));
+                        $goods_list[$index]['available'] = $agentlevel['available'];
+                    }
 					if( $goods_list[$index]["isdiscount"] && time() < $goods_list[$index]["isdiscount_time"] ) 
 					{
 						$goods_list[$index]["isdiscount"] = 0;

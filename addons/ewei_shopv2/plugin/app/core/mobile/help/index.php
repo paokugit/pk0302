@@ -76,5 +76,16 @@ class Index_EweiShopV2Page extends AppMobilePage{
        $m["openid"]=$openid;
        show_json(1, $m);
    }
+
+    /**
+     * 获取累计的邀请信息
+     */
+   public function help_count(){
+       global $_GPC;
+       if(empty($_GPC["openid"])) app_error(1,'信息错误');
+       $openid=$_GPC["openid"];
+       $step_today = pdo_fetchcolumn("select count(*) from " . tablename('ewei_shop_member_getstep') . " where openid=:openid and type=:type group by bang", array(':openid' => $openid,':type'=>1));
+       var_dump($step_today);
+   }
 }
 ?>
