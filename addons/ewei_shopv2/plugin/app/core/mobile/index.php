@@ -200,7 +200,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $shopset = m("common")->getSysset("shop");
        // $exchange=exchange($_W['openid']);
       
-        if (empty($member['agentlevel'])||$member['agentlevel']>5) {
+        if (empty($member['agentlevel'])) {
            // $bushu = 5;
             //  $subscription_ratio=1;
             $exchange=0.5/1500;
@@ -270,7 +270,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         $member = array('credit1' => $member['credit1']);
         $day = date('Y-m-d');
         $bushu = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day`=:today and openid=:openid and type!=:type", array(':today' => $day, ':openid' => $openid,':type'=>2));
-        $member['todaystep'] = $bushu['step'] ? $bushu['step'] : 0;
+        if (empty($bushu)){
+            $member['todaystep'] =0;
+        }else{
+        $member['todaystep'] = $bushu;
+        }
         $yaoqing = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day`=:today and openid=:openid ", array(':today' => $day, ':openid' => $openid));
         if(empty($yaoqing)){
             $yaoqing=0;
@@ -615,7 +619,7 @@ function exchange_step($openid=""){
     
     $member=pdo_get('ewei_shop_member',array('openid'=>$openid));
     
-    if ($member["agentlevel"]!=0&&$member["agentlevel"]<6){
+    if ($member["agentlevel"]!=0){
         
         $level=pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
         $set=pdo_get('ewei_setting',array('type'=>"level",'type_id'=>$member["agentlevel"]));
