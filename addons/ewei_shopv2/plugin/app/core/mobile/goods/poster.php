@@ -345,7 +345,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         {
             app_error(AppError::$PosterCreateFail, "海报生成失败");
         }
-       // app_json(array( "url" => $imgurl ));
+       app_json(array( "url" => $imgurl ));
     }
 }
 ?>
