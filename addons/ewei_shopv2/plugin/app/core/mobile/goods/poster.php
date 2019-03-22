@@ -309,7 +309,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         imagettftext($target, 26, 0, 32, 782, $black, $font, '快来帮我助力一下');
         imagettftext($target, 16, 0, 32, 820, $black, $font, '微信步数兑现金，收入可提现！');
 //lihanwen
-        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $member["id"], "page" => "pages/helphand/friendhelp/friendhelp" ));
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $member["id"]."&hlpid=", "page" => "pages/helphand/helpshare/helpshare" ));
         if( !is_error($qrcode) )
         {
             $qrcode = imagecreatefromstring($qrcode);
@@ -345,7 +345,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         {
             app_error(AppError::$PosterCreateFail, "海报生成失败");
         }
-        app_json(array( "url" => $imgurl ));
+       // app_json(array( "url" => $imgurl ));
     }
 }
 ?>
