@@ -76,5 +76,19 @@ class Index_EweiShopV2Page extends AppMobilePage{
        $m["openid"]=$openid;
        show_json(1, $m);
    }
+
+    /**
+     * 获取累计的邀请信息
+     */
+   public function help_count(){
+       global $_GPC;
+       if(empty($_GPC["openid"])) app_error(1,'信息错误');
+       $openid=$_GPC["openid"];
+       //累计邀请人数
+       $data['step_today'] = pdo_fetchcolumn("select count(*) from (select count(*) from " . tablename('ewei_shop_member_getstep') . " where openid=:openid and type=:type group by bang) as a", array(':openid' => $openid,':type'=>1));
+       //助力获取的总卡路里
+       $data['credit_price'] = $data['credit_sum'] =m('credits')->get_sum_credit(1,$openid);
+       app_error(0,$data);
+   }
 }
 ?>
