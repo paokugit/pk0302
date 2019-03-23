@@ -226,7 +226,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         
         foreach ($result as &$vv) {
             //var_dump($vv['step'] / $proportion["value"]);
-            $vv['currency'] = round($vv['step']*$exchange,2);
+            if ($vv["step"]!=2){
+                $vv['currency'] = round($vv['step']*$exchange,2);
+            }else{
+                $vv['currency'] =1;
+            }
+            
         }
         unset($vv);
         
@@ -331,14 +336,19 @@ class Index_EweiShopV2Page extends AppMobilePage
             
             if (!empty($step) && $step['status'] == 0) {
                 
-                $keduihuan =$step["step"]*$exchange;
+                
                 
                 if ($step["type"]!=2){
+                    //不是签到
+                 $keduihuan =$step["step"]*$exchange;
                     
                 if (($jinri*$exchange + $keduihuan) > $bushu) {
                     $keduihuan = $bushu - $jinri*$exchange;
                 }
                 
+                }else{
+                    //签到 1卡路里
+                    $keduihuan=1;
                 }
 
                 if ($step["type"]==0){
