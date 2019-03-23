@@ -166,7 +166,7 @@ class Info_EweiShopV2Page extends AppMobilePage
 	public function getMemberInf_v2(){
 		global $_GPC;
 		global $_W;
-		$id = $_GPC['mid'];
+		$id = $_GPC['mids'];
 		$memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where id=:id and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":id" => $id ));
 		app_json($memberInfo);
 	}

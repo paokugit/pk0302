@@ -310,7 +310,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         imagettftext($target, 16, 0, 32, 820, $black, $font, '微信步数兑现金，收入可提现！');
 //lihanwen
         $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=".$mid, "page" => "pages/helphand/helpshare/helpshare" ));
-        var_dump($qrcode);
+        //var_dump($qrcode);
         if( !is_error($qrcode) )
         {
             $qrcode = imagecreatefromstring($qrcode);

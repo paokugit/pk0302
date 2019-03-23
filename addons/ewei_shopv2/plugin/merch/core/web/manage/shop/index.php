@@ -74,7 +74,7 @@ class Index_EweiShopV2Page extends MerchWebPage
 			unset($value);
 			$order_ok = $order;
 			$merchid = $_W['merchid'];
-			$url = mobileUrl('merch', array('merchid' => $merchid), true);
+			$url = mobileUrl('merch', array('id' => $merchid), true);
 			$qrcode = m('qrcode')->createQrcode($url);
 			include $this->template();
 		}
