@@ -32,10 +32,11 @@
                     <div class="col-sm-10"  style="padding-left:30px">
                         <h3>{$user['merchname']}</h3>
                         <p>{$user['desc']}</p>
+                        <p>首页显示人数：{$fromcount['count']}</p>
                         <p class=''>
-                            店铺链接: <a href='javascript:;' class="js-clip text-primary" title='点击复制链接' data-url="{php echo $url}" >点击复制</a>
+                            店铺小程序码: <a href='merchant.php?c=site&a=entry&m=ewei_shopv2&do=web&r=download_shopcode' target="_blank" class="js-clip text-primary" title='点击下载' data-url="{php echo $url}" >点击下载</a>
                             <span style="cursor: pointer;" data-toggle="popover" data-trigger="hover" data-html="true"
-                                  data-content="<img src='{$qrcode}' width='130' alt='链接二维码'>" data-placement="auto right">
+                                  data-content="<img src='{$qrcode}' width='130' alt='店铺小程序码'>" data-placement="auto right">
                             <i class="glyphicon glyphicon-qrcode"></i>
                         </span>
                         </p>
