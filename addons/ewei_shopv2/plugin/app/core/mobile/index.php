@@ -226,7 +226,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         
         foreach ($result as &$vv) {
             //var_dump($vv['step'] / $proportion["value"]);
-            if ($vv["step"]!=2){
+            if ($vv["type"]!=2){
                 $vv['currency'] = round($vv['step']*$exchange,2);
             }else{
                 $vv['currency'] =1;
@@ -484,6 +484,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         $m["step"]=$step;
         $m["step_count"]=$step_count;
         $m["step_today"]=$step_today;
+        //获取会员累计的卡路里
+        $count= pdo_fetchcolumn("select sum(num) from " . tablename('mc_credits_record') . " where `credittype`=:credittype and  'num'>:num", array(':credittype' =>"credit1", ':num' =>0,));
+        $count=3+round($count/10000,2);
+        $m["count"]=$count;
         show_json(1, $m);
     }
     
@@ -524,7 +528,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         );
         
 
-        var_dump(p("app")->mysendNotice($touser, $postdata, "wx15091439077813980aed9da41044252876", 50, "PJlt5K7VTo9AaLWG4EM2pOTdxpNc6Ua029yKWhDYl6E"));
+        $resualt=p("app")->mysendNotice($touser, $postdata,  50, "PJlt5K7VTo9AaLWG4EM2pOTdxpNc6Ua029yKWhDYl6E");
+        var_dump($resualt["meta"]);
+        
     }
   
 }
