@@ -423,6 +423,8 @@ class Index_EweiShopV2Page extends AppMobilePage
                 }
                 pdo_insert('ewei_shop_member_getstep', $data);
                 pdo_update('ewei_shop_member', array('qiandao' => $day,'sign_days'=>$sign_days), array('openid' => $member['openid']));
+                //签到消息提醒
+                wxmessage($openid, $sign_days);
                 app_error(0,"签到成功,获取步数".$step);
             }else{
                 
@@ -439,6 +441,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $sign_days=1;
                 pdo_insert('ewei_shop_member_getstep', $data);
                 pdo_update('ewei_shop_member', array('qiandao' => $day,'sign_days'=>$sign_days), array('openid' => $member['openid']));
+                wxmessage($openid, $sign_days);
                 app_error(0,"签到成功,获取步数".$step);
             }
             
@@ -491,47 +494,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         show_json(1, $m);
     }
     
-    public function message(){
-        $touser="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
-        $template_id="_z-2ZdOYhmyqTEnByOjyWPhkux8Sw0LpUDs9Dwfq2qo";
-
-        $postdata=array(
-            'keyword1'=>array(
-                'value'=>"11",
-                'color' => '#ff510'
-            ),
-            'keyword2'=>array(
-                'value'=>"22",
-                'color' => '#ff510'
-            ),
-            'keyword3'=>array(
-                'value'=>"3",
-                'color' => '#ff510'
-            ),
-            'keyword4'=>array(
-                'value'=>"4",
-                'color' => '#ff510'
-            ),
-            'keyword5'=>array(
-                'value'=>"5",
-                'color' => '#ff510'
-            ),
-            'keyword6'=>array(
-                'value'=>"6",
-                'color' => '#ff510'
-            ),
-            'keyword6'=>array(
-                'value'=>"6",
-                'color' => '#ff510'
-            ),
-            
-        );
-        
-
-        $resualt=p("app")->mysendNotice($touser, $postdata,  50, "PJlt5K7VTo9AaLWG4EM2pOTdxpNc6Ua029yKWhDYl6E");
-        var_dump($resualt["meta"]);
-        
-    }
+   
   
 }
 //获取兑换比例
@@ -734,5 +697,31 @@ function count_days($a,$b){
     $a_new=mktime(12,0,0,$a_dt['mon'],$a_dt['mday'],$a_dt['year']);
     $b_new=mktime(12,0,0,$b_dt['mon'],$b_dt['mday'],$b_dt['year']);
     return round(abs($a_new-$b_new)/86400);
+}
+//签到消息
+function wxmessage($openid,$sign_days){
+    //获取用户信息
+    $member = m("member")->getMember($openid);
+    $postdata=array(
+        'keyword1'=>array(
+            'value'=>$member["nickname"],
+            'color' => '#ff510'
+        ),
+        'keyword2'=>array(
+            'value'=>"1卡路里",
+            'color' => '#ff510'
+        ),
+        'keyword3'=>array(
+            'value'=>$sign_days,
+            'color' => '#ff510'
+        ),
+        'keyword4'=>array(
+            'value'=>date("Y-m-d",time()),
+            'color' => '#ff510'
+        )
+        
+    );
+    p("app")->mysendNotice($openid, $postdata, "", "BJtaHWXzIvH3j6NfAO56TPnULBeZyYJhX2h9XoYSs6g");
+    return true;
 }
 ?>

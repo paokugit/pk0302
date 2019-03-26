@@ -224,7 +224,7 @@ if (!class_exists("AppModel")) {
             return $result;
         }
 
-        
+        //fanbeibei 消息提醒
         public function mysendNotice($openid = NULL, $datas = array(),  $orderid = 0, $template_id="")
         {
             global $_W;

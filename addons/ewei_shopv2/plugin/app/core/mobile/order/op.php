@@ -84,7 +84,7 @@ class Op_EweiShopV2Page extends AppMobilePage
 			app_error(AppError::$ParamsError);
 		}
 
-		$order = pdo_fetch('select id,status,openid,couponid,refundstate,refundid from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
+		$order = pdo_fetch('select id,ordersn,status,price,merchid,openid,couponid,refundstate,refundid from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
 
 		if (empty($order)) {
 			app_error(AppError::$OrderNotFound);
@@ -115,7 +115,32 @@ class Op_EweiShopV2Page extends AppMobilePage
 		}
 
 		m('notice')->sendOrderMessage($orderid);
-
+        //商家消息
+        if ($order["merchid"]!=0){
+            $merch=pdo_fetch("select * from ".tablename("ewei_shop_merch_user")." where id=:id",array(':id'=>$order["merchid"]));
+            if (!empty($merch)&&!empty($merch["wxopenid"])){
+                $postdata=array(
+                    'keyword1'=>array(
+                        'value'=>$order["price"],
+                        'color' => '#ff510'
+                    ),
+                    'keyword2'=>array(
+                        'value'=>"编号为：".$order["ordersn"]."的订单，已被用户确认收货",
+                        'color' => '#ff510'
+                    ),
+                    'keyword3'=>array(
+                        'value'=>date("Y-m-d",time()),
+                        'color' => '#ff510'
+                    ),
+                    'keyword4'=>array(
+                        'value'=>"订单被确认收货，请到商家中心查看",
+                        'color' => '#ff510'
+                    )
+                    
+                );
+                p("app")->mysendNotice($merch["wxopenid"], $postdata, "", "nSJSBKVYwLYN_LcsUXyvTLVjseO46nQA8RqKsRnsiRs");
+            }
+        }
 		if (p('commission')) {
 			p('commission')->checkOrderFinish($orderid);
 		}
