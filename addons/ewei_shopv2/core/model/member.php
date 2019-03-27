@@ -1099,5 +1099,113 @@ class Member_EweiShopV2Model
         }
         return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
     }
+    //fanbeibei
+    //获取每天可兑换的卡路里
+   public function exchange_step($openid=""){
+        
+        
+        $member=pdo_get('ewei_shop_member',array('openid'=>$openid));
+        
+        if ($member["agentlevel"]!=0){
+            
+            $level=pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
+            $set=pdo_get('ewei_setting',array('type'=>"level",'type_id'=>$member["agentlevel"]));
+            
+            //加速日期
+            $accelerate_day=date("Y-m-d",strtotime("+".$level["accelerate_day"]." day",strtotime($member["agentlevel_time"])));
+            
+            $day=date("Y-m-d",time());
+            
+            if ($accelerate_day>=$day){
+                //加速期间
+                $ratio=$level["duihuan"];
+                
+            }else{
+                // var_dump("11");
+                //获取最新下级
+                if ($member["agentlevel"]==5){
+                    //店主
+                    $subordinate = pdo_fetch("select * from " . tablename("ewei_shop_member") . " WHERE agentid=:agentid and agentlevel>=:agentlevel and agentlevel<:agent order by agentlevel_time desc limit 1", array(":agentid" => $member["id"],":agentlevel"=>3,":agent"=>6));
+                }else{
+                    
+                    $subordinate = pdo_fetch("select * from " . tablename("ewei_shop_member") . " WHERE agentid=:agentid and agentlevel>:agentlevel and agentlevel<:agent order by agentlevel_time desc limit 1", array(':agentid' => $member["id"],":agentlevel"=>0,":agent"=>6));
+                }
+                // var_dump($subordinate);
+                if (!empty($subordinate)&&($subordinate["agentlevel_time"]>=$accelerate_day)){
+                    $count_days=$this->count_days($day, $subordinate["agentlevel_time"]);
+                    // var_dump($subordinate);
+                    $round=number_format($count_days/20,2);
+                    //  var_dump($round);
+                    if ($round>=0&&$round<=1){
+                        $ratio=$level["duihuan"];
+                    }elseif ($round>1&&$round<=2){
+                        $ratio=number_format($level["duihuan"]*0.7,2);
+                    }elseif ($round>2&&$round<=3){
+                        $ratio=number_format($level["duihuan"]*0.4,2);
+                    }else{
+                        $ratio=number_format($level["duihuan"]*0.1,2);
+                    }
+                }
+                else{
+                    
+                    $count_days=$this->count_days($day, $accelerate_day);
+                    $round=number_format($count_days/20,2);
+                    if ($round>0&&$round<=1){
+                        $ratio=$level["duihuan"];
+                    }elseif ($round>1&&$round<=2){
+                        $ratio=number_format($level["duihuan"]*0.7,2);
+                    }elseif ($round>2&&$round<=3){
+                        $ratio=number_format($level["duihuan"]*0.4,2);
+                    }else{
+                        $ratio=number_format($level["duihuan"]*0.1,2);
+                    }
+                    
+                }
+            }
+            
+        }else{
+            $set=pdo_get('ewei_setting',array('type'=>"level",'type_id'=>0));
+            $day=date("Y-m-d",time());
+            $create_day=date("Y-m-d",$member["createtime"]);
+            $subordinate = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_member') . ' WHERE agentid=:agentid and agentlevel>:agentlevel order by agentlevel_time desc', array(':agentid' => $member["id"],':agentlevel'=>0));
+            if (!empty($subordinate)){
+                $count_days=$this->count_days($day, $subordinate["agentlevel_time"]);
+                $round=number_format($count_days/20,2);
+                if ($round>0&&$round<=1){
+                    $ratio=5;
+                }elseif ($round>1&&$round<=2){
+                    $ratio=number_format(5*0.7,2);
+                }elseif ($round>2&&$round<=3){
+                    $ratio=number_format(5*0.4,2);
+                }else{
+                    $ratio=number_format(5*0.1,2);
+                }
+            }else{
+                
+                $count_days=$this->count_days($day, $create_day);
+                $round=number_format($count_days/20,2);
+                if ($round>0&&$round<=1){
+                    $ratio=5;
+                }elseif ($round>1&&$round<=2){
+                    $ratio=number_format(5*0.7,2);
+                }elseif ($round>2&&$round<=3){
+                    $ratio=number_format(5*0.4,2);
+                }else{
+                    $ratio=number_format(5*0.1,2);
+                }
+            }
+        }
+        return $ratio;
+        
+    }
+    
+    //指定日期相差的天数
+  public  function count_days($a,$b){
+        $a_dt=getdate($a);
+        $b_dt=getdate($b);
+        $a_new=mktime(12,0,0,$a_dt['mon'],$a_dt['mday'],$a_dt['year']);
+        $b_new=mktime(12,0,0,$b_dt['mon'],$b_dt['mday'],$b_dt['year']);
+        return round(abs($a_new-$b_new)/86400);
+    }
 }
 ?>

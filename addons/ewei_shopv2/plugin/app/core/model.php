@@ -228,7 +228,7 @@ if (!class_exists("AppModel")) {
         public function mysendNotice($openid = NULL, $datas = array(),  $orderid = 0, $template_id="")
         {
             global $_W;
-            if (empty($openid) || empty($datas) || empty($prepay_id)) {
+            if (empty($openid) || empty($datas)) {
                 return error(-1, 'openid或datas或prepay_id为空');
             }
             //获取formid

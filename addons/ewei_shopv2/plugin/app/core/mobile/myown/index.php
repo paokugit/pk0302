@@ -28,7 +28,8 @@ class Index_EweiShopV2Page extends AppMobilePage{
         if ($day>=$accelerate_day){
             $resault["surplus_day"]=0;
         }else{
-            $resault["surplus_day"]=count_days($accelerate_day, $day);
+            $count_days=m("member")->count_days($accelerate_day, $day);
+            $resault["surplus_day"]=$count_days;
         }
         $resault["give_day"]=$level["accelerate_day"];
         //已加速天数
@@ -47,12 +48,4 @@ class Index_EweiShopV2Page extends AppMobilePage{
     }
 }
 
-//指定日期相差的天数
-function count_days($a,$b){
-    $a_dt=getdate($a);
-    $b_dt=getdate($b);
-    $a_new=mktime(12,0,0,$a_dt['mon'],$a_dt['mday'],$a_dt['year']);
-    $b_new=mktime(12,0,0,$b_dt['mon'],$b_dt['mday'],$b_dt['year']);
-    return round(abs($a_new-$b_new)/86400);
-}
 ?>

@@ -701,7 +701,10 @@ class System_EweiShopV2Model {
                         "title" => "会员等级",
                         "route" => "level"
                     ) ,
-                    
+                    array(
+                        "title" => "运动日记",
+                        "route" => "sport"
+                    ) ,
                     array(
                         "title" => "标签组",
                         "route" => "group"

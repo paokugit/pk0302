@@ -53,7 +53,8 @@
             <table class="table table-responsive table-hover" >
                 <thead class="navbar-inner">
                     <tr>
-                        <th style="width:250px;"></th>
+                        <th style="width:25px;"></th>
+                      
                         <th style="width:250px;">模板图片</th>
                         <th style="width:250px;">显示日期</th>
                         <th style="width:250px;">状态</th>
@@ -67,13 +68,20 @@
                             <td>
                                 <input type='checkbox'   value="{$row['id']}"/>
                             </td>
+                            
                             <td>
                              <img src="{php echo tomedia($row['thumb'])}" style='width:100px;border:1px solid #ccc;padding:1px'/>
                             </td>
-                            <td>{$row['date']}</td>
                             <td>
                             {if $row['is_default']==1}
-                                                                                         默认
+                                                                                       每天
+                            {else}
+                            {$row['date']}
+                            {/if}
+                            </td>
+                            <td>
+                            {if $row['is_default']==1}
+                                                                                         默认（不可删除）
                             {else}
                               
                             {/if}
@@ -102,7 +110,7 @@
                 <tfoot>
                 <tr>
                     <td><input type="checkbox"></td>
-                    <td colspan="3">
+                    <td colspan="2">
                         <div class="btn-group">
                            
                             {ifp 'member.sport.delete'}
