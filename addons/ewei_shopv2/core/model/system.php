@@ -702,9 +702,14 @@ class System_EweiShopV2Model {
                         "route" => "level"
                     ) ,
                     array(
+                        "title" => "运动日记",
+                        "route" => "sport"
+                    ) ,
+                    array(
                         "title" => "标签组",
                         "route" => "group"
                     ) ,
+                   
                     array(
                         "title" => "排行榜设置",
                         "route" => "rank",
