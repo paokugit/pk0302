@@ -23,12 +23,16 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $level=pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
         //加速日期
         $accelerate_day=date("Y-m-d",strtotime("+".$level["accelerate_day"]." day",strtotime($member["agentlevel_time"])));
+        
         $day=date("Y-m-d",time());
+        
         //加速剩余天数
         if ($day>=$accelerate_day){
+           
             $resault["surplus_day"]=0;
         }else{
-            $count_days=m("member")->count_days($accelerate_day, $day);
+            $count_days=m("member")->count_days($accelerate_day,$day);
+            
             $resault["surplus_day"]=$count_days;
         }
         $resault["give_day"]=$level["accelerate_day"];

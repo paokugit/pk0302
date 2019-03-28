@@ -49,7 +49,7 @@ class Sport_EweiShopV2Page extends WebPage{
         $id = intval($_GPC['id']);
         
         if ($_W['ispost']) {
-            $data = array('uniacid' => $_W['uniacid'], 'date' => trim($_GPC['date']), 'thumb' => save_media($_GPC['thumb']));
+            $data = array('uniacid' => $_W['uniacid'], 'date' => trim($_GPC['date']),'is_default'=>$_GPC['is_default'],'thumb' => save_media($_GPC['thumb']));
             
             if (!empty($id)) {
                 pdo_update('ewei_shop_member_sport', $data, array('id' => $id));
@@ -81,10 +81,10 @@ class Sport_EweiShopV2Page extends WebPage{
         
         foreach ($items as $item) {
             
-            if ($item["is_default"]!=1){
+           
             pdo_delete('ewei_shop_member_sport', array('id' => $item['id']));
             plog('member.sport.delete', '删除模板 ID: ' . $item['id'] );
-            }
+           
         }
         
         show_json(1, array('url' => referer()));

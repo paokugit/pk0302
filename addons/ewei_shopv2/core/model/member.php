@@ -298,11 +298,7 @@ class Member_EweiShopV2Model
 			{
 				$newcredit = 0;
 			}
-// 			var_dump($value);
-// 			var_dump($newcredit);
-// 			var_dump($credittype);
-// 			var_dump(pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid )));
-// 			die;
+
 			pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid ));
 			$log_data["remark"] = $log_data["remark"];
             $log_data["openid"]=$openid;
@@ -1198,14 +1194,114 @@ class Member_EweiShopV2Model
         return $ratio;
         
     }
-    
+    //fanbeibei
     //指定日期相差的天数
   public  function count_days($a,$b){
+        $a=strtotime($a);
+        $b=strtotime($b);
         $a_dt=getdate($a);
         $b_dt=getdate($b);
+      
         $a_new=mktime(12,0,0,$a_dt['mon'],$a_dt['mday'],$a_dt['year']);
         $b_new=mktime(12,0,0,$b_dt['mon'],$b_dt['mday'],$b_dt['year']);
+        
         return round(abs($a_new-$b_new)/86400);
+    }
+    //fanbeibei
+    //获取兑换比例
+    public function exchange($openid=""){
+        $member=pdo_get('ewei_shop_member',array('openid'=>$openid));
+        
+        if ($member["agentlevel"]!=0&&$member["agentlevel"]<6){
+            
+            $level=pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
+            $set=pdo_get('ewei_setting',array('type'=>"level",'type_id'=>$member["agentlevel"]));
+            
+            //加速日期
+            $accelerate_day=date("Y-m-d",strtotime("+".$level["accelerate_day"]." day",strtotime($member["agentlevel_time"])));
+            
+            $day=date("Y-m-d",time());
+            
+            if ($accelerate_day>=$day){
+                //加速期间
+                $ratio=$level["accelerate"]/$set["value"];
+                
+            }else{
+                // var_dump("11");
+                //获取最新下级
+                if ($member["agentlevel"]==5){
+                    //店主
+                    $subordinate = pdo_fetch("select * from " . tablename("ewei_shop_member") . " WHERE agentid=:agentid and agentlevel>=:agentlevel and agentlevel<:agent order by agentlevel_time desc limit 1", array(":agentid" => $member["id"],":agentlevel"=>3,":agent"=>6));
+                }else{
+                    
+                    $subordinate = pdo_fetch("select * from " . tablename("ewei_shop_member") . " WHERE agentid=:agentid and agentlevel>:agentlevel and agentlevel<:agent order by agentlevel_time desc limit 1", array(':agentid' => $member["id"],":agentlevel"=>0,":agent"=>6));
+                }
+                // var_dump($subordinate);
+                if (!empty($subordinate)&&($subordinate["agentlevel_time"]>=$accelerate_day)){
+                    $count_days=$this->count_days($day, $subordinate["agentlevel_time"]);
+                    
+                    $round=number_format($count_days/20,2);
+                    
+                    if ($round>=0&&$round<=1){
+                        $ratio=$level["subscription_ratio"]/$set["value"];
+                    }elseif ($round>1&&$round<=2){
+                        $ratio=$level["subscription_ratio"]/$set["value"]*0.7;
+                    }elseif ($round>2&&$round<=3){
+                        $ratio=$level["subscription_ratio"]/$set["value"]*0.4;
+                    }else{
+                        $ratio=$level["subscription_ratio"]/$set["value"]*0.1;
+                    }
+                }
+                else{
+                    
+                    $count_days=$this->count_days($day, $accelerate_day);
+                    $round=number_format($count_days/20,2);
+                    if ($round>0&&$round<=1){
+                        $ratio=$level["subscription_ratio"]/$set["value"];
+                    }elseif ($round>1&&$round<=2){
+                        $ratio=$level["subscription_ratio"]/$set["value"]*0.7;
+                    }elseif ($round>2&&$round<=3){
+                        $ratio=$level["subscription_ratio"]/$set["value"]*0.4;
+                    }else{
+                        $ratio=$level["subscription_ratio"]/$set["value"]*0.1;
+                    }
+                    
+                }
+            }
+            
+        }else{
+            $set=pdo_get('ewei_setting',array('type'=>"level",'type_id'=>0));
+            $day=date("Y-m-d",time());
+            $create_day=date("Y-m-d",$member["createtime"]);
+            $subordinate = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_member') . ' WHERE agentid=:agentid and agentlevel>:agentlevel order by agentlevel_time desc', array(':agentid' => $member["id"],':agentlevel'=>0));
+            if (!empty($subordinate)){
+                $count_days=$this->count_days($day, $subordinate["agentlevel_time"]);
+                $round=number_format($count_days/20,2);
+                if ($round>0&&$round<=1){
+                    $ratio=5/$set["value"];
+                }elseif ($round>1&&$round<=2){
+                    $ratio=5/$set["value"]*0.7;
+                }elseif ($round>2&&$round<=3){
+                    $ratio=5/$set["value"]*0.4;
+                }else{
+                    $ratio=5/$set["value"]*0.1;
+                }
+            }else{
+                
+                $count_days=$this->count_days($day, $create_day);
+                $round=number_format($count_days/20,2);
+                if ($round>0&&$round<=1){
+                    $ratio=5/$set["value"];
+                }elseif ($round>1&&$round<=2){
+                    $ratio=5/$set["value"]*0.7;
+                }elseif ($round>2&&$round<=3){
+                    $ratio=5/$set["value"]*0.4;
+                }else{
+                    $ratio=5/$set["value"]*0.1;
+                }
+            }
+        }
+        return $ratio;
     }
 }
 ?>
