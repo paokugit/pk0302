@@ -275,7 +275,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
 	}
 
 
-    private function createHelpPoster($member = array( ))
+    private function createHelpPoster($member = array( ),$mid)
     {
         global $_W;
         set_time_limit(0);
@@ -291,7 +291,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $filepath = $path . $filename;
         if( is_file($filepath) )
         {
-            return $this->getImgUrl($filename);
+            return $_W["siteroot"] . "addons/ewei_shopv2/data/helpposter/".$filename;
         }
         $target = imagecreatetruecolor(550, 978);
         $white = imagecolorallocate($target, 255, 255, 255);
@@ -308,8 +308,9 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $black = imagecolorallocate($target, 0, 0, 0);
         imagettftext($target, 26, 0, 32, 782, $black, $font, '快来帮我助力一下');
         imagettftext($target, 16, 0, 32, 820, $black, $font, '微信步数兑现金，收入可提现！');
-
-        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $member["id"], "page" => "pages/helphand/friendhelp/friendhelp" ));
+//lihanwen
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=".$mid, "page" => "pages/helphand/helpshare/helpshare" ));
+        //var_dump($qrcode);
         if( !is_error($qrcode) )
         {
             $qrcode = imagecreatefromstring($qrcode);
@@ -334,18 +335,19 @@ class Poster_EweiShopV2Page extends AppMobilePage
 
     public function gethelpimage()
     {
-
+        global $_GPC;
+        $mid = $_GPC['mid'];
         $member = $this->member;
         if( empty($member) )
         {
             $member = array( );
         }
-        $imgurl = $this->createHelpPoster( $member);
+        $imgurl = $this->createHelpPoster( $member,$mid);
         if( empty($imgurl))
         {
             app_error(AppError::$PosterCreateFail, "海报生成失败");
         }
-        app_json(array( "url" => $imgurl ));
+       app_json(array( "url" => $imgurl ));
     }
 }
 ?>

@@ -214,9 +214,13 @@ class Member_EweiShopV2Model
 	public function setCredit($openid = "", $credittype = "credit1", $credits = 0, $log = array( )) 
 	{
 		global $_W;
+		
 		load()->model("mc");
 		$uid = mc_openid2uid($openid);
+	   
 		$member = $this->getMember($openid);
+// 		var_dump($openid);
+		
 		if( empty($uid) ) 
 		{
 			$uid = intval($member["uid"]);
@@ -232,38 +236,38 @@ class Member_EweiShopV2Model
 				$log = array( 0, $log );
 			}
 		}
-		if( $credittype == "credit1" && empty($log[0]) && 0 < $credits ) 
-		{
-			$shopset = m("common")->getSysset("trade");
-			if( empty($member["diymaxcredit"]) ) 
-			{
-				if( 0 < $shopset["maxcredit"] ) 
-				{
-					if( $shopset["maxcredit"] <= $member["credit1"] ) 
-					{
-						return error(-1, "用户卡路里已达上限");
-					}
-					if( $shopset["maxcredit"] < $member["credit1"] + $credits ) 
-					{
-						$credits = $shopset["maxcredit"] - $member["credit1"];
-					}
-				}
-			}
-			else 
-			{
-				if( 0 < $member["maxcredit"] ) 
-				{
-					if( $member["maxcredit"] <= $member["credit1"] ) 
-					{
-						return error(-1, "用户卡路里已达上限");
-					}
-					if( $member["maxcredit"] < $member["credit1"] + $credits ) 
-					{
-						$credits = $member["maxcredit"] - $member["credit1"];
-					}
-				}
-			}
-		}
+// 		if( $credittype == "credit1" && empty($log[0]) && 0 < $credits ) 
+// 		{
+// 			$shopset = m("common")->getSysset("trade");
+// 			if( empty($member["diymaxcredit"]) ) 
+// 			{
+// 				if( 0 < $shopset["maxcredit"] ) 
+// 				{
+// 					if( $shopset["maxcredit"] <= $member["credit1"] ) 
+// 					{
+// 						return error(-1, "用户卡路里已达上限");
+// 					}
+// 					if( $shopset["maxcredit"] < $member["credit1"] + $credits ) 
+// 					{
+// 						$credits = $shopset["maxcredit"] - $member["credit1"];
+// 					}
+// 				}
+// 			}
+// 			else 
+// 			{
+// 				if( 0 < $member["maxcredit"] ) 
+// 				{
+// 					if( $member["maxcredit"] <= $member["credit1"] ) 
+// 					{
+// 						return error(-1, "用户卡路里已达上限");
+// 					}
+// 					if( $member["maxcredit"] < $member["credit1"] + $credits ) 
+// 					{
+// 						$credits = $member["maxcredit"] - $member["credit1"];
+// 					}
+// 				}
+// 			}
+// 		}
 		if( empty($log) ) 
 		{
 			$log = array( $uid, "未记录" );
@@ -294,6 +298,11 @@ class Member_EweiShopV2Model
 			{
 				$newcredit = 0;
 			}
+// 			var_dump($value);
+// 			var_dump($newcredit);
+// 			var_dump($credittype);
+// 			var_dump(pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid )));
+// 			die;
 			pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid ));
 			$log_data["remark"] = $log_data["remark"];
             $log_data["openid"]=$openid;
@@ -1058,7 +1067,6 @@ class Member_EweiShopV2Model
     public function agentlevel($openid)
     {
         global $_W;
-        global $_S;
         if( empty($openid) )
         {
             return false;
@@ -1069,11 +1077,27 @@ class Member_EweiShopV2Model
             $level = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where id=:id and uniacid=:uniacid limit 1", array( ":id" => $member["agentlevel"], ":uniacid" => $_W["uniacid"] ));
             if( !empty($level) )
             {
-                return $level['levelname'];
+                $nodate = date('Y-m-d',time());
+                $thisdate = date('Y-m-d',$member['agenttime']);
+                $data = array();
+                $data['thisdate'] = $thisdate;
+                $data['levelid'] = $level['id'];
+                $data['levelname'] = $level['levelname'];
+                $hasdate = $nodate-$thisdate;//剩余天数
+                if($level['id']==1){
+                    if($hasdate<0) $hasdate=0;
+                    $enddate = date('Y-m-d',time()+($hasdate*3600*24));
+                    $hastime = $nodate-$thisdate;
+                    $data['nodate'] = $nodate;
+                    $data['leveltime'] = date('Y-m-d',$member['agenttime']);
+                    $data['hasday'] = $hastime;
+                    $data['endtime'] = $enddate;
+                }
+                return $data;
             }
-            return '普通会员';
+            return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
         }
-        return '普通会员';
+        return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
     }
 }
 ?>

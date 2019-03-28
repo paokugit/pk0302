@@ -701,10 +701,12 @@ class System_EweiShopV2Model {
                         "title" => "会员等级",
                         "route" => "level"
                     ) ,
+                    
                     array(
                         "title" => "标签组",
                         "route" => "group"
                     ) ,
+                   
                     array(
                         "title" => "排行榜设置",
                         "route" => "rank",

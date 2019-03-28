@@ -15,7 +15,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 		{
 			$pageid = trim($_GPC['type']);
 		}
-		if (empty($pageid)) 
+		if (empty($pageid))
 		{
 			app_error(AppError::$PageNotFound);
 		}
@@ -23,7 +23,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $pageid=2;
         }
 		$page = $this->model->getPage($pageid, true);
-		if ($page === 'default') 
+		if ($page === 'default')
 		{
 			app_json(array('diypage' => false));
 		}

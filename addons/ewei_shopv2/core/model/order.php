@@ -69,7 +69,7 @@ class Order_EweiShopV2Model
 		$data = array( "status" => ($params["result"] == "success" ? 1 : 0) );
 		$ordersn_tid = $params["tid"];
 		$ordersn = rtrim($ordersn_tid, "TR");
-		$order = pdo_fetch("select id,uniacid,ordersn, price,openid,dispatchtype,addressid,carrier,status,isverify,deductcredit2,`virtual`,isvirtual,couponid,isvirtualsend,isparent,paytype,merchid,agentid,createtime,buyagainprice,istrade,tradestatus,iscycelbuy from " . tablename("ewei_shop_order") . " where  ordersn=:ordersn and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":ordersn" => $ordersn ));
+		$order = pdo_fetch("select id,uniacid,ordersn, price,goodsprice,openid,dispatchtype,addressid,carrier,status,isverify,deductcredit2,`virtual`,isvirtual,couponid,isvirtualsend,isparent,paytype,merchid,agentid,createtime,buyagainprice,istrade,tradestatus,iscycelbuy from " . tablename("ewei_shop_order") . " where  ordersn=:ordersn and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":ordersn" => $ordersn ));
 		$plugincoupon = com("coupon");
 		if( $plugincoupon ) 
 		{
@@ -195,6 +195,52 @@ class Order_EweiShopV2Model
 					else 
 					{
 						m("notice")->sendOrderMessage($order["id"]);
+						//购买成功--商家消息
+						if ($order["merchid"]!=0){
+						    $merch_user=pdo_fetch("select * from ".table("ewei_shop_merch_user")." where id=:id",array(':id'=>$order["merchid"]));
+						    if (!empty($merch_user["wxopenid"])){
+						        //获取商品信息
+						        $goods=pdo_fetchall("select * from ".table("ewei_shop_order_goods")." where orderid=:orderid",array(':orderid'=>$order["id"]));
+						        $goos_name="";
+						        foreach ($goods as $g){
+						            $good=pdo_fetch("select * from ".table("ewei_shop_goods")." where id=:good_id",array(':good_id'=>$g["goodsid"]));
+						            if (empty($goos_name)){
+						                $goods_name=$good["title"];
+						            }else{
+						                $goods_name=$goods_name.",".$good["title"];
+						            }
+						        }
+						        $postdata=array(
+						            'keyword1'=>array(
+						                'value'=>$merch_user["merchname"],
+						                'color' => '#ff510'
+						            ),
+						            'keyword2'=>array(
+						                'value'=>$order["ordersn"],
+						                'color' => '#ff510'
+						            ),
+						            'keyword3'=>array(
+						                'value'=>$goods_name,
+						                'color' => '#ff510'
+						            ),
+						            'keyword4'=>array(
+						                'value'=>$order["goodsprice"],
+						                'color' => '#ff510'
+						            ),
+						            'keyword5'=>array(
+						                'value'=>$order["price"],
+						                'color' => '#ff510'
+						            ),
+						            'keyword6'=>array(
+						                'value'=>"用户已下单，请登录商家后台及时对订单处理",
+						                'color' => '#ff510'
+						            )
+						            
+						        );
+						       p("app")->mysendNotice($merch_user["wxopenid"], $postdata, "", "si0GH6bbqNTByQrSRhxRl06CKUSKz473JrbdHwBSbts");
+						    }
+						}
+						
 					}
 					if( $order["isparent"] == 1 ) 
 					{

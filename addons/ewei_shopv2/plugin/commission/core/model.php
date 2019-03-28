@@ -2070,7 +2070,7 @@ if( !class_exists("CommissionModel") )
 			{
 				return NULL;
 			}
-			$order = pdo_fetch("select id,openid, ordersn,goodsprice,agentid,finishtime from " . tablename("ewei_shop_order") . " where id=:id and status>=3 and uniacid=:uniacid limit 1", array( ":id" => $orderid, ":uniacid" => $_W["uniacid"] ));
+			$order = pdo_fetch("select id,price,openid, ordersn,goodsprice,agentid,finishtime from " . tablename("ewei_shop_order") . " where id=:id and status>=3 and uniacid=:uniacid limit 1", array( ":id" => $orderid, ":uniacid" => $_W["uniacid"] ));
 			if( empty($order) ) 
 			{
 				return NULL;
@@ -2091,7 +2091,29 @@ if( !class_exists("CommissionModel") )
 			foreach ($order_goods as $vv){
 			    $goods=pdo_get('ewei_shop_goods',array('id'=>$vv['goodsid']));
 			    if ($goods['agentlevel']>$member['agentlevel']){
-			        pdo_update('ewei_shop_member',array('agentlevel'=>$goods['agentlevel']),array('id'=>$member['id']));
+			        pdo_update('ewei_shop_member',array('agentlevel'=>$goods['agentlevel'],'agentlevel_time'=>date("Y-m-d",time())),array('id'=>$member['id']));
+			        //会员开通消息
+			        $commission=pdo_fetch("select * from ".table("ewei_shop_commission_level")." where id=:id",array(':id'=>$goods["agentlevel"]));
+			        $postdata=array(
+			            'keyword1'=>array(
+			                'value'=>$commission["levelname"],
+			                'color' => '#ff510'
+			            ),
+			            'keyword2'=>array(
+			                'value'=>$order["price"],
+			                'color' => '#ff510'
+			            ),
+			            'keyword3'=>array(
+			                'value'=>date("Y-m-d",time()),
+			                'color' => '#ff510'
+			            ),
+			            'keyword4'=>array(
+			                'value'=>"已经成功开通",
+			                'color' => '#ff510'
+			            )
+			        );
+			        
+			        p("app")->mysendNotice($order["openid"], $postdata, $order["id"], "2nQmrU1YkfMK0EWEO4v0QmL89Xpx1v3DqZk-LMsnd80");
                 }
             }
             $this->orderFinishTask($order, ($set["selfbuy"] ? true : false), $member);
@@ -2102,6 +2124,31 @@ if( !class_exists("CommissionModel") )
 			if( !empty($member["agentid"]) ) 
 			{
 				$parent = m("member")->getMember($member["agentid"]);
+				//判断上级是否是店主
+				if ($parent["agentlevel"]==5){
+				    
+				    $postdata=array(
+				        'keyword1'=>array(
+				            'value'=>$parent["nickname"],
+				            'color' => '#ff510'
+				        ),
+				        'keyword2'=>array(
+				            'value'=>$member["nickname"],
+				            'color' => '#ff510'
+				        ),
+				        'keyword3'=>array(
+				            'value'=>"该会员现已升级为".$commission["levelname"],
+				            'color' => '#ff510'
+				        ),
+				        'keyword4'=>array(
+				            'value'=>"您推荐的现用户现已升级为".$commission["levelname"]."级别会员","收益以达到您余额，请注意查收",
+				            'color' => '#ff510'
+				        )
+				    );
+				    
+				    p("app")->mysendNotice($parent["openid"], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
+				    
+				}
 				if( empty($parent) || $parent["isagent"] != 1 || $parent["status"] != 1 ) 
 				{
 					$parentisagent = false;

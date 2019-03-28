@@ -214,7 +214,9 @@ if ($_W['ispost']) {
 	else {
 		$data['checked'] = 0;
 	}
-
+	$data['deduct'] = $_GPC['deduct'];
+	$data['deduct2'] = $_GPC['deduct2'];
+	$data['manydeduct'] = $_GPC['manydeduct'];
 	if (empty($id)) {
 		if (empty($_W['merch_user']['goodschecked'])) {
 			$data['checked'] = 1;
@@ -225,6 +227,7 @@ if ($_W['ispost']) {
 		plog('goods.add', '添加商品 ID: ' . $id . '<br>' . (!empty($data['nocommission']) ? '是否参与分销 -- 否' : '是否参与分销 -- 是'));
 	}
 	else {
+
 		unset($data['createtime']);
 		pdo_update('ewei_shop_goods', $data, array('id' => $id));
 		plog('goods.edit', '编辑商品 ID: ' . $id . '<br>' . (!empty($data['nocommission']) ? '是否参与分销 -- 否' : '是否参与分销 -- 是'));

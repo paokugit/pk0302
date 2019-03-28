@@ -28,6 +28,10 @@ class Index_EweiShopV2Page extends MerchWebPage
 		if (!empty($item['accountid'])) {
 			$account = pdo_fetch('select * from ' . tablename('ewei_shop_merch_account') . ' where id=:id and uniacid=:uniacid limit 1', array(':id' => $item['accountid'], ':uniacid' => $_W['uniacid']));
 		}
+		if (!empty($item["wxopenid"])){
+		    $salers=pdo_fetch('select id,nickname,avatar,openid from '.tablename('ewei_shop_member').'where openid=:openid',array(':openid'=>$item["wxopenid"]));
+		   
+		}
 
 		$diyform_flag = 0;
 		$diyform_plugin = p('diyform');
@@ -52,7 +56,8 @@ class Index_EweiShopV2Page extends MerchWebPage
 				}
 			}
 		}
-
+        
+		
 		if ($_W['ispost']) {
 			$fdata = array();
 
@@ -70,7 +75,17 @@ class Index_EweiShopV2Page extends MerchWebPage
 				$data['diyformdata'] = iserializer($fdata);
 				$data['diyformfields'] = iserializer($fields);
 			}
-
+            
+			if (empty($_GPC['openids'])){
+			    show_json(0, '请选择绑定店主账号');
+			}elseif (sizeof($_GPC["openids"])>1){
+			    show_json(0, '仅能够绑定一个店主账号');
+			}else{
+			   
+			    $data['wxopenid'] =$_GPC['openids'][0];
+			}
+			
+			
 			pdo_update('ewei_shop_merch_user', $data, array('id' => $_W['uniaccount']['merchid']));
 			show_json(1);
 		}

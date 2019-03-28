@@ -224,6 +224,42 @@ if (!class_exists("AppModel")) {
             return $result;
         }
 
+        //fanbeibei 消息提醒
+        public function mysendNotice($openid = NULL, $datas = array(),  $orderid = 0, $template_id="")
+        {
+            global $_W;
+            if (empty($openid) || empty($datas) || empty($prepay_id)) {
+                return error(-1, 'openid或datas或prepay_id为空');
+            }
+            //获取formid
+            $formid=pdo_fetch("select * from ".tablename("ewei_shop_member_formid")." where openid=:openid and time>=:time and type=0 order by create_time asc  limit 1",array(':openid'=>$openid,':time'=>time()));
+            if (empty($formid)){
+                return false;
+            }else{
+                $prepay_id=$formid["formid"];
+                //更新fomid表
+                pdo_update("ewei_shop_member_formid",array('type'=>1),array('id'=>$formid["id"]));
+            }
+            $openid = str_replace('sns_wa_', '', $openid);
+            $appset = m('common')->getSysset('app');
+            if (empty($appset)) {
+                return error(-1, '未读取到小程序设置');
+            }
+            
+            
+            $page = 'pages/order/detail/index?id=' . $orderid;
+            if (empty($orderid)) {
+                $page = '';
+            }
+            $obj = json_encode(array('touser' => $openid, 'template_id' => $template_id, 'page' => $page, 'form_id' => $prepay_id, 'data' => $datas));
+            $accessToken = $this->getAccessToken();
+            if (is_error($accessToken)) {
+                return error(-1, 'accessToken获取失败');
+            }
+            load()->func('communication');
+            $result = ihttp_post('https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=' . $accessToken, $obj);
+            return $result;
+        }
         protected function replaceTemplate($str, $datas = array())
         {
             foreach ($datas as $d) {

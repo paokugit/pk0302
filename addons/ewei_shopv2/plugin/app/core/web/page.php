@@ -3,7 +3,7 @@
 	exit( "Access Denied" );
 }
 class Page_EweiShopV2Page extends PluginWebPage 
-{
+{   
 	public function main() 
 	{
 		global $_W;

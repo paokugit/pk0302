@@ -316,6 +316,28 @@ class List_EweiShopV2Page extends MerchWebPage
 			}
 			$merch_user = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where uniacid=:uniacid and id=' . $merchid, array(':uniacid' => $_W['uniacid']));
 			$this->model->sendMessage(array('merchname' => $merch_user['merchname'], 'money' => $insert['realprice'], 'realname' => $merch_user['realname'], 'mobile' => $merch_user['mobile'], 'applytime' => time()), 'merch_apply_money');
+			if (!empty($merch_user["wxopenid"])){
+			    $postdata=array(
+			        'keyword1'=>array(
+			            'value'=>$item['realprice'],
+			            'color' => '#ff510'
+			        ),
+			        'keyword2'=>array(
+			            'value'=>"提现申请",
+			            'color' => '#ff510'
+			        ),
+			        'keyword3'=>array(
+			            'value'=>date("Y-m-d",time()),
+			            'color' => '#ff510'
+			        ),
+			        'keyword4'=>array(
+			            'value'=>"商家已提现申请，等待管理员确认",
+			            'color' => '#ff510'
+			        )
+			        
+			    );
+			    p("app")->mysendNotice($merch_user["wxopenid"], $postdata, "", "nSJSBKVYwLYN_LcsUXyvTLVjseO46nQA8RqKsRnsiRs");
+			}
 			show_json(1, array('url' => referer()));
 		}
 		include $this->template('apply/post');
