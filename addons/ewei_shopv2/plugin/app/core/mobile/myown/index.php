@@ -15,6 +15,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
             app_error(AppError::$ParamsError);
         }
         $member=m('member')->getMember($openid);
+       
         if (empty($member)){
             app_error(1,"用户不存在");
         }elseif ($member["agentlevel"]==0){

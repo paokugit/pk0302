@@ -147,7 +147,7 @@ class AppMobilePage extends PluginMobilePage
 
 		$member = m('member')->getMember($_GPC['openid']);
 		$this->member = $member;
-
+        
 		if (p('commission')) {
 			p('commission')->checkAgent($member['openid']);
 		}

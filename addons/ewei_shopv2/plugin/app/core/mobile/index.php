@@ -1,4 +1,6 @@
-<?php if (!defined("IN_IA")) {
+<?php
+
+if (!defined("IN_IA")) {
     exit("Access Denied");
 }
 require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
@@ -37,9 +39,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
     }
     
-   
-    
-    
+
     public function cacheset()
     {
         global $_GPC;
@@ -225,7 +225,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         foreach ($result as &$vv) {
             //var_dump($vv['step'] / $proportion["value"]);
             if ($vv["type"]!=2){
-                $vv['currency'] = round($vv['step']*$exchange,2);
+                $r=$vv['step']*$exchange;
+                if ($r>0.01){
+                 $vv['currency'] = round($vv['step']*$exchange,2);
+                }else{
+                $vv['currency'] = round($r,4);
+                }
             }else{
                 $vv['currency'] =1;
             }
@@ -489,7 +494,6 @@ class Index_EweiShopV2Page extends AppMobilePage
     }
     
    
-  
 }
 
 //签到消息

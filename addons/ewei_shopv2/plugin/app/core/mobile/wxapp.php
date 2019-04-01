@@ -140,12 +140,21 @@ class Wxapp_EweiShopV2Page extends Page
         }
         $pc = new WXBizDataCrypt($this->appid, $sessionKey);
         $errCode = $pc->decryptData($encryptedData, $iv, $data);
+        $scene=$_GPC["scene"];
         if ($errCode == 0) {
             $data = json_decode($data, true);
             $member = m("member")->getMember("sns_wa_" . $data["openId"]);
             if (empty($member)) {
-                $member = array("uniacid" => $_W["uniacid"], "uid" => 0, "openid" => "sns_wa_" . $data["openId"], "nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"), "openid_wa" => $data["openId"], "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
+                $member = array("uniacid" => $_W["uniacid"],"agentid"=>$scene, "uid" => 0, "openid" => "sns_wa_" . $data["openId"], "nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"), "openid_wa" => $data["openId"], "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
                 pdo_insert("ewei_shop_member", $member);
+                //推荐人
+                if ($scene!=0&&!empty($scene)){
+                    $parent=m("member")->getmember($scene);
+                    if (!empty($parent)){
+                        $cd=$this->prize();
+                        m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+                    }
+                }
                 $id = pdo_insertid();
                 $data["id"] = $id;
                 $data["uniacid"] = $_W["uniacid"];
@@ -175,11 +184,23 @@ class Wxapp_EweiShopV2Page extends Page
         if (empty($openid)) {
             app_error(AppError::$ParamsError);
         }
+        $openid=str_replace("sns_wa_", '', $openid);
+        
         $wxopenid = "sns_wa_" . $openid;
+        
         $member = m("member")->getMember($wxopenid);
+        $scene=$_GPC["scene"];
         if (empty($member)) {
-            $member = array("uniacid" => $_W["uniacid"], "uid" => 0, "openid" => $wxopenid, "openid_wa" => $openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
+            $member = array("uniacid" => $_W["uniacid"],"agentid"=>$scene, "uid" => 0, "openid" => $wxopenid, "openid_wa" => $openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
             pdo_insert("ewei_shop_member", $member);
+            //推荐人
+            if ($scene!=0&&!empty($scene)){
+                $parent=m("member")->getmember($scene);
+                if (!empty($parent)){
+                    $cd=$this->prize();
+                    m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+                }
+            }
             $member["id"] = pdo_insertid();
             if (method_exists(m("member"), "memberRadisCountDelete")) {
                 m("member")->memberRadisCountDelete();
@@ -188,6 +209,41 @@ class Wxapp_EweiShopV2Page extends Page
         app_json(array("uniacid" => $member["uniacid"], "openid" => $member["openid"], "id" => $member["id"], "nickname" => $member["nickname"], "avatarUrl" => tomedia($member["avatar"]), "isblack" => $member["isblack"]), $member["openid"]);
     }
     
+    //概率算法
+    public function get_rand($proArr) {
+        
+        $result = '';
+        //概率数组的总概率精度
+        $proSum = array_sum($proArr);
+        //概率数组循环
+        foreach ($proArr as $key => $proCur) {
+            $randNum = mt_rand(1, $proSum);
+            if ($randNum <= $proCur) {
+                $result = $key;
+                break;
+            } else {
+                $proSum -= $proCur;
+            }
+        }
+        unset ($proArr);
+        return $result;
+    }
+    
+    public function prize(){
+        $arr=array(60,25,10,5);
+        $rid = $this->get_rand($arr); //根据概率获取奖项id
+        if ($rid==0){
+            $resault=1;
+        }elseif ($rid==1){
+            $resault=rand(2,5);
+        }elseif ($rid==2){
+            $resault=rand(6,9);
+        }else{
+            $resault=10;
+        }
+        //         var_dump($resault);
+        return $resault;
+    }
     
 }
 

@@ -96,7 +96,9 @@ class Member_EweiShopV2Model
 		$uid = (int) $openid;
 		if( $uid == 0 ) 
 		{
+		   
 			$info = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where  openid=:openid and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $openid ));
+           
 			if( empty($info) ) 
 			{
 				if( strexists($openid, "sns_qq_") ) 
@@ -152,6 +154,7 @@ class Member_EweiShopV2Model
 				$upgrade2['avatar'] = str_replace('132132', '132', $info['avatar']);
 				pdo_update('ewei_shop_member', $upgrade2, array('id' => $info['id']));
 			}
+			
 			$info = $this->updateCredits($info);
 		}
 		
@@ -160,10 +163,13 @@ class Member_EweiShopV2Model
 	public function updateCredits($info) 
 	{
 		global $_W;
+		
 		$openid = $info["openid"];
+		
 		if( empty($info["uid"]) ) 
 		{
 			$followed = m("user")->followed($openid);
+			
 			if( $followed ) 
 			{
 				load()->model("mc");
@@ -189,7 +195,9 @@ class Member_EweiShopV2Model
 				}
 			}
 		}
+		
 		$credits = $this->getCredits($openid);
+		
 		$info["credit1"] = $credits["credit1"];
 		$info["credit2"] = $credits["credit2"];
 		return $info;
@@ -372,12 +380,15 @@ class Member_EweiShopV2Model
 		$openid = str_replace("sns_wa_", "", $openid);
 		load()->model("mc");
 		$uid = mc_openid2uid($openid);
+		
 		$types = implode(",", $credittypes);
 		if( !empty($uid) ) 
 		{
 			return pdo_fetch("SELECT " . $types . " FROM " . tablename("mc_members") . " WHERE `uid` = :uid limit 1", array( ":uid" => $uid ));
 		}
+		
 		$item = pdo_fetch("SELECT " . $types . " FROM " . tablename("ewei_shop_member") . " WHERE openid=:openid and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $openid ));
+		
 		if( empty($item) ) 
 		{
 			$item = pdo_fetch("SELECT " . $types . " FROM " . tablename("ewei_shop_member") . " WHERE openid_wa=:openid and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $openid ));

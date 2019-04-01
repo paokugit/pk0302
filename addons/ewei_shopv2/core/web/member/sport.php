@@ -49,8 +49,12 @@ class Sport_EweiShopV2Page extends WebPage{
         $id = intval($_GPC['id']);
         
         if ($_W['ispost']) {
-            $data = array('uniacid' => $_W['uniacid'], 'date' => trim($_GPC['date']),'is_default'=>$_GPC['is_default'],'thumb' => save_media($_GPC['thumb']));
             
+            if ($_GPC['is_default']==1){
+            $data = array('uniacid' => $_W['uniacid'], 'is_default'=>$_GPC['is_default'],'thumb' => save_media($_GPC['thumb']));
+            }else{
+            $data = array('uniacid' => $_W['uniacid'], 'date' => trim($_GPC['date']),'is_default'=>$_GPC['is_default'],'thumb' => save_media($_GPC['thumb']));
+            }
             if (!empty($id)) {
                 pdo_update('ewei_shop_member_sport', $data, array('id' => $id));
                 plog('member.sport.edit', '修改模板 ID: ' . $id);

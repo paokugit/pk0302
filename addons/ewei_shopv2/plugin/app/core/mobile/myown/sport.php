@@ -7,13 +7,187 @@ require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
 
 class Sport_EweiShopV2Page extends AppMobilePage{
     
-    public function createposter()
+    public function cs(){
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/" ;
+        file_put_contents($path."1.txt", "22");
+    }
+    
+    public function sports_poster(){
+        
+        global $_GPC;
+        global $_W;
+        $uniacid=$_W["uniacid"];
+        $openid = $_GPC['openid'];
+        $num=(int)$_GPC['num'];
+        if (empty($openid)) {
+            app_error(AppError::$ParamsError, '系统错误');
+        }
+        $member=m("member")->getMember($openid);
+     
+        if (empty($member)){
+            app_error(-1,"用户不存在");
+        }
+        $day=date("Y-m-d",time());
+        //获取今日模板
+        $sport_style=pdo_fetch("select * from ".tablename("ewei_shop_member_sport")." where date=:day and is_default!=1",array(':day'=>$day));
+        
+//         var_dump($sport_style);die;
+        if (empty($num)){
+            //获取今天生成的海报
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day order by num desc limit 1",array(':openid'=>$openid,':day'=>$day));
+           
+            if ($log){
+                $num=$log["num"]+1;
+                //获取兑换步数
+                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$log["create_time"]));
+
+//                 var_dump($getstep);die;
+                if ($getstep){
+                  //新生成模板
+                    if (empty($sport_style)){
+                        //获取默认模板
+                        $sport_styledefault=pdo_fetch("select * from ".tablename("ewei_shop_member_sport")."where is_default=:is_default order by id asc limit 1",array(':is_default'=>1));
+                        $sport_id=$sport_styledefault["id"];
+                        $url=$this->createposter($openid,$sport_styledefault["thumb"]);
+                    }else{
+                        $sport_id=$sport_style["id"];
+                        $url=$this->createposter($openid,$sport_style["thumb"]);
+                    }
+                }else{
+                    if (empty($sport_style)){
+                        $sport_id=$log["sport_id"];
+                        $url=$log["url"];
+                        
+                    }else{
+                        $default_log=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day and sport_id=:sport_id order by num desc limit 1",array(':openid'=>$openid,':day'=>$day,':sport_id'=>$sport_style["id"]));
+                        if ($default_log){
+                        $sport_id=$default_log["sport_id"];
+                        $url=$default_log["url"];
+                        }else{
+                            $sport_id=$sport_style["id"];
+                            $url=$this->createposter($openid,$sport_style["thumb"]);
+                        }
+                    }
+                    
+                }
+            }else{
+                //无今日记录
+                $num=1;
+                if (empty($sport_style)){
+                    //获取默认
+                    $sport_styledefault=pdo_fetch("select * from ".tablename("ewei_shop_member_sport")."where is_default=:is_default order by id asc limit 1",array(':is_default'=>1));
+                    $sport_id=$sport_styledefault["id"];
+                    $url=$this->createposter($openid,$sport_styledefault["thumb"]);
+                }else{
+                    $sport_id=$sport_style["id"];
+                    $url=$this->createposter($openid,$sport_style["thumb"]);
+                }
+            }
+        }else{
+            //传递有num
+            //获取今天生成的海报
+            $log=pdo_fetchall("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day and num=:num",array(':openid'=>$openid,':day'=>$day,':num'=>$num));
+            $sportids=array();
+            foreach ($log as $k=>$v){
+                $sportids[$k]=$v["sport_id"];
+            }
+           
+            //获取不在这个海报中样式
+            $style=pdo_fetch("select * from ".tablename("ewei_shop_member_sport")." where id not in(".implode(",", $sportids).") and (is_default=1 or date=:day)",array(':day'=>$day));
+//             var_dump($style);
+//             die;
+              //所有模板已生成
+            if (empty($style)){
+                
+                //获取兑换步数
+                //获取今天生成的海报
+                $logg=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day and num=:num order by create_time desc limit 1",array(':openid'=>$openid,':day'=>$day,':num'=>$num));
+                
+                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$logg["create_time"]));
+                
+                $num=$num+1;
+                if ($getstep){
+                    //新生成模板
+                    if (empty($sport_style)){
+                        //获取默认模板
+                        $sport_styledefault=pdo_fetch("select * from ".tablename("ewei_shop_member_sport")."where is_default=:is_default order by id asc limit 1",array(':is_default'=>1));
+                        $sport_id=$sport_styledefault["id"];
+                        $url=$this->createposter($openid,$sport_styledefault["thumb"]);
+                    }else{
+                        $sport_id=$sport_style["id"];
+                        $url=$this->createposter($openid,$sport_style["thumb"]);
+                    }
+                }else{
+                    if (empty($sport_style)){
+                        $sport_id=$logg["sport_id"];
+                        $url=$logg["url"];
+                        
+                    }else{
+                        $default_log=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day and sport_id=:sport_id order by num desc limit 1",array(':openid'=>$openid,':day'=>$day,':sport_id'=>$sport_style["id"]));
+                        if ($default_log){
+                            $sport_id=$default_log["sport_id"];
+                            $url=$default_log["url"];
+                        }else{
+                            $sport_id=$sport_style["id"];
+                            $url=$this->createposter($openid,$sport_style["thumb"]);
+                        }
+                    }
+                }
+            }else{
+               if ($num==1){
+                   //生成新海报
+                   $sport_id=$style["id"];
+                   $url=$this->createposter($openid,$style["thumb"]);
+                   
+               }else{
+                   //获取上次生成海报
+                   $last_sport=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and num=:num and sport_id=:sport_id and day=:day",array(':openid'=>$openid,':num'=>$num-1,':sport_id'=>$style["id"],':day'=>$day));
+                   
+                   $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$last_sport["create_time"]));
+                   
+                   if ($getstep){
+                       //生成新海报
+                       $sport_id=$style["id"];
+                       $url=$this->createposter($openid,$style["thumb"]);
+                   }else{
+                       if ($last_sport){
+                           $sport_id=$last_sport["sport_id"];
+                           $url=$last_sport["url"];
+                       }else{
+                           
+                           $sport_id=$style["id"];
+                           $url=$this->createposter($openid,$style["thumb"]);
+                           
+                       }
+                   }
+                   
+               }
+                
+            }
+        }
+        //记录
+        $data["openid"]=$openid;
+        $data["sport_id"]=$sport_id;
+        $data["num"]=$num;
+        $data["url"]=$url;
+        $data["day"]=$day;
+        $data["create_time"]=time();
+        pdo_insert("ewei_shop_member_sportlog",$data);
+        
+        $resault["url"]=$_W["siteroot"] .$url;
+        $resault["num"]=$num;
+        app_error(0,$resault);
+        
+       
+    }
+    
+    public function createposter($openid="",$backgroup="")
     {
         global $_W;
         
         set_time_limit(0);
         $goods = array( );
-        $openid="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
+//         $openid="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
         $member =pdo_fetch("select * from ".tablename("ewei_shop_member")." where openid=:openid",array(':openid'=>$openid));
         
         @ini_set("memory_limit", "256M");
@@ -24,10 +198,10 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             mkdirs($path);
         }
         $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "openid" => $member["openid"], "goodstitle" => $goods["title"], "goodprice" => $goods["minprice"], "version" => 1 )));
-        $filename = time() . ".png";
+        $filename = $openid."_".time() . ".png";
         $filepath = $path . $filename;
         
-        $backgroup=IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/1.png";
+//         $backgroup=IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/1.png";
         $target = imagecreatetruecolor(750, 1334);
         /*imagecolorallocate ( resource $image , int $red , int $green , int $blue )
          为一幅图像分配颜色*/
@@ -147,7 +321,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
     private function getImgUrl($filename)
     {
         global $_W;
-        return $_W["siteroot"] . "addons/ewei_shopv2/data/poster_wxapp/sport"."/" . $filename . "?v=1.0";
+        return  "addons/ewei_shopv2/data/poster_wxapp/sport"."/" . $filename;
     }
     private function createImage($imgurl)
     {
