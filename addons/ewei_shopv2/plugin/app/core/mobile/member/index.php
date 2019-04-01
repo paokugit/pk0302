@@ -208,7 +208,37 @@ class Index_EweiShopV2Page extends AppMobilePage
         if($level['endtime']!=''){
             $result["endtime"] = $level['endtime'];
         }
+        $result["levelinfo"] = $this->level_info($level['levelid']);
 		app_json($result);
 	}
+
+	public function level_info($levelid){
+        switch ($levelid){
+            case 1:
+                $data['one'] = '每天可兑换10卡路里，连续5天';
+                $data['two'] = '赠送10卡路里';
+                $data['three'] = '直推奖2元';
+                return $data;break;
+            case 2:
+                $data['one'] = '每天可兑换20卡路里，连续10天';
+                $data['two'] = '赠送99卡路里';
+                $data['three'] = '直推奖20元（最高）';
+                return $data;break;
+            case 3:
+                $data['one'] = '每天可兑换30卡路里，连续20天';
+                $data['two'] = '赠送350卡路里';
+                $data['three'] = '直推奖70元（最高）';
+                return $data;break;
+            case 5:
+                $data['one'] = '每天可兑换50卡路里，连续30天';
+                $data['two'] = '直推奖196元（最高)';
+                $data['three'] = '购买会员级差奖励10%';
+                $data['fore'] = '团队下用户平台商城消费利润返10%';
+                return $data;break;
+            default:
+                return false;
+
+        }
+    }
 }
 ?>
