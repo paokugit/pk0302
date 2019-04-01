@@ -218,35 +218,35 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $data['one']['info'] = '每天可兑换10卡路里，连续5天';
                 $data['two']['info'] = '赠送10卡路里';
                 $data['three']['info'] = '直推奖2元';
-                $data['one']['img'] = '/img/member/01@2x.png';
-                $data['two']['img'] = '/img/member/02@2x.png';
-                $data['three']['img'] = '/img/member/03@2x.png';
+                $data['one']['img'] = '/member/01@2x.png';
+                $data['two']['img'] = '/member/02@2x.png';
+                $data['three']['img'] = '/member/03@2x.png';
                 return $data;break;
             case 2:
                 $data['one']['info'] = '每天可兑换20卡路里，连续10天';
                 $data['two']['info'] = '赠送99卡路里';
                 $data['three']['info'] = '直推奖20元（最高）';
-                $data['one']['img'] = '/img/member/01@2x.png';
-                $data['two']['img'] = '/img/member/02@2x.png';
-                $data['three']['img'] = '/img/member/03@2x.png';
+                $data['one']['img'] = '/member/01@2x.png';
+                $data['two']['img'] = '/member/02@2x.png';
+                $data['three']['img'] = '/member/03@2x.png';
                 return $data;break;
             case 3:
                 $data['one']['info'] = '每天可兑换30卡路里，连续20天';
                 $data['two']['info'] = '赠送350卡路里';
                 $data['three']['info'] = '直推奖70元（最高）';
-                $data['one']['img'] = '/img/member/01@2x.png';
-                $data['two']['img'] = '/img/member/02@2x.png';
-                $data['three']['img'] = '/img/member/03@2x.png';
+                $data['one']['img'] = '/member/01@2x.png';
+                $data['two']['img'] = '/member/02@2x.png';
+                $data['three']['img'] = '/member/03@2x.png';
                 return $data;break;
             case 5:
                 $data['one']['info'] = '每天可兑换50卡路里，连续30天';
                 $data['two']['info'] = '直推奖196元（最高)';
                 $data['three']['info'] = '购买会员级差奖励10%';
                 $data['fore']['info'] = '团队下用户平台商城消费利润返10%';
-                $data['one']['img'] = '/img/member/01@2x.png';
-                $data['two']['img'] = '/img/member/02@2x.png';
-                $data['three']['img'] = '/img/member/03@2x.png';
-                $data['fore']['img'] = '/img/member/04@2x.png';
+                $data['one']['img'] = '/member/01@2x.png';
+                $data['two']['img'] = '/member/02@2x.png';
+                $data['three']['img'] = '/member/03@2x.png';
+                $data['fore']['img'] = '/member/04@2x.png';
                 return $data;break;
             default:
                 return false;
