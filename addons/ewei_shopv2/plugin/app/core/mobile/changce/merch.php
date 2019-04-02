@@ -453,14 +453,23 @@ class Merch_EweiShopV2Page extends AppMobilePage
         $data = array();
         if($member && $member['from_merchid']>0){//存在来源店铺
             $merchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where id=:merchid and uniacid=:uniacid Limit 1', array(':uniacid' => $_W['uniacid'], ':merchid' => $member['from_merchid']));
+            //var_dump($member['from_merchid']);
+            $goodsNum = pdo_count("ewei_shop_goods", "deleted =0 and status=1 and uniacid = " . $uniacid . " and merchid = " . $member['from_merchid']);
+            //var_dump($goodsNum);
             if($merchInfo){//获取推荐商品
                $args['merchid'] = $member['from_merchid'];
             }else{//推荐附近商店
-                $merchInfo = $this->get_near_merch();
+                $merchInfo = $this->get_near_merch(1);
                 $args['merchid'] = $merchInfo['id'];
             }
+
+            if($goodsNum<3){//推荐其他商品数量大于三的店铺
+                $merchInfo = $this->get_near_merch(1);
+                $args['merchid'] = $merchInfo['id'];
+            }
+
         }else{//推荐附近商店
-                $merchInfo = $this->get_near_merch();
+                $merchInfo = $this->get_near_merch(1);
                 $args['merchid'] = $merchInfo['id'];
         }
         $args['order'] = 'isrecommand';
@@ -476,7 +485,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
      * 获取最近的店铺
      * @return mixed
      */
-    public function get_near_merch()
+    public function get_near_merch($is_from=0)
     {
         global $_GPC;
         global $_W;
@@ -541,6 +550,12 @@ class Merch_EweiShopV2Page extends AppMobilePage
                     }
                     $merchuser[$k]['catename'] = $cate_list[$v['cateid']]['catename'];
                     $merchuser[$k]['logo'] = tomedia($v['logo']);
+                }
+                if($is_from>0){
+                    $goodsNum = pdo_count("ewei_shop_goods", "deleted =0 and status=1  and merchid = " . $v['id']);
+                    if($goodsNum<3){
+                        unset($merchuser[$k]);
+                    }
                 }
             }
 
