@@ -1091,7 +1091,7 @@ class Member_EweiShopV2Model
                 $data['levelid'] = $level['id'];
                 $data['levelname'] = $level['levelname'];
                 $hasdate = $nodate-$thisdate;//剩余天数
-                if($level['id']==1){
+                if($level['id']==1 || $level['id']==5){
                     if($hasdate<0) $hasdate=0;
                     $enddate = date('Y-m-d',time()+($hasdate*3600*24));
                     $hastime = $nodate-$thisdate;
