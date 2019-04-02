@@ -336,7 +336,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
     public function gethelpimage()
     {
         global $_GPC;
-        $mid = $_GPC['mid'];
+        $mid = $_GPC['mids'];
         $member = $this->member;
         if( empty($member) )
         {
