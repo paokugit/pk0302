@@ -37,9 +37,9 @@ class Index_EweiShopV2Page extends AppMobilePage
             
             
         }
+       
     }
     
-
     public function cacheset()
     {
         global $_GPC;

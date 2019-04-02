@@ -125,11 +125,15 @@ class Wxapp_EweiShopV2Page extends Page
                 }
             }
         }
+        
         show_json();
     }
     
+   
     public function auth()
     {
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/" ;
+      
         global $_GPC;
         global $_W;
         $encryptedData = trim($_GPC["data"]);
@@ -140,12 +144,14 @@ class Wxapp_EweiShopV2Page extends Page
         }
         $pc = new WXBizDataCrypt($this->appid, $sessionKey);
         $errCode = $pc->decryptData($encryptedData, $iv, $data);
-        $scene=$_GPC["scene"];
+//         file_put_contents($path."cs.txt", $errCode);
+        $scene=(int)$_GPC["scene"];
         if ($errCode == 0) {
             $data = json_decode($data, true);
+//             file_put_contents($path."1.txt", $data);
             $member = m("member")->getMember("sns_wa_" . $data["openId"]);
             if (empty($member)) {
-                $member = array("uniacid" => $_W["uniacid"],"agentid"=>$scene, "uid" => 0, "openid" => "sns_wa_" . $data["openId"], "nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"), "openid_wa" => $data["openId"], "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
+                $member = array("uniacid" => $_W["uniacid"],"agentid"=>$scene, "uid" => 0, "openid" => "sns_wa_" . $data["openId"], "nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"), "openid_wa" => $data["openId"], "comefrom" => "sns_wa", "unionid"=>$data["unionid"],"createtime" => time(), "status" => 0);
                 pdo_insert("ewei_shop_member", $member);
                 //推荐人
                 if ($scene!=0&&!empty($scene)){
@@ -162,7 +168,7 @@ class Wxapp_EweiShopV2Page extends Page
                     m("member")->memberRadisCountDelete();
                 }
             } else {
-                $updateData = array("nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"));
+                $updateData = array("nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"),"unionid"=>$data["unionid"]);
                 pdo_update("ewei_shop_member", $updateData, array("id" => $member["id"], "uniacid" => $member["uniacid"]));
                 $data["id"] = $member["id"];
                 $data["uniacid"] = $member["uniacid"];
@@ -189,7 +195,7 @@ class Wxapp_EweiShopV2Page extends Page
         $wxopenid = "sns_wa_" . $openid;
         
         $member = m("member")->getMember($wxopenid);
-        $scene=$_GPC["scene"];
+        $scene=(int)$_GPC["scene"];
         if (empty($member)) {
             $member = array("uniacid" => $_W["uniacid"],"agentid"=>$scene, "uid" => 0, "openid" => $wxopenid, "openid_wa" => $openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
             pdo_insert("ewei_shop_member", $member);
