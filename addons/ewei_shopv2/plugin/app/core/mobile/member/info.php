@@ -159,17 +159,12 @@ class Info_EweiShopV2Page extends AppMobilePage
 
 	public function getMemberInfo(){
 		global $_GPC;
-		$memberInfo = $this->member = m('member')->getInfo($_GPC['passive_openid']);
+		if($_GPC['passive_openid']) $id = $_GPC['passive_openid'];
+		if($_GPC['mids']) $id = $_GPC['mids'];
+		$memberInfo = $this->member = m('member')->getInfo($id);
 		app_json($memberInfo);
 	}
 
-	public function getMemberInf_v2(){
-		global $_GPC;
-		global $_W;
-		$id = $_GPC['mids'];
-		$memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where id=:id and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":id" => $id ));
-		app_json($memberInfo);
-	}
 }
 
 ?>
