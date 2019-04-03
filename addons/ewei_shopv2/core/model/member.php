@@ -1102,9 +1102,9 @@ class Member_EweiShopV2Model
                 }
                 return $data;
             }
-            return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
+            return array('levelname'=>'健康达人','leveltime'=>'','levelid'=>0);
         }
-        return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
+        return array('levelname'=>'健康达人','leveltime'=>'','levelid'=>0);
     }
     //fanbeibei
     //获取每天可兑换的卡路里
