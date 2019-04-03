@@ -12,6 +12,20 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         file_put_contents($path."1.txt", "22");
     }
     
+    public function  css(){
+        $openid="sns_wa_owRAK45elISHPXVTLz4DJ977pDR0";
+        $starttime=strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
+        var_dump($starttime);
+        
+        $endtime=strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
+        var_dump($endtime);
+        $count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and remark!=:remark and num>0",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime,':remark'=>"签到获取"));
+        if (empty($count)){
+            $count=0;
+        }
+        $count=round($count,1);
+        var_dump($count);
+    }
     public function sports_poster(){
         
         global $_GPC;
@@ -261,9 +275,9 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         
         //卡路里
         //获取今日已兑换的卡路里
-        $starttime=strtotime(date("Y-m-d",strtotime('-1 day')));
-        $endtime=strtotime(date("Y-m-d",strtotime('+1 day')));
-        $count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and remark!=:remark and num>0",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime,':remark'=>"签到获取"));
+        $starttime=strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
+        $endtime=strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
+        $count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime));
         if (empty($count)){
             $count=0;
         }
@@ -276,7 +290,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         imagettftext($target, 18, 0, 446, 998, $nameColor, $PINGFANG_BOLD, $name);
         //获取剩余卡路里未兑换
         $exchange=m("member")->exchange_step($openid);
-        $surplus=$exchange-$count;
+        $surplus=$exchange-$count+1;
         $name="剩余".$surplus."元"."未兑换";
         $nameColor = imagecolorallocate($target, 51, 51, 51);
         imagettftext($target, 18, 0, 144, 1028, $nameColor, $PINGFANG_LIGHT, $name);

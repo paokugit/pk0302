@@ -160,7 +160,7 @@ class Wxapp_EweiShopV2Page extends Page
                     m("member")->memberRadisCountDelete();
                 }
             } else {
-                $updateData = array("nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"),"unionid"=>$data["unionid"]);
+                $updateData = array("nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"),"unionid"=> (!empty($data["unionid"]) ? $data["unionid"] : ""));
                 pdo_update("ewei_shop_member", $updateData, array("id" => $member["id"], "uniacid" => $member["uniacid"]));
                 $data["id"] = $member["id"];
                 $data["uniacid"] = $member["uniacid"];
