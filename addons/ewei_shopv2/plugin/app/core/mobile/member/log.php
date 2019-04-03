@@ -80,6 +80,60 @@ class Log_EweiShopV2Page extends AppMobilePage
 
         app_json(array('list' => $newList, 'total' => $total, 'pagesize' => $psize, 'page' => $pindex, 'type' => $type, 'isopen' => $_W['shopset']['trade']['withdraw'], 'moneytext' => $_W['shopset']['trade']['moneytext']));
     }
+
+    /**
+     * 会员资金信息首页
+     */
+    public function member_money()
+    {
+        global $_W;
+        global $_GPC;
+        $member = $this->member;
+        $data['id'] = $member['id'];
+        $data['openid'] = $member['openid'];
+        $data['credit2'] = $member['credit2'];//账户余额
+
+        //已经提现
+        $sql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where openid=:openid and type=1 and status = 1";
+        $params = array(':openid' => $_W['openid']);
+        $data['balance_total'] = pdo_fetchcolumn($sql, $params);//成功提现金额
+
+        //累计收入
+        $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where openid=:openid and type=3 and status = 1";
+        $comeparams = array(':openid' => $_W['openid']);
+        $data['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计推荐收入
+
+        app_json(array('info' => $data));
+    }
+
+    public function money_log(){
+        global $_W;
+        global $_GPC;
+        $type = intval($_GPC['type']);
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 10;
+        $apply_type = array(0 => '微信钱包', 2 => '支付宝', 3 => '银行卡');
+        if($_GPC['type']==1){// 收入
+            $condition = ' and openid=:openid and uniacid=:uniacid and type in (0,3)';
+        }else{//支出
+            $condition = ' and openid=:openid and uniacid=:uniacid and type in (1,2)';
+        }
+        $params = array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']);
+        $list = pdo_fetchall('select * from ' . tablename('ewei_shop_member_log') . (' where 1 ' . $condition . ' order by createtime desc LIMIT ') . ($pindex - 1) * $psize . ',' . $psize, $params);
+        $total = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_log') . (' where 1 ' . $condition), $params);
+        $newList = array();
+        if (is_array($list) && !empty($list)) {
+            foreach ($list as $row) {
+                if($row['type'] == 1){
+                    $row['money'] = -$row['money'];
+                    $row['realmoney'] = -$row['realmoney'];
+                }
+                $newList[] = array('id' => $row['id'], 'title'=>$row['title'],'type' => $row['type'], 'money' => $row['money'], 'typestr' => $apply_type[$row['applytype']], 'status' => $row['status'], 'deductionmoney' => $row['deductionmoney'], 'realmoney' => $row['realmoney'], 'rechargetype' => $row['rechargetype'], 'createtime' => date('Y-m-d H:i', $row['createtime']));
+            }
+        }
+        app_json(array('list' => $newList, 'total' => $total, 'pagesize' => $psize, 'page' => $pindex, 'type' => $type, 'isopen' => $_W['shopset']['trade']['withdraw'], 'moneytext' => $_W['shopset']['trade']['moneytext']));
+    }
+
 }
 
 ?>
