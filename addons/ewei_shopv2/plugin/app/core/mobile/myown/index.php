@@ -43,7 +43,9 @@ class Index_EweiShopV2Page extends AppMobilePage{
         
         $starttime=strtotime($member["agentlevel_time"]);
         $endtime=strtotime($accelerate_day);
-        $credit=pdo_fetchcolumn("select sum(num) from ".tablename('mc_credits_record')."where credittype=:credittype and  openid=:openid and createtime>=:starttime and createtime<=:endtime",array('credittype'=>"credit1",':openid'=>$openid,':starttime'=>$starttime,':endtime'=>$endtime));
+//         var_dump($starttime);
+//         var_dump($endtime);
+        $credit=pdo_fetchcolumn("select sum(num) from ".tablename('mc_credits_record')."where credittype=:credittype and  openid=:openid and createtime>=:starttime and createtime<=:endtime and (remark like :remark or remark like :cc)",array('credittype'=>"credit1",':openid'=>$openid,':starttime'=>$starttime,':endtime'=>$endtime,':remark'=>'步数兑换',':cc'=>'好友助力'));
         if (empty($credit)){
             $resault["credit"]=0;
         }else{

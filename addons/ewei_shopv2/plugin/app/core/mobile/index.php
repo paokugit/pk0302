@@ -492,8 +492,67 @@ class Index_EweiShopV2Page extends AppMobilePage
         $m["count"]=$count;
         show_json(1, $m);
     }
-    
+    //绑定关系
+    public function binding(){
+        global $_W;
+        global $_GPC;
+        $login=(int)$_GPC["login"];
+        $parent_id=(int)$_GPC["parent_id"];
+        $openid=$_GPC["openid"];
+        if (empty($openid)){
+            app_error(AppError::$ParamsError);
+        }
+        if ($login==0){
+            pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>$openid));
+            //推荐人
+                           if ($parent_id!=0&&!empty($parent_id)){
+                               $parent=m("member")->getmember($parent_id);
+                                if (!empty($parent)){
+                                    $cd=$this->prize();
+                                    m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+                                }
+                            }
+            show_json(0,"成功");
+        }
+        show_json(0,"success");
+    }
    
+    //概率算法
+    public function get_rand($proArr) {
+        
+        $result = '';
+        //概率数组的总概率精度
+        $proSum = array_sum($proArr);
+        //概率数组循环
+        foreach ($proArr as $key => $proCur) {
+            $randNum = mt_rand(1, $proSum);
+            if ($randNum <= $proCur) {
+                $result = $key;
+                break;
+            } else {
+                $proSum -= $proCur;
+            }
+        }
+        unset ($proArr);
+        return $result;
+    }
+    
+    public function prize(){
+        $arr=array(60,25,10,5);
+        $rid = $this->get_rand($arr); //根据概率获取奖项id
+        if ($rid==0){
+            $resault=1;
+        }elseif ($rid==1){
+            $resault=rand(2,5);
+        }elseif ($rid==2){
+            $resault=rand(6,9);
+        }else{
+            $resault=10;
+        }
+        //         var_dump($resault);
+        return $resault;
+    }
+    
 }
 
 //签到消息
