@@ -229,7 +229,7 @@ if (!class_exists("AppModel")) {
         {
             global $_W;
             if (empty($openid) || empty($datas)) {
-                return error(-1, 'openid或datas或prepay_id为空');
+                return error(-1, 'openid或datas');
             }
             //获取formid
             $formid=pdo_fetch("select * from ".tablename("ewei_shop_member_formid")." where openid=:openid and time>=:time and type=0 order by create_time asc  limit 1",array(':openid'=>$openid,':time'=>time()));

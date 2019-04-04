@@ -387,7 +387,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $shopset = m("common")->getSysset("shop");
         
         if ($member["qiandao"]==$day){
-            
+//             wxmessage($openid, 1);
             app_error(AppError::$ParamsError, '请勿重复签到');
         }else{
             //昨天日期
@@ -422,7 +422,8 @@ class Index_EweiShopV2Page extends AppMobilePage
                         'step' => $step,
                         'type' => 2
                     );
-                    $sign_days=1;
+//                     $sign_days=1;
+                    $sign_days=$member["sign_days"]+1;
                 }
                 pdo_insert('ewei_shop_member_getstep', $data);
                 pdo_update('ewei_shop_member', array('qiandao' => $day,'sign_days'=>$sign_days), array('openid' => $member['openid']));
@@ -518,7 +519,7 @@ function wxmessage($openid,$sign_days){
         )
         
     );
-    p("app")->mysendNotice($openid, $postdata, "", "BJtaHWXzIvH3j6NfAO56TPnULBeZyYJhX2h9XoYSs6g");
+   p("app")->mysendNotice($openid, $postdata, "", "BJtaHWXzIvH3j6NfAO56TPnULBeZyYJhX2h9XoYSs6g");
     return true;
 }
 ?>

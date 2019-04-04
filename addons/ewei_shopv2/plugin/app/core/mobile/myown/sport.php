@@ -510,6 +510,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         if (empty($openid)){
             app_error(AppError::$ParamsError);
         }
+        $member=m("member")->getmember($openid);
         if ($login==0){
             pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>$openid));
             //推荐人
@@ -518,8 +519,31 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                 if (!empty($parent)){
                     $cd=$this->prize();
                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+                    //消息提醒
+                    $postdata=array(
+                        'keyword1'=>array(
+                            'value'=>$parent["nickname"],
+                            'color' => '#ff510'
+                        ),
+                        'keyword2'=>array(
+                            'value'=>$member["nickname"],
+                            'color' => '#ff510'
+                        ),
+                        'keyword3'=>array(
+                            'value'=>"已成功进入小程序",
+                            'color' => '#ff510'
+                        ),
+                        'keyword4'=>array(
+                            'value'=>"新人通过您的运动日记二维码进入，您获取".$cd."卡路里作为奖励",
+                            'color' => '#ff510'
+                        )
+                        
+                    );
+                    p("app")->mysendNotice($parent["openid"], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
+                    
                 }
             }
+            
             show_json(0,"成功");
         }
         show_json(0,"success");
