@@ -28,8 +28,9 @@ class Index_EweiShopV2Page extends AppMobilePage{
                     'bang' => $_GPC['openid'],
                     'remark'=>$_GPC['message']
                 );
-                pdo_insert('ewei_shop_member_getstep', $data);
-                app_json('助力成功啦！');
+               pdo_insert('ewei_shop_member_getstep', $data);
+               m('member')->setagent(array('agentopenid'=>trim($pid["openid"]),'openid'=>$_GPC['openid']));
+               app_json('助力成功啦！');
             }else{
                 app_error(2,'哎呀，助力人数太多啦，稍后再试哦');
             }
@@ -41,7 +42,6 @@ class Index_EweiShopV2Page extends AppMobilePage{
      * 获取助力列表
      */
     public function helplist(){
-
         global $_GPC;
         global $_W;
         $mid = $_GPC['mids'];//被助力人的mid
