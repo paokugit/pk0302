@@ -19,7 +19,9 @@ class MobilePage extends Page
         
         $preview = intval($_GPC["preview"]);
         $wap = m("common")->getSysset("wap");
-
+//         var_dump($wap);
+//         var_dump(is_weixin());
+//         var_dump($preview);
         if( !empty($wap["open"]) && !is_weixin() && empty($preview) )
         {
            
@@ -51,13 +53,16 @@ class MobilePage extends Page
             }
 
         }
+//         var_dump($_W["openid"]);die;
        
-// $member = m("member")->checkMember();
-       // var_dump($member);
+//         $member = m("member")->checkMember();
+//         var_dump($member);
         $_W["mid"] = (!empty($member) ? $member["id"] : "");
         $_W["mopenid"] = (!empty($member) ? $member["openid"] : "");
         $merch_plugin = p("merch");
         $merch_data = m("common")->getPluginset("merch");
+//         var_dump($merch_plugin);
+//         var_dump($merch_data);
         if( !empty($_GPC["merchid"]) && $merch_plugin && $merch_data["is_openmerch"] )
         {
             $this->merch_user = pdo_fetch("select * from " . tablename("ewei_shop_merch_user") . " where id=:id limit 1", array( ":id" => intval($_GPC["merchid"]) ));
