@@ -1103,9 +1103,9 @@ class Member_EweiShopV2Model
                 }
                 return $data;
             }
-            return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
+            return array('levelname'=>'健康达人','leveltime'=>'','levelid'=>0);
         }
-        return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
+        return array('levelname'=>'健康达人','leveltime'=>'','levelid'=>0);
     }
     //fanbeibei
     //获取每天可兑换的卡路里
@@ -1314,6 +1314,25 @@ class Member_EweiShopV2Model
             }
         }
         return $ratio;
+    }
+
+    /**
+     * 绑带会员
+     */
+    public function setagent($info){
+        global $_W;
+        $memberinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $info['openid'] ));
+        //主
+        if(!$memberinfo) return false;
+        if($memberinfo['agentid']==0 || $memberinfo['agentid']==''){
+            $agentinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $info['agentopenid'] ));
+            //附
+            $data['agentid'] = $agentinfo['id']?$agentinfo['id']:0;
+
+            $where['openid'] = $info['openid'];
+            $where['uniacid'] = $_W["uniacid"];
+            pdo_update("ewei_shop_member",$data,$where);
+        }
     }
 }
 ?>
