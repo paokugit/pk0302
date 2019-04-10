@@ -7,10 +7,12 @@ if (!(defined('IN_IA'))) {
 require EWEI_SHOPV2_PLUGIN . 'merchmanage/core/inc/page_merchmanage.php';
 class Login_EweiShopV2Page extends MerchmanageMobilePage
 {
+    
 	public function main()
 	{
 		global $_W;
 		global $_GPC;
+
 		$check = $this->isLogin();
 // 		var_dump($_W["openid"]);
 		if ($check) {
@@ -87,6 +89,30 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 		}else{
 			header('location: ' . mobileUrl('merchmanage/login'));
 		}
+	}
+	//短信消息
+	public function send(){
+	    $code=rand(100000,999999);
+	    $resault=com_run("sms::mysend", array('mobile'=>"13460300820",'tp_id'=>1,'code'=>$code));
+	    if ($resault["status"]==1){
+	        $resault["code"]=$code;
+	    }
+	    exit(json_encode($resault));
+	}
+	//微信
+	public function wx_login(){
+	    global $_W;
+	    if ( strpos($_SERVER['HTTP_USER_AGENT'],
+	        
+	        'MicroMessenger') !== false ) {
+// 	        return true;
+	        var_dump("11");
+	    }else{
+// 	    return false;
+            var_dump("22");
+	    }
+	    $result = mc_oauth_userinfo();
+	    var_dump($result) ;
 	}
 }
 

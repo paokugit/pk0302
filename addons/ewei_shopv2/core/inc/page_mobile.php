@@ -29,12 +29,14 @@ class MobilePage extends Page
             {
                 if( empty($_W["openid"]) )
                 {
+                   
                     $_W["openid"] = m("account")->checkLogin();
                 }
 
             }
             else
             {
+                
                 $_W["openid"] = m("account")->checkOpenid();
             }
 
@@ -53,9 +55,8 @@ class MobilePage extends Page
             }
 
         }
-//         var_dump($_W["openid"]);die;
-       
-//         $member = m("member")->checkMember();
+//           var_dump($_W["openid"]);
+//            $member = m("member")->checkMember();
 //         var_dump($member);
         $_W["mid"] = (!empty($member) ? $member["id"] : "");
         $_W["mopenid"] = (!empty($member) ? $member["openid"] : "");

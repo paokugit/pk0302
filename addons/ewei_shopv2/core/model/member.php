@@ -406,7 +406,7 @@ class Member_EweiShopV2Model
 		$member = array( );
 		$shopset = m("common")->getSysset(array( "shop", "wap" ));
 		$openid = $_W["openid"];
-// 		var_dump($openid);die;
+		
 		if( $_W["routes"] == "order.pay_alipay" || $_W["routes"] == "creditshop.log.dispatch_complete" || $_W["routes"] == "threen.register.threen_complete" || $_W["routes"] == "creditshop.detail.creditshop_complete" || $_W["routes"] == "order.pay_alipay.recharge_complete" || $_W["routes"] == "order.pay_alipay.complete" || $_W["routes"] == "newmr.alipay" || $_W["routes"] == "newmr.callback.gprs" || $_W["routes"] == "newmr.callback.bill" || $_W["routes"] == "account.sns" || $_W["plugin"] == "mmanage" || $_W["routes"] == "live.send.credit" || $_W["routes"] == "live.send.coupon" || $_W["routes"] == "index.share_url" ) 
 		{
 			return NULL;

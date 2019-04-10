@@ -14,6 +14,7 @@ class Temp_EweiShopV2Page extends ComWebPage
 	{
 		global $_W;
 		global $_GPC;
+// 		var_dump($_W['shopset']['notice']);
 		$pindex = max(1, intval($_GPC['page']));
 		$psize = 20;
 		$condition = ' and uniacid=:uniacid';

@@ -18,7 +18,7 @@ class Sms_EweiShopV2ComModel extends ComModel
 		global $_W;
 		$smsset = $this->sms_set();
 		$template = $this->sms_verify($tplid, $smsset);
-
+        
 		if (empty($template['status'])) {
 			return $template;
 		}
@@ -103,7 +103,14 @@ class Sms_EweiShopV2ComModel extends ComModel
 
 		return array('status' => 1);
 	}
-
+    //fanbeibei
+	public function mysend($parem){
+	   
+	    $data["code"]=$parem["code"];
+	    $resault=$this->send($parem["mobile"], $parem["tp_id"], $data,false);
+	    return $resault;
+	}
+	
 	public function sms_set()
 	{
 		global $_W;
@@ -169,9 +176,10 @@ class Sms_EweiShopV2ComModel extends ComModel
 	protected function sms_verify($tplid, $smsset)
 	{
 		global $_W;
+		
 		$template = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_sms') . ' WHERE id=:id and uniacid=:uniacid ', array(':id' => $tplid, ':uniacid' => $_W['uniacid']));
 		$template['data'] = iunserializer($template['data']);
-
+     
 		if (empty($template)) {
 			return array('status' => 0, 'message' => '模板不存在!');
 		}
