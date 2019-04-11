@@ -1,3 +1,4 @@
+<!--  
 <div class="fui-navbar">
     <a href="{php echo mobileUrl('merchmanage')}" class="external nav-item {if $_W['routes']=='merchmanage'}active{/if}">
         <span class="icon icon-home"></span>
@@ -25,4 +26,20 @@
         <span class="icon icon-set"></span>
         <span class="label">设置</span>
     </a>
+</div>
+-->
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/footer.css">
+<div class="footer_box">
+            <div class="footernav {if $_W['routes']=='merchmanage'}selected{/if}" onclick="location.href='{php echo mobileUrl('merchmanage')}'">
+                <div class="nav-img01"></div>
+                <span class="nav-text">工作台</span>
+            </div>
+            <div class="footernav {if $_W['controller']=='statistics'}selected{/if}" onclick="location.href='{php echo mobileUrl('merchmanage/statistics')}'">
+                <div class="nav-img02"></div>
+                <span class="nav-text">数据</span>
+            </div>
+            <div class="footernav {if $_W['controller']=='shop'}selected{/if}" onclick="location.href='{php echo mobileUrl('merchmanage/shop')}'">
+                <div class="nav-img03"></div>
+                <span class="nav-text">店铺</span>
+            </div>
 </div>

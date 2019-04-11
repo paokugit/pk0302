@@ -1,0 +1,279 @@
+html{
+  background: #f2f3f8;
+}
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td,hr,button,article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {
+    margin:0;
+    padding:0;
+}
+li{
+    list-style: none
+}
+a{
+    text-decoration: none
+}
+.body_box{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  
+}
+.header_tit{
+    width: 100%;
+    height: 60px;
+    /* background: #008ce4; */
+    text-align: center;
+    line-height: 60px;
+    color: #000;
+    font-size: 26px;
+    /* position: fixed;
+    top: 0px; */
+}
+.body_center{
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.header_top{
+    width: 100%;
+    height: 100px;
+}
+.header_top img{
+    width: 100%;
+}
+.header_inner{
+    width: 94%;
+    height: 130px;
+    background: #fff;
+    border-radius: 20px;
+    margin-top: -60px
+}
+.inner-top{
+    width: 100%;
+    height: 50px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+.info-left{
+    width: 40px;
+    height: 40px;
+    margin-left: 10px;
+}
+.info-left img{
+    width: 100%
+}
+.info-center{
+    width: 200px;
+    height: 50px;
+    margin-left: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.info-right{
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    position: absolute;
+    right: 20px
+}
+.info-right img{
+    width: 100%;
+    border-radius: 50%
+}
+.store_name{
+    font-size: 20px;
+    color: #333
+}
+.store_desc{
+    font-size: 12px;
+    color: #a9a9a9
+}
+.inner-bottom{
+    width: 100%;
+    height: 60px;
+    margin-top: 5px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center
+}
+.header_item{
+    width: 20%;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center
+}
+.item_num{
+    font-size: 20px;
+    color: #333
+}
+.item_tit{
+    font-size: 12px;
+    color: #a9a9a9
+}
+.tool_box{
+    width: 94%;
+    height: 215px;
+    background: #fff;
+    border-radius: 20px;
+    margin-top: 20px
+}
+.tool_tit{
+    width: 95%;
+    height: 20%;
+    color: #333;
+    font-size: 17px;
+    padding-left:5%;
+    display: flex;
+    align-items: center
+}
+.tool_info{
+    width: 100%;
+    height: 75%;
+    display: flex;
+    justify-content: center;
+    align-items: center
+ 
+}
+.tool_list{
+    width: 94%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center
+}
+.tool_item{
+    width: 62px;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center
+}
+.tool_item img{
+    width: 31px;
+    height: 31px;
+    display: block
+}
+.item-tit{
+    font-size: 13px;
+    color: #333
+}
+.tabbox{
+    width: 94%;
+    height: 350px;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center
+}
+.tabbox{margin:10px}
+.tabbox ul{
+    list-style:none;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    align-items: center
+}
+.tabbox ul li{
+    width:85px;
+    height: 30px;
+    line-height:30px;
+    text-align: center;
+    color: #333;
+    font-size: 15px;
+    cursor:pointer;
+    margin-right: 10px
+}
+.tabbox ul li.active{
+    color:white;
+    /* font-weight:bold; */
+    background: #008be4;
+    border-radius: 20px
+}
+.tabbox .content{
+    width: 100%;
+    height: 225px;
+    border-radius: 20px;
+    background: #fff
+}
+.tabbox .content>div{display:none;}
+.tabbox .content>div.active{display:block;}
+.list_child{
+    width: 100%;
+    height: 225px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center
+}
+.child-item{
+    width: 30%;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center
+}
+.child-item :nth-child(1){
+    font-size: 20px;
+    color: #333
+}
+.child-item :nth-child(2){
+    font-size: 12px;
+    color: #a9a9a9
+}
+.footer_box{
+    width: 100%;
+    height: 60px;
+    background: #fff;
+    position: fixed;
+    bottom: 0px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center
+}
+.footernav{
+    width: 30%;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    cursor: pointer;
+}
+.nav-img01{
+    width: 21px;
+    height: 21px;
+    background-image: url(http://paokucoin.com/img/backgroup/home-n@2x.png
+    );
+    background-size: 21px;
+    background-repeat:no-repeat;
+}
+.nav-img02{
+    width: 21px;
+    height: 21px;
+    background-image: url(http://paokucoin.com/img/backgroup/shuju-n@2x.png
+    );
+    background-size: 21px;
+    background-repeat:no-repeat;
+}
+.nav-img03{
+    width: 21px;
+    height: 21px;
+    background-image: url(http://paokucoin.com/img/backgroup/store-n@2x.png
+    );
+    background-size: 21px;
+    background-repeat:no-repeat;
+}
+.nav-text{
+    color: #333
+}

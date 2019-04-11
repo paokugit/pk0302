@@ -11,9 +11,64 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 	{
 		global $_W;
 		global $_GPC;
-		$merchid = $_W['merchmanage']['merchid'];
+		
 		$shopset = $_W['shopset']['shop'];
+		global $_W;
+		global $_GPC;
+		// 	    var_dump($_W['merchmanage']['merchid']);die;
+		if (empty($_GPC["merchid"])){
+		    $merchid = $_W['merchmanage']['merchid'];
+		}else{
+		    $merchid=$_GPC["merchid"];
+		}
+		
 		$merchshop = pdo_fetch('select * from '.tablename('ewei_shop_merch_user').' where id ="'.$merchid.'"');
+		
+		$logo=tomedia($merchshop["logo"]);
+		
+		//店铺下数据
+		
+		//访问次数
+		$viewcount = $this->sale_analysis_count('SELECT sum(viewcount) FROM ' . tablename('ewei_shop_goods') . ' WHERE uniacid = \'' . $_W['uniacid'] . '\' and merchid=\'' . $merchid . '\'');
+		
+		//今日订单
+		$order = $this->order(0);
+		$today_order=$order["count"];
+		//代发货
+		$totals = $this->model->getTotals($merchid);
+		$substitute_shipment=$totals["status1"];
+		//累计订单
+		$ordercount = $this->sale_analysis_count('SELECT count(*) FROM ' . tablename('ewei_shop_order') . ' WHERE status>=1 and uniacid = \'' . $_W['uniacid'] . '\' and merchid=\'' . $merchid . '\'');
+		
+		//店铺数据
+		
+		//今日成交额
+		$today_price=$order["price"];
+		//累计成交
+		$orderprice = $this->sale_analysis_count('SELECT sum(price) FROM ' . tablename('ewei_shop_order') . ' WHERE  status>=1 and uniacid = \'' . $_W['uniacid'] . '\' and merchid=\'' . $merchid . '\' ');
+		
+		//订单转化率
+		$percent=round( $ordercount/($viewcount==0?1:$viewcount),2);
+		if ($percent>1){
+		    $percent+=100;
+		}else {
+		    $percent*=100;
+		}
+		$order_percent=empty($percent)?'':$percent.'%';
+		//会员消费率
+		$member_count = $this->sale_analysis_count('select count(*) from ' . tablename('ewei_shop_member') . ' where uniacid=' . $_W['uniacid'] . ' and  openid in ( SELECT distinct openid from ' . tablename('ewei_shop_order') . '   WHERE uniacid = \'' . $_W['uniacid'] . '\' and merchid=\'' . $merchid . '\'  )');
+		$member_buycount = $this->sale_analysis_count('select count(*) from ' . tablename('ewei_shop_member') . ' where uniacid=' . $_W['uniacid'] . ' and  openid in ( SELECT distinct openid from ' . tablename('ewei_shop_order') . '   WHERE uniacid = \'' . $_W['uniacid'] . '\' and merchid=\'' . $merchid . '\' and status>=1 )');
+		$percent=round( $member_buycount/($member_count==0?1:$member_count),2);
+		if ($percent>1){
+		    $percent+=100;
+		}else{
+		    $percent*=100;
+		}
+		$vip_percent=empty($percent)?'':$percent.'%';
+		
+		//在售商品
+		$goods = $this->model->getMerchTotals($merchid);
+		$goodscount = $goods['sale'] + $goods['out'] + $goods['stock'] + $goods['cycle'];
 		include $this->template();
 	}
 
@@ -98,35 +153,30 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 	    }
 	    
 	    $merchshop = pdo_fetch('select * from '.tablename('ewei_shop_merch_user').' where id ="'.$merchid.'"');
-	    $resault["shop"]=array();
-	    $resault["shop"]["logo"]=tomedia($merchshop["logo"]);
-	    $resault["shop"]["merchname"]=$merchshop["merchname"];
+	  
+	    $logo=tomedia($merchshop["logo"]);
 	    
 	    //店铺下数据
-	    $resault["shop_data"]=array();
+	  
 	      //访问次数
 	    $viewcount = $this->sale_analysis_count('SELECT sum(viewcount) FROM ' . tablename('ewei_shop_goods') . ' WHERE uniacid = \'' . $_W['uniacid'] . '\' and merchid=\'' . $merchid . '\'');
 	    
-	    $resault["shop_data"]["viewcount"]=$viewcount;
-	   
 	      //今日订单
 	    $order = $this->order(0);
-	    $resault["shop_data"]["today_order"]=$order["count"];
+	    $today_order=$order["count"];
 	      //代发货
 	    $totals = $this->model->getTotals($merchid);
-	    $resault["shop_data"]["substitute_shipment"]=$totals["status1"];
+	    $substitute_shipment=$totals["status1"];
 	      //累计订单
 	    $ordercount = $this->sale_analysis_count('SELECT count(*) FROM ' . tablename('ewei_shop_order') . ' WHERE status>=1 and uniacid = \'' . $_W['uniacid'] . '\' and merchid=\'' . $merchid . '\'');
-	    $resault["shop_data"]["ordercount"]=$ordercount;
+	    
 	    //店铺数据
-	    $resault["shopdata"]=array();
-	    $resault["shopdata"]["today_order"]=$order["count"];
+
 	       //今日成交额
-	    $resault["shopdata"]["today_price"]=$order["price"];
+	    $today_price=$order["price"];
 	      //累计成交
 	    $orderprice = $this->sale_analysis_count('SELECT sum(price) FROM ' . tablename('ewei_shop_order') . ' WHERE  status>=1 and uniacid = \'' . $_W['uniacid'] . '\' and merchid=\'' . $merchid . '\' ');
-	    $resault["shopdata"]["orderprice"]=$orderprice;
-	    $resault["shopdata"]["substitute_shipment"]=$totals["status1"];
+	   
 	      //订单转化率
 	    $percent=round( $ordercount/($viewcount==0?1:$viewcount),2);
 	    if ($percent>1){
@@ -134,7 +184,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 	    }else {
 	        $percent*=100;
 	    }
-	    $resault["shopdata"]["percent"]=empty($percent)?'':$percent.'%';
+	    $order_percent=empty($percent)?'':$percent.'%';
 	      //会员消费率
 	    $member_count = $this->sale_analysis_count('select count(*) from ' . tablename('ewei_shop_member') . ' where uniacid=' . $_W['uniacid'] . ' and  openid in ( SELECT distinct openid from ' . tablename('ewei_shop_order') . '   WHERE uniacid = \'' . $_W['uniacid'] . '\' and merchid=\'' . $merchid . '\'  )');
 	    $member_buycount = $this->sale_analysis_count('select count(*) from ' . tablename('ewei_shop_member') . ' where uniacid=' . $_W['uniacid'] . ' and  openid in ( SELECT distinct openid from ' . tablename('ewei_shop_order') . '   WHERE uniacid = \'' . $_W['uniacid'] . '\' and merchid=\'' . $merchid . '\' and status>=1 )');
@@ -144,14 +194,15 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 	    }else{
 	        $percent*=100;
 	    }
-	    $resault["shopdata"]["vip_percent"]=empty($percent)?'':$percent.'%';
+	    $vip_percent=empty($percent)?'':$percent.'%';
+	    
 	      //在售商品
 	    $goods = $this->model->getMerchTotals($merchid);
 	    $goodscount = $goods['sale'] + $goods['out'] + $goods['stock'] + $goods['cycle'];
-	    $resault["shopdata"]["goodscount"]=$goodscount;
-	    $resault["shopdata"]["member_count"]=$member_count;
-	    $resault["shopdata"]["viewcount"]=$viewcount;
-	    show_json(1,$resault);
+	    
+	    
+// 	    show_json(1,$resault);
+	    include $this->template();
 	}
 	
 	

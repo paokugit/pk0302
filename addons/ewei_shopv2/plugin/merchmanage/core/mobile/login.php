@@ -90,6 +90,8 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 			header('location: ' . mobileUrl('merchmanage/login'));
 		}
 	}
+	//密码登录
+	
 	//短信消息
 	public function send(){
 	    $code=rand(100000,999999);
