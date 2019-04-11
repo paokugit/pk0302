@@ -27,7 +27,7 @@
                             <div class="store_name">{php echo !empty($merchshop['merchname'])?$merchshop['merchname']:'未设置商城名称'}</div>
                             <div class="store_desc">1.0版升级中</div>
                         </div>
-                        <div class="info-right"><img src="http://paokucoin.com/img/backgroup/erweima.png" alt=""></div>
+                        <div class="info-right withoutOpen"><img src="http://paokucoin.com/img/backgroup/erweima.png" alt=""></div>
                     </div>
                     <!-- inner-bottom -->
                     <ul class="inner-bottom">
@@ -44,14 +44,14 @@
                     <div class="tool_info">
                         <ul class="tool_list">
                             <li class="tool_item" onclick="location.href='{php echo mobileUrl('merchmanage/goods')}'"><img src="http://paokucoin.com/img/backgroup/goods@2x.png" alt=""><span class="item-tit">商品</span></li>
-                            <li class="tool_item"><img src="http://paokucoin.com/img/backgroup/customer@2x.png" alt=""><span class="item-tit">客户</span></li>
+                            <li class="tool_item withoutOpen"><img src="http://paokucoin.com/img/backgroup/customer@2x.png" alt=""><span class="item-tit">客户</span></li>
                             <li class="tool_item" onclick="location.href='{php echo mobileUrl('merchmanage/order', array('status'=>1))}'"><img src="http://paokucoin.com/img/backgroup/order@2x.png" alt=""><span class="item-tit">订单</span></li>
-                            <li class="tool_item"><img src="http://paokucoin.com/img/backgroup/marketing@2x.png" alt=""><span class="item-tit">营销</span></li>
+                            <li class="tool_item withoutOpen"><img src="http://paokucoin.com/img/backgroup/marketing@2x.png" alt=""><span class="item-tit">营销</span></li>
                             <li class="tool_item" onclick="location.href='{php echo mobileUrl('merchmanage/statistics')}'"><img src="http://paokucoin.com/img/backgroup/Accounts@2x.png" alt=""><span class="item-tit">结算</span></li>
-                            <li class="tool_item"><img src="http://paokucoin.com/img/backgroup/dongtai@2x.png" alt=""><span class="item-tit">发动态</span></li>
-                            <li class="tool_item"><img src="http://paokucoin.com/img/backgroup/ticket@2x.png" alt=""><span class="item-tit">满减券</span></li>
-                            <li class="tool_item"><img src="http://paokucoin.com/img/backgroup/miaosha@2x.png" alt=""><span class="item-tit">秒杀</span></li>
-                            <li class="tool_item"><img src="http://paokucoin.com/img/backgroup/pintuan@2x.png" alt=""><span class="item-tit">拼团</span></li>
+                            <li class="tool_item withoutOpen"><img src="http://paokucoin.com/img/backgroup/dongtai@2x.png" alt=""><span class="item-tit">发动态</span></li>
+                            <li class="tool_item withoutOpen"><img src="http://paokucoin.com/img/backgroup/ticket@2x.png" alt=""><span class="item-tit">满减券</span></li>
+                            <li class="tool_item withoutOpen"><img src="http://paokucoin.com/img/backgroup/miaosha@2x.png" alt=""><span class="item-tit">秒杀</span></li>
+                            <li class="tool_item withoutOpen"><img src="http://paokucoin.com/img/backgroup/pintuan@2x.png" alt=""><span class="item-tit">拼团</span></li>
                             <li class="tool_item" onclick="location.href='{php echo mobileUrl('merchmanage/shop')}'"><img src="http://paokucoin.com/img/backgroup/store@2x.png" alt=""><span class="item-tit">设置</span></li>
                         </ul>
                     </div>
@@ -79,9 +79,9 @@
                                 </div> 
                             </div>
                             <div>
-                                <div>暂未开发，敬请期待</div>
+                                <div>暂未开放，敬请期待</div>
                             </div>
-                            <div>暂未开发，敬请期待</div>
+                            <div>暂未开放，敬请期待</div>
                     </div>
                 </div>
                 <!-- 选项卡-结束 -->
@@ -90,6 +90,10 @@
         {template 'merchmanage/_menu'}
         <!-- 底部导航-结束 -->
     </div>
+    <!-- 暂未开放提示 -->
+<div id="notOpen">
+<div class="mask-text">暂未开放，敬请期待</div>
+</div>
 </body>
 </html>
 <script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/jquery-1.11.3.min.js"></script>
@@ -111,6 +115,10 @@
         $(this).addClass("selected").siblings().removeClass("selected");
         
     });
+    
+    $(".withoutOpen").click(function(){
+    	$("#notOpen").show().delay(1000).hide(300);
+    	})
     
 });
 

@@ -91,7 +91,43 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 		}
 	}
 	//密码登录
-	
+	public function loginapi(){
+	    global $_W;
+	    global $_GPC;
+	    $username = trim($_GPC['username']);
+	    $password = trim($_GPC['password']);
+	    if (empty($username)) {
+	        show_json(0, '请填写用户名');
+	    }
+	    
+	    
+	    if (empty($password)) {
+	        show_json(0, '请填写密码');
+	    }
+	    
+	    
+	    if (!($this->model->merch_user_check(array('username' => $username)))) {
+	        show_json(0, '用户不存在');
+	    }
+	    
+	    
+	    if (!($this->model->merch_user_check(array('username' => $username, 'pwd' => $password)))) {
+	        show_json(0, '用户名或密码错误');
+	    }
+	    
+	    $account = $this->model->merch_user_single(array('username' => $username));
+	    $account['hash'] = md5($account['pwd'] . $account['salt']);
+	    $session = base64_encode(json_encode($account));
+	    $session_key = '__merchmanage_' . $_W['uniacid'] . '_session';
+	    
+	    isetcookie($session_key, $session, 7200);
+	    $status = array();
+	    $status['lastvisit'] = TIMESTAMP;
+	    $status['lastip'] = CLIENT_IP;
+	    pdo_update('ewei_shop_merch_account', $status, array('id' => $account['id']));
+	    show_json(1,"登陆成功");
+	    
+	}
 	//短信消息
 	public function send(){
 	    $code=rand(100000,999999);
