@@ -479,6 +479,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         //获取用户今天总步数
         $day=date("Y-m-d",time());
         $step_today = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type", array(':today' => $day, ':openid' => $openid,':type'=>2));
+        if (empty($step_today)){
+            $step_today=0;
+        }
         $step=$step_count-$step_today;
         if ($step<0){
             $step=0;
