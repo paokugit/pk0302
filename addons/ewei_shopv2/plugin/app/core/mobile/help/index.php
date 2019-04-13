@@ -17,6 +17,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
             $pid = m('member')->getMember($mid);
             $iset = pdo_get('ewei_shop_member_getstep', array('bang' => $_GPC['openid'], 'type' => 1, 'day' => date('Y-m-d'), 'openid' => $pid['openid']));
             if($iset) app_error(0,'助力成功');
+            if($pid["openid"]==$_GPC['openid']) app_error(1,'自己不能给自己助力哦，赶快去邀请好友助力吧！');
             if (!empty($pid)) {
                 $data = array(
                     'timestamp' => time(),
