@@ -75,7 +75,6 @@ if ($_W['ispost']) {
 
 	if (is_array($_GPC['cates'])) {
 		$cates = $_GPC['cates'];
-
 		foreach ($cates as $key => $cid) {
 			$c = pdo_fetch('select level from ' . tablename('ewei_shop_category') . ' where id=:id and uniacid=:uniacid limit 1', array(':id' => $cid, ':uniacid' => $_W['uniacid']));
 
@@ -227,7 +226,10 @@ if ($_W['ispost']) {
 		plog('goods.add', '添加商品 ID: ' . $id . '<br>' . (!empty($data['nocommission']) ? '是否参与分销 -- 否' : '是否参与分销 -- 是'));
 	}
 	else {
-
+		if(in_array($id,array(3,4,5,7))){
+			$data['cates'] = 4;
+			$data['ccates'] = 4;
+		}
 		unset($data['createtime']);
 		pdo_update('ewei_shop_goods', $data, array('id' => $id));
 		plog('goods.edit', '编辑商品 ID: ' . $id . '<br>' . (!empty($data['nocommission']) ? '是否参与分销 -- 否' : '是否参与分销 -- 是'));
@@ -451,6 +453,11 @@ if ($_W['ispost']) {
 		if (0 < $totalstocks && $data['totalcnf'] != 2) {
 			pdo_update('ewei_shop_goods', array('total' => $totalstocks), array('id' => $id));
 		}
+	}
+	if(in_array($id,array(3,4,5,7))){
+		$cdata['cates'] = 4;
+		$cdata['ccates'] = 4;
+		pdo_update('ewei_shop_goods', $cdata, array('id' => $id));
 	}
 
 	show_json(1, array('url' => merchUrl('goods/edit', array('id' => $id, 'tab' => str_replace('#tab_', '', $_GPC['tab'])))));

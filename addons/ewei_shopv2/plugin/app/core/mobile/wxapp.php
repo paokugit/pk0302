@@ -183,6 +183,9 @@ class Wxapp_EweiShopV2Page extends Page
             app_error(AppError::$ParamsError);
         }
         $openid=str_replace("sns_wa_", '', $openid);
+
+
+
         
         $wxopenid = "sns_wa_" . $openid;
         
