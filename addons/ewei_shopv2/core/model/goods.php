@@ -201,7 +201,7 @@ class Goods_EweiShopV2Model
 		$list = pdo_fetchall($sql, $params);
 		foreach ($list as $lk => $lv ) 
 		{
-			if ($lv['hasoption'] == 1) 
+                if ($lv['hasoption'] == 1)
 			{
 				$pricemax = array();
 				$options = pdo_fetchall('select * from ' . tablename('ewei_shop_goods_option') . ' where goodsid=:goodsid and                               uniacid=:uniacid order by displayorder asc', array(':goodsid' => $lv['id'], ':uniacid' => $_W['uniacid']));
