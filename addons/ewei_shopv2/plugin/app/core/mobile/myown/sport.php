@@ -511,35 +511,42 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             app_error(AppError::$ParamsError);
         }
         $member=m("member")->getmember($openid);
-        if ($login==0){
+         if ($login==0){
+             if ($member){
             pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>$openid));
+             }else{
+                 $wxopenid =$openid=str_replace("sns_wa_", '', $openid);
+                 $m = array("uniacid" => $_W["uniacid"],"agentid"=>$parent_id,"uid" => 0, "openid" => $openid, "openid_wa" =>$wxopenid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
+                 pdo_insert("ewei_shop_member", $m);
+                 
+             }
             //推荐人
             if ($parent_id!=0&&!empty($parent_id)){
                 $parent=m("member")->getmember($parent_id);
                 if (!empty($parent)){
                     $cd=$this->prize();
                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
-                    //消息提醒
-                    $postdata=array(
-                        'keyword1'=>array(
-                            'value'=>$parent["nickname"],
-                            'color' => '#ff510'
-                        ),
-                        'keyword2'=>array(
-                            'value'=>$member["nickname"],
-                            'color' => '#ff510'
-                        ),
-                        'keyword3'=>array(
-                            'value'=>"已成功进入小程序",
-                            'color' => '#ff510'
-                        ),
-                        'keyword4'=>array(
-                            'value'=>"新人通过您的运动日记二维码进入，您获取".$cd."卡路里作为奖励",
-                            'color' => '#ff510'
-                        )
+//                     //消息提醒
+//                     $postdata=array(
+//                         'keyword1'=>array(
+//                             'value'=>$parent["nickname"],
+//                             'color' => '#ff510'
+//                         ),
+//                         'keyword2'=>array(
+//                             'value'=>$member["nickname"],
+//                             'color' => '#ff510'
+//                         ),
+//                         'keyword3'=>array(
+//                             'value'=>"已成功进入小程序",
+//                             'color' => '#ff510'
+//                         ),
+//                         'keyword4'=>array(
+//                             'value'=>"新人通过您的运动日记二维码进入，您获取".$cd."卡路里作为奖励",
+//                             'color' => '#ff510'
+//                         )
                         
-                    );
-                    p("app")->mysendNotice($parent["openid"], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
+//                     );
+//                     p("app")->mysendNotice($parent["openid"], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
                     
                 }
             }
@@ -584,5 +591,20 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         //         var_dump($resault);
         return $resault;
     }
-    
+    //更新login
+    public function update_login(){
+        global $_W;
+        global $_GPC;
+        $openid=$_GPC["openid"];
+        $member=m("member")->getmember($openid);
+        if ($member){
+            pdo_update("ewei_shop_member",array('is_login'=>1),array('openid'=>$openid));
+        }else{
+            $wxopenid =$openid=str_replace("sns_wa_", '', $openid);
+            $m = array("uniacid" => $_W["uniacid"],"is_login"=>1,"uid" => 0, "openid" => $openid, "openid_wa" =>$wxopenid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
+            pdo_insert("ewei_shop_member", $m);
+            
+        }
+        show_json(1, "success");
+    }
 }
