@@ -201,7 +201,7 @@ class Goods_EweiShopV2Model
 		$list = pdo_fetchall($sql, $params);
 		foreach ($list as $lk => $lv ) 
 		{
-			if ($lv['hasoption'] == 1) 
+                if ($lv['hasoption'] == 1)
 			{
 				$pricemax = array();
 				$options = pdo_fetchall('select * from ' . tablename('ewei_shop_goods_option') . ' where goodsid=:goodsid and                               uniacid=:uniacid order by displayorder asc', array(':goodsid' => $lv['id'], ':uniacid' => $_W['uniacid']));
@@ -247,6 +247,10 @@ class Goods_EweiShopV2Model
 					array_splice($list, $lk, 1);
 				}
 			}
+			if(in_array($lv['id'],array(3,4,5,7))){
+                $levelInfo = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_commission_level') . ' WHERE id = :id and uniacid = :uniacid', array(':id' => $lv['agentlevel'], ':uniacid' => $_W['uniacid']));
+                $list[$lk]['levelcontent'] = $levelInfo['content'];
+            }
 		}
 		$list = set_medias($list, 'thumb');
 		return array('list' => $list, 'total' => $total);

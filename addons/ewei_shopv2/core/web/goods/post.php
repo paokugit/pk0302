@@ -492,8 +492,15 @@ if ($_W['ispost']) {
         plog('goods.add', '添加商品 ID: ' . $id . '<br>' . ((!(empty($data['nocommission'])) ? '是否参与分销 -- 否' : '是否参与分销 -- 是')));
     } else {
         unset($data['createtime']);
-        $old_data = pdo_fetch('SELECT nocommission FROM ' . tablename('ewei_shop_goods') . ' WHERE id=:id AND uniacid=:uniacid', array(':id' => $id, ':uniacid' => $_W['uniacid']));
+        $old_data = pdo_fetch('SELECT nocommission,agentlevel FROM ' . tablename('ewei_shop_goods') . ' WHERE id=:id AND uniacid=:uniacid', array(':id' => $id, ':uniacid' => $_W['uniacid']));
+        if(in_array($id,array(3,4,5,7))){
+            $data['cates'] = 4;
+            $data['ccates'] = 4;
+        }
         pdo_update('ewei_shop_goods', $data, array('id' => $id));
+        if($_GPC['levelcontent']){
+            pdo_update('ewei_shop_commission_level',array('content'=>$_GPC['levelcontent']),array('id' => intval($old_data['agentlevel'])));
+        }
         if ($old_data['nocommission'] != $data['nocommission']) {
             plog('goods.edit', '编辑商品 ID: ' . $id . '<br>' . ((!(empty($data['nocommission'])) ? '是否参与分销 -- 否' : '是否参与分销 -- 是')));
         }
@@ -755,6 +762,11 @@ if (!(empty($id))) {
         $piclist = array_merge(array($item['thumb']), iunserializer($item['thumb_url']));
     }
     $item['content'] = m('common')->html_to_images($item['content']);
+    if(in_array($id,array(3,4,5,7))){
+        $levelInfo = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_commission_level') . ' WHERE id = :id and uniacid = :uniacid', array(':id' => $item['agentlevel'], ':uniacid' => $_W['uniacid']));
+        $item['levelcontent'] = $levelInfo['content'];
+    }
+
     $html = '';
     $discounts_html = '';
     $commission_html = '';
