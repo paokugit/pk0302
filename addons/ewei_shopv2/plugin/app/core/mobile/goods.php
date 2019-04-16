@@ -45,9 +45,9 @@ class Goods_EweiShopV2Page extends AppMobilePage
 				$goods_list = $goods["list"];
 				foreach( $goods_list as $index => $item )
 				{
-                    if ($_GPC['cate']!=4){
+                    if ($_GPC['cate']==4){
                         if(in_array($item['id'],array(3,4,5,7))){
-                            unset($goods_list[$index]);continue;
+                            $goods_list[$index]['thumb'] = $this->levelurlup($item['id']);
                         }
                     }
 				    if($_GPC['cate']==4){//会员产品获取有效期
@@ -74,6 +74,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 			app_json(array( "list" => $goods_list, "total" => $goods["total"], "pagesize" => $args["pagesize"] ));
 		}
 	}
+
 	public function getlistbyCoupon() 
 	{
 		global $_GPC;
@@ -1926,5 +1927,30 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		}
 		return array( "is_openmerch" => $is_openmerch, "merch_plugin" => $merch_plugin, "merch_data" => $merch_data );
 	}
+
+
+    /**
+     * 更改会员主图
+     * @param $thumb
+     * @param $id
+     */
+    private function levelurlup($id){
+        switch ($id){
+            case 3:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/XMUU5yU9jJ7yt58CE5O8UW5ogaAUm5.png";
+                break;
+            case 4:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/QT03Aprq37zHAwMt07vhVZP3w0wvht.png";
+                break;
+            case 5:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/a8LsNhn44h183OH00505XL39hS0s37.png";
+                break;
+            case 7:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/Xx7X7pa91M99YofuyfKJOo7P878fa7.png";
+                break;
+            default:
+                return '';
+        }
+    }
 }
 ?>
