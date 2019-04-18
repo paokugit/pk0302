@@ -2995,11 +2995,13 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$order["address"] = iserializer($address);
 		}
         //lihanwen
-        if($order['couponid']>0){
-            $coupon_info = pdo_fetch("SELECT couponid FROM " . tablename("ims_ewei_shop_coupon_data") . " WHERE `uniacid`=:uniacid AND `id`=:id AND `used`=:used limit 1", array( ":uniacid" => $uniacid, ":id" => $order['couponid'],":used" =>0));
+        $couponid_id = 0;
+        if($_GPC['couponid']>0){
+            $coupon_info = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_coupon_data") . " WHERE `id`=:id  limit 1", array(":id" => $_GPC['couponid']));
             if($coupon_info['couponid']==2){//店主会员免费商品
                 $order["price"] = 0.00;
             }
+            $couponid_id = $coupon_info['couponid'];
         }
 		pdo_insert("ewei_shop_order", $order);
 		$orderid = pdo_insertid();
@@ -3291,7 +3293,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			}
 		}
 		unset($_SESSION[$openid . "_order_create"]);
-		app_json(array( "orderid" => $orderid ));
+		app_json(array( "orderid" => $orderid,'couponid_id'=>$couponid_id,'couponid' =>$_GPC['couponid']));
 	}
 	protected function singleDiyformData($id = 0) 
 	{
