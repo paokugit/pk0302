@@ -507,16 +507,18 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         $login=(int)$_GPC["login"];
         $parent_id=(int)$_GPC["parent_id"];
         $openid=$_GPC["openid"];
+        $openid=str_replace("sns_wa_", '', $openid);
         if (empty($openid)){
             app_error(AppError::$ParamsError);
         }
-        $member=m("member")->getmember($openid);
+        $member=m("member")->getmember("sns_wa_".$openid);
          if ($login==0){
              if ($member){
-            pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>$openid));
+             pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
              }else{
-                 $wxopenid =$openid=str_replace("sns_wa_", '', $openid);
-                 $m = array("uniacid" => $_W["uniacid"],"agentid"=>$parent_id,"uid" => 0, "openid" => $openid, "openid_wa" =>$wxopenid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
+               
+                
+                 $m = array("uniacid" => $_W["uniacid"],"agentid"=>$parent_id,"uid" => 0, "openid" =>"sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
                  pdo_insert("ewei_shop_member", $m);
                  
              }
@@ -575,15 +577,15 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
-        $member=m("member")->getmember($openid);
+        $openid=str_replace("sns_wa_", '', $openid);
+        $member=m("member")->getmember("sns_wa_".$openid);
         if ($member){
-            pdo_update("ewei_shop_member",array('is_login'=>1),array('openid'=>$openid));
+            pdo_update("ewei_shop_member",array('is_login'=>1),array('openid'=>"sns_wa_".$openid));
         }else{
-            $wxopenid =$openid=str_replace("sns_wa_", '', $openid);
-            $m = array("uniacid" => $_W["uniacid"],"is_login"=>1,"uid" => 0, "openid" => $openid, "openid_wa" =>$wxopenid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
+           
+            $m = array("uniacid" => $_W["uniacid"],"is_login"=>1,"uid" => 0, "openid" => "sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
             pdo_insert("ewei_shop_member", $m);
-            
         }
-        show_json(1, "success");
+        show_json(0, "success");
     }
 }

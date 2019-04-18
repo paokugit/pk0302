@@ -165,12 +165,16 @@ define(['core', 'tpl'], function (core, tpl) {
             var shoplogo = $.trim($("#shoplogo").val());
             var realname = $.trim($("#realname").val());
             var mobile = $.trim($("#mobile").val());
+            var address = $.trim($("#address").val());
+            var lng = $.trim($("#lng").val());
+            var lat = $.trim($("#lat").val());
+            var detail_addr=$.trim($("#detail_addr").val());
             if (shopname == '') {
                 FoxUI.toast.show("请填写商户名称");
                 return
             }
             modal.stop = true;
-            var obj = {shoplogo: shoplogo, shopname: shopname, shopdesc: shopdesc,realname:realname,mobile:mobile};
+            var obj = {shoplogo: shoplogo, shopname: shopname, shopdesc: shopdesc,realname:realname,mobile:mobile,address:address,lng:lng,lat:lat,detail_addr:detail_addr};
             core.json('merchmanage/shop', obj, function (json) {
                 if (json.status == 1) {
                     FoxUI.toast.show("保存成功")

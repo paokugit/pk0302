@@ -43,8 +43,8 @@ class Wxapp_EweiShopV2Page extends Page
         $openid="sns_wa_".$arr["openid"];
         $member=pdo_get('ewei_shop_member',array('openid'=>$openid));
         if ($member){
-            
-            $arr["login"]=$member["is_login"];
+           $arr["login"]=$member["is_login"];
+         
         }else{
             //第一次登录
             $arr["login"]=0;

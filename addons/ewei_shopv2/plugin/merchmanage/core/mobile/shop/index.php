@@ -23,6 +23,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 			$desc = trim($_GPC['shopdesc']);
 			$mobile = intval($_GPC['mobile']);
 			$realname = trim($_GPC['realname']);
+			
 			if (empty($merchname)) {
 				show_json(0, '请填写商户名称');
 			}
@@ -35,6 +36,13 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 			
 			$data['mobile'] = $mobile;
 			$data['realname'] = $realname;
+			$data["address"]=trim($_GPC["address"]).trim($_GPC["detail_addr"]);
+			if ($_GPC["lat"]){
+			    $data["lat"]=$_GPC["lat"];
+			}
+			if ($_GPC["lng"]){
+			    $data["lng"]=$_GPC["lng"];
+			}
 			#更新
 			pdo_update('ewei_shop_merch_user',$data,array('id'=>$merchid));
 			show_json(1);

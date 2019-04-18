@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>密码重置</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/Resetpassword.css">
+<body>
+   
+    <div class="reset-body">
+        <div class="reset-con">
+            <p style="color:#333;font-size:26px">您好,</p>
+            <p style="color:#333;font-size:26px;margin-top: 8px">请输入注册手机号</p>
+            <div class="account_info">
+                <div class="ipt_box">
+                    <div class="img01_box"><img src="http://paokucoin.com/img/backgroup/mobile@2x.png" alt=""></div>
+                    <input type="text" placeholder="18738135355" id="ipt1" class="telphone">
+                    </div>
+                    <div class="ipt_box">
+                     <div class="img01_box">
+                     <img src="http://paokucoin.com/img/backgroup/duanxin@2x.png" alt=""></div>
+                     <input type="text" placeholder="6位数验证码" id="ipt2" class="password">
+                     <input type="button" id="codebtn" value="获取验证码" onclick="sendemail();sendcode()" />
+                   </div>
+                </div>
+                <div class="btn-box01"><button class="account-btn" style="color:#9a9a9a;font-size: 17px">确认</button></div>
+                <div class="btn-box02"><a href="{php echo mobileUrl('merchmanage/login/pwlogin')}" style="color:#333;font-size: 18px">密码登录</a></div>
+        </div>
+    </div>
+    <!-- 错误提示 -->
+    <div id="warning">
+            <div class="mask-text"></div>
+    </div>
+</body>
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
+var phonenum=''
+var code=''
+function sendcode(){
+var obj = $("#codebtn");
+sendyzm(obj);
+}
+function sendyzm(obj){
+$.ajax({
+type: 'POST',
+url: '{php echo mobileUrl('merchmanage/login/send')}' ,
+data: {
+"mobile":$("#ipt1").val(),
+} ,
+dataType: "json", 
+success: function(data){
+	
+if(data.status=="0"){
+var message=data.result.message
+
+$("#warning").show().delay(1000).hide(300);
+$("#warning .mask-text ").text(message);
+}else{
+	phonenum=data.result.mobile	
+	code=data.result.code
+}
+} ,
+});
+}
+// 倒计时
+var countdown=60; 
+function sendemail(){
+var obj = $("#codebtn");
+settime(obj);
+}
+//发送验证码倒计时
+function settime(obj) { 
+if (countdown == 0) { 
+obj.attr('disabled',false);
+obj.val("获取验证码");
+countdown = 60; 
+return;
+} else { 
+obj.attr('disabled',true);
+obj.val(countdown + "s");
+$("#codebtn").css({'color':'#FFFFFF','background':'#008be4'});
+
+countdown--; 
+} 
+setTimeout(function() { 
+settime(obj) }
+,1000) 
+}
+// 确认按钮的颜色变换
+$("input").bind("input propertychange change",function(event){
+        var telphone = $(".telphone").val().trim().length;
+        var pswd = $(".password").val().trim().length;
+        if(telphone > 0 && pswd > 0){
+
+$(".account-btn").css({'color':'#FFFFFF','background':'#008be4'});
+        }else{
+            $(".account-btn").css({'color':'#333','background':'#a9a9a9'});
+        }
+    });
+// 确认按钮的点击事件
+$(".account-btn").bind("click",function(){
+var telphoneval = $(".telphone").val();
+        var pswdval = $(".password").val();
+if(telphoneval ==phonenum && pswdval == code){
+	 location.href="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.login.reset&mobile="+telphoneval; 
+}
+if(pswdval != code){
+$("#warning").show().delay(1000).hide(300);
+$("#warning .mask-text ").text('验证码错误');
+}
+
+
+});
+</script>

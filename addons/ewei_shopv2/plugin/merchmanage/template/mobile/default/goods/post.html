@@ -32,7 +32,7 @@
             <div class="fui-cell fui-cell-textarea">
                 <div class="fui-cell-label ">商品名称</div>
                 <div class="fui-cell-info">
-                    <textarea rows="3" placeholder="请输入商品民称" id="title">{$item['title']}</textarea>
+                    <textarea rows="3" placeholder="请输入商品名称" id="title">{$item['title']}</textarea>
                 </div>
             </div>
             <div class="fui-cell">
@@ -125,6 +125,7 @@
                     <input type="number" placeholder="请输入商品成本价" class="fui-input" value="{php echo empty($item['costprice'])?0:$item['costprice']}" id="costprice" />
                 </div>
             </div>
+          
         </div>
         <div class="fui-cell-group fui-cell-click">
             <div class="fui-cell noactive">
@@ -219,6 +220,21 @@
                 </div>
                 <div class="fui-cell-remark noremark">件</div>
             </div>
+        </div>
+        
+        
+        <div class="fui-title">卡路里抵扣设置</div>
+        <div class="fui-cell-group fui-cell-click">
+            <div class="fui-cell">
+                <div class="fui-cell-label">卡路里</div>
+                <div class="fui-cell-info">
+                    <input type="number" placeholder="最多抵扣" class="fui-input" value="{php echo $item['deduct']}" id="deduct" />
+                </div>
+                <div class="fui-cell-remark noremark">元</div>
+            </div>
+            
+            
+            
         </div>
 
         <div class="fui-cell-group fui-cell-click">

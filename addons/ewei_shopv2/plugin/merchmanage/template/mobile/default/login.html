@@ -1,43 +1,52 @@
-{template 'merchmanage/common'}
-
-<div class='fui-page fui-page-current'>
-    <div class="fui-header fui-header-success">
-        <div class="fui-header-left">
-            {if $goshop}
-                <a class="back external" href="{php echo mobileUrl()}">商城</a>
-            {/if}
-          
-        </div>
-        <div class="title">用户登录</div>
-        <div class="fui-header-right"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商户登录</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/login01.css">
+<body>
+    <!-- header -开始-->
+   
+    <!-- header-结束 -->
+    <div class="login-top">
+        <div class="zhihui"></div>
+        <div class="tubiao"></div>
+        <div class="tubiao_desc">跑库商家</div>
     </div>
-    <div class='fui-content page-login'>
-
-        <div class="panel-logo">
-            <img src="{$logo}" />
-        </div>
-        <div class="panel-login">
-            <div class="fui-cell-group fui-cell-group-o">
-                <div class="fui-cell">
-                    <div class="fui-cell-info">
-                        <input type="text" placeholder="请输入用户名" class="fui-input" id="username" />
-                    </div>
-                </div>
-                <div class="fui-cell">
-                    <div class="fui-cell-info">
-                        <input type="password" placeholder="请输入密码" class="fui-input" id="password" />
-                    </div>
-                </div>
-            </div>
-            <div class="btn btn-success block btn-submit" data-type="" id="btn-submit">登录</div>
-        </div>
+    <div class="denglu_pic"><img src="http://paokucoin.com/img/backgroup/denglu-pic@2x.png" alt=""></div>
+    <div class="btn_box">
+    
+        <button id="btn01"><a style="color:#008be4" href="{php echo mobileUrl('merchmanage/login/pwlogin')}">账号登录</a></button>
+        <button id="btn02">快捷登录</button> 
     </div>
+    <!-- 错误提示 -->
+    <div id="warning">
+        <div class="mask-text"></div>
+    </div>
+</body>
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
 
-    <script language="javascript">
-        require(['../addons/ewei_shopv2/plugin/merchmanage/static/js/base.js'],function(modal){
-            modal.initLogin({backurl:"{$backurl}"});
-        });
-    </script>
-</div>
-
-{template '_footer'}
+// 快捷登录的点击事件
+$("#btn02").bind("click",function(){
+if (isWeixin()) {
+location.href='{php echo mobileUrl('merchmanage/login/wx_login')}';
+} else {
+$("#warning").show().delay(1000).hide(300);
+$("#warning .mask-text ").text('请在微信端打开');
+}
+// 判断是否在微信中打开
+function isWeixin() {
+var ua = navigator.userAgent.toLowerCase();
+if (ua.match(/MicroMessenger/i) == "micromessenger") {
+return true;
+} else {
+return false;
+}
+}
+})
+</script>

@@ -22,11 +22,55 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 		}
 		$backurl = trim($_GPC['backurl']);
 
-		if ( strpos($_SERVER['HTTP_USER_AGENT'],'MicroMessenger')== false ) {
-		    
-		    $is_wei=0;
-		}else{
-		    $is_wei=1;
+		if ($_W['ispost']) {
+			
+			if (!(empty($backurl))) {
+				$backurl = base64_decode(urldecode($backurl));
+				$backurl = './index.php?' . $backurl;
+			}
+
+			$username = trim($_GPC['username']);
+			$password = trim($_GPC['password']);
+
+			if (empty($username)) {
+				show_json(0, '请填写用户名');
+			}
+
+
+			if (empty($password)) {
+				show_json(0, '请填写密码');
+			}
+
+			
+			if (!($this->model->merch_user_check(array('username' => $username)))) {
+				show_json(0, '用户不存在');
+			}
+
+
+			if (!($this->model->merch_user_check(array('username' => $username, 'pwd' => $password)))) {
+				show_json(0, '用户名或密码错误');
+			}
+
+
+			$account = $this->model->merch_user_single(array('username' => $username));
+			$account['hash'] = md5($account['pwd'] . $account['salt']);
+			$session = base64_encode(json_encode($account));
+			$session_key = '__merchmanage_' . $_W['uniacid'] . '_session';
+			
+			isetcookie($session_key, $session, 7200);
+			$status = array();
+			$status['lastvisit'] = TIMESTAMP;
+			$status['lastip'] = CLIENT_IP;
+			pdo_update('ewei_shop_merch_account', $status, array('id' => $account['id']));
+			
+			show_json(1, array('backurl' => $backurl));
+		}
+
+		$shopset = $_W['shopset'];
+		$logo = tomedia($shopset['shop']['logo']);
+		if (is_weixin() || (!(empty($shopset['wap']['open'])) && empty($shopset['wap']['inh5app']))) {
+			$goshop = true;
+			
 		}
 		
 		include $this->template();
@@ -45,16 +89,6 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 		}else{
 			header('location: ' . mobileUrl('merchmanage/login'));
 		}
-	}
-	//密码--页面
-	public function pwlogin(){
-	    global $_W;
-	    global $_GPC;
-	    
-	    // 		var_dump(mobileUrl('merchmanage/login'));
-	    // 		var_dump(mobileUrl('merchmanage/login/wx_login'));
-	    $check = $this->isLogin();
-	    include $this->template();
 	}
 	//密码登录
 	public function loginapi(){
@@ -95,13 +129,6 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 	    show_json(1,"登陆成功");
 	    
 	}
-	//短信验证码页面
-	public function mobile_code(){
-	    global $_W;
-	    global $_GPC;
-	   
-	    include $this->template();
-	}
 	//短信消息
 	public function send(){
 	    header('Access-Control-Allow-Origin:*');
@@ -121,19 +148,8 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 	    if ($resault["status"]==1){
 	        $resault["result"]["code"]=$code;
 	        $resault["result"]["mobile"]=$mobile;
-	        exit(json_encode($resault));
-	    }else{
-	        show_json($resault['status'],$resault["message"]);
 	    }
-	   
-	}
-	//密码页面登录
-	public function reset(){
-	    global $_W;
-	    global $_GPC;
-	    $mobile=$_GPC["mobile"];
-	   
-	    include $this->template();
+	    exit(json_encode($resault));
 	}
 	//重置密码
 	public function reset_pwd(){
@@ -162,22 +178,22 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 	public function wx_login(){
 	    global $_W;
 	    global $_GPC;
-	    
+	    if ( strpos($_SERVER['HTTP_USER_AGENT'],'MicroMessenger')== false ) {
+            
+	        show_json(0,"请在微信端打开");
+	    }else{
 	        $result = mc_oauth_userinfo();
 	        $openid=$result["openid"];
 	        if (empty($openid)){
-	            
-	            echo "<script>alert('授权登录失败');</script>";
-	            header('location: ' . mobileUrl('merchmanage'));
-	            exit();
+	            show_json(0,"授权失败");
 	        }
 	        
 	        $user=pdo_get("ewei_shop_merch_account",array('openid'=>$openid));
 	        if (empty($user)){
 	            //未绑定账户
-	            $member=pdo_get("mc_mapping_fans",array("openid"=>$openid));
-	            $m=pdo_get("mc_members",array("uid"=>$member["uid"]));
-	            include $this->template();
+	            $resault["openid"]=$openid;
+	            $resault["binding"]=0;
+	            show_json(1,$resault);
 	            
 	        }else{
 	            //已绑定账户
@@ -193,9 +209,10 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 	           
 	            $resault["openid"]=$openid;
 	            $resault["binding"]=1;
-	            
- 	            header('location: ' . mobileUrl('merchmanage'));
-                exit();
+	            show_json(1,$resault);
+// 	            header('location: ' . mobileUrl('merchmanage'));
+// 	            exit;
+	        }
 	    }
 	   
 	    
