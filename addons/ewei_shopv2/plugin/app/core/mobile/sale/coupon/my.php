@@ -140,6 +140,12 @@ class My_EweiShopV2Page extends AppMobilePage
                 $row["color"] = "red ";
                 $title2 = $title2 . "打" . (double) $row["discount"] . "折";
                 $tagtitle = "打折券";
+                if($row["couponid"]==2){
+                    $title2 = "免费兑换券";
+                    $tagtitle = "店主专享";
+                    $row['timestr'] = "活的期间内有效";
+                }
+
             }
 
             if( $row["backtype"] == 2 ) 
@@ -484,7 +490,10 @@ class My_EweiShopV2Page extends AppMobilePage
         {
             $detail["desc"] = $coupon["desc"];
         }
-
+        if($data["couponid"]==2){//店主专享
+            $detail['reurl'] = '/pages/changce/merch/detail?id=10';
+        }
+        $detail['couponid'] = $data["couponid"];
         app_json(array( "detail" => $detail ));
     }
 

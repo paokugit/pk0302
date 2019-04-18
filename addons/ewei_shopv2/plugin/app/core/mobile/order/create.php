@@ -1170,6 +1170,8 @@ class Create_EweiShopV2Page extends AppMobilePage
 		{
 			return NULL;
 		}
+		//店主专享商品大于一件禁止购买
+		if($data['couponid']==2 && count($goodsarr)>1) return NULL;
 		if( is_array($goodsarr) ) 
 		{
 			$goods = array( );
@@ -1378,6 +1380,10 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$return_array["merchisdiscountprice"] = $merchisdiscountprice;
 		$return_array["couponmerchid"] = $merchid;
 		$return_array["\$goodsarr"] = $goodsarr;
+        if($data['couponid']==2) {
+
+           //$return_array["deductprice"] = $totalprice;
+        }
 		return $return_array;
 	}
 	public function caculate() 
@@ -1916,9 +1922,20 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$express_fee = $dispatch_price + $seckill_dispatchprice;
 			$coupon_price = $this->caculatecoupon($couponid, $goodsdata_coupon, $totalprice, $discountprice, $isdiscountprice, 0, array( ), 0, $realprice - $express_fee);
 			$coupon_deductprice = $coupon_price["deductprice"];
+			//lihanwen
+            $sql = "SELECT d.id,d.couponid,c.enough,c.backtype,c.deduct,c.discount,c.backmoney,c.backcredit,c.backredpack,c.merchid,c.limitgoodtype,c.limitgoodcatetype,c.limitgoodids,c.limitgoodcateids,c.limitdiscounttype  FROM " . tablename("ewei_shop_coupon_data") . " d";
+            $sql .= " left join " . tablename("ewei_shop_coupon") . " c on d.couponid = c.id";
+            $sql .= " where d.id=:id and d.uniacid=:uniacid and d.openid=:openid and d.used=0  limit 1";
+            $coupondata = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $couponid, ":openid" => $openid ));
+
 			$deductcredit2 -= $coupon_deductprice;
 			$deductmoney -= $coupon_deductprice;
 			$deductcredit = ($pmoney * $pcredit == 0 ? 0 : $deductmoney / $pmoney * $pcredit);
+            if( !empty($coupondata) && $coupondata['couponid']==2)
+            {
+                $deductcredit = $deductcredit2 = -$realprice;
+                $coupon_deductprice = $realprice;
+            }
 		}
 		$gifts = array( );
 		if( $isgift ) 
@@ -2977,6 +2994,13 @@ class Create_EweiShopV2Page extends AppMobilePage
 		{
 			$order["address"] = iserializer($address);
 		}
+        //lihanwen
+        if($order['couponid']>0){
+            $coupon_info = pdo_fetch("SELECT couponid FROM " . tablename("ims_ewei_shop_coupon_data") . " WHERE `uniacid`=:uniacid AND `id`=:id AND `used`=:used limit 1", array( ":uniacid" => $uniacid, ":id" => $order['couponid'],":used" =>0));
+            if($coupon_info['couponid']==2){//店主会员免费商品
+                $order["price"] = 0.00;
+            }
+        }
 		pdo_insert("ewei_shop_order", $order);
 		$orderid = pdo_insertid();
 		if( !empty($goods[0]["bargain_id"]) && p("bargain") ) 

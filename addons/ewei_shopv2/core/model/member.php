@@ -1092,20 +1092,20 @@ class Member_EweiShopV2Model
                 $data['levelid'] = $level['id'];
                 $data['levelname'] = $level['levelname'];
                 $hasdate = $nodate-$thisdate;//剩余天数
-                if($level['id']==1 || $level['id']==5){
+
+                if($level['id']==5){
                     if($hasdate<0) $hasdate=0;
-                    $enddate = date('Y-m-d',time()+($hasdate*3600*24));
                     $hastime = $nodate-$thisdate;
                     $data['nodate'] = $nodate;
                     $data['leveltime'] = date('Y-m-d',$member['agenttime']);
                     $data['hasday'] = $hastime;
-                    $data['endtime'] = $enddate;
+                    $data['endtime'] = date('Y-m-d',$member['agenttime']+365*3600*24);
                 }
                 return $data;
             }
-            return array('levelname'=>'健康达人','leveltime'=>'','levelid'=>0);
+            return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
         }
-        return array('levelname'=>'健康达人','leveltime'=>'','levelid'=>0);
+        return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
     }
     //fanbeibei
     //获取每天可兑换的卡路里
@@ -1321,16 +1321,15 @@ class Member_EweiShopV2Model
      */
     public function setagent($info){
         global $_W;
-        $memberinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $info['openid'] ));
+        $memberinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array(":openid" => $info['openid'] ));
+        //助力人的信息
         //主
         if(!$memberinfo) return false;
         if($memberinfo['agentid']==0 || $memberinfo['agentid']==''){
-            $agentinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $info['agentopenid'] ));
-            //附
-            $data['agentid'] = $agentinfo['id']?$agentinfo['id']:0;
-
+            $agentinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array(":openid" => $info['agentopenid'] ));
+            //附 被助力人的信息，来源信息
+            $data['agentid'] = $agentinfo['id']?$agentinfo['id']:1;
             $where['openid'] = $info['openid'];
-            $where['uniacid'] = $_W["uniacid"];
             pdo_update("ewei_shop_member",$data,$where);
         }
     }
