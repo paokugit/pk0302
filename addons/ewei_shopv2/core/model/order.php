@@ -184,7 +184,8 @@ class Order_EweiShopV2Model
 						com("coupon")->sendcouponsbytask($order["id"]);
 						com("coupon")->backConsumeCoupon($order["id"]);
 					}
-					if( $order["isparent"] == 1 ) 
+
+					if( $order["isparent"] == 1 )
 					{
 						$child_list = $this->getChildOrder($order["id"]);
 						foreach( $child_list as $k => $v ) 
@@ -470,6 +471,11 @@ class Order_EweiShopV2Model
                 $this->write_log('===='.$val['cates'].'====');
 	            break;
             }
+
+	        if($val['id']==7){//店主购买成功发放会员卡@lihanwen
+
+            }
+
         }
 	}
 	public function getGoodsCredit($goods) 

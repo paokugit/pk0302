@@ -550,11 +550,12 @@ class Merch_EweiShopV2Page extends AppMobilePage
                     }
                     $merchuser[$k]['catename'] = $cate_list[$v['cateid']]['catename'];
                     $merchuser[$k]['logo'] = tomedia($v['logo']);
-                }
-                if($is_from>0){
-                    $goodsNum = pdo_count("ewei_shop_goods", "deleted =0 and status=1  and merchid = " . $v['id']);
-                    if($goodsNum<3){
-                        unset($merchuser[$k]);
+
+                    if($is_from>0){
+                        $goodsNum = pdo_count("ewei_shop_goods", "deleted =0 and status=1  and merchid = " . $v['id']);
+                        if($goodsNum<3){
+                            unset($merchuser[$k]);
+                        }
                     }
                 }
             }

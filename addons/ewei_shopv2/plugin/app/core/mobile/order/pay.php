@@ -44,6 +44,16 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			pdo_delete("core_paylog", array( "plid" => $log["plid"] ));
 			$log = NULL;
 		}
+		//var_dump($order);
+		//lihanwen
+        if($order['couponid']>0){
+            //var_dump($order['couponid']);
+            $coupon_info = pdo_fetch("SELECT couponid FROM " . tablename("ims_ewei_shop_coupon_data") . " WHERE `uniacid`=:uniacid AND `id`=:id limit 1", array( ":uniacid" => $uniacid, ":id" => $order['couponid']));
+            //var_dump($coupon_info);
+            if($coupon_info['couponid']==2){//店主会员免费商品
+                $order["price"] = 0.00;
+            }
+        }
 		if( empty($log) ) 
 		{
 			$log = array( "uniacid" => $uniacid, "openid" => $member["uid"], "module" => "ewei_shopv2", "tid" => $order["ordersn"], "fee" => $order["price"], "status" => 0 );
@@ -510,7 +520,8 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			}
 		}
 		$result = array( "order" => array( "id" => $orderid, "isverify" => $order["isverify"], "virtual" => $order["virtual"], "isvirtual" => $order["isvirtual"], "isvirtualsend" => $order["isvirtualsend"], "virtualsend_info" => $order["virtualsend_info"], "virtual_str" => $order["virtual_str"], "status" => ($order["paytype"] == 3 ? "订单提交支付" : "订单支付成功"), "text" => $text, "price" => $order["price"] ), "paytype" => ($order["paytype"] == 3 ? "需到付" : "实付金额"), "carrier" => $carrier, "address" => $address, "stores" => $stores, "store" => $store, "icon" => $icon, "seckill_color" => $seckill_color );
-		if( !empty($order["virtual"]) && !empty($order["virtual_str"]) ) 
+        $result['goods'] = $goods['0'];
+		if( !empty($order["virtual"]) && !empty($order["virtual_str"]) )
 		{
 			$result["ordervirtual"] = m("order")->getOrderVirtual($order);
 			$result["virtualtemp"] = pdo_fetch("SELECT linktext, linkurl FROM " . tablename("ewei_shop_virtual_type") . " WHERE id=:id AND uniacid=:uniacid LIMIT 1", array( ":id" => $order["virtual"], ":uniacid" => $_W["uniacid"] ));
