@@ -32,8 +32,9 @@ class Goods_EweiShopV2Page extends AppMobilePage
 
             if( isset($_GPC["deduct"]) )
             {
-                $args["order"] = 'deduct desc';
+                $args["order"] = 'minprice asc,deduct desc';
                 $args["ishot"] = 1;
+                $args["deducts"] = 1;
                 
             }
 

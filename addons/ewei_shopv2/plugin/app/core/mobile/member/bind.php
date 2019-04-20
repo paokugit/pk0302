@@ -64,7 +64,7 @@ class Bind_EweiShopV2Page extends AppMobilePage
 				app_error(AppError::$VerifyCodeError, "验证码错误或已过期");
 			}
 			$member2 = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where mobile=:mobile and uniacid=:uniacid and mobileverify=1 limit 1", array( ":mobile" => $mobile, ":uniacid" => $_W["uniacid"] ));
-			if( empty($member2) ) 
+			if( empty($member2) )
 			{
 				$salt = m("account")->getSalt();
 				m("bind")->update($member["id"], array( "mobile" => $mobile, "pwd" => md5($pwd . $salt), "salt" => $salt, "mobileverify" => 1 ));
@@ -74,8 +74,11 @@ class Bind_EweiShopV2Page extends AppMobilePage
 				{
 					m("bind")->sendCredit($member);
 				}
-				app_json();
-			}
+                $this->bindMerch($mobile);
+                app_json();
+			}else{
+                app_error(AppError::$VerifyCodeError, "改手机号已被绑定其他账号，请更改手机号");
+            }
 			if( $member["id"] == $member2["id"] ) 
 			{
 				app_error(AppError::$BindSelfBinded);
@@ -89,7 +92,9 @@ class Bind_EweiShopV2Page extends AppMobilePage
 					m("bind")->update($member2["id"], array( "mobileverify" => 0 ));
 					m("cache")->del($key);
 					m("account")->setLogin($member["id"]);
-					app_json();
+                    $this->bindMerch($mobile);
+
+                    app_json();
 				}
 				else 
 				{
@@ -109,7 +114,9 @@ class Bind_EweiShopV2Page extends AppMobilePage
 					m("bind")->update($member["id"], array( "mobile" => $mobile, "pwd" => md5($pwd . $salt), "salt" => $salt, "mobileverify" => 1 ));
 					m("cache")->del($key);
 					m("account")->setLogin($member["id"]);
-					app_json();
+                    $this->bindMerch($mobile);
+
+                    app_json();
 				}
 				else 
 				{
@@ -129,7 +136,9 @@ class Bind_EweiShopV2Page extends AppMobilePage
 					m("bind")->update($member2["id"], array( "mobile" => $mobile, "pwd" => md5($pwd . $salt), "salt" => $salt, "mobileverify" => 1 ));
 					m("cache")->del($key);
 					m("account")->setLogin($member2["id"]);
-					app_json();
+                    $this->bindMerch($mobile);
+
+                    app_json();
 				}
 				else 
 				{
@@ -139,6 +148,22 @@ class Bind_EweiShopV2Page extends AppMobilePage
 		}
 		app_error(AppError::$ParamsError);
 	}
+
+    /**
+     * 店主会员绑定绑定店铺
+     * @param $member_id
+     * @param $mobile
+     */
+	public function bindMerch($mobile){
+	    if(!$mobile) return false;
+        $merchInfo = pdo_fetch("select * from " . tablename("ewei_shop_merch_user") . " where mobile=:mobile limit 1", array( ":mobile" => $mobile ));
+        if(!$merchInfo) return false;
+        if($merchInfo['member_id']>0) return true;
+        $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where mobile=:mobile  limit 1", array( ":mobile" => $mobile ));
+        if(!$memberInfo) return false;
+        return pdo_update("ewei_shop_merch_user",array('member_id'=>$memberInfo['id']),array('id'=>$merchInfo['id']));
+    }
+
 	public function imageChange() 
 	{
 		global $_W;

@@ -1331,7 +1331,25 @@ class Member_EweiShopV2Model
             $data['agentid'] = $agentinfo['id']?$agentinfo['id']:1;
             $where['openid'] = $info['openid'];
             pdo_update("ewei_shop_member",$data,$where);
+            $this->bindFromMerch($info['openid'],$data['agentid']);
         }
+    }
+
+
+    /**
+     * 绑定会员来源店铺
+     * @param $openid
+     * @return bool
+     */
+    public function bindFromMerch($openid,$agentid){
+        $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid  limit 1", array( ":openid" => $openid ));
+        if(!$memberInfo) return false;
+        if($memberInfo['from_merchid']>0) return true;
+
+        $merchInfo = pdo_fetch("select * from " . tablename("ewei_shop_merch_user") . " where member_id=:member_id  limit 1", array( ":member_id" => $agentid ));
+        if(!$merchInfo) return false;
+
+        return pdo_update("ewei_shop_member",array('from_merchid'=>$merchInfo['id']),array('openid'=>$openid));
     }
 }
 ?>
