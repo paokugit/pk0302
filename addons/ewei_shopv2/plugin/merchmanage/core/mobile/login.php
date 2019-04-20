@@ -50,9 +50,7 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 	public function pwlogin(){
 	    global $_W;
 	    global $_GPC;
-	    
-	    // 		var_dump(mobileUrl('merchmanage/login'));
-	    // 		var_dump(mobileUrl('merchmanage/login/wx_login'));
+
 	    $check = $this->isLogin();
 	    include $this->template();
 	}
@@ -233,6 +231,38 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 	    }else{
 	        show_json(0,"绑定失败");
 	    }
+	}
+	
+	//充值金额
+	public function purchaseset(){
+	    global $_W;
+	    global $_GPC;
+	   
+	    $list = pdo_fetchall('select * from ' . tablename('ewei_shop_merch_purchase') . (' order by money asc ') );
+	    show_json(1,$list); 
+	}
+	//收集站
+	public function m(){
+	    global $_W;
+	    global $_GPC;
+	    $params["openid"] ="oQmU56Lf1GeIkpqsLStPq5Qktm9I";
+	    $params["fee"] =100;
+	    $params["title"]="购买";
+	    $params["tid"]="201904190123".time();
+	    load()->model("payment");
+	    $setting = uni_setting($_W["uniacid"], array( "payment" ));
+	    if( is_array($setting["payment"]) )
+	    {
+	        $options = $setting["payment"]["wechat"];
+	        $options["appid"] = $_W["account"]["key"];
+	        $options["secret"] = $_W["account"]["secret"];
+	    }
+	    $options["mch_id"]=$options["mchid"];
+// 	    var_dump($options);die;
+	    
+	    $wechat = m("common")->fwechat_child_build($params, $options, 0);
+// 	    var_dump($wechat);
+	    include $this->template();
 	}
 }
 

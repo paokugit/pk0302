@@ -1,0 +1,85 @@
+{template '_header'}
+
+<div class="page-header">当前位置：<span class="text-primary">购买设置管理</span></div>
+
+<div class="page-content">
+    <form action="./index.php" method="get" class="form-horizontal  ">
+        <input type="hidden" name="c" value="site" />
+        <input type="hidden" name="a" value="entry" />
+        <input type="hidden" name="m" value="ewei_shopv2" />
+        <input type="hidden" name="do" value="web" />
+        <input type="hidden" name="r"  value="shop.purchase" />
+          
+          <div class="page-toolbar row m-b-sm m-t-sm">
+            <div class="col-md-4">
+                <a class='btn btn-primary btn-sm' href="{php echo webUrl('shop/purchase/add')}"><i class='fa fa-plus'></i> 添加</a>
+            </div>
+
+            
+        </div>
+    </form>
+
+    {if empty($list)}
+        <div class="panel panel-default">
+            <div class="panel-body empty-data">未查询到相关数据</div>
+        </div>
+    {else}
+        <form action="" method="post">
+            
+            <table class="table table-responsive table-hover" >
+                <thead class="navbar-inner">
+                    <tr>
+                        <th style="width:25px;" ></th>
+                        <th class='th-sortable' data-sort-name='title'>ID</th>
+                        <th class='th-sortable' data-sort-name='title'>充值金额</th>
+                        <th>赠送</th>
+                       
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $list $row}
+                        <tr>
+                            <td>
+                                <input type='checkbox'   value="{$row['id']}"/>
+                            </td>
+                           <td>{$row['id']}</td>
+                            <td>{$row['money']}元</td>
+                            <td>{$row['give']}元</td>
+                           
+                            <td style="text-align:left;">
+                                {ifp 'shop.purchase.view|shop.purchase.edit'}
+                                    <a href="{php echo webUrl('shop/purchase/edit',array('id' => $row['id']))}" class="btn btn-op btn-operation" >
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="{ifp 'shop.purchase.edit'}修改{else}查看{/if}">
+                                                <i class='icow icow-bianji2'></i>
+                                            </span>
+                                    </a>
+                                {/if}
+                                {ifp 'shop.purchase.delete'}
+                                    <a data-toggle='ajaxRemove' href="{php echo webUrl('shop/purchase/delete', array('id' => $row['id']))}"class="btn btn-op btn-operation" data-confirm='确认要删除此设置吗?'>
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="删除">
+                                               <i class='icow icow-shanchu1'></i>
+                                            </span>
+                                    </a>
+                                {/if}
+                            </td>
+                        </tr>
+                    {/loop}
+                </tbody>
+                <tfoot>
+                    <tr>
+                       
+                        <td colspan="2">
+                            
+                        </td>
+                        <td colspan="3" style="text-align: right">
+                            {$pager}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </form>
+    {/if}
+</div>
+{template '_footer'}
+<!--NDAwMDA5NzgyNw==-->

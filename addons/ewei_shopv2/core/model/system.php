@@ -591,6 +591,11 @@ class System_EweiShopV2Model {
                                 "title" => "退货地址",
                                 "route" => "refundaddress",
                                 "desc" => "店铺退货地址管理"
+                            ),
+                            array(
+                                "title" => "购买设置",
+                                "route" => "purchase",
+                                "desc" => "赏金任务购买设置"
                             )
                         )
                     ) ,

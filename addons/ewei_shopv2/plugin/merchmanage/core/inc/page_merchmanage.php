@@ -24,8 +24,8 @@ class MerchmanageMobilePage extends PluginMobilePage
 		}
 
 
-		$this->checkLogin();
-		$this->setShare();
+// 		$this->checkLogin();
+// 		$this->setShare();
 	}
 
 	protected function checkLogin()
