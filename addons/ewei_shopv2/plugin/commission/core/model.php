@@ -1306,6 +1306,12 @@ if( !class_exists("CommissionModel") )
 			}
 			return $_W["siteroot"] . "addons/ewei_shopv2/data/poster/" . $_W["uniacid"] . "/" . $file;
 		}
+
+        /**
+         * 分享奖励
+         * @param string $openid
+         * @return |null
+         */
 		public function checkAgent($openid = "") 
 		{
 			global $_W;
@@ -1337,6 +1343,7 @@ if( !class_exists("CommissionModel") )
 				if( $clickcount <= 0 ) 
 				{
 					$click = array( "uniacid" => $_W["uniacid"], "openid" => $openid, "from_openid" => $parent["openid"], "clicktime" => time() );
+					if(0)
 					pdo_insert("ewei_shop_commission_clickcount", $click);
 					pdo_update("ewei_shop_member", array( "clickcount" => $parent["clickcount"] + 1 ), array( "uniacid" => $_W["uniacid"], "id" => $parent["id"] ));
 				}

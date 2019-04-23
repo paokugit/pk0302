@@ -16,27 +16,27 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         global $_W;
-        $shopset = m("common")->getSysset("shop");
+//        $shopset = m("common")->getSysset("shop");
         parent::__construct();
-        $mid = $_GPC['mid'];
-        if (!empty($mid) && !empty($_W["openid"])) {
-            $pid = m('member')->getMember($mid);
-            $iset = pdo_get('ewei_shop_member_getstep', array('bang' => $_W['openid'], 'type' => 1, 'day' => date('Y-m-d'), 'openid' => $pid['openid']));
-            if (!empty($pid) && empty($iset)) {
-                $data = array(
-                    'timestamp' => time(),
-                    'openid' => trim($pid["openid"]),
-                    'day' => date('Y-m-d'),
-                    'uniacid' => $_W['uniacid'],
-                    'step' => $shopset['qiandao'],
-                    'type' => 1,
-                    'bang' => $_W['openid']
-                );
-                pdo_insert('ewei_shop_member_getstep', $data);
-            }
-            
-            
-        }
+//        $mid = $_GPC['mid'];
+//        if (!empty($mid) && !empty($_W["openid"])) {
+//            $pid = m('member')->getMember($mid);
+//            $iset = pdo_get('ewei_shop_member_getstep', array('bang' => $_W['openid'], 'type' => 1, 'day' => date('Y-m-d'), 'openid' => $pid['openid']));
+//            if (!empty($pid) && empty($iset)) {
+//                $data = array(
+//                    'timestamp' => time(),
+//                    'openid' => trim($pid["openid"]),
+//                    'day' => date('Y-m-d'),
+//                    'uniacid' => $_W['uniacid'],
+//                    'step' => $shopset['qiandao'],
+//                    'type' => 1,
+//                    'bang' => $_W['openid']
+//                );
+//                pdo_insert('ewei_shop_member_getstep', $data);
+//            }
+//
+//
+//        }
        
     }
     
