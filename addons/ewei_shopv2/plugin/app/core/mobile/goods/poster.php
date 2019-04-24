@@ -351,34 +351,46 @@ class Poster_EweiShopV2Page extends AppMobilePage
        app_json(array( "url" => $imgurl ));
     }
 
-    /**
-     * 获取商品小程序
-     * @return string
-     */
-    public function goodqrcode(){
+
+    public function getShopOwnerPoster()
+    {
         global $_GPC;
         global $_W;
         set_time_limit(0);
         @ini_set("memory_limit", "256M");
-        $path = IA_ROOT . "/addons/ewei_shopv2/data/goodcode/";
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/shopownercode/";
         if( !is_dir($path) )
         {
             load()->func("file");
             mkdirs($path);
         }
-        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "id" => $_GPC["id"])));
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $_GPC['mid'])));
         $filename = $md5 . ".png";
         $filepath = $path . $filename;
         if( is_file($filepath) )
         {
-            return $_W["siteroot"] . "addons/ewei_shopv2/data/goodcode/".$filename;
+            return $_W["siteroot"] . "addons/ewei_shopv2/data/shopownercode/".$filename;
         }
-        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "id=" . $_GPC["id"] . "&mid=" . $_GPC["mid"], "page" => "pages/goods/detail/index" ));
-        var_dump($qrcode);
-        imagepng($qrcode, $filepath);
-        imagedestroy($qrcode);
-        app_json(array( "url" =>$_W["siteroot"] . "addons/ewei_shopv2/data/goodcode/".$filename . "?v=1.0"));
+        $target = imagecreatetruecolor(690, 850);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+        $thumb = "/addons/ewei_shopv2/static/images/shopowner.png";
+        $thumb = $this->createImage(tomedia($thumb));
+        imagecopyresized($target, $thumb, 0, 0, 0, 0, 690, 850, imagesx($thumb), imagesy($thumb));
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "id=" . $_GPC['id'] . "&mid=" . $_GPC['mid'], "page" => "pages/goods/detail/index" ));
+        if( !is_error($qrcode) )
+        {
+            $qrcode = imagecreatefromstring($qrcode);
+            imagecopyresized($target, $qrcode, 174, 281, 0, 0, 334, 334, imagesx($qrcode), imagesy($qrcode));
+        }
 
+        imagepng($target, $filepath);
+        imagedestroy($target);
+
+        $imgurl =  $_W["siteroot"] . "addons/ewei_shopv2/data/shopownercode/".$filename . "?v=1.0";
+        app_json(array( "url" => $imgurl ));
     }
+
+
 }
 ?>
