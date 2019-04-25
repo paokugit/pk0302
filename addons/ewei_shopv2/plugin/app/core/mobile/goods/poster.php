@@ -326,13 +326,25 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
         $image = $this->mergeImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
         imagecopyresized($target, $image, 32, 860, 0, 0, 70, 70, imagesx($image), imagesy($image));
-        imagettftext($target, 16, 0, 110, 875 , $black, $font, $member["nickname"]);
+        imagettftext($target, 16, 0, 110, 875 , $black, $font, $this->subtext($member["nickname"],8));
         $nameColor = imagecolorallocate($target, 102, 102, 102);
         imagettftext($target, 12, 0, 110, 900 , $nameColor, $font, '每一步，都值得鼓励');
         imagepng($target, $filepath);
         imagedestroy($target);
         return $_W["siteroot"] . "addons/ewei_shopv2/data/helpposter/".$filename . "?v=1.0";
     }
+
+    public function subtext($text, $length)
+    {
+        if(mb_strlen($text, 'utf8') > $length) {
+            return mb_substr($text, 0, $length, 'utf8').'...';
+        } else {
+            return $text;
+        }
+
+    }
+
+
 
     public function gethelpimage()
     {
@@ -364,12 +376,13 @@ class Poster_EweiShopV2Page extends AppMobilePage
             load()->func("file");
             mkdirs($path);
         }
-        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $_GPC['mid'])));
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $_GPC['mid'],"id" => $_GPC['id'])));
         $filename = $md5 . ".png";
         $filepath = $path . $filename;
         if( is_file($filepath) )
         {
-            return $_W["siteroot"] . "addons/ewei_shopv2/data/shopownercode/".$filename;
+            $imgurl = $_W["siteroot"] . "addons/ewei_shopv2/data/shopownercode/".$filename;
+            app_json(array( "url" => $imgurl ));
         }
         $target = imagecreatetruecolor(690, 850);
         $white = imagecolorallocate($target, 255, 255, 255);

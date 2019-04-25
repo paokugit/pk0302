@@ -239,10 +239,10 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $data['three']['img'] = '/member/03@2x.png';
                 return $data;break;
             case 5:
-                $data['one']['info'] = '每天可兑换50卡路里，连续30天';
-                $data['two']['info'] = '直推奖196元（最高)';
-                $data['three']['info'] = '购买会员级差奖励10%';
-                $data['fore']['info'] = '团队下用户平台商城消费利润返10%';
+                $data['one']['info'] = '开通小程序店铺1个';
+                $data['two']['info'] = '团队下用户平台商城消费利润返10%';
+                $data['three']['info'] = '系统地拓客引流培训课程';
+                $data['fore']['info'] = '逐步开放6大引流功能';
                 $data['one']['img'] = '/member/01@2x.png';
                 $data['two']['img'] = '/member/02@2x.png';
                 $data['three']['img'] = '/member/03@2x.png';

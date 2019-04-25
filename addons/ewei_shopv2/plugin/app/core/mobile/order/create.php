@@ -2006,6 +2006,11 @@ class Create_EweiShopV2Page extends AppMobilePage
 		{
 			$_GPC["fromcart"] = 0;
 		}
+//        if($_GPC['mid'] && !$member['agentid']){
+//            //lihanwen绑定会员推荐关系
+//            $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$_GPC['mid']));
+//            if($agentmemberInfo)  m('member')->setagent(array('agentopenid'=>trim($agentmemberInfo["openid"]),'openid'=>$member['openid']));
+//        }
 		$allow_sale = true;
 		$packageid = intval($_GPC["packageid"]);
 		$package = array( );
