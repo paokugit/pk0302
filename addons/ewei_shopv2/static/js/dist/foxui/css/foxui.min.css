@@ -1076,7 +1076,7 @@ a {
 
 .fui-cell-group .fui-cell .fui-input {
 
-	width: 100%;
+	width: 92%;
 	border: 0;
 	outline: 0;
 	-webkit-appearance: none;
@@ -1085,6 +1085,7 @@ a {
 	color: inherit;
 	height: 1.41176471em;
 	line-height: 1.41176471;
+	maxlength="15"
 }
 .fui-cell-group .fui-cell .fui-cell-info  ::-webkit-input-placeholder{
 	color: #b2b2b2

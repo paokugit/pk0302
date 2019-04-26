@@ -65,6 +65,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
          pdo_insert("ewei_shop_member_scene",$data);
          show_json(1,"成功");
     }
+    
 }
 
 ?>

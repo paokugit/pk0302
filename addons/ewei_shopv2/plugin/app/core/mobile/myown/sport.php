@@ -291,6 +291,9 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         //获取剩余卡路里未兑换
         $exchange=m("member")->exchange_step($openid);
         $surplus=$exchange-$count+1;
+        if ($surplus<0){
+            $surplus=0;
+        }
         $name="剩余".$surplus."元"."未兑换";
         $nameColor = imagecolorallocate($target, 51, 51, 51);
         imagettftext($target, 18, 0, 144, 1028, $nameColor, $PINGFANG_LIGHT, $name);

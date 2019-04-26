@@ -7,6 +7,7 @@ class MerchmanageMobilePage extends PluginMobilePage
 {
 	public function __construct($_com = '', $_init = false)
 	{
+	    
 		global $_W;
 		global $_GPC;
 		if (empty($_GPC['i'])) {

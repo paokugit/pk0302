@@ -77,6 +77,9 @@ class Merch_EweiShopV2Page extends AppMobilePage
                     //$merchuser[$k]['url'] = mobileUrl('merch/map', array('merchid' => $v['id']));
                     //$merchuser[$k]['merch_url'] = mobileUrl('merch', array('merchid' => $v['id']));
                     $merchuser[$k]['logo'] = tomedia($v['logo']);
+                    
+                    //判断是否有赏金任务
+                    
                 }
             }
 

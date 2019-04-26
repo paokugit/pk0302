@@ -84,7 +84,7 @@ class Op_EweiShopV2Page extends AppMobilePage
 			app_error(AppError::$ParamsError);
 		}
 
-		$order = pdo_fetch('select id,ordersn,status,price,merchid,openid,couponid,refundstate,refundid from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
+		$order = pdo_fetch('select id,ordersn,status,price,merchid,openid,couponid,refundstate,refundid,share_price,share_id from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
 
 		if (empty($order)) {
 			app_error(AppError::$OrderNotFound);
@@ -100,7 +100,18 @@ class Op_EweiShopV2Page extends AppMobilePage
 			$change_refund['refundtime'] = time();
 			pdo_update('ewei_shop_order_refund', $change_refund, array('id' => $order['refundid'], 'uniacid' => $_W['uniacid']));
 		}
-
+        //订单赏金
+        if ($order["share_price"]!=0){
+            //更新用户赏金
+            $share_member=pdo_get("ewei_shop_member",array('id'=>$order["share_id"]));
+            if (!empty($share_member)){
+                //用户佣金
+                m('member')->setCredit($share_member["openid"], 'credit2', $order["share_price"],"赏金任务佣金，用户确认收货");
+                pdo_update("ewei_shop_member",array('frozen_credit2'=>$share_member["frozen_credit2"]-$order["share_price"]),array('id'=>$order["share_id"]));
+                //更新记录
+                pdo_update("ewei_shop_member_credit2",array("frozen"=>1),array('orderid'=>$orderid));
+            }
+        }
 		pdo_update('ewei_shop_order', array('status' => 3, 'finishtime' => time(), 'refundstate' => 0), array('id' => $order['id'], 'uniacid' => $_W['uniacid']));
 		m('order')->setStocksAndCredits($orderid, 3);
 		m('member')->upgradeLevel($order['openid'], $orderid);

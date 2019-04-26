@@ -69,7 +69,7 @@ class Order_EweiShopV2Model
 		$data = array( "status" => ($params["result"] == "success" ? 1 : 0) );
 		$ordersn_tid = $params["tid"];
 		$ordersn = rtrim($ordersn_tid, "TR");
-		$order = pdo_fetch("select id,uniacid,ordersn, price,goodsprice,openid,dispatchtype,addressid,carrier,status,isverify,deductcredit2,`virtual`,isvirtual,couponid,isvirtualsend,isparent,paytype,merchid,agentid,createtime,buyagainprice,istrade,tradestatus,iscycelbuy from " . tablename("ewei_shop_order") . " where  ordersn=:ordersn and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":ordersn" => $ordersn ));
+		$order = pdo_fetch("select id,uniacid,ordersn, price,goodsprice,openid,dispatchtype,addressid,carrier,status,isverify,deductcredit2,`virtual`,isvirtual,couponid,isvirtualsend,isparent,paytype,merchid,agentid,createtime,buyagainprice,istrade,tradestatus,iscycelbuy,share_id from " . tablename("ewei_shop_order") . " where  ordersn=:ordersn and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":ordersn" => $ordersn ));
 		$plugincoupon = com("coupon");
 		if( $plugincoupon ) 
 		{
@@ -170,6 +170,12 @@ class Order_EweiShopV2Model
 						$change_data["merchshow"] = 1;
 					}
 					pdo_update("ewei_shop_order", $change_data, array( "id" => $order["id"] ));
+					//判断赏金佣金
+					if ($order["share_id"]!=0&&!empty($order["share_id"])&&$order["merchid"]!=0){
+					    
+					    m("merch")->order($order["id"]);
+					}
+					
 					if( $order["iscycelbuy"] == 1 && p("cycelbuy") ) 
 					{
 						p("cycelbuy")->cycelbuy_periodic($order["id"]);
