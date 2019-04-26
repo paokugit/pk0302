@@ -381,6 +381,11 @@ class Pay_EweiShopV2Page extends AppMobilePage
 		{
 			app_error(AppError::$ParamsError);
 		}
+		//订单绑定推荐会员
+        if($_GPC['mid'] && !$member['agentid']){
+            $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$_GPC['mid']));
+            if($agentmemberInfo)  m('member')->setagent(array('agentopenid'=>trim($agentmemberInfo["openid"]),'openid'=>$member['openid']));
+        }
 		$order = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where id=:id and uniacid=:uniacid and openid=:openid limit 1", array( ":id" => $orderid, ":uniacid" => $uniacid, ":openid" => $openid ));
 		$merchid = $order["merchid"];
 		$goods = pdo_fetchall("select og.goodsid,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,og.optionname as optiontitle,g.isverify,g.storeids from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:orderid and og.uniacid=:uniacid ", array( ":uniacid" => $uniacid, ":orderid" => $orderid ));

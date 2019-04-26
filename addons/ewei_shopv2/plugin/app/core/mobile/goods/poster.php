@@ -326,13 +326,25 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
         $image = $this->mergeImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
         imagecopyresized($target, $image, 32, 860, 0, 0, 70, 70, imagesx($image), imagesy($image));
-        imagettftext($target, 16, 0, 110, 875 , $black, $font, $member["nickname"]);
+        imagettftext($target, 16, 0, 110, 875 , $black, $font, $this->subtext($member["nickname"],8));
         $nameColor = imagecolorallocate($target, 102, 102, 102);
         imagettftext($target, 12, 0, 110, 900 , $nameColor, $font, '每一步，都值得鼓励');
         imagepng($target, $filepath);
         imagedestroy($target);
         return $_W["siteroot"] . "addons/ewei_shopv2/data/helpposter/".$filename . "?v=1.0";
     }
+
+    public function subtext($text, $length)
+    {
+        if(mb_strlen($text, 'utf8') > $length) {
+            return mb_substr($text, 0, $length, 'utf8').'...';
+        } else {
+            return $text;
+        }
+
+    }
+
+
 
     public function gethelpimage()
     {
@@ -350,5 +362,48 @@ class Poster_EweiShopV2Page extends AppMobilePage
         }
        app_json(array( "url" => $imgurl ));
     }
+
+
+    public function getShopOwnerPoster()
+    {
+        global $_GPC;
+        global $_W;
+        set_time_limit(0);
+        @ini_set("memory_limit", "256M");
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/shopownercode/";
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $_GPC['mid'],"id" => $_GPC['id'])));
+        $filename = $md5 . ".png";
+        $filepath = $path . $filename;
+        if( is_file($filepath) )
+        {
+            $imgurl = $_W["siteroot"] . "addons/ewei_shopv2/data/shopownercode/".$filename;
+            app_json(array( "url" => $imgurl ));
+        }
+        $target = imagecreatetruecolor(690, 850);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+        $thumb = "/addons/ewei_shopv2/static/images/shopowner.png";
+        $thumb = $this->createImage(tomedia($thumb));
+        imagecopyresized($target, $thumb, 0, 0, 0, 0, 690, 850, imagesx($thumb), imagesy($thumb));
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "id=" . $_GPC['id'] . "&mid=" . $_GPC['mid'], "page" => "pages/goods/detail/index" ));
+        if( !is_error($qrcode) )
+        {
+            $qrcode = imagecreatefromstring($qrcode);
+            imagecopyresized($target, $qrcode, 174, 281, 0, 0, 334, 334, imagesx($qrcode), imagesy($qrcode));
+        }
+
+        imagepng($target, $filepath);
+        imagedestroy($target);
+
+        $imgurl =  $_W["siteroot"] . "addons/ewei_shopv2/data/shopownercode/".$filename . "?v=1.0";
+        app_json(array( "url" => $imgurl ));
+    }
+
+
 }
 ?>

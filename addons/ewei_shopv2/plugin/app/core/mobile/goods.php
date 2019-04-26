@@ -32,7 +32,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 
             if( isset($_GPC["deduct"]) )
             {
-                $args["order"] = 'minprice asc,deduct desc';
+                $args["order"] = '(minprice-deduct) asc,deduct desc';
                 $args["ishot"] = 1;
                 $args["deducts"] = 1;
                 
@@ -70,6 +70,10 @@ class Goods_EweiShopV2Page extends AppMobilePage
 					{
 						$goods_list[$index]["saleout"] = $saleout;
 					}
+
+                    if( isset($_GPC["deduct"]) ){
+                        $goods_list[$index]["showprice"] = round($goods_list[$index]["minprice"]-$goods_list[$index]["deduct"],2);
+                    }
 				}
 			}
 			app_json(array( "list" => $goods_list, "total" => $goods["total"], "pagesize" => $args["pagesize"] ));
@@ -131,6 +135,10 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		}
 		$goods = pdo_fetch("select * from " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid limit 1", array( ":id" => $id, ":uniacid" => $_W["uniacid"] ));
 		$member = m("member")->getMember($openid);
+//        if($_GPC['mid'] && $member['agentid']){
+//            $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$_GPC['mid']));
+//            if($agentmemberInfo)  m('member')->setagent(array('agentopenid'=>trim($agentmemberInfo["openid"]),'openid'=>$member['openid']));
+//        }
 		$showlevels = ($goods["showlevels"] != "" ? explode(",", $goods["showlevels"]) : array( ));
 		$showgroups = ($goods["showgroups"] != "" ? explode(",", $goods["showgroups"]) : array( ));
 		$showgoods = 0;
@@ -312,7 +320,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 				$goods["cannotbuy"] = "超出最大购买数量";
 			}
 		}
-		$levelid = $member["level"];
+		$levelid = $member["agentlevel"];
 		$groupid = $member["groupid"];
 		$goods["levelbuy"] = "1";
 		if( $goods["buylevels"] != "" ) 
@@ -322,7 +330,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 			{
 				$goods["levelbuy"] = 0;
 				$goods["canbuy"] = 0;
-				$goods["cannotbuy"] = "购买级别不够";
+				$goods["cannotbuy"] = $this->canByLevels($buylevels);
 			}
 		}
 		$goods["groupbuy"] = "1";
@@ -1952,6 +1960,19 @@ class Goods_EweiShopV2Page extends AppMobilePage
             default:
                 return '';
         }
+    }
+
+    /**
+     * 可购买的会员级别
+     * @param $cids
+     */
+    public function canByLevels($cids){
+        if(count($cids)>1 && in_array(1,$cids)) return "健康达人以上级别专享";
+        if(count($cids)==1 && in_array(1,$cids)) return "健康达人专享";
+        if(count($cids)==1 && in_array(2,$cids)) return "星选达人专享";
+        if(count($cids)==1 && in_array(5,$cids)) return "店主专享";
+        if(count($cids)>1 && in_array(2,$cids)) return "星选达人以上级别专享";
+        return "您当前会员等级没有购买权限";
     }
 }
 ?>

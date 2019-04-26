@@ -91,5 +91,19 @@ class Index_EweiShopV2Page extends AppMobilePage{
        $data['credit_price'] = $data['credit_sum'] =m('credits')->get_sum_credit(1,$openid);
        app_error(0,$data);
    }
+
+    /**
+     * 扫店铺小程序时推荐人绑定为店主
+     */
+   public function bang_agent(){
+       global $_GPC;
+       $merchInfo = pdo_get('ewei_shop_merch_user', array('id' =>$_GPC['merchid']));
+       if(!$merchInfo || $merchInfo['member_id']=='')  app_error(2,'账号未绑定店铺');
+
+       $memberInfo = pdo_get('ewei_shop_member', array('id' =>$merchInfo['member_id']));
+       if(!$memberInfo)  app_error(1,'信息不存在');
+       m('member')->setagent(array('agentopenid'=>trim($memberInfo["openid"]),'openid'=>$_GPC['openid']));
+       show_json(0, '绑定成功');
+   }
 }
 ?>

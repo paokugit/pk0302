@@ -58,12 +58,13 @@ if ($ccard_plugin) {
     $ccard = 1;
 }
 $category = m('shop')->getFullCategory(true, true);
-$levels = m('member')->getLevels();
+//$levels = m('member')->getLevels();
+$levels = pdo_fetchall("select * from " . tablename("ewei_shop_commission_level") . " where status=1");
 foreach ($levels as &$l) {
     $l['key'] = 'level' . $l['id'];
 }
 unset($l);
-$levels = array_merge(array(array('id' => 0, 'key' => 'default', 'levelname' => (empty($_W['shopset']['shop']['levelname']) ? '默认会员' : $_W['shopset']['shop']['levelname']))), $levels);
+//$levels = array_merge(array(array('id' => 0, 'key' => 'default', 'levelname' => (empty($_W['shopset']['shop']['levelname']) ? '默认会员' : $_W['shopset']['shop']['levelname']))), $levels);
 $groups = m('member')->getGroups();
 $commission_level = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_commission_level') . ' WHERE uniacid = \'' . $_W['uniacid'] . '\' ORDER BY commission1 asc');
 foreach ($commission_level as &$l) {

@@ -420,7 +420,7 @@ class Order_EweiShopV2Model
 
             $this->write_log('===='.$order['status'].'====');
             if($order['status']==1){
-                $this->reward($goodslist,$order['openid']);//lihanwen 会员推荐返佣金
+                $this->reward($goodslist,$order['openid'],$order);//lihanwen 会员推荐返佣金
             }
 			foreach( $goodslist as $item )
 			{
@@ -467,10 +467,10 @@ class Order_EweiShopV2Model
     }
 
     /**
-     *  会员推荐返佣金
+     *  会员推荐返佣金,与会员关系绑定
      * @param $goodslist
      */
-	public function reward($goodslist,$openid){
+	public function reward($goodslist,$openid,$order){
 	    foreach ($goodslist as $val){
 	        if($val['cates']=='4'){
 	            m('reward')->addReward($openid);
@@ -478,8 +478,11 @@ class Order_EweiShopV2Model
 	            break;
             }
 
-	        if($val['id']==7){//店主购买成功发放会员卡@lihanwen
-
+	        if($order['agentid']){//会员关系绑定@lihanwen
+	            //推荐人信息
+                $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$order['agentid']));
+                if(!$agentmemberInfo)  app_error(1,'信息不存在');
+                m('member')->setagent(array('agentopenid'=>$agentmemberInfo["openid"],'openid'=>$openid));
             }
 
         }
