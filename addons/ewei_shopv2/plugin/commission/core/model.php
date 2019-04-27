@@ -2151,7 +2151,7 @@ if( !class_exists("CommissionModel") )
 				            'color' => '#ff510'
 				        ),
 				        'keyword4'=>array(
-				            'value'=>"您推荐的现用户现已升级为".$commission["levelname"]."级别会员","收益以达到您余额，请注意查收",
+				            'value'=>"您推荐的用户现已升级为".$commission["levelname"]."级别会员","收益以达到您余额，请注意查收",
 				            'color' => '#ff510'
 				        )
 				    );

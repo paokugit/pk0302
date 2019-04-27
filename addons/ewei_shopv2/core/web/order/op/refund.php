@@ -43,6 +43,8 @@ class Refund_EweiShopV2Page extends WebPage
 		if ($_W['ispost']) 
 		{
 			$shopset = $_S['shop'];
+			$order=pdo_get("ewei_shop_order",array('id' => $item['id'], 'uniacid' => $_W['uniacid']));
+// 			var_dump($order);die;
 			if (empty($item['refundstate'])) 
 			{
 				show_json(0, '订单未申请维权，不需处理！');
@@ -375,6 +377,12 @@ class Refund_EweiShopV2Page extends WebPage
 				}
 				plog('order.op.refund.submit', $log);
 				m('notice')->sendOrderMessage($item['id'], true);
+				if ($order["share_id"]!=0&&$order["share_price"]!=0){
+				//订单赏金
+				$share_member=pdo_get("ewei_shop_member",array("id"=>$order["share_id"]));
+				pdo_update("ewei_shop_member",array('frozen_credit2'=>$share_member["frozen_credit2"]-$order["share_price"]),array('id'=>$order["share_id"]));
+				pdo_update("ewei_shop_member_credit2",array('frozen'=>-1),array("orderid"=>$item['id']));
+				}
 			}
 			else if ($refundstatus == -1) 
 			{
@@ -422,6 +430,13 @@ class Refund_EweiShopV2Page extends WebPage
 					pdo_update('ewei_shop_goods', array('salesreal' => $salesreal), array('id' => $g['id']));
 				}
 				m('notice')->sendOrderMessage($item['id'], true);
+				
+				if ($order["share_id"]!=0&&$order["share_price"]!=0){
+				    //订单赏金
+				    $share_member=pdo_get("ewei_shop_member",array("id"=>$order["share_id"]));
+				    pdo_update("ewei_shop_member",array('frozen_credit2'=>$share_member["frozen_credit2"]-$order["share_price"]),array('id'=>$order["share_id"]));
+				    pdo_update("ewei_shop_member_credit2",array('frozen'=>-1),array("orderid"=>$item['id']));
+				}
 			}
 			show_json(1);
 		}

@@ -2887,6 +2887,9 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$discountprice = 0;
 		}
 		$order = array( );
+		if ($_GPC["mid"]){
+		    $order["share_id"]=$_GPC["mid"];
+		}
 		$order["ismerch"] = $ismerch;
 		$order["parentid"] = 0;
 		$order["uniacid"] = $uniacid;

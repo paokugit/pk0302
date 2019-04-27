@@ -233,14 +233,7 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 	    }
 	}
 	
-	//充值金额
-	public function purchaseset(){
-	    global $_W;
-	    global $_GPC;
-	   
-	    $list = pdo_fetchall('select * from ' . tablename('ewei_shop_merch_purchase') . (' order by money asc ') );
-	    show_json(1,$list); 
-	}
+	
 	//收集站
 	public function m(){
 	    global $_W;
@@ -264,6 +257,7 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 // 	    var_dump($wechat);
 	    include $this->template();
 	}
+	
 }
 
 
