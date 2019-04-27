@@ -89,7 +89,7 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 			}
 		}
 
-		$list = pdo_fetchall('select * from ' . tablename('ewei_shop_member') . ' where uniacid = ' . $_W['uniacid'] . (' ' . $condition . '  ORDER BY isagent desc,id desc limit ') . ($pindex - 1) * $psize . ',' . $psize);
+		$list = pdo_fetchall('select * from ' . tablename('ewei_shop_member') . ' where uniacid = ' . $_W['uniacid'] . (' ' . $condition . '  ORDER BY id desc,isagent desc limit ') . ($pindex - 1) * $psize . ',' . $psize);
 		if (!is_array($list) || empty($list)) {
 			$list = array();
 		}
@@ -99,7 +99,7 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 			if ($member['isagent'] && $member['status']) {
 				$info = $this->model->getInfo($row['openid'], array('total'));
 				$row['commission_total'] = $info['commission_total'];//累计佣金
-				$row['agentcount'] = $info['agentcount'];
+				$row['agentcount'] = $this->getagentcount($row['openid']);
 				$row['agenttime'] = date('Y-m-d H:i', $row['agenttime']);
 			}
 
@@ -115,6 +115,12 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 
 		unset($row);
 		app_json(array('list' => $list, 'total' => $total_level, 'pagesize' => $psize));
+	}
+
+	public function getagentcount($openid){
+		$member = m("member")->getMember($openid);
+		$agentInfo = pdo_fetchall("select id  from " . tablename("ewei_shop_member") . " where  agentid=:agentid", array( ":agentid" => $member["id"] ));
+		return count($agentInfo);
 	}
 }
 

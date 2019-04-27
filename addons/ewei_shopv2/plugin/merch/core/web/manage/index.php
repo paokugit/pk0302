@@ -56,6 +56,7 @@ class Index_EweiShopV2Page extends MerchWebPage
 		$filename = $md5 . ".png";
 		$filepath = $path . $filename;
 		$this->getshopcode(1280);
+
 		if(file_exists($filepath)){
 			$file = fopen ( $filepath, "r" );
 			//输入文件标签

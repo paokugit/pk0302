@@ -34,6 +34,8 @@ class Reward_EweiShopV2Model
             $ownerMoney = $this->shopOwnerMoney($memberlevel);
             return m('memberlog')->rewardShowOwnerMember($shopOwner,$ownerMoney,$memberopenid);
         }
+        return true;
+
     }
 
 

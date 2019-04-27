@@ -903,12 +903,10 @@ if( !class_exists("CommissionModel") )
 				$level3_agentids = pdo_fetchall("select id from " . tablename("ewei_shop_member") . " where uniacid=:uniacid and agentid in( " . implode(",", array_keys($level2_agentids)) . ") and isagent=1 and status=1", array( ":uniacid" => $_W["uniacid"] ), "id");
 				$level3 = count($level3_agentids);
 				$agentcount += $level3;
-				//lihanwen
-                $agentInfo = pdo_count("select id  from " . tablename("ewei_shop_member") . " where  agentid=:agentid", array( ":agentid" => $member["id"] ));
-                $agentcount = count($agentInfo);
-
-
 			}
+            //lihanwen
+            $agentInfo = pdo_fetchall("select id  from " . tablename("ewei_shop_member") . " where  agentid=:agentid", array( ":agentid" => $member["id"] ));
+            $agentcount = count($agentInfo);
 			$member["agentcount"] = $agentcount;
 			$member["ordercount"] = $ordercount;
 			$member["ordermoney"] = $ordermoney;
