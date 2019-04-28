@@ -1084,6 +1084,48 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		}
 		$goods["minprice"] = number_format($minprice, 2);
 		$goods["maxprice"] = number_format($maxprice, 2);
+		//判断是否在赏金任务内
+		$merchid=$goods["merchid"];
+		if ($merchid==0){
+		    $goods["reward"]=0;
+		}else{
+		    $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
+		    if ($merch["reward_type"]==0){
+		        $goods["reward"]=0;
+		    }else{
+		        if ($merch["reward_type"]==1){
+		            //指定商品
+		            //获取商家赏金
+		            $reward=pdo_fetchall('select * from'.tablename('ewei_shop_merch_reward').'where is_end=0 and type=1 and merch_id=:merchid',array(':merchid'=>$merchid));
+		            
+		            $g=array();
+		            if (!empty($reward)){
+		                foreach ($reward as $k=>$v){
+		                    $g[$k]=unserialize($v["goodid"]);
+		                }
+		            }
+		            if (!empty($g)){
+		                
+		            if (m("merch")->good($g,$goods["id"])){
+		                $goods["reward"]=1;
+		            }else{
+		                $goods["reward"]=0;
+		            }
+		            
+		            }else{
+		                $goods["reward"]=0;
+		            }
+		        }else{
+		           //全部商品
+		           $reward=pdo_get("ewei_shop_merch_reward",array("merch_id"=>$merchid,"is_end"=>0,"type"=>2));
+		           if ($reward){
+		               $goods["reward"]=1;
+		           }else{
+		               $goods["reward"]=0;
+		           }
+		        }
+		    }
+		}
 		app_json(array( "goods" => $goods ));
 	}
 	public function getCommission($goods, $level, $set) 

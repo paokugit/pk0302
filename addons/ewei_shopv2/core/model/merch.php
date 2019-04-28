@@ -193,12 +193,43 @@ class Merch_EweiShopV2Model{
                 'color' => '#ff510'
             ),
             'keyword4'=>array(
-                'value'=>"您的商品分享链接被人购买",
+                'value'=>"您分享的商品链接被人购买",
                 'color' => '#ff510'
             )
             
         );
         p("app")->mysendNotice($openid, $postdata, "", "nSJSBKVYwLYN_LcsUXyvTLVjseO46nQA8RqKsRnsiRs");
         return true;
+    }
+    //获取商家最大赏金
+    public function reward_money($merchid,$reward_type){
+        $money=0;
+        if ($reward_type==1){
+            //指定商品
+            $list=pdo_fetchall("select * from ".table("ewei_shop_merch_reward")." where merch_id=:merch_id and is_end=0",array(':merch_id'=>$merchid));
+            foreach ($list as $k=>$v){
+                $goodsid=unserialize($v["goodid"]);
+                //获取数组长度
+                $length=count($goodsid);
+                $money=$money+($v["share_price"]+$v["click_price"])*$length;
+                //获取订单佣金
+                foreach ($goodsid as $kk=>$vv){
+                    //获取商品
+                    $good=pdo_get("ewei_shop_goods",array('id'=>$vv));
+                    $money=$money+$v["commission"]*$good["maxprice"]/100;
+                }
+            }
+            return $money;
+        }else{
+            //全部商品
+            $list=pdo_get("ewei_shop_merch_reward",array('merch_id'=>$merchid,'is_end'=>0));
+            $goods=pdo_fetchall("select * from ".table("ewei_shop_goods")."where merchid=:merchid",array(':merchid'=>$merchid));
+            foreach ($goods as $k=>$v){
+                $money=$money+($list["share_price"]+$list["click_price"]);
+                $money=$money+($list["commission"]*$v["maxprice"]/100);
+
+            }
+        }
+        return $money;
     }
 }

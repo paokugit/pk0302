@@ -214,9 +214,11 @@ class Index_EweiShopV2Page extends AppMobilePage
            $exchange_step=m("member")->exchange_step($openid);
            $bushu=ceil($exchange_step*1500/$subscription_ratio);
         }
+        //已兑换的bushu
         $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $_W['openid'],':type'=>2));
         
         $proportion=pdo_get('ewei_setting',array('type_id'=>$member['agentlevel'],'type'=>'level'));
+        
         $step_number=$jinri*$exchange;
         if ($step_number < $bushu) {
             $result = pdo_getall('ewei_shop_member_getstep', array('day' => $day, 'openid' => $_W['openid'], 'status' => 0));

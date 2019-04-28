@@ -29,7 +29,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
             if (!(empty($_GPC['cateid']))) {
                 $data['cateid'] = $_GPC['cateid'];
             }
-            $data = array_merge($data, array('status' => 1, 'field' => 'id,uniacid,merchname,salecate,logo,groupid,cateid,address,tel,lng,lat'));
+            $data = array_merge($data, array('status' => 1, 'field' => 'id,uniacid,merchname,salecate,logo,groupid,cateid,address,tel,lng,lat,reward_type'));
             if (!(empty($sorttype))) {
                 $data['orderby'] = array('id' => 'desc');
             }
@@ -79,7 +79,21 @@ class Merch_EweiShopV2Page extends AppMobilePage
                     $merchuser[$k]['logo'] = tomedia($v['logo']);
                     
                     //判断是否有赏金任务
-                    
+                    if ($v["reward_type"]==0){
+                        $merchuser[$k]["is_reward"]=0;
+                        $merchuser[$k]["reward_money"]=0;
+                    }else{
+                        //获取是否有进行中的赏金
+                        $reward=pdo_get("ewei_shop_merch_reward",array('is_end'=>0,'merch_id'=>$v["id"]));
+                        if ($reward){
+                            $merchuser[$k]["is_reward"]=1;
+                            //获取赏金
+                            $merchuser[$k]["reward_money"]=m("merch")->reward_money($v["id"],$v["reward_type"]);
+                        }else{
+                            $merchuser[$k]["is_reward"]=0;
+                            $merchuser[$k]["reward_money"]=0;
+                        }
+                    }
                 }
             }
 
@@ -123,7 +137,18 @@ class Merch_EweiShopV2Page extends AppMobilePage
         //if ($merch_plugin && $merch_data['is_openmerch']) {
         $args['merchid'] = intval($_GPC['id']);
         //}
-
+        //获取商家
+        $merchid=intval($_GPC['id']);
+        $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
+        $reward=pdo_fetchall("select * from ".tablename("ewei_shop_merch_reward")."where merch_id=:merch_id and type=1 and is_end=0",array(':merch_id'=>$merchid));
+        $g=array();
+        if (!empty($reward)){
+            foreach ($reward as $k=>$v){
+                $g[$k]=unserialize($v["goodid"]);
+            }
+        }
+        
+        
         if (isset($_GPC['nocommission'])) {
             $args['nocommission'] = intval($_GPC['nocommission']);
         }
@@ -155,6 +180,35 @@ class Merch_EweiShopV2Page extends AppMobilePage
 
                 if ($item['total'] < 1) {
                     $goods_list[$index]['saleout'] = $saleout;
+                }
+                //判断赏金
+                if ($merch["reward_type"]==0){
+                    $goods_list[$index]["reward"]=0;
+                }else{
+                    if ($merch["reward_type"]==1){
+                        if (!empty($g)){
+                           
+                           if (m("merch")->good($g,$goods_list[$index]["id"])){
+                               $goods_list[$index]["reward"]=1;
+                           }else{
+                               $goods_list[$index]["reward"]=0;
+                           }
+                           
+                       } else{
+                           $goods_list[$index]["reward"]=0;
+                       }
+                        
+                        
+                    }else{
+                        //全部商品
+                        $r=pdo_get("ewei_shop_merch_reward",array("merch_id"=>$merchid,"is_end"=>0,"type"=>2));
+                        if ($r){
+                            $goods_list[$index]["reward"]=1;
+                        }else{
+                            $goods_list[$index]["reward"]=0;
+                        }
+                        
+                    }
                 }
             }
         }

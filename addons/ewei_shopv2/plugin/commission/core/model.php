@@ -2126,7 +2126,39 @@ if( !class_exists("CommissionModel") )
 			        );
 			        
 			        p("app")->mysendNotice($order["openid"], $postdata, $order["id"], "2nQmrU1YkfMK0EWEO4v0QmL89Xpx1v3DqZk-LMsnd80");
-                }
+                
+			    
+			        if( !empty($member["agentid"]) )
+			        {
+			            $parent = m("member")->getMember($member["agentid"]);
+			            //判断上级是否是店主
+			            if ($parent["agentlevel"]==5){
+			                
+			                $postdata=array(
+			                    'keyword1'=>array(
+			                        'value'=>$parent["nickname"],
+			                        'color' => '#ff510'
+			                    ),
+			                    'keyword2'=>array(
+			                        'value'=>$member["nickname"],
+			                        'color' => '#ff510'
+			                    ),
+			                    'keyword3'=>array(
+			                        'value'=>"该会员现已升级为".$commission["levelname"],
+			                        'color' => '#ff510'
+			                    ),
+			                    'keyword4'=>array(
+			                        'value'=>"您推荐的用户现已升级为".$commission["levelname"]."级别会员","收益以达到您余额，请注意查收",
+			                        'color' => '#ff510'
+			                    )
+			                );
+			                
+			                p("app")->mysendNotice($parent["openid"], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
+			                
+			            }
+			           
+			        }
+			    }
             }
             $this->orderFinishTask($order, ($set["selfbuy"] ? true : false), $member);
 			$time = time();
@@ -2135,36 +2167,13 @@ if( !class_exists("CommissionModel") )
 			$parentisagent = true;
 			if( !empty($member["agentid"]) ) 
 			{
-				$parent = m("member")->getMember($member["agentid"]);
-				//判断上级是否是店主
-				if ($parent["agentlevel"]==5){
-				    
-				    $postdata=array(
-				        'keyword1'=>array(
-				            'value'=>$parent["nickname"],
-				            'color' => '#ff510'
-				        ),
-				        'keyword2'=>array(
-				            'value'=>$member["nickname"],
-				            'color' => '#ff510'
-				        ),
-				        'keyword3'=>array(
-				            'value'=>"该会员现已升级为".$commission["levelname"],
-				            'color' => '#ff510'
-				        ),
-				        'keyword4'=>array(
-				            'value'=>"您推荐的用户现已升级为".$commission["levelname"]."级别会员","收益以达到您余额，请注意查收",
-				            'color' => '#ff510'
-				        )
-				    );
-				    
-				    p("app")->mysendNotice($parent["openid"], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
-				    
-				}
+			    $parent = m("member")->getMember($member["agentid"]);
+			    
 				if( empty($parent) || $parent["isagent"] != 1 || $parent["status"] != 1 ) 
 				{
 					$parentisagent = false;
 				}
+				
 			}
 			if( !$isagent && $set["become_order"] == "1" ) 
 			{
