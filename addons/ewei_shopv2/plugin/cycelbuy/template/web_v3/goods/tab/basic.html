@@ -483,20 +483,18 @@
 <script language="javascript">
     require(['jquery.ui'],function(){
         $('.multi-img-details').sortable({scroll:'false'});
-        $('.multi-img-details').sortable('option', 'scroll', false);
-        /*$('.multi-img-details').sortable({zIndex: 50 });
+        $('.multi-img-details').sortable('option','scroll',false);
 
-        $('.multi-img-details').sortable('option','zIndex', 50);*/
-    })
+    });
     $(function () {
-        $("input[name=isstatustime]").off('click').on('click',function () {
+        $("input[name='isstatustime']").off('click').on('click',function () {
             if($(this).val()==1){
                 $("#shelves").show()
             }else{
                 $("#shelves").hide();
             }
         })
-    })
+    });
 </script>
 
 {if empty($new_area)}

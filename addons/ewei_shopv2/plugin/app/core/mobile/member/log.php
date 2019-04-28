@@ -114,11 +114,11 @@ class Log_EweiShopV2Page extends AppMobilePage
         $psize = 10;
         $apply_type = array(0 => '微信钱包', 2 => '支付宝', 3 => '银行卡');
         if($_GPC['type']==1){// 收入
-            $condition = ' and openid=:openid and uniacid=:uniacid and type in (0,3)';
+            $condition = ' and openid=:openid and type in (0,3)';
         }else{// 支出
-            $condition = ' and openid=:openid and uniacid=:uniacid and type in (1,2)';
+            $condition = ' and openid=:openid and type in (1,2)';
         }
-        $params = array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']);
+        $params = array( ':openid' => $_W['openid']);
         $list = pdo_fetchall('select * from ' . tablename('ewei_shop_member_log') . (' where 1 ' . $condition . ' order by createtime desc LIMIT ') . ($pindex - 1) * $psize . ',' . $psize, $params);
         $total = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_log') . (' where 1 ' . $condition), $params);
         $newList = array();

@@ -260,6 +260,10 @@ class Goods_EweiShopV2Model
                 $levelInfo = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_commission_level') . ' WHERE id = :id and uniacid = :uniacid', array(':id' => $lv['agentlevel'], ':uniacid' => $_W['uniacid']));
                 $list[$lk]['levelcontent'] = $levelInfo['content'];
             }
+
+            if( $list[$lk]["deduct"]>0 ){
+                $list[$lk]["showprice"] = round($list[$lk]["minprice"]-$list[$lk]["deduct"],2);
+            }
 		}
 		$list = set_medias($list, 'thumb');
 		return array('list' => $list, 'total' => $total);

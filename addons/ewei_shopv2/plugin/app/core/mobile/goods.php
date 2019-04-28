@@ -135,10 +135,13 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		}
 		$goods = pdo_fetch("select * from " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid limit 1", array( ":id" => $id, ":uniacid" => $_W["uniacid"] ));
 		$member = m("member")->getMember($openid);
-//        if($_GPC['mid'] && $member['agentid']){
-//            $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$_GPC['mid']));
-//            if($agentmemberInfo)  m('member')->setagent(array('agentopenid'=>trim($agentmemberInfo["openid"]),'openid'=>$member['openid']));
-//        }
+
+		//绑定推荐会员
+        if($_GPC['mid'] && !$member['agentid']){
+            $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$_GPC['mid']));
+            if($agentmemberInfo)  m('member')->setagent(array('agentopenid'=>trim($agentmemberInfo["openid"]),'openid'=>$member['openid']));
+        }
+
 		$showlevels = ($goods["showlevels"] != "" ? explode(",", $goods["showlevels"]) : array( ));
 		$showgroups = ($goods["showgroups"] != "" ? explode(",", $goods["showgroups"]) : array( ));
 		$showgoods = 0;
@@ -1084,6 +1087,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		}
 		$goods["minprice"] = number_format($minprice, 2);
 		$goods["maxprice"] = number_format($maxprice, 2);
+
 		//判断是否在赏金任务内
 		$merchid=$goods["merchid"];
 		if ($merchid==0){
@@ -1126,6 +1130,9 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		        }
 		    }
 		}
+
+        $goods['showshare'] = 0;
+
 		app_json(array( "goods" => $goods ));
 	}
 	public function getCommission($goods, $level, $set) 
