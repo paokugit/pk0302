@@ -206,6 +206,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $exchange=0.5/1500;
             $exchange_step=m("member")->exchange_step($openid);
             $bushu=ceil($exchange_step*1500/0.5);
+           
         } else {
             $memberlevel = pdo_get('ewei_shop_commission_level', array('id' => $member['agentlevel']));
            // $bushu = $memberlevel['duihuan'];
@@ -213,13 +214,19 @@ class Index_EweiShopV2Page extends AppMobilePage
            $exchange=$subscription_ratio/1500;
            $exchange_step=m("member")->exchange_step($openid);
            $bushu=ceil($exchange_step*1500/$subscription_ratio);
+           //可兑换的步数
+//            var_dump($bushu);
         }
+        
         //已兑换的bushu
         $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $_W['openid'],':type'=>2));
+        if (empty($jinri)){
+            $jinri=0;
+        }
         
-        $proportion=pdo_get('ewei_setting',array('type_id'=>$member['agentlevel'],'type'=>'level'));
         
-        $step_number=$jinri*$exchange;
+        $step_number=$jinri;
+       
         if ($step_number < $bushu) {
             $result = pdo_getall('ewei_shop_member_getstep', array('day' => $day, 'openid' => $_W['openid'], 'status' => 0));
         }
@@ -323,17 +330,24 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $memberlevel = pdo_get('ewei_shop_commission_level', array('id' => $member['agentlevel']));
               //  $bushu = $memberlevel['duihuan'];
                 $subscription_ratio=$memberlevel["subscription_ratio"];
+                //兑换比例
                 $exchange=$subscription_ratio/1500;
                 $exchange_step=m("member")->exchange_step($openid);
+                //今日可兑换步数
                 $bushu=ceil($exchange_step*1500/$subscription_ratio);
             }
 
             $step = pdo_get('ewei_shop_member_getstep', array('id' => $_GPC['id']));
+            //今日步数
             $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $openid,':type'=>2));
+            
+            if (empty($jinri)){
+                $jinri=0;
+            }
             
             if ($step["type"]!=2){
                 
-            if ($jinri*$exchange > $bushu) {
+            if ($jinri> $bushu) {
                 app_error(-2,"您每天最多可兑换".$bushu."卡路里");
             }
             
@@ -345,11 +359,17 @@ class Index_EweiShopV2Page extends AppMobilePage
                 
                 if ($step["type"]!=2){
                     //不是签到
-                 $keduihuan =$step["step"]*$exchange;
+                
+                if (($jinri + $step["step"]) > $bushu) {
                     
-                if (($jinri*$exchange + $keduihuan) > $bushu) {
-                    $keduihuan = $bushu - $jinri*$exchange;
+                    $keduihuan = ($bushu-$jinri)*$exchange;
+                    
+                }else{
+                    
+                    $keduihuan =$step["step"]*$exchange;
+                    
                 }
+                    
                 
                 }else{
                     //签到 1卡路里
@@ -364,6 +384,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                     m('member')->setCredit($openid, 'credit1', $keduihuan, "签到获取");
                 }
                 pdo_update('ewei_shop_member_getstep', array('status' => 1), array('id' => $step['id']));
+                app_error(0,$keduihuan);
             }
             
             app_error(0,"兑换成功");

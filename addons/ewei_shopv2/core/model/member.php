@@ -1121,6 +1121,7 @@ class Member_EweiShopV2Model
             
             //加速日期
             $accelerate_day=date("Y-m-d",strtotime("+".$level["accelerate_day"]." day",strtotime($member["agentlevel_time"])));
+           
             
             $day=date("Y-m-d",time());
             
@@ -1138,8 +1139,24 @@ class Member_EweiShopV2Model
                     
                     $subordinate = pdo_fetch("select * from " . tablename("ewei_shop_member") . " WHERE agentid=:agentid and agentlevel>:agentlevel and agentlevel<:agent order by agentlevel_time desc limit 1", array(':agentid' => $member["id"],":agentlevel"=>0,":agent"=>6));
                 }
-                // var_dump($subordinate);
-                if (!empty($subordinate)&&($subordinate["agentlevel_time"]>=$accelerate_day)){
+                 
+                if ($accelerate_day>=date("Y-m-d",time())){
+                   
+                    $count_days=$this->count_days($day, $accelerate_day);
+                    // var_dump($subordinate);
+                    $round=number_format($count_days/20,2);
+                    //  var_dump($round);
+                    if ($round>=0&&$round<=1){
+                        $ratio=$level["duihuan"];
+                    }elseif ($round>1&&$round<=2){
+                        $ratio=number_format($level["duihuan"]*0.7,2);
+                    }elseif ($round>2&&$round<=3){
+                        $ratio=number_format($level["duihuan"]*0.4,2);
+                    }else{
+                        $ratio=number_format($level["duihuan"]*0.1,2);
+                    }
+                    
+                }else if (!empty($subordinate)&&($subordinate["agentlevel_time"]>=$accelerate_day)){
                     $count_days=$this->count_days($day, $subordinate["agentlevel_time"]);
                     // var_dump($subordinate);
                     $round=number_format($count_days/20,2);
@@ -1153,8 +1170,8 @@ class Member_EweiShopV2Model
                     }else{
                         $ratio=number_format($level["duihuan"]*0.1,2);
                     }
-                }
-                else{
+                    
+                }else{
                     
                     $count_days=$this->count_days($day, $accelerate_day);
                     $round=number_format($count_days/20,2);
