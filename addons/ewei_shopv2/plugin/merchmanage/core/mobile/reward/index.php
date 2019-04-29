@@ -203,16 +203,20 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
        $goodid=$_GPC["goodid"];
        $goodid=explode(",", $goodid);
        $list=array();
+       $kk=0;
        foreach ($goodid as $k=>$v){
+           if (!empty($v)){
            $g=pdo_get("ewei_shop_goods",array('id'=>$v));
-           $list[$k]["id"]=$v;
-           $list[$k]["title"]=$g["title"];
-           $list[$k]["thumb"]=tomedia($g["thumb"]);
-           $list[$k]["total"]=$g["total"];
-           $list[$k]["sales"]=$g["sales"];
-           $list[$k]["deduct"]=$g["deduct"];
-           $list[$k]["minprice"]=$g["minprice"];
-           $list[$k]["maxprice"]=$g["maxprice"];
+           $list[$kk]["id"]=$v;
+           $list[$kk]["title"]=$g["title"];
+           $list[$kk]["thumb"]=tomedia($g["thumb"]);
+           $list[$kk]["total"]=$g["total"];
+           $list[$kk]["sales"]=$g["sales"];
+           $list[$kk]["deduct"]=$g["deduct"];
+           $list[$kk]["minprice"]=$g["minprice"];
+           $list[$kk]["maxprice"]=$g["maxprice"];
+           $kk=$kk+1;
+           }
        }
        $l["good"]=$list;
        show_json(1,$l);
@@ -239,11 +243,11 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
        $data["share_price"]=$_GPC["share_price"];
        $data["click_price"]=$_GPC["click_price"];
        if ($data["share_price"]<0.1||$data["click_price"]<0.1){
-           show_json(0,"分享奖励|点击奖励金额不可小于0.1");
+           show_json(0,"金额不可小于0.1");
        }
        $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
        if ($data["share_price"]+$data["click_price"]>$merch["card"]){
-           show_json(0,"余额不足，不可发布");
+           show_json(0,"余额不足");
        }
        $data["commission"]=$_GPC["commission"];
        $data["type"]=1;

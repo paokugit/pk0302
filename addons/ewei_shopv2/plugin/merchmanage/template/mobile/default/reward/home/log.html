@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>明细</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/Particulars.css">
+<body>
+    <div class="detail_box">
+        <!-- header -->
+        <div class="detail_header">
+                <div class="detail-back"><a href="javascript:history.back(-1)"><img src="http://paokucoin.com/img/backgroup/fanhui.png" alt=""></a></div>
+                <div class="detail-tit">明细</div>
+        </div>
+        <!-- header -->
+        <!-- content -->
+        <div class="detail_content">
+            <div  id="main">
+                <ul  id="list_box">
+                    <!-- <li class="item">
+                        <span class="item_left">
+                            <i class="item-tit">点击支出</i>
+                            <i class="item-time">2019-04-22 15:47</i>
+                        </span>
+                        <span class="item_right">11111xxx</span>
+                    </li> -->
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- content -->
+    </div>
+</body>
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
+        
+        $(window).load(function() { 
+            var str1=''
+            var listbox=$("#list_box")
+            $.ajax({
+            type: 'POST',
+            url:'{php echo mobileUrl('merchmanage/reward/index/reward_log')}',
+            data: {
+               
+                } ,
+            dataType: "json", 
+            success: function(data){
+            console.log(data)
+            $.each(data.result.log, function(i, item) {
+                console.log(item.type);
+                if(item.type==0){
+                str1 += '<li class="item">'+'<span class="item_left">'+'<i class="item-tit">'+item.intro+'</i>'+'<i class="item-time">'+item.create_time+'</i>'+'</span>'+'<span class="item_income">'+'+'+item.money+'</span>'+'</li>'
+            }else if(item.type==1){
+                str1 += '<li class="item">'+'<span class="item_left">'+'<i class="item-tit">'+item.intro+'</i>'+'<i class="item-time">'+item.create_time+'</i>'+'</span>'+'<span class="item_expend">'+'-'+item.money+'</span>'+'</li>'
+            }
+            listbox.html(str1)
+            })
+            }
+            })
+    })
+        </script>

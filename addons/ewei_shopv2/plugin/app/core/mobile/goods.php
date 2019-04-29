@@ -1092,10 +1092,16 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		$merchid=$goods["merchid"];
 		if ($merchid==0){
 		    $goods["reward"]=0;
+		    $goods["share_price"]=0;
+		    $goods["click_price"]=0;
+		    $goods["commission"]=0;
 		}else{
 		    $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
 		    if ($merch["reward_type"]==0){
 		        $goods["reward"]=0;
+		        $goods["share_price"]=0;
+		        $goods["click_price"]=0;
+		        $goods["commission"]=0;
 		    }else{
 		        if ($merch["reward_type"]==1){
 		            //指定商品
@@ -1105,15 +1111,23 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		            $g=array();
 		            if (!empty($reward)){
 		                foreach ($reward as $k=>$v){
-		                    $g[$k]=unserialize($v["goodid"]);
+		                    $g[$k]["reward_id"]=$v["id"];
+		                    $g[$k]["goodsid"]=unserialize($v["goodid"]);
 		                }
 		            }
 		            if (!empty($g)){
-		                
-		            if (m("merch")->good($g,$goods["id"])){
+		                $reward_id=m("merch")->order_good($g,$id);
+		                if ($reward_id){
+		                $r=pdo_get("ewei_shop_merch_reward",array('id'=>$reward_id));   
 		                $goods["reward"]=1;
+		                $goods["share_price"]=$r["share_price"];
+		                $goods["click_price"]=$r["click_price"];
+		                $goods["commission"]=$r["commission"]*$goods["maxprice"]/100;
 		            }else{
 		                $goods["reward"]=0;
+		                $goods["share_price"]=0;
+		                $goods["click_price"]=0;
+		                $goods["commission"]=0;
 		            }
 		            
 		            }else{
@@ -1124,8 +1138,14 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		           $reward=pdo_get("ewei_shop_merch_reward",array("merch_id"=>$merchid,"is_end"=>0,"type"=>2));
 		           if ($reward){
 		               $goods["reward"]=1;
+		               $goods["share_price"]=$reward["share_price"];
+		               $goods["click_price"]=$reward["click_price"];
+		               $goods["commission"]=$$reward["commission"]*$goods["maxprice"]/100;
 		           }else{
 		               $goods["reward"]=0;
+		               $goods["share_price"]=0;
+		               $goods["click_price"]=0;
+		               $goods["commission"]=0;
 		           }
 		        }
 		    }

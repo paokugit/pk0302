@@ -12,37 +12,40 @@ a{
     text-decoration: none
 }
 .body_box{
-width: 100%;
-height: 100%;
-display: flex;
-flex-direction: column;
-align-items: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  
 }
 #notOpen{
-width: 100%;
-height: 100%;
-position: fixed;
-top: 0;
-left: 0;
-z-index: 4000;
-background: rgba(0, 0, 0, 0.4);
-display: none
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: rgba(0, 0, 0, 0.4);
+    display: none
 }
 .mask-text{
-width: 94%;
-height: 100px;
-border-radius: 10px;
-background: #fff;
-line-height: 100px;
-text-align: center;
-color: #333;
-font-size: 26px;
-position: absolute;
-top: 0;
-bottom: 0;
-left: 0;
-right: 0;
-margin: auto;
+    width: 94%;
+    height: 100px;
+    border-radius: 10px;
+    background: #fff;
+    line-height: 100px;
+    text-align: center;
+    color: #333;
+    font-size: 26px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    
 }
 .header_tit{
     width: 100%;
@@ -143,6 +146,48 @@ margin: auto;
     font-size: 12px;
     color: #a9a9a9
 }
+.guide_box{
+    width: 94%;
+    height: 225px;
+    background: #fff;
+    border-radius: 20px;
+    margin-top: 20px
+}
+.guide_tit{
+    width: 95%;
+    height: 20%;
+    color: #333;
+    font-size: 17px;
+    padding-left:5%;
+    display: flex;
+    align-items: center
+}
+.guide_info{
+    width: 100%;
+    height: 75%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.guide_list{
+    width: 94%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+}
+.guide_item{
+    width: 100px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+.guide_item img{
+    width: 70px;
+    height: 70px;
+}
 .tool_box{
     width: 94%;
     height: 215px;
@@ -176,7 +221,7 @@ margin: auto;
     align-items: center
 }
 .tool_item{
-    width: 62px;
+    width: 80px;
     height: 70px;
     display: flex;
     flex-direction: column;
@@ -264,6 +309,7 @@ margin: auto;
     bottom: 0px;
     display: flex;
     justify-content: space-around;
+    border-top: 1px solid #f1f1f1;
     align-items: center
 }
 .footernav{
@@ -301,4 +347,26 @@ margin: auto;
 }
 .nav-text{
     color: #333
+}
+.footer_box div.selected .nav-text{
+    color:#008ce4;
+    font-weight:bold;
+}
+.footer_box div.selected .nav-img01{
+    background-image: url(http://paokucoin.com/img/backgroup/home-s@2x.png
+    );
+    background-size: 21px;
+    background-repeat:no-repeat;
+}
+.footer_box div.selected .nav-img02{
+    background-image: url(http://paokucoin.com/img/backgroup/shuju-s@2x.png
+    );
+    background-size: 21px;
+    background-repeat:no-repeat;
+}
+.footer_box div.selected .nav-img03{
+    background-image: url(http://paokucoin.com/img/backgroup/store-s@2x.png
+    );
+    background-size: 21px;
+    background-repeat:no-repeat;
 }

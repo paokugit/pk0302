@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>固定商品</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/fixed.css">
+<body>
+    <div class="fixed_box">
+        <!-- header -->
+        <div class="fixed_header">
+                <div class="fixed-back"><a href="javascript:history.back(-1)"><img src="http://paokucoin.com/img/backgroup/fanhui.png" alt=""></a></div>
+                <div class="fixed-tit">发布赏金任务</div>
+        </div>
+        <!-- header -->
+        <!-- content -->
+        <div class="fixed_content">
+            <div class="content_auto">
+                <div class="tab-box">
+                    <ul class="tab_list">
+                        <li class="active">指定商品</li>
+                        <li id="allstore">全店商品</li>
+                    </ul>
+                    <div class="tab-content">
+                        <!-- 指定商品-开始 -->
+                        <div class="active-txt">
+                            <div class="explain_box">
+                                <span class="ex_img"><img src="http://paokucoin.com/img/backgroup/explain01.png" alt=""></span>
+                                <span class="ex_text">奖励说明</span>
+                            </div>
+                            <div class="award_list">
+                                <!-- 分享奖励 -->
+                                <div class="list_box">
+                                    <div class="award_item"><span class="award_text">分享奖励</span><span class="award_count"><input class="share_award fixedIpt" type="text" placeholder="单次分享奖励不低于0.1"></span></div>
+                                </div>
+                                <!-- 点击奖励 -->
+                                <div class="list_box">
+                                    <div class="award_item"><span class="award_text">点击奖励</span><span class="award_count"><input class="click_award fixedIpt" type="text" placeholder="单次点击不低于0.1"></span></div>
+                                </div>
+                                <!-- 交易佣金-->
+                                <div class="list_box">
+                                    <div class="award_item"><span class="award_text">交易佣金</span><span class="award_count"><input class="trader_award fixedIpt" type="text" placeholder="每成交一单奖励的金额为订单支付金额百分比"></span></div>
+                                </div>
+                            </div>
+                             <!-- 商品-开始 -->
+                             <div class="productsBox">
+                                <ul id="fixed_box"></ul>
+                            </div>
+                            <!-- 商品-结束 -->
+                            <div class="btn_box"><button id="chooseBtn">选择商品</button></div>
+                             <!-- 余额充足时 -->
+                             <div class="morethan" style="display:none">
+                                <div class="morethanCon">
+                                    <div class="account-reminder">您的账户余额仅剩<span class="money_num">￥0</span>卡路里,发布后请及时关注</div>
+                                    <div class="account-reminder">账户变动情况,当账户余额小于＜<span class="total_other">(分享奖励+点击奖励)</span>之和,则任务自动结束</div>
+                                </div>
+                            </div>
+                                <!-- 余额充足时 -->
+                            <!-- 余额不足时 -->
+                            <div class="pro_desc_none" style="display:none">
+                                    <div class="morethanCon">
+                                <div class="account-reminder">您的账户余额仅剩<span class="money_num">￥0</span>卡路里,不满足</div>
+                                <div class="account-reminder">≥<span class="total_other">(分享奖励+点击奖励)</span>之和</div>
+                                <div class="account-rechange">请先充值</div>
+                            </div>
+                            </div>
+                            <!-- 余额不足时 -->
+                            <!-- 余额充足时 -->
+                            <div class="lessthan" style="display:none">
+                                    <div class="morethanCon">
+                                <div class="account-reminder">您的账户余额仅剩<span class="money_num">￥0</span>卡路里,建议发布后立即充值</div>
+                                <div class="account-reminder">如低于<span class="total_other">(分享奖励+点击奖励)</span>之和,则任务自动结束</div>
+                            </div>
+                            </div>
+                            <!-- 余额充足时 -->
+
+                            <div class="fixed_footer" style="display:block">发布</div>
+                            <div class="all_footer" style="display:none">账户余额不足,暂不能发布</div>
+                        </div>
+                        <!-- 指定商品-结束 -->
+
+                        <!-- 全店商品-开始 -->
+                        <div>
+                            <div class="explain_box">
+                                <span class="ex_img"><img src="http://paokucoin.com/img/backgroup/explain01.png" alt=""></span>
+                                <span class="ex_text">奖励说明</span>
+                            </div>
+                            <!-- 奖励-开始 -->
+                            <div class="award_list">
+                                    <!-- 分享奖励 -->
+                                    <div class="list_box">
+                                        <div class="award_item"><span class="award_text">分享奖励</span><span class="award_count"><input class="allIpt" id="shareipt" type="text" value="" placeholder="单次分享奖励不低于0.1"></span></div>
+                                    </div>
+                                    <!-- 点击奖励 -->
+                                    <div class="list_box">
+                                        <div class="award_item"><span class="award_text">点击奖励</span><span class="award_count"><input class="allIpt" id="clickipt" type="text" placeholder="单次点击不低于0.1"></span></div>
+                                    </div>
+                                    <!-- 交易佣金-->
+                                    <div class="list_box">
+                                        <div class="award_item"><span class="award_text">交易佣金</span><span class="award_count"><input class="allIpt" id="tradeript" type="text" placeholder="每成交一单奖励的现金金额"></span></div>
+                                    </div>
+                                </div>
+                            <!-- 奖励-结束 -->
+                            <!-- 商品-开始 -->
+                            <div class="productsBox">
+                                    <ul id="allproduct_box"></ul>
+                            </div>
+                            <!-- 商品-结束 -->
+                            <!-- 余额充足时 -->
+                            <div class="morethan" style="display:none">
+                                    <div class="morethanCon">
+                                    <div class="total_text">共选择<span class="total_num">0</span>件商品</div>
+                                    <!-- <div class="btn_box"><button id="choose">选择商品</button></div> -->
+                                    <div class="account-reminder">您的账户余额仅剩<span class="money_num">￥0</span>卡路里,发布后请及时关注</div>
+                                    <div class="account-reminder">账户变动情况,当账户余额小于＜<span class="total_other">(分享奖励+点击奖励)</span>之和,则任务自动结束</div>
+                                </div>
+                            </div>
+                                <!-- 余额充足时 -->
+                            <!-- 余额不足时 -->
+                            <div class="pro_desc_none" style="display:none">
+                                    <div class="morethanCon">
+                                <div class="total_text">共选择<span class="total_num">0</span>件商品</div>
+                                <div class="account-reminder">您的账户余额仅剩<span class="money_num">￥0</span>卡路里,不满足</div>
+                                <div class="account-reminder">≥<span class="total_other">(分享奖励+点击奖励)</span>之和</div>
+                                <div class="account-rechange">请先充值</div>
+                            </div>
+                            </div>
+                            <!-- 余额不足时 -->
+                            <!-- 余额充足时 -->
+                            <div class="lessthan" style="display:none">
+                                    <div class="morethanCon">
+                                <div class="total_text">共选择<span class="total_num">0</span>件商品</div>
+                                <!-- <div class="btn_box"><button id="Choose">选择商品</button></div> -->
+                                <div class="account-reminder">您的账户余额仅剩<span class="money_num">￥0</span>卡路里,建议发布后立即充值</div>
+                                <div class="account-reminder">如低于<span class="total_other">(分享奖励+点击奖励)</span>之和,则任务自动结束</div>
+                            </div>
+                            </div>
+                            <!-- 余额充足时 -->
+
+                            <div id="allpost" class="fixed_footer" style="display:block">发布</div>
+                            <div class="all_footer" style="display:none">账户余额不足,暂不能发布</div>
+                        </div>
+                        <!-- 全店商品-结束 -->
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        <!-- content -->
+        <!-- footer -->
+        
+        <!-- footer -->
+    </div>
+    <!-- 错误提示 -->
+    <div id="warning">
+        <div class="mask-text"></div>
+    </div>
+</body>
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
+        // var goodId=[]
+        var url = location.search;
+        console.log(url)
+        var searchData='{php echo $goodid}'
+        console.log(searchData)
+        var res=""
+        // var globalNumber=""
+        var shareval = ""
+        var clickval = ""
+        var traderval=""
+        var shareipt = ""
+        var clickipt = ""
+        var tradeript=""
+        var iptres=""
+        var cardNumber=sessionStorage.getItem("cardNumber")
+        console.log(cardNumber)
+        var globalNumber=Number(cardNumber)
+        console.log(globalNumber)
+        $('.fixedIpt').bind('input propertychange', function(){
+            if($(this).val()){
+                         shareval = Number($(".share_award").val())
+                         clickval = Number($(".click_award").val())
+                         traderval =Number($(".trader_award").val())
+                         res=shareval+clickval
+                        console.log(res)
+                        console.log(globalNumber)
+                    }
+                    if(globalNumber < res) {
+                        // alert('hello')
+                            $(".pro_desc_none").css('display','block'); 
+                            $(".lessthan").css('display','none');
+                            $(".morethan").css('display','none');
+                            $(".fixed_footer").css('display','none');
+                            $(".all_footer").css('display','block');
+
+                        }else{
+                            $(".fixed_footer").css('display','block');
+                            $(".all_footer").css('display','none');
+                            if(globalNumber< 100){
+                                $(".lessthan").css('display','block'); 
+                                $(".pro_desc_none").css('display','none'); 
+                                $(".morethan").css('display','none'); 
+                                
+                            }else{
+                                $(".morethan").css('display','block'); 
+                                $(".lessthan").css('display','none'); 
+                                $(".pro_desc_none").css('display','none'); 
+                            }
+                        }
+
+        })
+        $('.allIpt').bind('input propertychange', function(){
+            if($(this).val()){
+                         shareipt = Number($("#shareipt").val())
+                         clickipt = Number($("#clickipt").val())
+                         tradeript =Number($("#tradeript").val())
+                         iptres=shareipt+clickipt
+                        console.log(iptres)
+                    }
+                    if(globalNumber < iptres) {
+                            $(".pro_desc_none").css('display','block'); 
+                            $(".lessthan").css('display','none');
+                            $(".morethan").css('display','none');
+                            $(".fixed_footer").css('display','none');
+                            $(".all_footer").css('display','block');
+
+                        }else{
+                            $(".fixed_footer").css('display','block');
+                            $(".all_footer").css('display','none');
+                            if(globalNumber< 100){
+                                $(".lessthan").css('display','block'); 
+                                $(".pro_desc_none").css('display','none'); 
+                                $(".morethan").css('display','none'); 
+                                
+                            }else{
+                                $(".morethan").css('display','block'); 
+                                $(".lessthan").css('display','none'); 
+                                $(".pro_desc_none").css('display','none'); 
+                            }
+                        }
+        })
+        $(window).load(function() { 
+            // 商家余额
+            $.ajax({
+            type: 'POST',
+            url: '{php echo mobileUrl('merchmanage/reward/index/shop_reward')}' ,
+            
+            dataType: "json", 
+            success: function(data){
+                console.log(data)
+                var cardnumber=Number(data.result.card)
+                sessionStorage.setItem("cardNumber",cardnumber)
+               
+                $(".money_num").text(data.result.card)
+            }
+    })
+        var str1='';
+        var str2=''
+        var str3=''
+        var itemid=''
+        var fixedbox=$("#fixed_box")
+        // 全店商品显示
+        $.ajax({
+            type: 'POST',
+            url: '{php echo mobileUrl('merchmanage/reward/index/sel_good')}' ,
+            data: {
+                "page":'1',
+                "extend_type":'1'
+            } ,
+            dataType: "json", 
+            success: function(data){
+                console.log(data)
+                $.each(data.result.good, function(i, item) {
+             
+                str2 += '<li class="pro-item">'+'<div class="item-img">'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'
+                $("#allproduct_box").html(str2)
+            });
+            }
+                
+            })
+            
+         //页面加载   
+         if(searchData!=""){
+        	 
+        
+        $.ajax({
+        type: 'POST',
+        url: '{php echo mobileUrl('merchmanage/reward/index/good')}' ,
+        data: {
+            "goodid":searchData
+            } ,
+        dataType: "json", 
+        success: function(data){
+            console.log(data)
+            
+            $.each(data.result.good, function(i, item) {
+            console.log(item.id);
+            str1 += '<li class="pro-item">'+'<div class="item-img">'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'
+            fixedbox.html(str1)
+            // 选择商品的点击事件
+            $("#chooseBtn").click(function (){
+               
+                location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.home.good&goodid='+searchData
+            })
+            });
+        
+           
+            
+        
+        }
+    })
+         }else{
+        	 
+        	 $("#chooseBtn").click(function (){
+                 location.href='{php echo mobileUrl('merchmanage/reward/home/good')}';
+             })
+         }
+    
+        })
+        // 指定商品的发布按钮点击事件
+        $(".fixed_footer").click(function (){
+            // console.log(shareval,clickval)
+            if($(".share_award").val().length<0 || $(".click_award").val().length<0 || $(".trader_award").val().length<0){
+            $("#warning").show().delay(1000).hide(300);
+            $("#warning .mask-text ").text("输入框不能为空");
+         }else{
+            $.ajax({
+            type: 'POST',
+            url: '{php echo mobileUrl('merchmanage/reward/index/good_reward')}' ,
+            data: {
+               
+                "share_price":shareval,
+                "click_price":clickval,
+                "commission":traderval,
+                "goodid":searchData,
+            } ,
+            dataType: "json", 
+            success: function(data){
+                console.log(data)
+                var message=data.result.message
+                if(data.status==0){
+                    $("#warning").show().delay(1000).hide(300);
+                    $("#warning .mask-text ").text(message);
+                }else{
+                	
+                	 $("#warning").show().delay(1000).hide(300);
+                     $("#warning .mask-text ").text(message);
+
+                    location.href='{php echo mobileUrl('merchmanage/reward/home/index')}'
+                }
+            }
+                
+            })
+         }
+        })
+        $(document).on('click','#allproduct_box',function(){
+            var arrlength=''
+            var arr = [];
+        $(".pro-item input:checkbox[name='role']:checked").each(function(i){
+            arr[i] = $(this).attr("data-id");
+            });
+            arrlength=arr.length
+            arrToStr = arr.toString();
+            $('.total_num').text(arrlength)
+        })
+            // 点击事件
+            $(".tab-box li").click(function ()
+    　　{
+    　　　　$(this).addClass("active").siblings().removeClass("active");
+    　　　　var index = $(this).index();
+    　　　　$(this).parent().siblings().children().eq(index).addClass("active-txt")
+    　　　　.siblings().removeClass("active-txt");
+    　　});
+
+    // 全店商品的发布按钮点击事件
+     $("#allpost").click(function (){
+        if($("#shareipt").val().length<0 ||$("#clickipt").val().length<0 || $("#tradeript").val().length<0){
+            $("#warning").show().delay(1000).hide(300);
+            $("#warning .mask-text ").text("输入框不能为空");
+         }else{
+            $.ajax({
+            type: 'POST',
+            url: '{php echo mobileUrl('merchmanage/reward/index/whole_reward')}' ,
+            data: {
+               
+                "share_price":shareipt,
+                "click_price":clickipt,
+                "commission":tradeript,
+            } ,
+            dataType: "json", 
+            success: function(data){
+                console.log(data)
+                var message02=data.result.message
+                if(data.status==0){
+                    $("#warning").show().delay(1000).hide(300);
+                    $("#warning .mask-text ").text(message02);
+                }else{
+                	 $("#warning").show().delay(1000).hide(300);
+                     $("#warning .mask-text ").text(message02);
+
+               
+                    location.href='{php echo mobileUrl('merchmanage/reward/home/index')}'
+                }
+            }
+                
+            })
+         } 
+        })
+        
+        
+</script>

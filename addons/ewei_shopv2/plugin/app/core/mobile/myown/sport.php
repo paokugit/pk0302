@@ -561,7 +561,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
     }
     
     public function prize(){
-        $arr=array(60,25,10,5);
+        $arr=array(90,5,4,1);
         $rid = $this->get_rand($arr); //根据概率获取奖项id
         if ($rid==0){
             $resault=1;

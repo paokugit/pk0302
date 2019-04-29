@@ -1,0 +1,347 @@
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td,hr,button,article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {
+    margin:0;
+    padding:0;
+}
+html{
+    background: #f1f1f1;
+    height: 100%
+}
+a{
+    text-decoration: none
+}
+li{
+    list-style: none
+}
+i{
+    font-style: normal
+}
+.home01_body{
+    width: 100%;
+    height: 100%;
+}
+.home01-header{
+    width: 100%;
+    height: 60px;
+    background: #eee;
+    text-align: center;
+    line-height: 60px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    z-index: 5
+}
+.home01-back{
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+    position: absolute;
+    left: 10px
+}
+.home01-back img{
+    width: 100%
+}
+.home01-tit{
+    width: 100%;
+    height: 60px;
+    text-align: center;
+    line-height: 60px
+}
+.home01-article{
+    width: 100%;
+    /* height: 600px; */
+    overflow:auto;
+    top:60px;
+    position:absolute;
+    z-index:10;
+    bottom:60px;
+
+}
+.home01-article-center{
+    width: 100%;
+    height: 100%;
+    
+}
+.article-top{
+    width: 100%;
+    height: 200px;
+    background: #fff
+}
+.account-reward{
+    width: 94%;
+    height: 200px;
+    background: #fff;
+    margin: auto;
+    
+}
+.reward-top{
+    width: 100%;
+    height: 60px;
+    padding-top: 20px;
+}
+.reward-top-text{
+    width: 200px;
+    float: left;
+    color: #333;
+    font-size: 15px;
+}
+button{
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;  
+    outline: none;   
+}
+.recharge_btn{
+    width: 60px;
+    height: 40px;
+    background: #07c062;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 15px;
+    float: right;
+    line-height: 40px;
+    text-align: center;
+}
+.reward-totalmoney{
+    width: 100%;
+    height: 60px;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    align-items: center
+}
+.money-img{
+    width: 25px;
+    height: 25px;
+}
+.money-img img{
+    width: 100%
+}
+.money-symbol{
+    height: 30px;
+    line-height: 40px;
+    margin-left: 5px;
+    font-size: 18px;
+    color: #333;
+    font-weight: bold
+}
+.money-num{
+    height: 30px;
+    line-height: 30px;
+    color: #333;
+    font-size: 35px;
+    margin-left: 2px;
+}
+.money-point{
+    width: 20px;
+    height: 30px;
+    line-height: 40px;
+    font-size: 15px;
+    color: #333
+}
+.task-explain{
+    width: 100%;
+    height: 60px;
+}
+.task-left{
+    width: 130px;
+    height: 60px;
+    float: left;
+    display: flex;
+    align-items: center
+}
+.explain-img{
+    width: 25px;
+    height: 25px;
+}
+.explain-img img{
+    width: 100%
+}
+.explain-text{
+    color: #808080;
+    font-size: 15px;
+    margin-left: 5px
+}
+.task-right{
+    width: 60px;
+    height: 60px;
+    float: right;
+    display: flex;
+    align-items: center;
+}
+.detail-text{
+    color: #808080;
+    font-size: 15px
+}
+.detail-img{
+    width: 12px;
+    height: 12px;
+    margin-left: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+.detail-img img{
+    width: 100%
+}
+.article-bottom{
+    width: 94%;
+    height: auto;
+    margin: auto;
+    margin-top: 10px
+    
+}
+.reward-info{
+    width: 100%;
+    height: 130px;
+    /* background: #fff;
+    border-radius: 10px; */ 
+}
+.rewardCon{
+    width: 100%;
+    height: 130px;
+    background: #fff;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px
+}
+.reward-info-top{
+    width: 95%;
+    height: 70px;
+    border-bottom: 1px solid #eee;
+    display: flex
+}
+.info-item{
+    width: 25%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center
+}
+.item-text01{
+    width: 100%;
+    height: 30px;
+    display: block;
+    background: #fec400;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 12px;
+    line-height: 30px;
+    text-align: center
+}
+.item-text{
+    width: 100%;
+    height: 30px;
+    display: block;
+    color: #808080;
+    font-size: 12px;
+    line-height: 30px;
+    text-align: center
+}
+.item-num01{
+    width: 100%;
+    height: 30px;
+    display: block;
+    line-height: 30px;
+    text-align: center;
+    color: #008be4;
+    font-size: 12px
+}
+.item-num{
+    width: 100%;
+    height: 30px;
+    display: block;
+    line-height: 30px;
+    text-align: center;
+    color: #333;
+    font-size: 20px
+}
+.reward-info-bottom{
+    width: 95%;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center
+}
+.post-time{
+    width: auto;
+    color: #909090;
+    font-size: 12px;
+}
+.btnBox{
+    width: auto;
+    height: 30px;
+    text-align: right
+}
+.product-btn{
+    width: 60px;
+    height: 30px;
+    background: #fec400;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 14px;
+    line-height: 30px;
+    text-align: center;
+    margin-right: 5px
+}
+.post-end-btn{
+    width: 60px;
+    height: 30px;
+    background: #008be4;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 14px;
+    line-height: 30px;
+    text-align: center;
+}
+.home01-footer{
+    width:100%;
+    height:50px;
+    line-height:50px;
+    background:#008be4;
+    position:absolute;
+    z-index:200;
+    bottom:0;
+    text-align:center;
+}
+.footer-post-btn{
+    width: 100%;
+    height: 50px;
+    background:#008be4;
+    line-height:50px;
+    text-align: center;
+    color: #fff;
+    font-size: 17px
+}
+#warning{
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: rgba(0, 0, 0, 0.4);
+    display: none
+}
+.mask-text{
+    width: 94%;
+    height: 100px;
+    border-radius: 10px;
+    background: #fff;
+    line-height: 100px;
+    text-align: center;
+    color: #333;
+    font-size: 26px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    
+}

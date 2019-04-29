@@ -1,0 +1,422 @@
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td,hr,button,article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {
+    margin:0;
+    padding:0;
+}
+a{
+    text-decoration: none
+}
+li{
+    list-style: none
+}
+html{
+    background: #f1f1f1
+}
+button{
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;  
+    outline: none;   
+}
+
+.fixed_box{
+    width: 100%;
+    height: 100%
+}
+.fixed_header{
+    width: 100%;
+    height: 60px;
+    background: #eee;
+    text-align: center;
+    line-height: 60px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    z-index: 5
+}
+.fixed-back{
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+    position: absolute;
+    left: 10px
+}
+.fixed-back img{
+    width: 100%
+}
+.fixed-tit{
+    width: 100%;
+    height: 60px;
+    text-align: center;
+    line-height: 60px
+}
+.fixed_content{
+    width: 100%;
+    /* height: 600px; */
+    overflow:auto;
+    top:60px;
+    position:absolute;
+    z-index:10;
+    bottom:60px;
+}
+
+.content_auto{
+    width: 100%;
+    height: auto;
+    margin: auto
+}
+
+.tab-box {
+    width: 100%;
+    margin: 10px auto;
+}
+
+.tab-box .tab_list {
+    width: 100%;
+    height: 50px;
+    list-style-type: none;
+}
+
+.tab_list li {
+    float: left;
+    width: 50%;
+    background: #fff;
+    border-bottom: 1px solid #ccc;
+    color: #333;
+    font-size: 17px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+}
+.tab_list li.active {
+    background: #008be4;
+    color: #fff;
+}
+.tab-box .tab-content{
+    width: 100%;
+    height: auto;
+}
+.tab-box .tab-content>div{display:none;}
+.tab-box .tab-content>div.active-txt{display:block;}
+/*//注意这里设置整个容器里的div为不可见的*/
+.tab-content .explain_box{
+    width: 94%;
+    height: 44px;
+    padding: 0 3%;
+    background: #ccc;
+    display: flex;
+    align-items: center
+}
+.ex_img{
+    width: 20px;
+    height: 20px;
+
+}
+.ex_img img{
+    width: 100%
+}
+.ex_text{
+    color: #808080;
+    font-size: 15px;
+    margin-left: 5px
+}
+.award_list{
+    width: 94%;
+    height: auto;
+    padding: 0 3%;
+    background: #fff
+}
+.award_list .award_item{
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ccc
+}
+.award_text{
+    color: #333;
+    font-size: 17px
+}
+.award_count{
+    color: #808080;
+    font-size: 15px;
+    margin-left: 10px
+}
+input{
+    background:none;  
+    outline:none;  
+    border: none
+}
+input:focus{   
+    border:none;
+}
+.share_award{
+    width: 260px;
+    height: 50px
+}
+.click_award{
+    width: 260px;
+    height: 50px
+}
+.trader_award{
+    width: 260px;
+    height: 50px
+}
+#shareipt{
+    width: 260px;
+    height: 50px
+}
+#clickipt{
+    width: 260px;
+    height: 50px
+}
+#tradeript{
+    width: 260px;
+    height: 50px
+}
+
+.btn_box{
+    width: 150px;
+    height: 45px;
+    background: #fff;
+    border-radius: 5px;
+    margin: 20px auto
+}
+#chooseBtn{
+    width: 150px;
+    height: 45px;
+    background: #fff;
+    border-radius: 5px;
+    color: #333;
+    font-size: 17px
+}
+#Choose{
+    width: 150px;
+    height: 45px;
+    background: #fff;
+    border-radius: 5px;
+    color: #333;
+    font-size: 17px
+}
+#choose{
+    width: 150px;
+    height: 45px;
+    background: #fff;
+    border-radius: 5px;
+    color: #333;
+    font-size: 17px
+}
+.productsBox{
+    width: 100%;
+    height: auto;
+    background: #fff;
+}
+#allproduct_box{
+    width: 94%;
+    height: auto;
+    padding: 0 3%;
+    margin-top: 20px
+}
+#fixed_box{
+    width: 94%;
+    height: auto;
+    padding: 0 3%;
+    margin-top: 20px
+}
+.pro-item{
+    width: 100%;
+    height: 125px;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    align-items: center;
+    background: #fff
+}
+.item-img{
+    width: 90px;
+    height: 90px;
+    position: relative;
+    margin-left: 5px;
+}
+.item-check{
+    width: 20px;
+    height: 20px;
+    margin-left: 5px;
+}
+.checkipt{
+    width: 20px;
+    height: 20px
+}
+.pro_state{
+    width: 100%;
+    height: 20px;
+    position: absolute;
+    background: #333;
+    left: 0;
+    bottom: 0;
+    line-height: 20px;
+    text-align: center;
+    opacity: 0.9;
+    color: #fff;
+    font-size: 16px
+}
+.item-img img{
+    width: 100%;
+    height: 100%
+}
+.item-info{
+    width: 150px;
+    height: 90px;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.info_tit{
+    width: 150px;
+    color: #333;
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis
+}
+.info_price{
+    width: auto;
+    color: #ff1c1c;
+    font-size: 22px
+}
+.info_sale{
+    width: auto;
+    color: #9a9a9a;
+    font-size: 12px
+}
+.item-amount{
+    width: 60px;
+    height: 90px;
+    margin-left: 30px;
+    position: relative;
+}
+.amount_num{
+    width: auto;
+    height: 20px;
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    color: #9a9a9a;
+    font-size: 12px
+}
+.pro_desc_none{
+    width: 94%;
+    height: auto;
+    padding: 20px 3%;
+}
+.morethan{
+    width: 94%;
+    height: auto;
+    padding: 20px 3%;
+}
+.lessthan{
+    width: 94%;
+    height: auto;
+    padding: 20px 3%;
+}
+.morethanCon{
+    width: 94%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center
+}
+.total_text{
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 13px;
+    color: #808080;
+}
+.total_num{
+    font-size: 13px;
+    color: #ff1c1c;
+    margin: 0 3px
+}
+.money_num{
+    font-size: 13px;
+    color: #ff1c1c;
+    margin: 0 3px
+}
+.account-reminder{
+    width: 300px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 13px;
+    color: #808080;
+}
+.total_other{
+    font-size: 13px;
+    color: #808080;
+    margin: 0 3px
+}
+.account-rechange{
+    width: 300px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 13px;
+    color: #808080;
+}
+.fixed_footer{
+    width:100%;
+    height:50px;
+    line-height:50px;
+    background:#008be4;
+    position:fixed;
+    /* z-index:200; */
+    bottom:0;
+    text-align:center;
+    color: #fff
+}
+.all_footer{
+    width:100%;
+    height:50px;
+    line-height:50px;
+    background:#d2d2d2;
+    position:fixed;
+    /* z-index:200; */
+    bottom:0;
+    text-align:center;
+    color: #fff
+}
+#warning{
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: rgba(0, 0, 0, 0.4);
+    display: none
+}
+.mask-text{
+    width: 94%;
+    height: 100px;
+    border-radius: 10px;
+    background: #fff;
+    line-height: 100px;
+    text-align: center;
+    color: #333;
+    font-size: 26px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    
+}

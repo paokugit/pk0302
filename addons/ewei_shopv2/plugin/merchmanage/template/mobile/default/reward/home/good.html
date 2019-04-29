@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>选择商品</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/choose.css">
+<body>
+    <div class="choose_box">
+        <!-- header -->
+        <div class="choose_header">
+                <div class="choose-back"><a href="javascript:history.back(-1)"><img src="http://paokucoin.com/img/backgroup/fanhui.png" alt=""></a></div>
+                <div class="choose-tit">选择商品</div>
+        </div>
+        <!-- header -->
+        <!-- content -->
+        <div class="choose_content">
+            <!-- 搜索框 -->
+            <div class="ipt_box">
+                <div class="ipt_relative">
+                    <div class="ipt_icon"><img src="http://paokucoin.com/img/backgroup/fangdajing.png" alt=""></div>
+                    <input type="text" id="searchipt" placeholder="请输入商品名称">
+                </div>  
+            </div>
+            <div class="choose-desc">
+                <p class="desc-text">请选择参加赏金任务的商品</p>
+            </div>
+            <div class="content_auto">
+                <ul id="product_box"></ul>
+            </div>
+            <div class="submitbox">
+                <button class="submit">提交</button>
+            </div>
+        </div>
+        <!-- content --> 
+       
+    </div>
+    <!-- 错误提示 -->
+    <div id="warning">
+        <div class="mask-text"></div>
+    </div>
+</body>
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
+ var goodId=''
+        var url = location.search;
+        console.log(url)
+        var searchData='{php echo $goodid}'
+        console.log(searchData)
+        var arrId=sessionStorage.getItem("idarr")
+        console.log(arrId)
+        
+    $(window).load(function() { 
+        var str1='';
+        var itemid=''
+        var productbox=$("#product_box")
+        $.ajax({
+        type: 'POST',
+        url: '{php echo mobileUrl('merchmanage/reward/index/sel_good')}' ,
+        data: {
+          
+            "page":'1',
+            "extend_type":'2'
+            } ,
+        dataType: "json", 
+        success: function(data){
+            console.log(data)
+            var idarr=[]
+            $.each(data.result.good, function(i, item) {
+                console.log(item.id)
+                idarr.push(item.id)
+                console.log(idarr)
+                sessionStorage.setItem("idarr",idarr)
+                // 判断item.id在searchData里面,checkbox状态为已选择
+                if(url!=''){
+                // url不为空(判断item.id在searchData里面,if(在checkbox状态为已选择)else(checkbox状态为未选择)
+                var searcharray=searchData.split(",")
+                console.log(searcharray)
+                console.log($.inArray(item.id,searcharray))
+                var exist=$.inArray(item.id,searcharray)
+                console.log(exist)
+                if(exist==-1){
+                    // alert("-1")
+                if(item.isadd==1){
+                          str1 += '<li class="pro-item">'+'<label class="item-check">'+'<input class="checkipt" type="checkbox" name="role" disabled="disabled" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="pro_state">'+'已添加'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'       
+                  }else{
+                    str1 += '<li class="pro-item">'+'<label class="item-check">'+'<input class="checkipt" type="checkbox" name="role" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="prostate">'+'已选择'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'
+                    productbox.delegate ('.pro-item', 'click', function (){
+                    $(this).addClass("active")
+                    $(this).siblings().removeClass("active");
+                    if($(".active .checkipt").is(":checked")){
+                    $(".active .prostate").css('display','block');
+                    
+                }
+                else{
+                    $(".active .prostate").css('display','none');
+                    }
+                })
+                }
+                    productbox.html(str1)
+                }else{
+                	
+                	  if(item.isadd==1){
+                          str1 += '<li class="pro-item">'+'<label class="item-check">'+'<input class="checkipt" type="checkbox" name="role" disabled="disabled" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="pro_state">'+'已添加'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'       
+                  }else{
+                    // alert("0")
+                    str1 += '<li class="pro-item">'+'<label class="item-check">'+'<input checked="checked" class="checkipt" type="checkbox" name="role" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="proState">'+'已选择'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'
+                
+                    productbox.delegate ('.pro-item', 'click', function (){
+                    $(this).addClass("active")
+                    $(this).siblings().removeClass("active");
+                    if($(".active .checkipt").is(":checked")){
+                    $(".active .proState").css('display','block');
+                    }
+                    else{
+                    $(".active .proState").css('display','none');
+                    }
+                })
+                    productbox.html(str1)
+                  }
+                }
+            }else{
+                // url为空
+                if(item.isadd==1){
+                str1 += '<li class="pro-item">'+'<label class="item-check">'+'<input class="checkipt" type="checkbox" name="role" disabled="disabled" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="pro_state">'+'已添加'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'
+                
+        }else{
+            str1 += '<li class="pro-item">'+'<label class="item-check">'+'<input class="checkipt" type="checkbox" name="role" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="prostate">'+'已选择'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'
+          productbox.delegate ('.pro-item', 'click', function (){
+            $(this).addClass("active")
+            $(this).siblings().removeClass("active");
+                if($(".active .checkipt").is(":checked")){
+            $(".active .prostate").css('display','block');
+            }
+            else{
+                $(".active .prostate").css('display','none');
+            }
+        })
+        }
+            productbox.html(str1)
+            }
+           
+       
+            
+            });
+        }
+    })
+    
+})
+
+// 提交的点击事件
+$('.submit').click(function(){
+    var arr = [];
+    //根据name的值获取到所有选中checkbox，并遍历
+    $(".pro-item input:checkbox[name='role']:checked").each(function(i){
+        arr[i] = $(this).attr("data-id");
+        });
+        console.log(arr)
+        if(arr==''){
+            // alert('请至少选择一个')
+            $("#warning").show().delay(1000).hide(300);
+            $("#warning .mask-text ").text('请至少选择一个');
+
+        }else{
+            arrToStr = arr.toString();
+            console.log(arrToStr)
+            if(url != ""){
+                var string=arrToStr+","+searchData
+                function uniq(arr01){
+                var temp = []; //一个新的临时数组
+                for(var i = 0; i < arr01.length; i++){
+                    if(temp.indexOf(arr01[i]) == -1){
+                    temp.push(arr01[i]);
+                }
+            }
+            return temp;
+            }
+            var searchArr=string.split(",")
+            console.log(searchArr)
+            location.href='../index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.home.release&goodid='+arrToStr
+            }else{
+                console.log(arrToStr)
+                location.href='../index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.home.release&goodid='+arrToStr
+            }
+        }
+       
+})
+
+
+// 搜索的点击事件
+$(".ipt_icon").bind("click",function(){
+    var str2='';
+    var productbox=$("#product_box")
+    var searchval=$("#searchipt").val()
+    console.log(searchval)
+        $.ajax({
+        type: 'POST',
+        url: '{php echo mobileUrl('merchmanage/reward/index/sel_good')}' ,
+        data: {
+          
+            "page":'1',
+            "extend_type":'2',
+            "title":searchval
+            } ,
+        dataType: "json", 
+        success: function(data){
+            console.log(data)
+            var idarr02=[]
+            $.each(data.result.good, function(i, item) {
+                console.log(item.id)
+                idarr02.push(item.id)
+                console.log(idarr02)
+                sessionStorage.setItem("idarr02",idarr02)
+                // 判断item.id在searchData里面,checkbox状态为已选择
+                if(url!=''){
+                // url不为空(判断item.id在searchData里面,if(在checkbox状态为已选择)else(checkbox状态为未选择)
+                var searcharray02=searchData.split(",")
+                console.log(searcharray02)
+                console.log($.inArray(item.id,searcharray02))
+                var exist02=$.inArray(item.id,searcharray02)
+                console.log(exist02)
+                if(exist02==-1){
+                if(item.isadd==1){
+                          str1 += '<li class="pro-item">'+'<label class="item-check">'+'<input class="checkipt" type="checkbox" name="role" disabled="disabled" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="pro_state">'+'已添加'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'       
+                  }else{
+                    // alert("-1")
+                    str2 += '<li class="pro-item">'+'<label class="item-check">'+'<input class="checkipt" type="checkbox" name="role" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="prostate">'+'已选择'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'
+                    productbox.delegate ('.pro-item', 'click', function (){
+                    $(this).addClass("active")
+                    $(this).siblings().removeClass("active");
+                    if($(".active .checkipt").is(":checked")){
+                    $(".active .prostate").css('display','block');
+                }
+                else{
+                    $(".active .prostate").css('display','none');
+                    }
+                })
+                }
+                    productbox.html(str2)
+                }else{
+                	  if(item.isadd==1){
+                          str1 += '<li class="pro-item">'+'<label class="item-check">'+'<input class="checkipt" type="checkbox" name="role" disabled="disabled" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="pro_state">'+'已添加'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'       
+                  }else{
+                    // alert("0")
+                    str2 += '<li class="pro-item">'+'<label class="item-check">'+'<input checked="checked" class="checkipt" type="checkbox" name="role" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="proState">'+'已选择'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'
+                
+                    productbox.delegate ('.pro-item', 'click', function (){
+                    $(this).addClass("active")
+                    $(this).siblings().removeClass("active");
+                    if($(".active .checkipt").is(":checked")){
+                    $(".active .proState").css('display','block');
+                    }
+                    else{
+                    $(".active .proState").css('display','none');
+                    }
+                })
+                    productbox.html(str2)
+                }
+                }
+            }else{
+                // url为空
+                if(item.isadd==1){
+                str2 += '<li class="pro-item">'+'<label class="item-check">'+'<input class="checkipt" type="checkbox" name="role" disabled="disabled" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="pro_state">'+'已添加'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'
+                
+        }else{
+            str2 += '<li class="pro-item">'+'<label class="item-check">'+'<input class="checkipt" type="checkbox" name="role" data-id='+item.id+'>'+'</label>'+'<div class="item-img">'+'<span class="prostate">'+'已选择'+'</span>'+'<img src='+item.thumb+' alt="">'+'</div>'+'<div class="item-info">'+'<div class="info_tit">'+item.title+'</div>'+'<div class="info_price">'+'￥'+item.minprice+'</div>'+'<div class="info_sale">'+'销量'+item.sales+'</div>'+'</div>'+'<div class="item-amount ">'+'<span class="amount_num">'+'库存'+item.total+'</span>'+'</div>'+'</li>'
+          productbox.delegate ('.pro-item', 'click', function (){
+            $(this).addClass("active")
+            $(this).siblings().removeClass("active");
+                if($(".active .checkipt").is(":checked")){
+            $(".active .prostate").css('display','block');
+            }
+            else{
+                $(".active .prostate").css('display','none');
+            }
+        })
+        }
+            productbox.html(str2)
+            }
+            
+            });
+        }
+
+    })
+})
+</script>
