@@ -8,11 +8,8 @@ a{
 li{
     list-style: none
 }
-i{
-    font-style:normal
-}
 html{
-    background: #fff
+    background: #f1f1f1
 }
 button{
     margin: 0;
@@ -21,11 +18,11 @@ button{
     outline: none;   
 }
 
-.detail_box{
+.payment_box{
     width: 100%;
     height: 100%
 }
-.detail_header{
+.payment_header{
     width: 100%;
     height: 60px;
     background: #eee;
@@ -38,7 +35,7 @@ button{
     top: 0;
     z-index: 5
 }
-.detail-back{
+.payment-back{
     width: 26px;
     height: 26px;
     line-height: 26px;
@@ -46,91 +43,67 @@ button{
     position: absolute;
     left: 10px
 }
-.detail-back img{
+.payment-back img{
     width: 100%
 }
-.detail-tit{
+.payment-tit{
     width: 100%;
     height: 60px;
     text-align: center;
     line-height: 60px
 }
-.detail_content{
+.payment_content{
     width: 100%;
+    height: 600px;
     overflow:auto;
-    top:-10px;
+    top:-60px;
     position:absolute;
     z-index:10;
     bottom:60px;
 
 }
-#main {
-    width: 95%;
-	position:absolute;
-	top:0px;
-	left:0px;
-	right:0px;
-	bottom:0px;
-	padding:10px;
-	overflow:auto;
-}
-#list_box{
+.payment_center{
     width: 100%;
-    height: auto;
+    height: 100%;
+    position: relative
+}
+.paymentCon{
+    width: 300px;
+    height: 220px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top:0;
+    margin: auto;
     background: #fff;
-   
-}
-.item{
-    width: 100%;
-    height: 70px;
-    padding: 5px 0;
-    display: flex;
-    border-bottom: 1px solid #ccc
-}
-.item_left{
-    width: 65%;
-    height: 70px;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+    align-items: center
 }
-
-.item-tit{
-    width: 100%;
-    color: #333;
-    font-size: 17px;
-}
-.item-time{
-    width: 100%;
-    color: #a9a9a9;
-    font-size: 15px;
-}
-.item_expend{
-    width: 34%;
-    height: 70px;
-    padding-right: 5px;
+.order_amount{
+    width: auto;
+    height: 60px;
     line-height: 60px;
-    text-align: right;
     color: #333;
-    font-size: 18px
-
+    font-size: 36px;
+    text-align: center
 }
-.item_income{
-    width: 34%;
+.btn_box{
+    width: 220px;
     height: 70px;
-    padding-right: 5px;
-    line-height: 60px;
-    text-align: right;
-    color: #07c062;
-    font-size: 18px
+    border-radius: 10px;
+    
 }
-.detail_footer{
-    width:100%;
-    height:50px;
-    line-height:50px;
-    background:#008be4;
-    position:absolute;
-    z-index:200;
-    bottom:0;
-    text-align:center;
+#paybtn{
+    width: 220px;
+    height: 70px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 30px;
+    background: #07c062;
+    display: flex;
+    justify-content: center;
+    align-items: center
 }

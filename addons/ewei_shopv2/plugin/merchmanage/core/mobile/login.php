@@ -238,10 +238,10 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 	public function m(){
 	    global $_W;
 	    global $_GPC;
-	    $params["openid"] ="oQmU56Lf1GeIkpqsLStPq5Qktm9I";
+	    $params["openid"] =$_W["openid"];
 	    $params["fee"] =100;
 	    $params["title"]="购买";
-	    $params["tid"]="201904190123".time();
+	    $params["tid"]=$_GPC["order_sn"];
 	    load()->model("payment");
 	    $setting = uni_setting($_W["uniacid"], array( "payment" ));
 	    if( is_array($setting["payment"]) )

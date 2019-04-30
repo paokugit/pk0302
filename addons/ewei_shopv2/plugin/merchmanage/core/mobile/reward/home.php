@@ -21,7 +21,8 @@ require EWEI_SHOPV2_PLUGIN . 'merchmanage/core/inc/page_merchmanage.php';
     public function recharge(){
         global $_W;
         global $_GPC;
-        
+       
+//         var_dump($openid);
         include $this->template();
     }
     //明细

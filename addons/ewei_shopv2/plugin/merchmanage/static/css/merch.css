@@ -221,7 +221,7 @@ a{
     align-items: center
 }
 .tool_item{
-    width: 80px;
+    width: 30%;
     height: 70px;
     display: flex;
     flex-direction: column;

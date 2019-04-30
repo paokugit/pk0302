@@ -89,10 +89,11 @@ class Log_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $member = $this->member;
+        
         $data['id'] = $member['id'];
         $data['openid'] = $member['openid'];
         $data['credit2'] = $member['credit2'];//账户余额
-
+        $data['frozen_credit2']=$member["frozen_credit2"];
         //已经提现
         $sql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where openid=:openid and type=1 and status = 1";
         $params = array(':openid' => $_W['openid']);

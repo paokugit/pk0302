@@ -6,14 +6,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>卡路里充值</title>
 </head>
+
 <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/Rechange.css">
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/jquery-1.11.3.min.js"></script>
+<script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script>
 <body>
     <div class="rechange_body">
         <!-- header -->
-        <div class="rechange-header">
-            <div class="rechange-back"><a href="javascript:history.back(-1)"><img src="http://paokucoin.com/img/backgroup/fanhui.png" alt=""></a></div>
-            <div class="rechange-tit">卡路里充值</div>
-        </div>
+       
         <!-- header -->
         <!-- content -->
         <div class="rechange-content">
@@ -49,8 +49,8 @@
         <div class="mask-text"></div>
     </div>
 </body>
-</html>
-<script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/jquery-1.11.3.min.js"></script>
+
+
 <script type="text/javascript">   
     var itemid=''
     var money='' 
@@ -94,7 +94,7 @@ $(window).load(function() {
 
         
 }); 
-    // 充值的点击事件
+ // 充值的点击事件
     $(".rechange-btn").bind("click",function(){
         if(itemid==''){
             itemid=0
@@ -107,95 +107,42 @@ $(window).load(function() {
             money= money
         }
         console.log(itemid,money)
+        if(money<10){
+        	$("#warning").show().delay(1000).hide(300);
+            $("#warning .mask-text ").text("金额不可小于10");
+        }else{
+		
         $.ajax({
                 type: 'POST',
                 url: '{php echo mobileUrl('merchmanage/reward/index/order')}' ,
                 data: {
                     "purchase_id":itemid,
-                    "merchid":'3'
+                    "money":money
+                   
                 } ,
                 dataType: "json", 
+				//生成订单
                 success: function(data){
                     console.log(data)
                     message=data.result.message
                     console.log(message)
-                    $.ajax({
-                    type: 'POST',
-                    url: '{php echo mobileUrl('merchmanage/reward/index/order_wx')}' ,
-                    data: {
-                        "order_sn":message
-                    } ,
-                    dataType: "json", 
-                    success: function(data){
-                        console.log(data)
-                        
-                        if(data.status=="1"){
-                            function onBridgeReady(){
-                            WeixinJSBridge.invoke(
-                            'getBrandWCPayRequest', {
-                            "appId":data.result.appId,     //公众号名称，由商户传入     
-                            "timeStamp":data.result.timeStamp,         //时间戳，自1970年以来的秒数     
-                            "nonceStr":data.result.nonceStr, //随机串     
-                            "package":data.result.package,     
-                            "signType":"MD5",         //微信签名方式：     
-                            "paySign":data.result.paySign//微信签名 
-                    },
+					
+                    if(data.status==1){
+					//pay(message);
+                    location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.index.order_wx&order_sn='+message
                     
-                    function(res){
-                    if(res.err_msg == "get_brand_wcpay_request:ok" ){
-                            console.log('ok')
-                            $.ajax({
-                                type: 'POST',
-                                url: '{php echo mobileUrl('merchmanage/reward/index/order_wxback')}' ,
-                                data: {
-                                    "order_sn":message
-                                } ,
-                                dataType: "json", 
-                                success: function(data){
-                                    console.log(ok)
-                                    console.log(data)
-                                    if(data.status==1){
-                                        location.href='{php echo mobileUrl('merchmanage/reward/home/index')}'
-                                    }else{
-                                       var errMsg=data.result.message
-                                        $("#warning").show().delay(1000).hide(300);
-                                        $("#warning .mask-text ").text(errMsg);
-                                    }
-                                }
-                            })
-                            
-                    } 
-                }); 
-            }
-            function callpay()
-            {
-                if (typeof WeixinJSBridge == "undefined"){
-                    if( document.addEventListener ){
-                        document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-                    }else if (document.attachEvent){
-                        document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
-                        document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+                    }else{
+                    	var errMsg=data.result.message
+                        $("#warning").show().delay(1000).hide(300);
+                        $("#warning .mask-text ").text(errMsg);
                     }
-                }else{
-                    onBridgeReady();
                 }
-            }
-                
-                        }else{
-                            var errormsg=data.result.message
-                            console.log("error")
-                            $("#warning").show().delay(1000).hide(300);
-                            $("#warning .mask-text ").text(errormsg);
-                        }
-                       
-                    
-
-                }
+			//生成订单结束	
+				
             })
-
-                }
-            })
+			
+    }
     })
-
-
+    
 </script>
+</html>

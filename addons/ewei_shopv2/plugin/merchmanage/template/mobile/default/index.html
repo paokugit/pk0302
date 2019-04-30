@@ -6,7 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>商家后台</title>
 </head>
+<script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script>
 <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/merch.css">
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/jquery-1.11.3.min.js"></script>
 <body>
     <div class="body_box">
         <!-- header -->
@@ -64,9 +66,9 @@
                             <li class="tool_item" onclick="location.href='{php echo mobileUrl('merchmanage/order', array('status'=>1))}'"><img src="http://paokucoin.com/img/backgroup/order@2x.png" alt=""><span class="item-tit">订单</span></li>
                             <li class="tool_item " onclick="location.href='{php echo mobileUrl('merchmanage/reward/home/index')}'"><img src="http://paokucoin.com/img/backgroup/marketing@2x.png" alt=""><span class="item-tit">营销</span></li>
                             <li class="tool_item" onclick="location.href='{php echo mobileUrl('merchmanage/apply/manage')}'"><img src="http://paokucoin.com/img/backgroup/Accounts@2x.png" alt=""><span class="item-tit">结算</span></li>
-                            <li class="tool_item withoutOpen"><img src="http://paokucoin.com/img/backgroup/dongtai@2x.png" alt=""><span class="item-tit">发动态</span></li>
+                           <!--   <li class="tool_item withoutOpen"><img src="http://paokucoin.com/img/backgroup/dongtai@2x.png" alt=""><span class="item-tit">发动态</span></li>
                             <li class="tool_item withoutOpen"><img src="http://paokucoin.com/img/backgroup/ticket@2x.png" alt=""><span class="item-tit">满减券</span></li>
-
+                            -->
                             <li class="tool_item" onclick="location.href='{php echo mobileUrl('merchmanage/shop')}'"><img src="http://paokucoin.com/img/backgroup/store@2x.png" alt=""><span class="item-tit">设置</span></li>
                         </ul>
                     </div>
@@ -110,11 +112,9 @@
 <div class="mask-text">暂未开放，敬请期待</div>
 </div>
 </body>
-</html>
-<script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/jquery-1.11.3.min.js"></script>
+
 <script>
-    $(function ()
-{
+    $(function (){
 
 　　$(".tabbox li").click(function ()
 　　{
@@ -138,3 +138,4 @@
 });
 
 </script>
+</html>

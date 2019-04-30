@@ -62,17 +62,22 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
        
        $openid=$_W["openid"];
        if (empty($openid)){
+           $result = mc_oauth_userinfo();
+           $openid=$result["openid"];
+       }
+
+       if (empty($openid)){
            $openid=$_GPC["openid"];
        }
        $order_sn=$_GPC["order_sn"];
        $log=pdo_get("ewei_shop_merch_purchaselog",array('order_sn'=>$order_sn));
-       if (empty($log)){
-           show_json(0,"订单编号不正确");
-       }
-       if ($log["status"]==1){
-           show_json(0,"该订单已被支付");
-       }
-//        var_dump($openid);
+//        if (empty($log)){
+//            show_json(0,"订单编号不正确");
+//        }
+//        if ($log["status"]==1){
+//            show_json(0,"该订单已被支付");
+//        }
+
        $params["openid"]=$openid;
        $params["fee"] =$log["money"];
        $params["title"]="商家充值";
@@ -89,12 +94,12 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
        // 	    var_dump($options);die;
        
        $wechat = m("common")->fwechat_child_build($params, $options, 0);
-//         var_dump($wechat);
-       if (is_error($wechat)){
-           show_json(0,$wechat);
-//               var_dump($wechat);
-       }
-       show_json(1,$wechat);
+
+//        if (is_error($wechat)){
+//            show_json(0,$wechat);
+// //               var_dump($wechat);
+//        }
+       include $this->template();
    }
    
    //充值--成功回调
@@ -104,20 +109,21 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
        global $_GPC;
        $order_sn=$_GPC["order_sn"];
        $log=pdo_get("ewei_shop_merch_purchaselog",array("order_sn"=>$order_sn));
-       if (empty($log)) {
-           show_json(0,"订单编号错误");
-       }
-       if ($log["status"]==1){
-           show_json(0,"该订单已被支付");
-       }
+//        if (empty($log)) {
+//            show_json(0,"订单编号错误");
+//        }
+//        if ($log["status"]==1){
+//            show_json(0,"该订单已被支付");
+//        }
        $r=m("merch")->set_cardlog($order_sn,0);
-      if ($r){
-           
-          show_json(1,"成功");
-           
-       } else{
-           show_json(0,"失败");
-       }
+//       if ($r){
+//           show_json(1,"成功");
+//        } else{
+//            show_json(0,"失败");
+//        }
+
+       header('location: ' . mobileUrl('merchmanage/reward/home/index'));
+       exit();
        
    }
    
@@ -151,7 +157,8 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
            
            $params = array(':merchid' => $merchid,':title'=>"%".$title."%");
        }
-       $sql = 'SELECT id,title,thumb,total,sales,deduct,minprice,maxprice FROM ' . tablename('ewei_shop_goods') . ' where 1 ' . $condition . ' ORDER BY id desc LIMIT ' . ($pindex - 1) * $psize . ',' . $psize;
+//        $sql = 'SELECT id,title,thumb,total,sales,deduct,minprice,maxprice FROM ' . tablename('ewei_shop_goods') . ' where 1 ' . $condition . ' ORDER BY id desc LIMIT ' . ($pindex - 1) * $psize . ',' . $psize;
+       $sql = 'SELECT id,title,thumb,total,sales,deduct,minprice,maxprice FROM ' . tablename('ewei_shop_goods') . ' where 1 ' . $condition . ' ORDER BY id desc ';
        
        $list = pdo_fetchall($sql, $params);
 //        var_dump($list);
@@ -335,7 +342,9 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
        }
        $pageindex=max(1,intval($_GPC["page"]));
        $pagesize=6;
-       $sql="select id,type,share,click,commission_count,create_time from ".tablename("ewei_shop_merch_reward")." where merch_id=:merch_id and is_end=0 order by create_time desc limit ".($pageindex-1)*$pagesize.','.$pagesize;
+//        $sql="select id,type,share,click,commission_count,create_time from ".tablename("ewei_shop_merch_reward")." where merch_id=:merch_id and is_end=0 order by create_time desc limit ".($pageindex-1)*$pagesize.','.$pagesize;
+       $sql="select id,type,share,click,commission_count,create_time from ".tablename("ewei_shop_merch_reward")." where merch_id=:merch_id and is_end=0 order by create_time desc";
+       
        $param=array(':merch_id'=>$merchid);
        $list["list"]=pdo_fetchall($sql,$param);
        foreach ($list["list"] as $k=>$v){
