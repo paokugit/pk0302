@@ -105,5 +105,13 @@ class Index_EweiShopV2Page extends AppMobilePage{
        m('member')->setagent(array('agentopenid'=>trim($memberInfo["openid"]),'openid'=>$_GPC['openid']));
        show_json(0, '绑定成功');
    }
+
+    /**
+     * 获取平台用户活跃量
+     */
+   public function get_member_count(){
+       $memberid = pdo_fetchcolumn("select id from " . tablename('ewei_shop_member') .'where 1=1  order by id desc limit 1');
+       show_json(0, $memberid*11);
+   }
 }
 ?>
