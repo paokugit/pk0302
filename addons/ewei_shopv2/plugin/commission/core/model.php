@@ -2102,6 +2102,19 @@ if( !class_exists("CommissionModel") )
 			    $goods=pdo_get('ewei_shop_goods',array('id'=>$vv['goodsid']));
 			    if ($goods['agentlevel']>$member['agentlevel']){
 			        pdo_update('ewei_shop_member',array('agentlevel'=>$goods['agentlevel'],'agentlevel_time'=>date("Y-m-d",time())),array('id'=>$member['id']));
+			       
+			        //会员卡路里奖励
+			        if ($goods['agentlevel']==1||$goods['agentlevel']==2){
+			            if ($goods['agentlevel']==1){
+			                $credit=9.9;
+			                $info="购买健康达人会员赠送";
+			            }else{
+			                $credit=99;
+			                $info="购买星选达人会员赠送";
+			            }
+			            
+			            m('member')->setCredit($openid, 'credit1', $credit, $info);
+			        }
 			        //会员开通消息
 			        $commission=pdo_fetch("select * from ".table("ewei_shop_commission_level")." where id=:id",array(':id'=>$goods["agentlevel"]));
 			        $postdata=array(

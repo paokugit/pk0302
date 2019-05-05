@@ -26,14 +26,14 @@
                     <div class="tab-content">
                         <!-- 指定商品-开始 -->
                         <div class="active-txt">
-                            <div class="explain_box">
+                            <div class="explain_box sharebtn">
                                 <span class="ex_img"><img src="http://paokucoin.com/img/backgroup/explain01.png" alt=""></span>
                                 <span class="ex_text">奖励说明</span>
                             </div>
                             <div class="award_list">
                                 <!-- 分享奖励 -->
                                 <div class="list_box">
-                                    <div class="award_item"><span class="award_text">分享奖励</span><span class="award_count"><input class="share_award fixedIpt" type="text" placeholder="单次分享奖励不低于0.1"></span></div>
+                                    <div class="award_item"><span class="award_text" >分享奖励</span><span class="award_count"><input class="share_award fixedIpt" type="text" placeholder="单次分享奖励不低于0.1"></span></div>
                                 </div>
                                 <!-- 点击奖励 -->
                                 <div class="list_box">
@@ -83,7 +83,7 @@
 
                         <!-- 全店商品-开始 -->
                         <div>
-                            <div class="explain_box">
+                            <div class="explain_box sharebtn">
                                 <span class="ex_img"><img src="http://paokucoin.com/img/backgroup/explain01.png" alt=""></span>
                                 <span class="ex_text">奖励说明</span>
                             </div>
@@ -157,6 +157,19 @@
     <div id="warning">
         <div class="mask-text"></div>
     </div>
+    
+    <!-- 奖励说明 -->
+<div id="taskexplain">
+<div class="taskexplain_explain">
+<div class="taskexplain-text">
+<p>分享奖励：<span>用户分享一次，即算一次； 店铺内每件商品<i>限首次分享</i>有奖励。</span></p >
+<p>分享奖励：<span>用户分享出去，好友通过链接或商品海报扫码进入，即算一次。</span></p >
+<p>交易佣金：<span>用户分享出去，好友通过链接或商品海报扫码进入下单成功，即算一次，金额由商家后台自由设置；从订单支付款中扣除，奖励给分享的用户。</span></p >
+</div>
+<div class="closeBtn"><img src="http://paokucoin.com/img/backgroup/guanbi.png" alt=""></div>
+</div>
+</div>
+
 </body>
 
 <script type="text/javascript">
@@ -409,6 +422,11 @@
          } 
         })
         
-        
+        $(".sharebtn").click(function (){
+$("#taskexplain").css('display','block')
+})
+$(".closeBtn").bind("click",function(){
+$("#taskexplain").css('display','none')
+})
 </script>
 </html>
