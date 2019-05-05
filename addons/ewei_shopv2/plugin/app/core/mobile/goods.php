@@ -1140,7 +1140,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		               $goods["reward"]=1;
 		               $goods["share_price"]=$reward["share_price"];
 		               $goods["click_price"]=$reward["click_price"];
-		               $goods["commission"]=$$reward["commission"]*$goods["maxprice"]/100;
+		               $goods["commission"]=$reward["commission"]*$goods["maxprice"]/100;
 		           }else{
 		               $goods["reward"]=0;
 		               $goods["share_price"]=0;
