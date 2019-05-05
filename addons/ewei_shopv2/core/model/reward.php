@@ -43,12 +43,16 @@ class Reward_EweiShopV2Model
     /**
      * 根据等级获取奖励金额
      * @param $agentlevel
+     * 店主和星选达人   推荐健康达人改为5元         健康达人推荐健康达人改为3元
      */
     public function getRewardMoney($agentlevel,$memberlevel){
         if($memberlevel==0) return 0;
 	    if($agentlevel==0) return 0;
-	    if($agentlevel==1) return 2;
-	    if($agentlevel==2) return 20;
+	    if($agentlevel==1) return 3;
+	    if($agentlevel==2){
+            if($memberlevel==1) return 5;
+            return 20;
+        }
 	    if($agentlevel==3){
 	        if($memberlevel==2) return 20;
 	        if($memberlevel==1) return 2;
@@ -65,7 +69,7 @@ class Reward_EweiShopV2Model
             //if($memberlevel==4) return 70;
             if($memberlevel==3) return 70;
             if($memberlevel==2) return 20;
-            if($memberlevel==1) return 2;
+            if($memberlevel==1) return 5;
             return 0;
         }
 	    return 0;

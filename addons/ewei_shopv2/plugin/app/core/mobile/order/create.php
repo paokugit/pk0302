@@ -2283,7 +2283,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 						app_error(AppError::$OrderCreateTimeEnd, $data["title"] . "<br/> 限购时间已过!");
 					}
 				}
-				$levelid = intval($member["level"]);
+				$levelid = intval($member["agentlevel"]);
 				$groupid = intval($member["groupid"]);
 				if( $data["buylevels"] != "" ) 
 				{
