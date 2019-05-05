@@ -85,9 +85,14 @@ class Merch_EweiShopV2Page extends AppMobilePage
                     }else{
                         //获取是否有进行中的赏金
                         $reward=pdo_get("ewei_shop_merch_reward",array('is_end'=>0,'merch_id'=>$v["id"]));
+//                         var_dump($reward);
                         if ($reward){
+                           
                             $merchuser[$k]["is_reward"]=1;
                             //获取赏金
+//                             var_dump($v["id"]);
+//                             var_dump($v["reward_type"]);
+//                             var_dump(m("merch")->reward_money($v["id"],$v["reward_type"]));
                             $merchuser[$k]["reward_money"]=m("merch")->reward_money($v["id"],$v["reward_type"]);
                         }else{
                             $merchuser[$k]["is_reward"]=0;

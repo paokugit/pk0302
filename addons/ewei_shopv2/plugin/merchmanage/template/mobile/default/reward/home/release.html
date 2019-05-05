@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>固定商品</title>
+    <meta content="yes" name="apple-mobile-web-app-capable"> <meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+    <title>发布任务</title>
 </head>
 <script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script>
 <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/fixed.css">
@@ -76,8 +77,7 @@
                             </div>
                             <!-- 余额充足时 -->
 
-                            <div class="fixed_footer" style="display:block">发布</div>
-                            <div class="all_footer" style="display:none">账户余额不足,暂不能发布</div>
+                            
                         </div>
                         <!-- 指定商品-结束 -->
 
@@ -139,8 +139,7 @@
                             </div>
                             <!-- 余额充足时 -->
 
-                            <div id="allpost" class="fixed_footer" style="display:block">发布</div>
-                            <div class="all_footer" style="display:none">账户余额不足,暂不能发布</div>
+                           
                         </div>
                         <!-- 全店商品-结束 -->
                     </div>
@@ -150,7 +149,11 @@
         </div>
         <!-- content -->
         <!-- footer -->
-        
+       <div class="footer_box">
+<div class="fixed_footer" style="display:block">发布</div>
+<div class="all_footer" style="display:none">账户余额不足,暂不能发布</div>
+<div id="allpost" style="display:block">发布</div>
+</div>
         <!-- footer -->
     </div>
     <!-- 错误提示 -->
@@ -187,7 +190,14 @@
         var clickipt = ""
         var tradeript=""
         var iptres=""
+        	var navIndex=''
         var cardNumber=sessionStorage.getItem("cardNumber")
+        
+        var cardNumber=sessionStorage.getItem("cardNumber")
+var shareVal=sessionStorage.getItem("shareval")
+var clickVal=sessionStorage.getItem("clickval")
+var traderVal=sessionStorage.getItem("traderval")
+
         console.log(cardNumber)
         var globalNumber=Number(cardNumber)
         console.log(globalNumber)
@@ -196,6 +206,11 @@
                          shareval = Number($(".share_award").val())
                          clickval = Number($(".click_award").val())
                          traderval =Number($(".trader_award").val())
+                         
+                         sessionStorage.setItem("shareval",shareval)
+sessionStorage.setItem("clickval",clickval)
+sessionStorage.setItem("traderval",traderval)
+
                          res=shareval+clickval
                         console.log(res)
                         console.log(globalNumber)
@@ -255,6 +270,13 @@
                         }
         })
         $(window).load(function() { 
+        	
+        	$(".share_award").val(shareVal)
+        	$(".click_award").val(clickVal)
+        	$(".trader_award").val(traderVal)
+        	$("#shareipt").val(shareVal)
+        	$("#clickipt").val(clickVal)
+        	$("#tradeript").val(traderVal)
             // 商家余额
             $.ajax({
             type: 'POST',
@@ -383,6 +405,17 @@
     　　{
     　　　　$(this).addClass("active").siblings().removeClass("active");
     　　　　var index = $(this).index();
+       
+    navIndex=index
+    if(navIndex==0){
+    // alert('指定商品')
+    $(".fixed_footer").css('display','block')
+    $("#allpost").css('display','none')
+    }else if(navIndex==1){
+    $(".fixed_footer").css('display','none')
+    $("#allpost").css('display','block')
+    }
+    
     　　　　$(this).parent().siblings().children().eq(index).addClass("active-txt")
     　　　　.siblings().removeClass("active-txt");
     　　});
