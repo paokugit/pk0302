@@ -204,14 +204,18 @@ class Merch_EweiShopV2Model{
     //获取商家最大赏金
     public function reward_money($merchid,$reward_type){
         $money=0;
+//         var_dump($merchid);
+//         var_dump($reward_type);die;
         if ($reward_type==1){
             //指定商品
-            $list=pdo_fetchall("select * from ".table("ewei_shop_merch_reward")." where merch_id=:merch_id and is_end=0",array(':merch_id'=>$merchid));
+            $list=pdo_fetchall("select * from ".tablename("ewei_shop_merch_reward")." where merch_id=:merch_id and is_end=0",array(':merch_id'=>$merchid));
+//             var_dump($list);die;
             foreach ($list as $k=>$v){
                 $goodsid=unserialize($v["goodid"]);
                 //获取数组长度
                 $length=count($goodsid);
                 $money=$money+($v["share_price"]+$v["click_price"])*$length;
+                
                 //获取订单佣金
                 foreach ($goodsid as $kk=>$vv){
                     //获取商品
@@ -223,7 +227,7 @@ class Merch_EweiShopV2Model{
         }else{
             //全部商品
             $list=pdo_get("ewei_shop_merch_reward",array('merch_id'=>$merchid,'is_end'=>0));
-            $goods=pdo_fetchall("select * from ".table("ewei_shop_goods")."where merchid=:merchid",array(':merchid'=>$merchid));
+            $goods=pdo_fetchall("select * from ".tablename("ewei_shop_goods")."where merchid=:merchid",array(':merchid'=>$merchid));
             foreach ($goods as $k=>$v){
                 $money=$money+($list["share_price"]+$list["click_price"]);
                 $money=$money+($list["commission"]*$v["maxprice"]/100);
