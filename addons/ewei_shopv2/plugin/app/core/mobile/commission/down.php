@@ -90,6 +90,7 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		}
 
 		$list = pdo_fetchall('select * from ' . tablename('ewei_shop_member') . ' where uniacid = ' . $_W['uniacid'] . (' ' . $condition . '  ORDER BY id desc,isagent desc limit ') . ($pindex - 1) * $psize . ',' . $psize);
+		
 		if (!is_array($list) || empty($list)) {
 			$list = array();
 		}
