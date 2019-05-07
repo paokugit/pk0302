@@ -31,6 +31,10 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
       if (empty($merchid)){
           $merchid=$_GPC['merchid'];
       }
+      $merchid=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
+      if ($merchid["member_id"]==0){
+          show_json(0,"未绑定小程序账户");
+      }
       $data["merch_id"]=$merchid;
       $data["purchase_id"]=$_GPC["purchase_id"];
       if ($data["purchase_id"]!=0){
@@ -121,7 +125,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 //        } else{
 //            show_json(0,"失败");
 //        }
-
+        
        header('location: ' . mobileUrl('merchmanage/reward/home/index'));
        exit();
        
@@ -326,7 +330,14 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
        if (empty($merch)){
            show_json(0,"商户不存在");
        }
-       $l["card"]=$merch["card"];
+       //获取绑定的用户
+       if ($merch["member_id"]!=0){
+       $member=pdo_get("ewei_shop_member",array('id'=>$merch["member_id"]));
+       $l["card"]=$member["credit1"];
+       }else{
+       $l["card"]=0;
+       }
+      
        $l["reward_type"]=$merch["reward_type"];
        show_json(1,$l);
    }

@@ -42,7 +42,7 @@
                                 </div>
                                 <!-- 交易佣金-->
                                 <div class="list_box">
-                                    <div class="award_item"><span class="award_text">交易佣金</span><span class="award_count"><input class="trader_award fixedIpt" type="text" placeholder="每成交一单奖励的金额为订单支付金额百分比"></span></div>
+                                    <div class="award_item"><span class="award_text">交易佣金</span><span class="award_count"><input class="trader_award fixedIpt" type="text" placeholder="每成交一单奖励为订单支付金额百分比"></span></div>
                                 </div>
                             </div>
                              <!-- 商品-开始 -->
@@ -99,7 +99,7 @@
                                     </div>
                                     <!-- 交易佣金-->
                                     <div class="list_box">
-                                        <div class="award_item"><span class="award_text">交易佣金</span><span class="award_count"><input class="allIpt" id="tradeript" type="text" placeholder="每成交一单奖励的现金金额"></span></div>
+                                        <div class="award_item"><span class="award_text">交易佣金</span><span class="award_count"><input class="allIpt" id="tradeript" type="text" placeholder="每成交一单奖励为订单支付金额百分比"></span></div>
                                     </div>
                                 </div>
                             <!-- 奖励-结束 -->
@@ -274,9 +274,9 @@ sessionStorage.setItem("traderval",traderval)
         	$(".share_award").val(shareVal)
         	$(".click_award").val(clickVal)
         	$(".trader_award").val(traderVal)
-        	$("#shareipt").val(shareVal)
-        	$("#clickipt").val(clickVal)
-        	$("#tradeript").val(traderVal)
+     //   	$("#shareipt").val(shareVal)
+     //   	$("#clickipt").val(clickVal)
+      //  	$("#tradeript").val(traderVal)
             // 商家余额
             $.ajax({
             type: 'POST',
@@ -356,10 +356,16 @@ sessionStorage.setItem("traderval",traderval)
         })
         // 指定商品的发布按钮点击事件
         $(".fixed_footer").click(function (){
+        	
+        	shareval = Number($(".share_award").val())
+            clickval = Number($(".click_award").val())
+            traderval =Number($(".trader_award").val())
+            
             // console.log(shareval,clickval)
             if($(".share_award").val().length<0 || $(".click_award").val().length<0 || $(".trader_award").val().length<0){
             $("#warning").show().delay(1000).hide(300);
             $("#warning .mask-text ").text("输入框不能为空");
+            
          }else{
             $.ajax({
             type: 'POST',

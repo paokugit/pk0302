@@ -40,7 +40,10 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                          if ($merch["card"]>=$v["share_price"]){
                              
                          pdo_update("ewei_shop_merch_user",array('card'=>$merch["card"]-$v["share_price"]),array('id'=>$merchid));
-                         
+                         if ($merch["member_id"]!=0){
+                             $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
+                             m('member')->setCredit($member["openid"], 'credit1', -$v["share_price"], "分享支出");
+                         }
                          pdo_update("ewei_shop_merch_reward",array('commission_count'=>$v["commission_count"]+$v["share_price"]),array('id'=>$v["id"]));
                          $shoplog["merch_id"]=$merchid;
                          $shoplog["openid"]=$openid;
@@ -84,6 +87,11 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                             if ($merch["card"]>=$v["share_price"]){
                                 
                                 pdo_update("ewei_shop_merch_user",array('card'=>$merch["card"]-$v["share_price"]),array('id'=>$merchid));
+                                
+                                if ($merch["member_id"]!=0){
+                                    $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
+                                    m('member')->setCredit($member["openid"], 'credit1', -$v["share_price"], "分享支出");
+                                }
                                 
                                 pdo_update("ewei_shop_merch_reward",array('commission_count'=>$v["commission_count"]+$v["share_price"]),array('id'=>$v["id"]));
                                 $shoplog["merch_id"]=$merchid;
@@ -165,7 +173,10 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                         if ($merch["card"]>=$v["click_price"]){
                             
                             pdo_update("ewei_shop_merch_user",array('card'=>$merch["card"]-$v["click_price"]),array('id'=>$merchid));
-                            
+                            if ($merch["member_id"]!=0){
+                                $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
+                                m('member')->setCredit($member["openid"], 'credit1', -$v["click_price"], "分享点击支出");
+                            }
                             pdo_update("ewei_shop_merch_reward",array('commission_count'=>$v["commission_count"]+$v["click_price"]),array('id'=>$v["id"]));
                             $shoplog["merch_id"]=$merchid;
                             $shoplog["openid"]=$openid;
@@ -210,6 +221,11 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                             if ($merch["card"]>=$v["click_price"]){
                                 
                                 pdo_update("ewei_shop_merch_user",array('card'=>$merch["card"]-$v["click_price"]),array('id'=>$merchid));
+                                
+                                if ($merch["member_id"]!=0){
+                                    $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
+                                    m('member')->setCredit($member["openid"], 'credit1', -$v["click_price"], "分享点击支出");
+                                }
                                 
                                 pdo_update("ewei_shop_merch_reward",array('commission_count'=>$v["commission_count"]+$v["click_price"]),array('id'=>$v["id"]));
                                 $shoplog["merch_id"]=$merchid;

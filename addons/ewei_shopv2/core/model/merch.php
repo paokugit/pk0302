@@ -11,6 +11,9 @@ class Merch_EweiShopV2Model{
           if ($type==0){
               $log=pdo_get("ewei_shop_merch_purchaselog",array("order_sn"=>$data));
               $merch=pdo_get("ewei_shop_merch_user",array('id'=>$log["merch_id"]));
+              if ($merch["member_id"]!=0){
+              $member=pdo_get("ewei_shop_member",array('id'=>$merch["member_id"]));
+              }
               $card=$merch["card"]+$log["purchase"]+$log["give"];
               if (pdo_update("ewei_shop_merch_user",array('card'=>$card),array('id'=>$log["merch_id"]))){
                   
@@ -21,12 +24,21 @@ class Merch_EweiShopV2Model{
                   $dat["money"]=$log["purchase"];
                   $dat["create_time"]=time();
                   pdo_insert("ewei_shop_merch_rewardlog",$dat);
+                  if ($merch["member_id"]!=0){
+                  //更新小程序用户
+                  m('member')->setCredit($member["openid"], 'credit1', $log["purchase"], "充值");
+                  }
+                  
                   if ($log["give"]!=0){
                       $dat["merch_id"]=$log["merch_id"];
                       $dat["intro"]="充值赠送金额";
                       $dat["money"]=$log["give"];
                       $dat["create_time"]=time();
                       pdo_insert("ewei_shop_merch_rewardlog",$dat);
+                      if ($merch["member_id"]!=0){
+                      //更新小程序用户
+                      m('member')->setCredit($member["openid"], 'credit1', $log["give"], "充值赠送金额");
+                      }
                   }
                   
                   return true;
