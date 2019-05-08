@@ -253,5 +253,32 @@ class Index_EweiShopV2Page extends AppMobilePage
 
         }
     }
+
+
+    /**
+     * 获取会员手机号
+     */
+    public function get_mobile(){
+        global $_GPC;
+        if(empty($_GPC['openid'])) app_error(2,'参数错误');
+        $member_info = m('member')->getInfo($_GPC['openid']);
+        if(!$member_info) app_error(2,'用户信息不存在');
+        app_error(0,$member_info['mobile']);
+    }
+
+
+    /**
+     * 添加会员手机号
+     */
+    public function add_mobile(){
+        global $_GPC;
+        if(empty($_GPC['mobile'])) app_error(1,'手机号获取失败');
+        if(empty($_GPC['openid'])) app_error(2,'参数错误');
+        $member_info = m('member')->getInfo($_GPC['openid']);
+        if(!$member_info) app_error(2,'用户信息不存在');
+        if($member_info['mobile']) app_error(0,'手机号更新成功');
+        pdo_update('ewei_shop_member',array('mobile'=>$_GPC['mobile']),array('openid'=>$_GPC['openid']));
+        app_error(0,'手机号更新成功');
+    }
 }
 ?>

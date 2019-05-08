@@ -475,13 +475,12 @@ class Order_EweiShopV2Model
 	        if($val['cates']=='4'){
 	            m('reward')->addReward($openid);
                 $this->write_log('===='.$val['cates'].'====');
-	            break;
             }
 
 	        if($order['agentid']){//会员关系绑定@lihanwen
 	            //推荐人信息
                 $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$order['agentid']));
-                if(!$agentmemberInfo)  app_error(1,'信息不存在');
+                if(!$agentmemberInfo)  break;
                 m('member')->setagent(array('agentopenid'=>$agentmemberInfo["openid"],'openid'=>$openid));
             }
 

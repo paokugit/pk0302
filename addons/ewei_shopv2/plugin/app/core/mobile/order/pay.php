@@ -392,6 +392,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
         if($order['status']==3){
             m('order')->reward($goods,$order['openid'],$order);//lihanwen 会员推荐返佣金
         }
+
 		$address = false;
 		if( !empty($order["addressid"]) ) 
 		{
@@ -568,13 +569,11 @@ class Pay_EweiShopV2Page extends AppMobilePage
 		pdo_insert("ewei_shop_member_log", $log_data);
 	}
 
-//	public function aa(){
-//        $order = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where id=:id and openid=:openid limit 1", array( ":id" => 604,":openid" => 'sns_wa_owRAK4-smphSYPkphpDAFOnsuy08' ));
-//        $goods = pdo_fetchall("select og.goodsid,g.cates,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,og.optionname as optiontitle,g.isverify,g.storeids from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:orderid ", array(  ":orderid" =>604 ));
-//        if($order['status']==3){
-//            $res = m('order')->reward($goods,$order['openid'],$order);//lihanwen 会员推荐返佣金
-//            var_dump($res);
-//        }
-//    }
+	public function aa(){
+        $res = m('reward')->addReward('sns_wa_owRAK4-smphSYPkphpDAFOnsuy08');
+        $this->write_log('===='.'ssss'.'====');
+        var_dump($res);
+        die();
+    }
 }
 ?>
