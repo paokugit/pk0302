@@ -12,7 +12,7 @@ class Reward_EweiShopV2Model
      */
 	public function addReward($openid){
         global $_W;
-        $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $openid ));
+        $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $openid ));
         if(!$memberInfo) return false;
         $res = $this->getReward($memberInfo['agentid'],$memberInfo['agentlevel'],$memberInfo['openid']);
         return $res;
@@ -25,14 +25,18 @@ class Reward_EweiShopV2Model
      */
     public function getReward($agentid,$memberlevel,$memberopenid){
         global $_W;
-        $agentInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where id=:id and uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":id" => $agentid ));
+        $agentInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where id=:id limit 1", array(  ":id" => $agentid ));
         if(!$agentInfo) return false;
         $rewardMoney = $this->getRewardMoney($agentInfo['agentlevel'],$memberlevel);// 奖励金额
         $shopOwner = $this->getShopOwnerAgent($agentid);//获取是否有上级店长
-        m('memberlog')->rewardMember($agentInfo['openid'],$rewardMoney,$memberopenid);//直推奖
+        if($rewardMoney>0){
+            m('memberlog')->rewardMember($agentInfo['openid'],$rewardMoney,$memberopenid);//直推奖
+        }
         if($shopOwner){//有店长
             $ownerMoney = $this->shopOwnerMoney($memberlevel);
-            return m('memberlog')->rewardShowOwnerMember($shopOwner,$ownerMoney,$memberopenid);
+            if($ownerMoney>0) {
+                m('memberlog')->rewardShowOwnerMember($shopOwner, $ownerMoney, $memberopenid);
+            }
         }
         return true;
 
@@ -78,7 +82,7 @@ class Reward_EweiShopV2Model
     public function shopOwnerMoney($memberlevel){
         switch ($memberlevel){
             case 0:
-                return 0;break;
+                return 0;
             case 1:
                 return 1;
             case 2:

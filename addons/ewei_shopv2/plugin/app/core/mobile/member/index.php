@@ -262,8 +262,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         if(empty($_GPC['openid'])) app_error(2,'参数错误');
         $member_info = m('member')->getInfo($_GPC['openid']);
-        if(!$member_info) app_error(2,'用户信息不存在');
-        app_error(0,$member_info['mobile']);
+        if(!$member_info) app_error(3,'用户信息不存在');
+        $member_info['mobile']?app_error(0,$member_info['mobile']):app_error(1,'未添加手机号');
     }
 
 
@@ -271,6 +271,19 @@ class Index_EweiShopV2Page extends AppMobilePage
      * 添加会员手机号
      */
     public function add_mobile(){
+        global $_GPC;
+        global $_W;
+        $encryptedData = trim($_GPC["res"]['encryptedData']);
+        $iv = trim($_GPC['res']["iv"]);
+        $sessionKey = trim($_GPC['res']["sessionKey"]);
+        if (empty($encryptedData) || empty($iv)) {
+            app_error(AppError::$ParamsError);
+        }
+        $appset = m("common")->getSysset("app");
+        $pc = new WXBizDataCrypt($appset['appid'], $sessionKey);
+        $errCode = $pc->decryptData($encryptedData, $iv, $data);
+        var_dump($errCode);die();
+
         global $_GPC;
         if(empty($_GPC['mobile'])) app_error(1,'手机号获取失败');
         if(empty($_GPC['openid'])) app_error(2,'参数错误');

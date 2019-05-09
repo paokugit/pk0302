@@ -2114,7 +2114,7 @@ if( !class_exists("CommissionModel") )
 			            }
 			            
 			            m('member')->setCredit($openid, 'credit1', $credit, $info);
-                        wxmessage($order['agentid'],$openid);
+                        //wxmessage($order['agentid'],$openid);
 			        }
 			        //会员开通消息
 			        $commission=pdo_fetch("select * from ".table("ewei_shop_commission_level")." where id=:id",array(':id'=>$goods["agentlevel"]));
@@ -3870,11 +3870,16 @@ if( !class_exists("CommissionModel") )
 
         //卡路里奖励到账提醒
         //bopenid为被推荐人的
-        function wxmessage($agentid,$bopenid){
+       public function wxmessage($agentid,$bopenid){
             //获取推荐人的用户信息
             $tmember = m("member")->getMember($agentid);//推荐人的
             $bmember = m("member")->getMember($bopenid);//被推荐人的
-            $agentInfo = pdo_fetch("select id,levelname from " . tablename("ewei_shop_commission_level") . " where id = :id", array( ":id" => $bmember['agentlevel'] ));
+            $agentInfo=array();
+            if($bmember['agentlevel']==0){
+                $agentInfo['levelname'] = "普通会员";
+            }else{
+                $agentInfo = pdo_fetch("select id,levelname from " . tablename("ewei_shop_commission_level") . " where id = :id", array( ":id" => $bmember['agentlevel'] ));
+            }
 
             $postdata=array(//被推荐人
                 'keyword1'=>array(
