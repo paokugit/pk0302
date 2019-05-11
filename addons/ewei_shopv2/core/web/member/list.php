@@ -222,6 +222,12 @@ class List_EweiShopV2Page extends WebPage
 			$aagentlevels = $plugin_abonus->getLevels();
 		}
 		$member = m("member")->getMember($id);
+		if($member['agentlevel']==0){
+            $shop['levelname']='普通会员';
+        }else{
+            $agentlevelInfo = $agentlevels[$member['agentlevel']-1];
+        }
+        $shop['levelname']= $agentlevelInfo['levelname'];
 		if( $hascommission ) 
 		{
 			$member = $plugin_com->getInfo($id, array( "total", "pay" ));
