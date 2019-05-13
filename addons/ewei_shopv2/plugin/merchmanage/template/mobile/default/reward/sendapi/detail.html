@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>编辑短信</title>
+     <script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script>
+    <script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/jquery.min.js"></script>
+    <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/redact.css">
+</head>
+
+
+<body>
+    <!-- 编辑短信 -->
+    <div class="all_box">
+        <!-- 头部编辑短信 -->
+        <div class="head">
+            <!-- 蓝色的框 -->
+            <div class="frame">
+            </div>
+            <!-- 标题 -->
+            <div class="redact">
+                <span>编辑短信</span>
+            </div>
+        </div>
+        <!-- 文本域和清除 -->
+        <div class="text_field_clear">
+            <!-- 文本域 -->
+            <div class="text_field">
+                <textarea class="textarea"></textarea>
+            </div>
+        </div>
+        <div class="redact_text">
+            <ul class="headline">
+
+            </ul>
+        </div>
+        <!-- 发送名单 -->
+        <div class="send_select">
+            <div class="send">发送名单</div>
+
+            <div class="select">
+                <span>已选择</span>
+                <span class="num">0</span>
+                <span>个会员名单</span>
+            </div>
+            <div class="direction">
+                <img src="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/img/open@2x.png">
+            </div>
+        </div>
+        <!-- 支付 -->
+        <div class="pay">
+            <span>支付</span>
+            <span class="payspan">0</span>
+            <span>元，立即群发</span>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script type="text/javascript">
+
+//paraName 等找参数的名称
+　　function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) { return pair[1]; }
+        }
+        return (false);
+    }
+    var templateid ='{php echo $template_id}'
+    console.log(templateid)
+    var openid = '{php echo $openid}'
+    console.log(openid)
+    var message = ""
+    var content = ""
+    var str1 = ""
+    var str2 = ""
+    var num='{php echo $num}'
+    if(num){
+    $(".num").html(num)
+    $(".payspan").html(num*0.2)
+    }
+    
+    $(window).load(function () {
+        $.ajax({
+            type: 'POST',
+            url:'{php echo mobileUrl('merchmanage/reward/sendapi/template_detail')}',
+            data: {
+                "template_id":templateid
+            },
+            dataType: "json",
+            success: function (data) {
+                str1 += '<div class="text_field">' +
+                    '<textarea class="textarea">' + data.result.content + '</textarea>' +
+                    '</div>'
+                $(".text_field").html(str1)
+                $.each(data.result.variable, function (i, item) {
+                    // console.log(item)
+                    str2 += '<li class="headli ">' + '<div class="optional">' +
+                        '<span class="headtext">' + item + '</span>' +
+                        '</div>'
+                        + '<div class="optional_text">' +
+                        '<input class="select_text" placeholder="请填写" />' +
+                        '</div>' +
+                        '</li>'
+                    $(".redact_text").html(str2)
+                    
+                })
+            }
+        })
+    })
+
+    //跳转选择会员界面，将templateid传过去
+    $(".send_select").click(function () {
+        location.href = '../index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.sendapi.select_member&id=' + templateid
+    })
+    // 点击支付
+    $(".pay").click(function(){
+        var temp= document.getElementsByClassName("select_text");
+
+        for(var i=0;i<temp.length;i++){
+            if(content==''){
+                content=temp[i].value
+            }else{
+                content+=','+temp[i].value
+            }
+        }
+        console.log(content);
+    
+        $.ajax({
+                type: 'POST',
+                dataType: "json",
+                
+                url:'{php echo mobileUrl('merchmanage/reward/sendapi/create_order')}',
+                data:{
+                    "template_id":templateid,
+                    "openid":openid,
+                    "content":content,
+                },
+                success:function(data){
+                    message = data.result.message   
+                    console.log("message++++++++++++++++++"+message);
+                    window.location.href="../index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.sendapi.order_wx&order_sn="+message
+                }
+            })
+           
+    })
+</script>

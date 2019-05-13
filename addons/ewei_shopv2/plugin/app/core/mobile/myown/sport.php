@@ -511,33 +511,60 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         $parent_id=(int)$_GPC["parent_id"];
         $openid=$_GPC["openid"];
         $openid=str_replace("sns_wa_", '', $openid);
+        //绑定测试
+        $bind["login"]=$login;
+        $bind["parent_id"]=$parent_id;
+        $bind["openid"]=$openid;
+        $bind["create_time"]=date("Y-m-d",time());
+        pdo_insert("ewei_member_bind",$bind);
+       
         if (empty($openid)){
             app_error(AppError::$ParamsError);
         }
         $member=m("member")->getmember("sns_wa_".$openid);
-         if ($login==0){
-             if ($member){
-             pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
-             }else{
+//          if ($login==0){
+//              if ($member){
+//              pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
+//              }else{
                
-                
-                 $m = array("uniacid" => $_W["uniacid"],"agentid"=>$parent_id,"uid" => 0, "openid" =>"sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
-                 pdo_insert("ewei_shop_member", $m);
+//                  $m = array("uniacid" => $_W["uniacid"],"agentid"=>$parent_id,"uid" => 0, "openid" =>"sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
+//                  pdo_insert("ewei_shop_member", $m);
                  
-             }
+//              }
+//             //推荐人
+//             if ($parent_id!=0&&!empty($parent_id)){
+//                 $parent=m("member")->getmember($parent_id);
+//                 if (!empty($parent)){
+//                     $cd=$this->prize();
+//                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+ 
+//                 }
+//             }
+            
+//             show_json(0,"成功");
+//         }
+       
+       
+            if ($member&&$member["agentid"]==0){
+                pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
+            }elseif (empty($member)){
+                
+                $m = array("uniacid" => $_W["uniacid"],"agentid"=>$parent_id,"uid" => 0, "openid" =>"sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
+                pdo_insert("ewei_shop_member", $m);
+                
+            }
             //推荐人
             if ($parent_id!=0&&!empty($parent_id)){
                 $parent=m("member")->getmember($parent_id);
                 if (!empty($parent)){
                     $cd=$this->prize();
                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
- 
+                    
                 }
             }
             
             show_json(0,"成功");
-        }
-        show_json(0,"success");
+        
     }
     
     //概率算法

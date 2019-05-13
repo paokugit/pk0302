@@ -257,7 +257,14 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
            show_json(0,"金额不可小于0.1");
        }
        $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
-       if ($data["share_price"]+$data["click_price"]>$merch["card"]){
+       if ($merch["member_id"]){
+           $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
+           $yue=$member["credit1"];
+       }else{
+           $yue=$merch["card"];
+       }
+       
+       if ($data["share_price"]+$data["click_price"]>$yue){
            show_json(0,"余额不足");
        }
        $data["commission"]=$_GPC["commission"];
@@ -292,9 +299,15 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
            show_json(0,"分享奖励|点击奖励金额不可小于0.1");
        }
        $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
-//        var_dump($merch);
-       if ($data["share_price"]+$data["click_price"]>$merch["card"]){
-           show_json(0,"余额不足，不可发布");
+       if ($merch["member_id"]){
+           $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
+           $yue=$member["credit1"];
+       }else{
+           $yue=$merch["card"];
+       }
+       
+       if ($data["share_price"]+$data["click_price"]>$yue){
+           show_json(0,"余额不足");
        }
        
        $data["commission"]=$_GPC["commission"];

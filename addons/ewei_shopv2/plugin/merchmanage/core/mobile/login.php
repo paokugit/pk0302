@@ -106,7 +106,7 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 	    global $_W;
 	    global $_GPC;
 	    $mobile=$_GPC["mobile"];
-	    if (!preg_match("/^1[345678]{1}\d{9}$/",$mobile)){
+	    if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
 	        show_json(0,"手机号格式不正确");
 	    }
 	    //判断是否又该商户
