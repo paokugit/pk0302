@@ -186,9 +186,6 @@ class Wxapp_EweiShopV2Page extends Page
         }
         $openid=str_replace("sns_wa_", '', $openid);
 
-
-
-        
         $wxopenid = "sns_wa_" . $openid;
         
         $member = m("member")->getMember($wxopenid);

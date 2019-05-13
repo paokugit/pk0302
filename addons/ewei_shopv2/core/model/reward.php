@@ -55,7 +55,8 @@ class Reward_EweiShopV2Model
 	    if($agentlevel==1) return 3;
 	    if($agentlevel==2){
             if($memberlevel==1) return 5;
-            return 20;
+            if($memberlevel==5) return 100;
+            if($memberlevel==2) return 40;
         }
 	    if($agentlevel==3){
 	        if($memberlevel==2) return 20;
@@ -69,10 +70,10 @@ class Reward_EweiShopV2Model
             return 280;
 	    }*/
 	    if($agentlevel==5){
-            if($memberlevel==5) return 196;
+            if($memberlevel==5) return 200;
             //if($memberlevel==4) return 70;
-            if($memberlevel==3) return 70;
-            if($memberlevel==2) return 20;
+            //if($memberlevel==3) return 70;
+            if($memberlevel==2) return 40;
             if($memberlevel==1) return 5;
             return 0;
         }
