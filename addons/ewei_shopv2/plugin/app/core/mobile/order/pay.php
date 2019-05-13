@@ -44,12 +44,9 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			pdo_delete("core_paylog", array( "plid" => $log["plid"] ));
 			$log = NULL;
 		}
-		//var_dump($order);
 		//lihanwen
         if($order['couponid']>0){
-            //var_dump($order['couponid']);
             $coupon_info = pdo_fetch("SELECT couponid FROM " . tablename("ims_ewei_shop_coupon_data") . " WHERE `uniacid`=:uniacid AND `id`=:id limit 1", array( ":uniacid" => $uniacid, ":id" => $order['couponid']));
-            //var_dump($coupon_info);
             if($coupon_info['couponid']==2){//店主会员免费商品
                 $order["price"] = 0.00;
             }
@@ -149,7 +146,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			app_error(AppError::$OrderPayFail);
 		}
 		$order_goods = pdo_fetchall("select og.id,g.title, og.goodsid,og.optionid,g.total as stock,og.total as buycount,g.status,g.deleted,g.maxbuy,g.usermaxbuy,g.istime,g.timestart,g.timeend,g.buylevels,g.buygroups,g.totalcnf from  " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on og.goodsid = g.id " . " where og.orderid=:orderid and og.uniacid=:uniacid ", array( ":uniacid" => $_W["uniacid"], ":orderid" => $orderid ));
-		foreach( $order_goods as $data ) 
+		foreach( $order_goods as $data )
 		{
 			if( empty($data["status"]) || !empty($data["deleted"]) ) 
 			{
@@ -218,9 +215,9 @@ class Pay_EweiShopV2Page extends AppMobilePage
 				}
 			}
 		}
-		if( $type == "cash" ) 
+		if( $type == "cash" )
 		{
-			if( empty($set["pay"]["cash"]) ) 
+			if( empty($set["pay"]["cash"]) )
 			{
 				app_error(AppError::$OrderPayFail, "未开启货到付款");
 			}
@@ -243,9 +240,9 @@ class Pay_EweiShopV2Page extends AppMobilePage
 		$ps["user"] = $openid;
 		$ps["fee"] = $log["fee"];
 		$ps["title"] = $log["title"];
-		if( $type == "credit" ) 
+		if( $type == "credit" )
 		{
-			if( empty($set["pay"]["credit"]) && 0 < $ps["fee"] ) 
+			if( empty($set["pay"]["credit"]) && 0 < $ps["fee"] )
 			{
 				app_error(AppError::$OrderPayFail, "未开启余额支付");
 			}
@@ -392,6 +389,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
         if($order['status']==3){
             m('order')->reward($goods,$order['openid'],$order);//lihanwen 会员推荐返佣金
         }
+
 		$address = false;
 		if( !empty($order["addressid"]) ) 
 		{
@@ -527,8 +525,8 @@ class Pay_EweiShopV2Page extends AppMobilePage
 				$seckill_color = $diydata["page"]["seckill"]["color"];
 			}
 		}
-		$result = array( "order" => array( "id" => $orderid, "isverify" => $order["isverify"], "virtual" => $order["virtual"], "isvirtual" => $order["isvirtual"], "isvirtualsend" => $order["isvirtualsend"], "virtualsend_info" => $order["virtualsend_info"], "virtual_str" => $order["virtual_str"], "status" => ($order["paytype"] == 3 ? "订单提交支付" : "订单支付成功"), "text" => $text, "price" => $order["price"] ), "paytype" => ($order["paytype"] == 3 ? "需到付" : "实付金额"), "carrier" => $carrier, "address" => $address, "stores" => $stores, "store" => $store, "icon" => $icon, "seckill_color" => $seckill_color );
-        $result['goods'] = $goods['0'];
+		$result = array("goods"=>$goods[0], "order" => array( "id" => $orderid, "isverify" => $order["isverify"], "virtual" => $order["virtual"], "isvirtual" => $order["isvirtual"], "isvirtualsend" => $order["isvirtualsend"], "virtualsend_info" => $order["virtualsend_info"], "virtual_str" => $order["virtual_str"], "status" => ($order["paytype"] == 3 ? "订单提交支付" : "订单支付成功"), "text" => $text, "price" => $order["price"] ), "paytype" => ($order["paytype"] == 3 ? "需到付" : "实付金额"), "carrier" => $carrier, "address" => $address, "stores" => $stores, "store" => $store, "icon" => $icon, "seckill_color" => $seckill_color );
+		$result['goods'] = $goods[0];
 		if( !empty($order["virtual"]) && !empty($order["virtual_str"]) )
 		{
 			$result["ordervirtual"] = m("order")->getOrderVirtual($order);
@@ -568,13 +566,12 @@ class Pay_EweiShopV2Page extends AppMobilePage
 		pdo_insert("ewei_shop_member_log", $log_data);
 	}
 
-//	public function aa(){
-//        $order = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where id=:id and openid=:openid limit 1", array( ":id" => 604,":openid" => 'sns_wa_owRAK4-smphSYPkphpDAFOnsuy08' ));
-//        $goods = pdo_fetchall("select og.goodsid,g.cates,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,og.optionname as optiontitle,g.isverify,g.storeids from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:orderid ", array(  ":orderid" =>604 ));
-//        if($order['status']==3){
-//            $res = m('order')->reward($goods,$order['openid'],$order);//lihanwen 会员推荐返佣金
-//            var_dump($res);
-//        }
-//    }
+	public function aa(){
+	    $res = p('commission')->wxmessage(83,'sns_wa_owRAK4-smphSYPkphpDAFOnsuy08');
+	    var_dump($res);
+        $res = m('reward')->addReward('sns_wa_owRAK4-smphSYPkphpDAFOnsuy08');
+        $this->write_log('========');
+        die();
+    }
 }
 ?>

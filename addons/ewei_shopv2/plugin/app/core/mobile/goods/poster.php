@@ -404,6 +404,88 @@ class Poster_EweiShopV2Page extends AppMobilePage
         app_json(array( "url" => $imgurl ));
     }
 
+    /**
+     * 分享商品海报图生成
+     */
+    public function sharegoodsimg(){
+        global $_GPC;
+        global $_W;
+        set_time_limit(0);
+        @ini_set("memory_limit", "256M");
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/sharegoods/";
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"],"id" => $_GPC['id'])));
+        $filename = $md5 . ".png";
+        $filepath = $path . $filename;
+        if( is_file($filepath) )
+        {
+            $imgurl = $_W["siteroot"] . "addons/ewei_shopv2/data/sharegoods/".$filename;
+            app_json(array( "url" => $imgurl ));
+        }
+        //底部图
+        $target = imagecreatetruecolor(450,360);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+        $thumb = "/addons/ewei_shopv2/static/images/sharegoodsbg.png";
+        $thumb = $this->createImage(tomedia($thumb));
+        imagecopyresized($target, $thumb, 0, 0, 0, 0, 450, 360, imagesx($thumb), imagesy($thumb));
+
+        $goods = pdo_fetch("select * from " . tablename("ewei_shop_goods") . " where id=:id limit 1", array( ":id" => $_GPC['id'] ));
+        //商品图
+        if( !empty($goods["thumb"]) )
+        {
+            if( stripos($goods["thumb"], "//") === false )
+            {
+                $thumb = $this->createImage(tomedia($goods["thumb"]));
+            }
+            else
+            {
+                $thumbStr = substr($goods["thumb"], stripos($goods["thumb"], "//"));
+                $thumb = $this->createImage(tomedia("https:" . $thumbStr));
+            }
+            imagecopyresized($target, $thumb, 11, 11, 0, 0, 280, 280, imagesx($thumb), imagesy($thumb));
+        }
+
+        //价格
+        $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_BOLD.TTF";
+        if( !is_file($font) )
+        {
+            $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
+        }
+        $goodsprice = $this->goodsminprice($goods);
+        if($goodsprice==0){
+            $red = imagecolorallocate($target, 248, 5, 4);
+            imagettftext($target, 32, 0, 297, 124, $red, $font,'免费兑' );
+            //imagettftext($target, 32, 0, 318, 120, $red, $font, floatval($goods['minprice']));
+        }else{
+            //现价
+            $red = imagecolorallocate($target, 248, 5, 4);
+            imagettftext($target, 28, 0, 297, 124, $red, $font,'¥' );
+            imagettftext($target, 32, 0, 318, 120, $red, $font, floatval($goods['minprice']));
+        }
+       //原价
+        $black = imagecolorallocate($target, 51, 51, 51);
+        imagettftext($target, 20, 0, 297, 170, $black, $font,'¥'.floatval($goods['productprice']) );
+
+        imagepng($target, $filepath);
+        imagedestroy($target);
+
+        $imgurl =  $_W["siteroot"] . "addons/ewei_shopv2/data/sharegoods/".$filename . "?v=1.0";
+        app_json(array( "url" => $imgurl ));
+
+    }
+
+     public function goodsminprice($goods){
+         if($goods['deduct']>=$goods['minprice']) return 0;
+         if($goods['deduct']>0){
+             return floatval($goods['minprice']-$goods['deduct']);
+         }
+         return $goods['minprice'];
+     }
 
 }
 ?>

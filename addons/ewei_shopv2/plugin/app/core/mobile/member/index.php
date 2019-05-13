@@ -3,6 +3,9 @@
 	exit( "Access Denied" );
 }
 require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
+//require(EWEI_SHOPV2_PLUGIN . "app/core/error_code.php");
+require(EWEI_SHOPV2_PLUGIN . "app/core/wxapp/wxBizDataCrypt.php");
+
 class Index_EweiShopV2Page extends AppMobilePage 
 {
 	public function main() 
@@ -253,5 +256,46 @@ class Index_EweiShopV2Page extends AppMobilePage
 
         }
     }
+
+
+    /**
+     * 获取会员手机号
+     */
+    public function get_mobile(){
+        global $_GPC;
+        if(empty($_GPC['openid'])) app_error(2,'参数错误');
+        $member_info = m('member')->getInfo($_GPC['openid']);
+        if(!$member_info) app_error(3,'用户信息不存在');
+        $member_info['mobile']?app_error(0,$member_info['mobile']):app_error(1,'未添加手机号');
+    }
+
+
+    /**
+     * 添加会员手机号
+     */
+    public function add_mobile(){
+        global $_GPC;
+        global $_W;
+        $encryptedData = trim($_GPC['encryptedData']);
+        $iv = trim($_GPC["iv"]);
+        $sessionKey = trim($_GPC["sessionKey"]);
+        if (empty($encryptedData) || empty($iv)) {
+            app_error(AppError::$ParamsError);
+        }
+        $appset = m("common")->getSysset("app");
+        $pc = new WXBizDataCrypt($appset['appid'], $sessionKey);
+        $errCode = $pc->decryptDatas($encryptedData, $iv, $data);
+        if ($errCode == 0) {
+            $data = json_decode($data, true);
+            $member_info = m('member')->getInfo($_GPC['openid']);
+            if(!$member_info) app_error(2,'用户信息不存在');
+            if($member_info['mobile']) app_error(0,'1手机号更新成功');
+            pdo_update('ewei_shop_member',array('mobile'=>$data['phoneNumber']),array('openid'=>$_GPC['openid']));
+            app_error(0,'2手机号更新成功');
+        }else{
+            app_error(0,'3手机号更新成功');
+        }
+    }
+
 }
 ?>

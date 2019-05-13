@@ -81,7 +81,7 @@ class Order_EweiShopV2Model
 		}
 		$orderid = $order["id"];
 		$ispeerpay = $this->checkpeerpay($orderid);
-		if( !empty($ispeerpay) ) 
+		if( !empty($ispeerpay) )
 		{
 			$peerpay_info = (double) pdo_fetchcolumn("select SUM(price) price from " . tablename("ewei_shop_order_peerpay_payinfo") . " where pid=:pid limit 1", array( ":pid" => $ispeerpay["id"] ));
 			if( $peerpay_info < $ispeerpay["peerpay_realprice"] ) 
@@ -124,9 +124,9 @@ class Order_EweiShopV2Model
 			}
 			if( $order["istrade"] == 0 ) 
 			{
-				if( $order["status"] == 0 ) 
+				if( $order["status"] == 0 )
 				{
-					if( !empty($order["virtual"]) && com("virtual") ) 
+					if( !empty($order["virtual"]) && com("virtual") )
 					{
 						if (p('lottery') && empty($ispeerpay)) 
 							{
@@ -140,7 +140,7 @@ class Order_EweiShopV2Model
 					}
 					if( $order["isvirtualsend"] ) 
 					{
-						if (p('lottery') && empty($ispeerpay)) 
+						if (p('lottery') && empty($ispeerpay))
 							{
 								$res = p('lottery')->getLottery($order['openid'], 1, array('money' => $order['price'], 'paytype' => 1));
 								if ($res) 
@@ -172,15 +172,13 @@ class Order_EweiShopV2Model
 					pdo_update("ewei_shop_order", $change_data, array( "id" => $order["id"] ));
 					//判断赏金佣金
 					if ($order["share_id"]!=0&&!empty($order["share_id"])&&$order["merchid"]!=0){
-					    
 					    m("merch")->order($order["id"]);
 					}
-					
-					if( $order["iscycelbuy"] == 1 && p("cycelbuy") ) 
+					if( $order["iscycelbuy"] == 1 && p("cycelbuy") )
 					{
 						p("cycelbuy")->cycelbuy_periodic($order["id"]);
 					}
-					if( $order["isparent"] == 1 ) 
+					if( $order["isparent"] == 1 )
 					{
 						$this->setChildOrderPayResult($order, $time, 1);
 					}
@@ -366,7 +364,8 @@ class Order_EweiShopV2Model
 		$this->setStocksAndCredits($orderid, 3);
 		m("member")->upgradeLevel($order["openid"]);
 		$this->setGiveBalance($orderid, 1);
-		if( com("coupon") ) 
+
+        if( com("coupon") )
 		{
 			com("coupon")->sendcouponsbytask($order["id"]);
 		}
@@ -375,7 +374,7 @@ class Order_EweiShopV2Model
 			com("coupon")->backConsumeCoupon($order["id"]);
 		}
 		m("notice")->sendOrderMessage($orderid);
-		if( p("commission") ) 
+		if( p("commission") )
 		{
 			p("commission")->checkOrderPay($order["id"]);
 			p("commission")->checkOrderFinish($order["id"]);
@@ -475,16 +474,15 @@ class Order_EweiShopV2Model
 	        if($val['cates']=='4'){
 	            m('reward')->addReward($openid);
                 $this->write_log('===='.$val['cates'].'====');
-	            break;
             }
 
 	        if($order['agentid']){//会员关系绑定@lihanwen
 	            //推荐人信息
                 $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$order['agentid']));
-                if(!$agentmemberInfo)  app_error(1,'信息不存在');
-                m('member')->setagent(array('agentopenid'=>$agentmemberInfo["openid"],'openid'=>$openid));
+                if($agentmemberInfo){
+                    m('member')->setagent(array('agentopenid'=>$agentmemberInfo["openid"],'openid'=>$openid));
+                }
             }
-
         }
 	}
 	public function getGoodsCredit($goods) 

@@ -509,10 +509,12 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 			$params[':keywords'] = '%' . $keywords . '%';
 		}
 
-
+		//步数引流
+        if(isset($_GPC['stepfrom']) && $_GPC['stepfrom']==1){
+            $condition .= " and deduct>0";
+        }
 		$sql = 'SELECT count(g.id) FROM ' . tablename('ewei_shop_goods') . 'g' . $condition;
 		$total = pdo_fetchcolumn($sql, $params);
-
 		if (0 < $total) {
 			$presize = (($pindex - 1) * $psize) - $offset;
 			$sql = 'SELECT g.* FROM ' . tablename('ewei_shop_goods') . 'g' . $condition . ' ORDER BY g.`status` DESC, g.`displayorder` DESC,' . "\r\n" . '                g.`id` DESC LIMIT ' . $presize . ',' . $psize;
