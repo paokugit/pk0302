@@ -64,83 +64,67 @@ input{
     input:focus{ 
     border:none;
     }
-/* 头部 */
-/* .head {
-    
-    line-height: 60px;
-    width: 100%;
-    position: absolute;
-    z-index: 5;
-    top: 0;
-    text-align: center;
-} */
-
 /* 内容 */
 .all_box {
-    width: 94%;
+    width: 98%;
+    padding: 0 1%;
     height: auto;
     overflow: auto;
     top: -10px;
     /* position: absolute; */
     z-index: 10;
-    bottom: 60px;
-    padding: 0 3%
-}
-.template_all{
-    width: 100%;
-    height: 100%
-}
-.template1{
-    font-size: 16px
-}
-/* 第一个模板的盒子 */
-.template_one {
-    margin-bottom: 16px;
-}
-.template_item{
-    width: 100%;
-    height: 140px;
-    background: #fff;
-    margin-bottom: 15px
-}
-/* 第二个模板的盒子 */
-.template_two {
-    margin-top: 16px;
-}
-
-.templateandtext {
-    width: 96%;
-    height: 140px;
-    background: #ffffff;
-    border-radius: 5px;
-    font-size: 16px;
-    margin-bottom: 16px;
-    margin: auto
-}
-.template_text{
-    width: 100%;
-    height: 100px;
-    line-height: 25px;
-    font-size: 20px;
-    color: #333;
-    border-bottom: 1px solid #ccc;
-}
-.use_tempalte01{
-    width: 100%;
-    height: 40px;
-    line-height: 40px
-}
-
-.button_template{
-    width: 90px;
-    height: 30px;
-    background: #008be4;
-    border-radius: 5px;
-    color: #fff;
-    float: right;
-    margin-right: 3%;
+    /* background: #008be4; */
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 5px
+}
+.template_all{
+    width: 100%;
+    height: auto;
+    /* background: #f00; */
+}
+.template1{
+    font-size: 15px;
+    color: #333333;
+    height: auto;
+}
+
+.template_item{
+    width: 100%;
+    height: 220px;
+    /* margin-left: 0.5%; */
+    padding: 0 2px;
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 13px;
+}
+
+.template_text{
+    width: 96%;
+    padding: 3% 2%;
+    height: 150px;
+    margin-top: 13px;
+    line-height: 30px;
+    font-size: 15px;
+    color: #333;
+    border-bottom: 1px solid rgb(245, 244, 244);
+}
+
+.button_template{
+    width: 80px;
+    height: 30px;
+    font-size: 15px;
+    background: #008be4;
+    border-radius: 8px;
+    color: #fff;
+    float: right;
+    margin-right: 3%;
+}
+.use_tempalte01{
+    width: 100%;
+    height: 30px;
+    margin-top: 8px;
+    justify-content: center;
+    align-items: center;
+    /* text-align: center; */
 }

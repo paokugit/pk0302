@@ -116,5 +116,60 @@ class Reward_EweiShopV2Model
         return false;
     }
 
+     //判断是否是赏金
+     public function good($goods_id){
+         $goods = pdo_fetch("select * from " . tablename("ewei_shop_goods") . " where id=:id limit 1", array( ":id" => $goods_id ));
+         //判断是否在赏金任务内
+         $merchid=$goods["merchid"];
+         if ($merchid==0){
+             $goods["reward"]=0;
+            
+         }else{
+             $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
+             if ($merch["reward_type"]==0){
+                 $goods["reward"]=0;
+                
+             }else{
+                 if ($merch["reward_type"]==1){
+                     //指定商品
+                     //获取商家赏金
+                     $reward=pdo_fetchall('select * from'.tablename('ewei_shop_merch_reward').'where is_end=0 and type=1 and merch_id=:merchid',array(':merchid'=>$merchid));
+                     
+                     $g=array();
+                     if (!empty($reward)){
+                         foreach ($reward as $k=>$v){
+                             $g[$k]["reward_id"]=$v["id"];
+                             $g[$k]["goodsid"]=unserialize($v["goodid"]);
+                         }
+                     }
+                     if (!empty($g)){
+                         $reward_id=m("merch")->order_good($g,$goods_id);
+                         if ($reward_id){
+                             $r=pdo_get("ewei_shop_merch_reward",array('id'=>$reward_id));
+                             $goods["reward"]=1;
+                             
+                         }else{
+                             $goods["reward"]=0;
+                            
+                         }
+                         
+                     }else{
+                         $goods["reward"]=0;
+                     }
+                 }else{
+                     //全部商品
+                     $reward=pdo_get("ewei_shop_merch_reward",array("merch_id"=>$merchid,"is_end"=>0,"type"=>2));
+                     if ($reward){
+                         $goods["reward"]=1;
+                         
+                     }else{
+                         $goods["reward"]=0;
+                         
+                     }
+                 }
+             }
+         }
+         return $goods;
+     }
 }
 ?>
