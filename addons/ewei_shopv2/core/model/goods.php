@@ -264,6 +264,8 @@ class Goods_EweiShopV2Model
             if( $list[$lk]["deduct"]>0 ){
                 $list[$lk]["showprice"] = round($list[$lk]["minprice"]-$list[$lk]["deduct"],2);
             }
+            //判断是否是赏金任务的商品
+            
 		}
 		$list = set_medias($list, 'thumb');
 		return array('list' => $list, 'total' => $total);
