@@ -122,12 +122,12 @@ class Reward_EweiShopV2Model
          //判断是否在赏金任务内
          $merchid=$goods["merchid"];
          if ($merchid==0){
-             $goods["reward"]=0;
+             $status=0;
             
          }else{
              $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
              if ($merch["reward_type"]==0){
-                 $goods["reward"]=0;
+                 $status=0;
                 
              }else{
                  if ($merch["reward_type"]==1){
@@ -146,30 +146,30 @@ class Reward_EweiShopV2Model
                          $reward_id=m("merch")->order_good($g,$goods_id);
                          if ($reward_id){
                              $r=pdo_get("ewei_shop_merch_reward",array('id'=>$reward_id));
-                             $goods["reward"]=1;
+                             $status=1;
                              
                          }else{
-                             $goods["reward"]=0;
+                             $status=0;
                             
                          }
                          
                      }else{
-                         $goods["reward"]=0;
+                         $status=0;
                      }
                  }else{
                      //全部商品
                      $reward=pdo_get("ewei_shop_merch_reward",array("merch_id"=>$merchid,"is_end"=>0,"type"=>2));
                      if ($reward){
-                         $goods["reward"]=1;
+                         $status=1;
                          
                      }else{
-                         $goods["reward"]=0;
+                         $status=0;
                          
                      }
                  }
              }
          }
-         return $goods;
+         return $status;
      }
 }
 ?>
