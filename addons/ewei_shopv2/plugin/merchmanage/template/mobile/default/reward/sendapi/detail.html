@@ -64,6 +64,8 @@
 
 </html>
 
+
+
 <script type="text/javascript">
     //paraName 等找参数的名称
     function getQueryVariable(variable) {
@@ -76,14 +78,18 @@
         return (false);
     }
     var templateid ='{php echo $template_id}'
-    console.log(templateid)
+        console.log(templateid)
     var openid ='{php echo $openid}'
-    console.log(openid)
+        console.log(openid)
     var message = ""
+    // var content = sessionStorage.getItem("content")
+    // alert(content)
+    var gettext = sessionStorage.getItem("textarr")
+    console.log(gettext);
     var content = ""
+    var temp = ""
     var str1 = ""
     var str2 = ""
-    var temp = ""
     var textValue = ""
     var num='{php echo $num}'
     $(function () {
@@ -101,20 +107,37 @@
                         '</div>'
                     $(".text_field").html(str1)
                     $.each(data.result.variable, function (i, item) {
-                        // console.log(item)
                         str2 += '<li class="headli ">' + '<div class="optional">' +
                             '<span class="headtext">' + item + '</span>' +
                             '</div>'
                             + '<div class="optional_text">' +
-                            '<input class="select_text fixedIpt" placeholder="请填写" type="text">' +
+                            '<input class="select_text fixedIpt" placeholder="请填写" id="' + i + '" type="text" value="">' +
                             '</div>' +
                             '</li>'
                         $(".redact_text").html(str2)
+                        
                     })
-                }
+                    if (gettext == null) {
+                    	var inputArr = document.getElementsByClassName("select_text");
+                    	for (var i = 0; i < inputArr.length; i++) {//循环赋值
+                    	//inputArr[i].value = "请填写"
+                    	
+                    	}
+                    	}else{
+                    	var inputArr = document.getElementsByClassName("select_text");
+                    	for (var i = 0; i < inputArr.length; i++) {//循环赋值
+                    		
+                    	if(gettext.split(",")[i]!=""&&gettext.split(",")[i]){
+                    	inputArr[i].value = gettext.split(",")[i]
+                    	}	
+                    	
+                    	}
+                    	}
+
+                }  
             })
         })
-        if (num == 0 || num == '') {
+         if (num == 0 || num == '') {
             $(".num").html(0)
             $(".payspan").html(num* 0.2)
             $(".pay").unbind('click')
@@ -123,19 +146,21 @@
             $(".payspan").html(num * 0.2)
             $(".pay").css('background', '#008be4')
         }
+
     })
     //跳转选择会员界面，将templateid传过去和填写的数据
     $(".send_select").click(function () {
-        temp = document.getElementsByClassName("select_text");
-        for (var i = 0; i < temp.length; i++) {
-            if (content == '') {
-                content = temp[i].value
-            } else {
-                content += ',' + temp[i].value
-            }
+        var textarr = []
+        var txt = $('.redact_text').find(':text');
+        for (var i = 0; i < txt.length; i++) {
+            textarr.push(txt.eq(i).val());
         }
+        // alert(textarr)
+        sessionStorage.setItem("textarr",textarr);
+        // alert(sessionStorage.getItem("textarr"))
         location.href = '../index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.sendapi.select_member&id=' + templateid
     })
+    
     // 点击支付
     $(".pay").click(function () {
         temp = document.getElementsByClassName("select_text");
