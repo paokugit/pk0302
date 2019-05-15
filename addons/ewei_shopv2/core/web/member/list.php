@@ -108,13 +108,22 @@ class List_EweiShopV2Page extends WebPage
 		foreach( $list as &$row ) 
 		{
 			$row["groupname"] = (isset($res_group[$row["groupid"]]) ? $res_group[$row["groupid"]]["groupname"] : "");
-			$row["levelname"] = (isset($res_level[$row["level"]]) ? $res_level[$row["level"]]["levelname"] : "");
-			$row["agentnickname"] = (isset($res_agent[$row["agentid"]]) ? $res_agent[$row["agentid"]]["agentnickname"] : "");
+			//$row["levelname"] = (isset($res_level[$row["level"]]) ? $res_level[$row["level"]]["levelname"] : "");
+
+            if($row['agentlevel']==0){
+                $row['levelname']='普通会员';
+            }else{
+                $agentlevelInfo = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where id=:id Limit 1", array( ":id" => $row["agentlevel"]));
+                $row['levelname']= $agentlevelInfo['levelname'];
+            }
+            $fromstore = pdo_fetchcolumn("select count(*) from" . tablename("ewei_shop_member") ."where agentid=:agentid and agentlevel=5",array( ":agentid" => $row['id']));
+            $row["fromstore"] = $fromstore?$fromstore:0;
+            $row["agentnickname"] = (isset($res_agent[$row["agentid"]]) ? $res_agent[$row["agentid"]]["agentnickname"] : "");
 			$row["agentavatar"] = (isset($res_agent[$row["agentid"]]) ? $res_agent[$row["agentid"]]["agentavatar"] : "");
 			$row["followed"] = (isset($res_fans[$row["openid"]]) ? $res_fans[$row["openid"]]["followed"] : "");
 			$row["unfollowtime"] = (isset($res_fans[$row["openid"]]) ? $res_fans[$row["openid"]]["unfollowtime"] : "");
 			$row["fanid"] = (isset($res_fans[$row["openid"]]) ? $res_fans[$row["openid"]]["fanid"] : "");
-			$row["levelname"] = (empty($row["levelname"]) ? (empty($shop["levelname"]) ? "普通会员" : $shop["levelname"]) : $row["levelname"]);
+			//$row["levelname"] = (empty($row["levelname"]) ? (empty($shop["levelname"]) ? "普通会员" : $shop["levelname"]) : $row["levelname"]);
 			$row["ordercount"] = pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where uniacid=:uniacid and openid=:openid and status=3", array( ":uniacid" => $_W["uniacid"], ":openid" => $row["openid"] ));
 			$row["ordermoney"] = pdo_fetchcolumn("select sum(price) from " . tablename("ewei_shop_order") . " where uniacid=:uniacid and openid=:openid and status=3", array( ":uniacid" => $_W["uniacid"], ":openid" => $row["openid"] ));
 			$row["credit1"] = m("member")->getCredit($row["openid"], "credit1");
@@ -128,7 +137,13 @@ class List_EweiShopV2Page extends WebPage
 			{
 				$row["createtime"] = date("Y-m-d H:i", $row["createtime"]);
 				$row["groupname"] = (empty($row["groupname"]) ? "无分组" : $row["groupname"]);
-				$row["levelname"] = (empty($row["levelname"]) ? "普通会员" : $row["levelname"]);
+				//$row["levelname"] = (empty($row["levelname"]) ? "普通会员" : $row["levelname"]);
+                if($row['agentlevel']==0){
+                    $row['levelname']='普通会员';
+                }else{
+                    $agentlevelInfo = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where id=:id Limit 1", array( ":id" => $row["agentlevel"]));
+                    $row['levelname']= $agentlevelInfo['levelname'];
+                }
 				$row["realname"] = str_replace("=", "", $row["realname"]);
 				$row["nickname"] = str_replace("=", "", $row["nickname"]);
 				$row["remark"] = trim($row["content"]);
@@ -175,6 +190,8 @@ class List_EweiShopV2Page extends WebPage
 		$default_levelname = (empty($set["shop"]["levelname"]) ? "普通等级" : $set["shop"]["levelname"]);
 		include($this->template());
 	}
+
+
 	public function detail() 
 	{
 	   

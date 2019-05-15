@@ -5,10 +5,10 @@ if (!(defined('IN_IA')))
 }
 class Reward_EweiShopV2Model
 {
-
     /**
      * 会员购买成功后给推荐人分佣金
-     * @param $openid 购买人的opendid
+     * @param $openid   购买人的opendid
+     * @return bool
      */
 	public function addReward($openid){
         global $_W;
@@ -21,7 +21,8 @@ class Reward_EweiShopV2Model
     /**
      * @param $agentid  推荐人
      * @param $memberlevel  被推荐人的等级
-     * @param $memberid 被推荐人
+     * @param $memberopenid  被推荐人
+     * @return bool
      */
     public function getReward($agentid,$memberlevel,$memberopenid){
         global $_W;
@@ -42,12 +43,12 @@ class Reward_EweiShopV2Model
 
     }
 
-
-
     /**
      * 根据等级获取奖励金额
+     * 店主和星选达人 推荐健康达人改为5元   健康达人推荐健康达人改为3元
      * @param $agentlevel
-     * 店主和星选达人   推荐健康达人改为5元         健康达人推荐健康达人改为3元
+     * @param $memberlevel
+     * @return int
      */
     public function getRewardMoney($agentlevel,$memberlevel){
         if($memberlevel==0) return 0;
@@ -55,7 +56,8 @@ class Reward_EweiShopV2Model
 	    if($agentlevel==1) return 3;
 	    if($agentlevel==2){
             if($memberlevel==1) return 5;
-            return 20;
+            if($memberlevel==5) return 100;
+            if($memberlevel==2) return 40;
         }
 	    if($agentlevel==3){
 	        if($memberlevel==2) return 20;
@@ -69,16 +71,20 @@ class Reward_EweiShopV2Model
             return 280;
 	    }*/
 	    if($agentlevel==5){
-            if($memberlevel==5) return 196;
+            if($memberlevel==5) return 200;
             //if($memberlevel==4) return 70;
-            if($memberlevel==3) return 70;
-            if($memberlevel==2) return 20;
+            //if($memberlevel==3) return 70;
+            if($memberlevel==2) return 40;
             if($memberlevel==1) return 5;
             return 0;
         }
 	    return 0;
     }
 
+    /**
+     * @param $memberlevel
+     * @return int
+     */
     public function shopOwnerMoney($memberlevel){
         switch ($memberlevel){
             case 0:
@@ -98,8 +104,8 @@ class Reward_EweiShopV2Model
 
     /**
      * 获取推荐人的上级店长
-     * @param $openid  被推荐人
-     * @param $agentid 推荐人
+     * @param $agentid  推荐人
+     * @return bool
      */
     public function getShopOwnerAgent($agentid){
         while ($agentid>0){

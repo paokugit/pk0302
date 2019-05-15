@@ -603,6 +603,24 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 
 		show_json(1);
 	}
+
+    /**
+     * 获取店铺信息
+     */
+	public function getStore(){
+        global $_W;
+        global $_GPC;
+        $merchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where id=:merchid and uniacid=:uniacid Limit 1', array(':uniacid' => $_W['uniacid'], ':merchid' => $_GPC['merchid']));
+        $goodsNum = pdo_count("ewei_shop_goods", "deleted =0 and status=1 and merchid = " . $_GPC['merchid']);
+        $args['merchid'] = $merchInfo['id'];
+        $goodList = m('goods')->getList($args);
+        $merchInfo['logo'] = tomedia($merchInfo['logo']);
+        $data['merchInfo'] = $merchInfo;
+        $data['goodList'] = $goodList;
+        $data['goodsNum'] = $goodsNum;
+
+
+    }
 }
 
 
