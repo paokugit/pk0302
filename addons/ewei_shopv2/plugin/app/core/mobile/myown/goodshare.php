@@ -35,9 +35,9 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                         
                          //更新商户
                          $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
-                         
+                         $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
                          //判断商家佣金
-                         if ($merch["card"]>=$v["share_price"]){
+                         if ($member&&($member["credit1"]>=$v["share_price"])){
                              
                          pdo_update("ewei_shop_merch_user",array('card'=>$merch["card"]-$v["share_price"]),array('id'=>$merchid));
                          if ($merch["member_id"]!=0){
@@ -57,6 +57,7 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                          pdo_insert("ewei_shop_merch_rewardlog",$shoplog);
                          //用户佣金
                          m('member')->setCredit($openid, 'credit1', $v["share_price"],"分享商品佣金");
+                         
                          app_error(0,"分享获取佣金成功");
                          }
                          
@@ -82,9 +83,9 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                             
                             //更新商户
                             $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
-                            
+                            $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
                             //判断商家佣金
-                            if ($merch["card"]>=$v["share_price"]){
+                            if ($member&&($member["credit1"]>=$v["share_price"])){
                                 
                                 pdo_update("ewei_shop_merch_user",array('card'=>$merch["card"]-$v["share_price"]),array('id'=>$merchid));
                                 
@@ -168,20 +169,20 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                         
                         //更新商户
                         $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
-                        
+                        $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
                         //判断商家佣金
-                        if ($merch["card"]>=$v["click_price"]){
+                        if ($member&&($member["credit1"]>=$v["click_price"])){
                             
                             pdo_update("ewei_shop_merch_user",array('card'=>$merch["card"]-$v["click_price"]),array('id'=>$merchid));
                             if ($merch["member_id"]!=0){
                                 $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
-                                m('member')->setCredit($member["openid"], 'credit1', -$v["click_price"], "分享点击支出");
+                                m('member')->setCredit($member["openid"], 'credit1', -$v["click_price"], "点击支出");
                             }
                             pdo_update("ewei_shop_merch_reward",array('commission_count'=>$v["commission_count"]+$v["click_price"]),array('id'=>$v["id"]));
                             $shoplog["merch_id"]=$merchid;
                             $shoplog["openid"]=$openid;
                             $shoplog["type"]=1;
-                            $shoplog["intro"]="分享点击支出";
+                            $shoplog["intro"]="点击支出";
                             $shoplog["money"]=$v["click_price"];
                             $shoplog["expend_type"]=2;
                             $shoplog["reward_id"]=$v["id"];
@@ -189,8 +190,8 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                             $shoplog["create_time"]=time();
                             pdo_insert("ewei_shop_merch_rewardlog",$shoplog);
                             //用户佣金
-                            m('member')->setCredit($sharemember["openid"], 'credit1', $v["click_price"],"分享点击商品佣金");
-                            app_error(0,"分享点击获取佣金成功");
+                            m('member')->setCredit($sharemember["openid"], 'credit1', $v["click_price"],"点击商品佣金");
+                            app_error(0,"点击获取佣金成功");
                         }
                         
                         app_error(0,"商家佣金不足");
@@ -216,22 +217,23 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                             
                             //更新商户
                             $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
-                            
+                            $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
                             //判断商家佣金
-                            if ($merch["card"]>=$v["click_price"]){
+                            if ($member&&($member["credit1"]>=$v["click_price"])){
                                 
                                 pdo_update("ewei_shop_merch_user",array('card'=>$merch["card"]-$v["click_price"]),array('id'=>$merchid));
                                 
+                                //商家资金减少
                                 if ($merch["member_id"]!=0){
                                     $member=pdo_get("ewei_shop_member",array("id"=>$merch["member_id"]));
-                                    m('member')->setCredit($member["openid"], 'credit1', -$v["click_price"], "分享点击支出");
+                                    m('member')->setCredit($member["openid"], 'credit1', -$v["click_price"], "点击支出");
                                 }
                                 
                                 pdo_update("ewei_shop_merch_reward",array('commission_count'=>$v["commission_count"]+$v["click_price"]),array('id'=>$v["id"]));
                                 $shoplog["merch_id"]=$merchid;
                                 $shoplog["openid"]=$openid;
                                 $shoplog["type"]=1;
-                                $shoplog["intro"]="分享点击支出";
+                                $shoplog["intro"]="点击支出";
                                 $shoplog["money"]=$v["click_price"];
                                 $shoplog["expend_type"]=2;
                                 $shoplog["reward_id"]=$v["id"];
@@ -246,7 +248,7 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                                 $data["share_id"]=$share_id;
                                 pdo_insert("ewei_shop_merch_rewardclick",$data);
                                 //用户佣金
-                                m('member')->setCredit($sharemember["openid"], 'credit1', $v["click_price"],"分享点击商品佣金");
+                                m('member')->setCredit($sharemember["openid"], 'credit1', $v["click_price"],"点击商品佣金");
                                 app_error(0,"分享获取佣金成功");
                             }
                             

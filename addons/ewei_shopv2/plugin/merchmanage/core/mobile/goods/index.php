@@ -476,6 +476,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 
 	public function getlist()
 	{
+        header('Access-Control-Allow-Origin:*');
 		global $_W;
 		global $_GPC;
 		$offset = intval($_GPC['offset']);
