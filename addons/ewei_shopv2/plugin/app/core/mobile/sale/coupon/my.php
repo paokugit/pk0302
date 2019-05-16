@@ -493,7 +493,7 @@ class My_EweiShopV2Page extends AppMobilePage
         if($data["couponid"]==2){//店主专享
             $detail['reurl'] = '/pages/changce/merch/detail?id=10';
         }
-        $detail['couponid'] = $data["couponid"];
+        $detail['couponid'] = (int)$data["couponid"];
         app_json(array( "detail" => $detail ));
     }
 

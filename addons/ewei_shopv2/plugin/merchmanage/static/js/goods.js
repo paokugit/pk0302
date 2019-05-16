@@ -180,6 +180,7 @@ define(['core'], function (core) {
             }
         });
         $(".searchbtn").unbind('click').click(function () {
+			console.log('2')
             var keywords = $.trim($("#keywords").val());
             if (keywords != '') {
                 modal.keywords = keywords;
@@ -187,6 +188,10 @@ define(['core'], function (core) {
                 $(".container").empty();
                 modal.getList()
             }
+        });
+		$(".chuchuang-box").unbind('click').click(function () {
+			console.log('1')
+          
         });
         $("#keywords").bind('input propertychange', function () {
             var keywords = $.trim($(this).val());
