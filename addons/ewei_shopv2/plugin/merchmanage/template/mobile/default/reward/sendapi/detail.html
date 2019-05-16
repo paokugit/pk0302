@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta content="yes" name="apple-mobile-web-app-capable"> 
+    <meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+   
      <script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script>
     <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/redact.css">
 <script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/jquery.min.js"></script>
@@ -92,6 +93,7 @@
     var str2 = ""
     var textValue = ""
     var num='{php echo $num}'
+    var date='{php echo $date}'
     $(function () {
         $(window).load(function () {
             $.ajax({
@@ -107,16 +109,21 @@
                         '</div>'
                     $(".text_field").html(str1)
                     $.each(data.result.variable, function (i, item) {
-                        str2 += '<li class="headli ">' + '<div class="optional">' +
-                            '<span class="headtext">' + item + '</span>' +
-                            '</div>'
-                            + '<div class="optional_text">' +
-                            '<input class="select_text fixedIpt" placeholder="请填写" id="' + i + '" type="text" value="">' +
-                            '</div>' +
-                            '</li>'
-                        $(".redact_text").html(str2)
-                        
-                    })
+str2 += '<li class="headli ">' + '<div class="optional">' +
+'<span class="headtext">' + item + '</span>' +
+'</div>'
++ '<div class="optional_text">';
+console.log(item.search("日期"));
+if(item.search("日期")!=-1){
+str3 ='<input class="select_text fixedIpt" placeholder="请填写" id="' + i + '" type="date" name="cc['+i+']" value="'+date+'">' ;
+}else{
+str3 ='<input class="select_text fixedIpt" placeholder="请填写" id="' + i + '" type="text"  name="cc['+i+']" value="">' ;
+}
+str2 +=str3+
+'</div>' +
+'</li>'
+$(".redact_text").html(str2)
+})
                     if (gettext == null) {
                     	var inputArr = document.getElementsByClassName("select_text");
                     	for (var i = 0; i < inputArr.length; i++) {//循环赋值
@@ -150,14 +157,12 @@
     })
     //跳转选择会员界面，将templateid传过去和填写的数据
     $(".send_select").click(function () {
-        var textarr = []
-        var txt = $('.redact_text').find(':text');
-        for (var i = 0; i < txt.length; i++) {
-            textarr.push(txt.eq(i).val());
-        }
-        // alert(textarr)
-        sessionStorage.setItem("textarr",textarr);
-        // alert(sessionStorage.getItem("textarr"))
+    	var textarr = []
+    	$("input[name^='cc']").each(function (i, el) {
+    	console.log($(this).val())
+    	textarr.push($(this).val());
+    	});
+    	sessionStorage.setItem("textarr", textarr);
         location.href = '../index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.sendapi.select_member&id=' + templateid
     })
     

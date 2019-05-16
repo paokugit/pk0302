@@ -223,6 +223,7 @@ class Sendapi_EweiShopV2Page extends MerchmanageMobilePage{
         $template_id=$_GPC["id"];
         $openid=$_GPC["openid"];
         $num=$_GPC["num"];
+        $date=date("Y-m-d");
         include $this->template();
     }
     //选择会员
