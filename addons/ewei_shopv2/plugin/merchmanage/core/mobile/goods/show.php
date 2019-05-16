@@ -82,7 +82,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         global $_GPC;
         if(isset($_GPC['id'])){
             //查询goods部分字段
-            $fields = "title,description,marketprice,thumb,thumb_url,commission1_pay,commission2_pay";
+            $fields = "title,description,total,marketprice,thumb,thumb_url,commission1_pay,commission2_pay";
             $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>31]);
             //查询红包引流的全部字段
             $item2 = pdo_fetch('select * from' .tablename('ewei_shop_goods_bribe_expert').' where goods_id =:id',[':id'=>$_GPC['id']]);
@@ -116,12 +116,12 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             'merchid'=>$_W['merchmanage']['merchid'],
             'uniacid'=>$_W['uniacid'],
             'total'=>$_GPC['total'],
-            'marketprice'=>$_GPC['market_price'],
+            'marketprice'=>$_GPC['marketprice'],
             'commission1_pay'=>$_GPC['commission1_pay'],   //一级分销固定金额
             'commission2_pay'=>$_GPC['commission2_pay'],   //二级分销固定金额
         ];
         $add = [
-            'music'=>$_GPC['music_id'],                    //背景音乐
+            'music'=>$_GPC['music'],                    //背景音乐
             'pro_type'=>$_GPC['pro_type'],                 //产品类型
             'express_name'=>$_GPC['express_name']?:"",     //快递名字
             'express_price'=>$_GPC['express_price']?:0,    //运费
@@ -161,6 +161,10 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
+        //判断提交方式  post才成功
+        if (!$_W['ispost']) {
+            app_error(AppError::$RequestError);
+        }
         $data = [
             'uniacid'=>$_W['uniacid'],
             'merchid'=>$_W['merchmanage']['merchid'],
