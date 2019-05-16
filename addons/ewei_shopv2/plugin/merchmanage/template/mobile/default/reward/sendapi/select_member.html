@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta content="yes" name="apple-mobile-web-app-capable"> 
+    <meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+    
     <script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/jquery.min.js"></script>
     <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/select.css">
     <title>选择会员</title>
@@ -51,10 +52,8 @@
         }
         return (false);
     }
-    var templateId = getQueryVariable("id")
+    var templateId = '{php echo $template_id}'
     console.log(templateId)
-    var content = getQueryVariable("content")
-    console.log(content);
     var str1 = ""
     var openid = ""
     var num = ""
@@ -63,10 +62,8 @@
     $(window).load(function () {
         $.ajax({
             type: 'POST',
-            url:'{php echo mobileUrl('merchmanage/reward/sendapi/member')}',
-            data: {
-                "merchid": '3'
-            },
+            url: '{php echo mobileUrl('merchmanage/reward/sendapi/member')}',
+           
             dataType: "json",
             success: function (data) {
                 console.log(data);
@@ -131,8 +128,7 @@
                 // alert(arrToStr)
                 hynum = document.getElementById("0").innerHTML
                 if (hynum > 0) {
-                 //   location.href = './redact.html?id=' + templateId + '&num=' + hynum + '&openid=' + openid
-                    location.href = '../index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.sendapi.detail&id=' + templateId+'&num='+hynum + '&openid=' + openid
+                	 location.href = '../index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.sendapi.detail&id=' + templateId+'&num='+hynum + '&openid=' + openid
                 } else {
                     $("#warning").show().delay(1000).hide(300);
                     $("#warning .mask-text ").text("请至少选择一位用户");
@@ -141,3 +137,5 @@
         })
     })
 </script>
+
+

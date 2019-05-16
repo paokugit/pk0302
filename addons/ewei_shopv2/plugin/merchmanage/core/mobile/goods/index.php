@@ -488,8 +488,9 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 		$params = array(':uniacid' => $_W['uniacid']);
 		$goodsfrom = strtolower(trim($_GPC['status']));
 		empty($goodsfrom) && ($_GPC['status'] = $goodsfrom = 'sale');
+        if($_GPC['stepfrom']){
 
-		if ($goodsfrom == 'sale') {
+        }elseif ($goodsfrom == 'sale') {
 			$condition .= ' AND g.`status` > 0 and g.`checked`=0 and g.`total`>0 and g.`deleted`=0';
 		}
 		 else if ($goodsfrom == 'out') {

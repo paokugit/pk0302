@@ -127,6 +127,7 @@ class Sendapi_EweiShopV2Page extends MerchmanageMobilePage{
         $data["num"]=$count;
         $data["openid"]=serialize($openid);
         $data["money"]=$count*0.2;
+        //$data["money"]=0.01;
         //模板变量
         $content=m("market")->handle($template["content"]);
         //接收的变量
@@ -199,11 +200,13 @@ class Sendapi_EweiShopV2Page extends MerchmanageMobilePage{
             $resault=m("market")->send_out($order["mobile"],$order["template_content"]);
             if ($resault){
                 pdo_update("ewei_shop_codeorder",array("status"=>2),array("order_sn"=>$order_sn));
-//                 header('location: ' . mobileUrl('merchmanage/reward/home/index'));
-//                 exit();
+                header('location: ' . mobileUrl('merchmanage/reward/sendapi/index'));
+                exit();
 //                  var_dump($resault);
             }
-            var_dump($resault);
+//             var_dump($resault);
+            header('location: ' . mobileUrl('merchmanage/reward/sendapi/index'));
+            exit();
     }
     //短信模板页面
     public function index(){
@@ -220,6 +223,7 @@ class Sendapi_EweiShopV2Page extends MerchmanageMobilePage{
         $template_id=$_GPC["id"];
         $openid=$_GPC["openid"];
         $num=$_GPC["num"];
+        $date=date("Y-m-d");
         include $this->template();
     }
     //选择会员
