@@ -7,6 +7,20 @@ require EWEI_SHOPV2_PLUGIN . 'merchmanage/core/inc/page_merchmanage.php';
 class Show_EweiShopV2Page extends MerchmanageMobilePage
 {
     /**
+     * 橱窗页面
+     */
+    public function index(){
+        include $this->template('merchmanage/goods/shop');
+    }
+
+    /**
+     * 步数列表
+     */
+    public function list(){
+        include $this->template('merchmanage/goods/steplist');
+    }
+
+    /**
      * 进入这个页面自加载接口
      */
     public function getlist()
@@ -34,7 +48,8 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         foreach ($list as $key =>$val){
             $list[$key]["isreward"] =  m('reward')->good($val['id']);
         }
-        show_json(1,[ 'store'=>$store,'show'=>$show,'list'=>$list]);
+//        show_json(1,[ 'store'=>$store,'show'=>$show,'list'=>$list]);
+        show_json(1,[ 'store'=>$store,'list'=>$list]);
     }
 
     /**
@@ -66,31 +81,54 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
     }
 
     /**
+     * 如果是编辑商品
+     */
+    public function editgoods(){
+        header('Access-Control-Allow-Origin:*');
+        global $_W;
+        global $_GPC;
+        if(isset($_GPC['id'])){
+            //查询goods部分字段
+            $fields = "title,description,marketprice,thumb,thumb_url,commission1_pay,commission2_pay";
+            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>31]);
+            //查询红包引流的全部字段
+            $item2 = pdo_fetch('select * from' .tablename('ewei_shop_goods_bribe_expert').' where goods_id =:id',[':id'=>$_GPC['id']]);
+            $item = array_merge($item1,$item2);
+            //获取某个字段
+            $item['music'] = pdo_getcolumn('ewei_shop_music',array('id'=>$item['music']),'title');
+            show_json(1,['item'=>$item]);
+        }else{
+            show_json(0,'参数错误');
+        }
+    }
+
+    /**
      * 添加紅包引流商品
      */
     public function addgoods(){
         header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
+        //判断提交方式  post才成功
         if (!$_W['ispost']) {
             app_error(AppError::$RequestError);
         }
+        //判断权限
         if (!cv('goods.add') && cv('goods.edit')) {
             app_error(AppError::$PermError, '您无操作权限');
         }
-        if(isset($_GPC['id'])){
-            $fields = 'id, title, desc, music, total, marketprice, commission1_pay, commission2_pay, pro_type, express_name, express_price,  main, principal , address,tel,merchid,isdraft';
-            $item = pdo_fetch('SELECT ' . $fields . ' FROM ' . tablename('ewei_shop_goods') . ' WHERE id = :id and uniacid = :uniacid LIMIT 1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
-        }
         $data = [
             'title'=>$_GPC['title'],
-            'desc'=>$_GPC['desc'],
+            'description'=>$_GPC['desc'],
             'merchid'=>$_W['merchmanage']['merchid'],
-            'music'=>$_GPC['music_id'],   //背景音乐
+            'uniacid'=>$_W['uniacid'],
             'total'=>$_GPC['total'],
             'marketprice'=>$_GPC['market_price'],
             'commission1_pay'=>$_GPC['commission1_pay'],   //一级分销固定金额
             'commission2_pay'=>$_GPC['commission2_pay'],   //二级分销固定金额
+        ];
+        $add = [
+            'music'=>$_GPC['music_id'],                    //背景音乐
             'pro_type'=>$_GPC['pro_type'],                 //产品类型
             'express_name'=>$_GPC['express_name']?:"",     //快递名字
             'express_price'=>$_GPC['express_price']?:0,    //运费
@@ -111,8 +149,46 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             unset($thumb_url[0]);
             $data['thumb_url'] = serialize(m('common')->array_images($thumb_url));
         }
-        pdo_insert('ewei_shop_goods',$data);
+        if(isset($_GPC['id'])){
+            pdo_update('ewei_shop_goods',$data,['id'=>$_GPC['id']]);
+            pdo_update('ewei_shop_goods_bribe_expert',$add,['goods_id'=>$_GPC['id']]);
+        }else{
+            pdo_insert('ewei_shop_goods',$data);
+            $add['goods_id'] = pdo_insertid();
+            pdo_insert('ewei_shop_goods_bribe_expert',$add);
+        }
         show_json(1);
+    }
+
+    /**
+     * 添加背景音乐
+     */
+    public function addmusic()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_W;
+        global $_GPC;
+        $data = [
+            'uniacid'=>$_W['uniacid'],
+            'merchid'=>$_W['merchmanage']['merchid'],
+            'title'=>$_GPC['title'],
+            'music'=>save_media($_GPC['music']),
+            'created_at'=>time(),
+        ];
+        pdo_insert('ewei_shop_music',$data);
+        show_json(1);
+    }
+
+    /**
+     * 背景音乐列表
+     */
+    public function getmusic()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_W;
+       // $list = pdo_fetchall(' select * from '.tablename('ewei_shop_music').'where uniacid = :uniacid and merchid = :merchid',[':uniacid'=>$_W['uniacid'],':merchid'=>$_W['merchmanage']['merchid']]);
+        $list = pdo_fetchall(' select * from '.tablename('ewei_shop_music').'where uniacid = :uniacid and merchid = :merchid',[':uniacid'=>$_W['uniacid'],':merchid'=>31]);
+        show_json(1,['list'=>$list]);
     }
 }
 
