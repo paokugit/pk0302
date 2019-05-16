@@ -5,6 +5,7 @@ if (!defined("IN_IA")) {
 }
 require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
 
+
 class Version_EweiShopV2Page extends AppMobilePage
 {
     public function main()
@@ -14,6 +15,8 @@ class Version_EweiShopV2Page extends AppMobilePage
 
     public function __construct()
     {
+        global $_GPC;
+        global $_W;
         parent::__construct();
     }
 
