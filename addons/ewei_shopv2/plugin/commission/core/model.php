@@ -2078,23 +2078,23 @@ if( !class_exists("CommissionModel") )
 			global $_GPC;
 			if( empty($orderid) ) 
 			{
-				return 1;
+				return NULL;
 			}
 			$order = pdo_fetch("select id,price,openid, ordersn,goodsprice,agentid,finishtime from " . tablename("ewei_shop_order") . " where id=:id and status>=3 and uniacid=:uniacid limit 1", array( ":id" => $orderid, ":uniacid" => $_W["uniacid"] ));
 			if( empty($order) ) 
 			{
-				return 2;
+				return NULL;
 			}
 			$set = $this->getSet();
 			if( empty($set["level"]) ) 
 			{
-				return 3;
+				return NULL;
 			}
 			$openid = $order["openid"];
 			$member = m("member")->getMember($openid);
 			if( empty($member) ) 
 			{
-				return 4;
+				return NULL;
 			}
 
             $order_goods = pdo_fetchall("select goodsid from " . tablename("ewei_shop_order_goods") . " where orderid=:orderid and uniacid=:uniacid  ", array( ":uniacid" => $_W["uniacid"], ":orderid" => $order["id"] ), "goodsid");
@@ -2331,18 +2331,18 @@ if( !class_exists("CommissionModel") )
 				$plugin_globonus = p("globonus");
 				if( !$plugin_globonus ) 
 				{
-					return 5;
+					return NULL;
 				}
 				$set = $plugin_globonus->getSet();
 				if( empty($set["open"]) ) 
 				{
-					return 6;
+					return NULL;
 				}
 				$ispartner = $member["ispartner"] && $member["partnerstatus"];
 				if( $ispartner ) 
 				{
 					$plugin_globonus->upgradeLevelByOrder($openid);
-					return 7;
+					return NULL;
 				}
 				$become_check = intval($set["become_check"]);
 				if( $set["become_order"] == "1" ) 
@@ -3871,11 +3871,8 @@ if( !class_exists("CommissionModel") )
         //卡路里奖励到账提醒
         //bopenid为被推荐人的
        public function wxmessage($agentid,$bopenid){
-		    var_dump($bopenid);
-
             //获取推荐人的用户信息
             $bmember = m("member")->getMember($bopenid);//被推荐人的
-           var_dump($bopenid);die();
             if($bmember['agentid']==0 || $bmember['agentid']=='') return false;
             $tmember = m("member")->getMember($bmember['agentid']);//推荐人的
            $agentInfo=array();
@@ -3884,7 +3881,6 @@ if( !class_exists("CommissionModel") )
             }else{
                 $agentInfo = pdo_fetch("select id,levelname from " . tablename("ewei_shop_commission_level") . " where id = :id", array( ":id" => $bmember['agentlevel'] ));
             }
-
             $postdata=array(//被推荐人
                 'keyword1'=>array(
                     'value'=>$bmember["nickname"],
@@ -3902,7 +3898,6 @@ if( !class_exists("CommissionModel") )
                     'value'=>'每一步，都值得鼓励，点击查看小程序明细',
                     'color' => '#ff510'
                 )
-
             );
            $res = p("app")->mysendNotice($tmember['openid'], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
            return $res;
