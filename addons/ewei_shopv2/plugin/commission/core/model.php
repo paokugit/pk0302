@@ -2078,23 +2078,23 @@ if( !class_exists("CommissionModel") )
 			global $_GPC;
 			if( empty($orderid) ) 
 			{
-				return NULL;
+				return 1;
 			}
 			$order = pdo_fetch("select id,price,openid, ordersn,goodsprice,agentid,finishtime from " . tablename("ewei_shop_order") . " where id=:id and status>=3 and uniacid=:uniacid limit 1", array( ":id" => $orderid, ":uniacid" => $_W["uniacid"] ));
 			if( empty($order) ) 
 			{
-				return NULL;
+				return 2;
 			}
 			$set = $this->getSet();
 			if( empty($set["level"]) ) 
 			{
-				return NULL;
+				return 3;
 			}
 			$openid = $order["openid"];
 			$member = m("member")->getMember($openid);
 			if( empty($member) ) 
 			{
-				return NULL;
+				return 4;
 			}
 
             $order_goods = pdo_fetchall("select goodsid from " . tablename("ewei_shop_order_goods") . " where orderid=:orderid and uniacid=:uniacid  ", array( ":uniacid" => $_W["uniacid"], ":orderid" => $order["id"] ), "goodsid");
@@ -2114,7 +2114,7 @@ if( !class_exists("CommissionModel") )
 			            }
 			            
 			            m('member')->setCredit($openid, 'credit1', $credit, $info);
-                        //wxmessage($order['agentid'],$openid);
+                        wxmessage($order['agentid'],$openid);
 			        }
 			        //会员开通消息
 			        $commission=pdo_fetch("select * from ".table("ewei_shop_commission_level")." where id=:id",array(':id'=>$goods["agentlevel"]));
@@ -2331,18 +2331,18 @@ if( !class_exists("CommissionModel") )
 				$plugin_globonus = p("globonus");
 				if( !$plugin_globonus ) 
 				{
-					return NULL;
+					return 5;
 				}
 				$set = $plugin_globonus->getSet();
 				if( empty($set["open"]) ) 
 				{
-					return NULL;
+					return 6;
 				}
 				$ispartner = $member["ispartner"] && $member["partnerstatus"];
 				if( $ispartner ) 
 				{
 					$plugin_globonus->upgradeLevelByOrder($openid);
-					return NULL;
+					return 7;
 				}
 				$become_check = intval($set["become_check"]);
 				if( $set["become_order"] == "1" ) 
@@ -3871,10 +3871,14 @@ if( !class_exists("CommissionModel") )
         //卡路里奖励到账提醒
         //bopenid为被推荐人的
        public function wxmessage($agentid,$bopenid){
+		    var_dump($bopenid);
+
             //获取推荐人的用户信息
-            $tmember = m("member")->getMember($agentid);//推荐人的
             $bmember = m("member")->getMember($bopenid);//被推荐人的
-            $agentInfo=array();
+           var_dump($bopenid);die();
+            if($bmember['agentid']==0 || $bmember['agentid']=='') return false;
+            $tmember = m("member")->getMember($bmember['agentid']);//推荐人的
+           $agentInfo=array();
             if($bmember['agentlevel']==0){
                 $agentInfo['levelname'] = "普通会员";
             }else{
@@ -3900,8 +3904,8 @@ if( !class_exists("CommissionModel") )
                 )
 
             );
-            p("app")->mysendNotice($tmember['openid'], $postdata, "", "BJtaHWXzIvH3j6NfAO56TPnULBeZyYJhX2h9XoYSs6g");
-            return true;
+           $res = p("app")->mysendNotice($tmember['openid'], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
+           return $res;
         }
 	}
 }
