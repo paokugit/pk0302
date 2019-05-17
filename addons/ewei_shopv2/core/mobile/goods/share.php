@@ -10,16 +10,12 @@ class Share_EweiShopV2Page extends MobilePage
        global $_GPC;
       
        if (empty($_W["openid"])){
-           var_dump("11");
-           $result = mc_oauth_userinfo();
-           var_dump($result);
-           $_W["openid"]=$result["openid"];
-           $openid=$result["openid"];
-       }else {
+           mc_oauth_account_userinfo();
+       }
            var_dump("22");
            $openid=$_W["openid"];
-       }
-       var_dump($_W["openid"]);
+      
        var_dump($openid);
+      
     }
 }
