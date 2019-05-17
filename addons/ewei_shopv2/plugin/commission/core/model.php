@@ -2114,7 +2114,7 @@ if( !class_exists("CommissionModel") )
 			            }
 			            
 			            m('member')->setCredit($openid, 'credit1', $credit, $info);
-                        wxmessage($order['agentid'],$openid);
+                        //wxmessage($order['agentid'],$openid);
 			        }
 			        //会员开通消息
 			        $commission=pdo_fetch("select * from ".table("ewei_shop_commission_level")." where id=:id",array(':id'=>$goods["agentlevel"]));
@@ -2136,7 +2136,7 @@ if( !class_exists("CommissionModel") )
 			                'color' => '#ff510'
 			            )
 			        );
-			        
+
 			        p("app")->mysendNotice($order["openid"], $postdata, $order["id"], "2nQmrU1YkfMK0EWEO4v0QmL89Xpx1v3DqZk-LMsnd80");
                 
 			    
