@@ -49,7 +49,7 @@
 </body>
 
 </html>
-<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery-1.11.3.min.js"></script>
+<script src="../addons/ewei_shopv2/static/js/jquery-1.11.3.min.js"></script>
 <script type="text/javascript">
     var str1 = ""
     var str2 = ""
@@ -64,7 +64,8 @@
         console.log(storeId)
         $.ajax({
             type: 'POST',
-            url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.getlist',
+            //url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.getlist',
+            url: '{php echo mobileUrl("merchmanage.goods.show.getlist")}',
             data: {
                 // page:this.data.page
                 "page": '1'
@@ -139,8 +140,7 @@
                 $(".product-list").on("click", ".pro-item", function () {
                     var proId = ($(this).attr("data-id"))
                     console.log(proId)
-                    // location.href='http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.edit?id='+proId
-                    location.href='http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.edit&id='+proId
+                    window.location.href = './index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.edit&id='+proId;
                 })
 
 
@@ -234,24 +234,25 @@
                 });
                 // 列表商品点击跳转编辑事件
                    $(".good-list").on("click", ".handlebtn", function () {
-                    var goodId = ($(this).attr("data-id"))
-                    console.log(goodId)
-                    // location.href='http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.edit?id='+goodId
-                    location.href='http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.edit&id='+goodId
-                })
+                       var goodId = ($(this).attr("data-id"))
+                       console.log(goodId)
+                       window.location.href = './index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.edit&id='+goodId;
+                   })
 
                 // 列表商品结束
                 // 左移
                 $(".good-list").on("click", ".leftbtn", function () {
-                    $(this).toggleClass('selected').siblings().removeClass(
-                        'selected');
+                    $('.leftbtn').removeClass('select')
+                    $('.centerbtn').removeClass('select')
+                    $('.rightbtn').removeClass('select')
+                    $(this).toggleClass('select').siblings().removeClass('select')
                     var goodid = ($(this).attr("data-id"))
                     console.log(goodid)
                     $.ajax({
                         type: 'POST',
-                        url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.changesort&ids=1:2,2:3,3:1',
+                        url: "{php echo mobileUrl('merchmanage.goods.show.changesort')}" ,
                         data: {
-                            "ids": 'goodid:3'
+                            "ids": goodid+':3'
                         },
                         dataType: "json",
                         success: function (data) {
@@ -274,15 +275,17 @@
                 })
                 // 中移
                 $(".good-list").on("click", ".centerbtn", function () {
-                    $(this).toggleClass('selected').siblings().removeClass(
-                        'selected');
+                    $('.leftbtn').removeClass('select')
+                    $('.centerbtn').removeClass('select')
+                    $('.rightbtn').removeClass('select')
+                    $(this).toggleClass('select').siblings().removeClass('select')
                     var goodid = ($(this).attr("data-id"))
                     console.log(goodid)
                     $.ajax({
                         type: 'POST',
-                        url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.changesort&ids=1:2,2:3,3:1',
+                        url: '{php echo mobileUrl("merchmanage.goods.show.changesort")}',
                         data: {
-                            "ids": 'goodid:2'
+                            "ids": goodid+':2'
                         },
                         dataType: "json",
                         success: function (data) {
@@ -305,15 +308,17 @@
                 })
                 // 右移
                 $(".good-list").on("click", ".rightbtn", function () {
-                    $(this).toggleClass('selected').siblings().removeClass(
-                        'selected');
+                    $('.leftbtn').removeClass('select')
+                    $('.centerbtn').removeClass('select')
+                    $('.rightbtn').removeClass('select')
+                    $(this).toggleClass('select').siblings().removeClass('select')
                     var goodid = ($(this).attr("data-id"))
                     console.log(goodid)
                     $.ajax({
                         type: 'POST',
-                        url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.changesort&ids=1:2,2:3,3:1',
+                        url: '{php echo mobileUrl('merchmanage/goods/show/changesort')}' ,
                         data: {
-                            "ids": 'goodid:2'
+                            "ids": goodid+':2'
                         },
                         dataType: "json",
                         success: function (data) {
@@ -342,6 +347,6 @@
     })
     // 店铺跳转
     $(".store-detailbox").click(function () {
-       location.href='http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.shop&id='+storeId
+       location.href='./app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.shop&id='+storeId
     })
 </script>

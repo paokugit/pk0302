@@ -418,7 +418,7 @@ button {
     text-align: center
 }
 
-.selected {
+.select {
     width: 40px;
     height: 25px;
     background: #12bfa3;
@@ -436,7 +436,7 @@ button {
 }
 
 .good-redact {
-    width: 40;
+    width: 40px;
     height: 25px;
     float: right;
     background: transparent
