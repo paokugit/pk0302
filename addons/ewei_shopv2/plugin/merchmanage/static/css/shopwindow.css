@@ -142,6 +142,7 @@ button {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+    padding-left: 10px;
 
 }
 
@@ -361,7 +362,7 @@ button {
 }
 
 .good-name {
-    width: 140px;
+    width: 130px;
     height: 25px;
     line-height: 25px;
     color: #333;
@@ -400,7 +401,7 @@ button {
     /* background: #ff0; */
     position: absolute;
     right: 0;
-    top: 30px;
+    top: 40px;
     display: flex;
     justify-content: space-around
 }
