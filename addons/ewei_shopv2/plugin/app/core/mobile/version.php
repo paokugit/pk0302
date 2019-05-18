@@ -24,6 +24,7 @@ class Version_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         if($_GPC['version'] && $_GPC['version']>=6) app_json(array(
+
             'app_version' => 0,
         ));
 
