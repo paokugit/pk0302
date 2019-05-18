@@ -25,7 +25,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         //页数
         $page = max(1,($_GPC['page']));
         //每页显示条数
-        $pageSize = 6;
+        $pageSize = 20;
         //第几页从第几个显示
         $psize = ($page-1)*$pageSize-$offset;
         //店铺信息
@@ -37,6 +37,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         foreach ($list as $key =>$val){
             $list[$key]["isreward"] =  m('reward')->good($val['id']);
         }
+        $store['logo'] = tomedia($store['logo']);;
         show_json(1,[ 'store'=>$store,'list'=>$list]);
     }
 

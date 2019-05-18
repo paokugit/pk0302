@@ -204,8 +204,37 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 // 	    show_json(1,$resault);
 	    include $this->template();
 	}
-	
-	
+
+
+    public function getshopcode($width = 430){
+        global $_W;
+        $merchid = $_W['uniaccount']['merchid']?$_W['merchid']:0;
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/storecode/";
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "id" => $merchid,'width'=>$width)));
+        $filename = $md5 . ".png";
+        $filepath = $path . $filename;
+        if( is_file($filepath) )
+        {
+            return $_W["siteroot"] . "addons/ewei_shopv2/data/storecode/".$filename . "?v=1.0";
+        }
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&id=".$merchid."&fromid=".$merchid, "page" => 'pages/changce/merch/detail',"width"=>$width));
+        if( !is_error($qrcode) )
+        {
+            $qrcode = imagecreatefromstring($qrcode);
+        }
+        imagepng($qrcode, $filepath);
+        imagedestroy($qrcode);
+        $a =  $_W["siteroot"] . "addons/ewei_shopv2/data/storecode/".$filename . "?v=1.0";
+        var_dump($a);
+    }
+
+
+
 }
 
 
