@@ -64,7 +64,8 @@
         console.log(storeId)
         $.ajax({
             type: 'POST',
-            url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.getlist',
+            //url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.getlist',
+            url: '{php echo mobileUrl("merchmanage.goods.show.getlist")}',
             data: {
                 // page:this.data.page
                 "page": '1'
@@ -251,7 +252,7 @@
                     console.log(goodid)
                     $.ajax({
                         type: 'POST',
-                        url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.changesort',
+                        url: "{php echo mobileUrl('merchmanage.goods.show.changesort')}" ,
                         data: {
                             "ids": goodid+':3'
                         },
@@ -284,7 +285,7 @@
                     console.log(goodid)
                     $.ajax({
                         type: 'POST',
-                        url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.changesort',
+                        url: '{php echo mobileUrl("merchmanage.goods.show.changesort")}',
                         data: {
                             "ids": goodid+':2'
                         },
