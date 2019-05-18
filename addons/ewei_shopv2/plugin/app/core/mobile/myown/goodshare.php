@@ -249,7 +249,7 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                                 pdo_insert("ewei_shop_merch_rewardclick",$data);
                                 //用户佣金
                                 m('member')->setCredit($sharemember["openid"], 'credit1', $v["click_price"],"点击商品佣金");
-                                app_error(0,"分享获取佣金成功");
+                                app_error(0,"点击获取佣金成功");
                             }
                             
                             app_error(0,"分享成功");
