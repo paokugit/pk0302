@@ -16,13 +16,13 @@
     </td>
     <td  style="overflow:visible;">
         <span class='label {if $item['status']==1}label-primary{else}label-default{/if}'
-        {ifp 'sale.package.edit'}
+        {ifp 'sale.bribe.edit'}
         data-toggle='ajaxSwitch'
         data-confirm = "确认是{if $item['status']==1}关闭{else}开启{/if}？"
         data-switch-refresh='true'
         data-switch-value='{$item['status']}'
-        data-switch-value0='0|关闭|label label-default|{php echo webUrl('sale/package/delete',array('status'=>1,'id'=>$item['id']))}'
-        data-switch-value1='1|开启|label label-primary|{php echo webUrl('sale/package/delete',array('status'=>0,'id'=>$item['id']))}'
+        data-switch-value0='0|关闭|label label-default|{php echo webUrl('sale/bribe/delete',array('status'=>1,'id'=>$item['id']))}'
+        data-switch-value1='1|开启|label label-primary|{php echo webUrl('sale/bribe/delete',array('status'=>0,'id'=>$item['id']))}'
         {/if}>
         {if $item['status']==1}开启{else}关闭{/if}</span>
     </td>

@@ -91,7 +91,7 @@ class Index_EweiShopV2Page extends WebPage
 			$condition .= ' and status = 1 ';
 		} else {
 			if ($type == 'done') {
-				$condition .= ' status= 0 ';
+				$condition .= ' and status= 0 ';
 			}
 		}
 		if (!empty($_GPC['keyword'])) {
@@ -119,7 +119,7 @@ class Index_EweiShopV2Page extends WebPage
 		$items = pdo_fetchall('SELECT id,title FROM ' . tablename('ewei_shop_music') . (' WHERE id in( ' . $id . ' ) AND uniacid=') . $_W['uniacid']);
 		foreach ($items as $item) {
 			pdo_update('ewei_shop_music', array('status' => intval($_GPC['status'])), array('id' => $item['id']));
-			plog('sale.bribe.music', '修改背景音乐状态<br/>ID: ' . $item['id'] . '<br/>背景音乐名称: ' . $item['title'] . '<br/>状态: ' . $_GPC['status'] == 1 ? '上架' : '下架');
+			plog('sale.bribe.music', '修改背景音乐<br/>ID: ' . $item['id'] . '<br/>背景音乐名称: ' . $item['title'] . '<br/>状态: ' . $_GPC['status'] == 1 ? '上架' : '下架');
 		}
 		show_json(1, array('url' => referer()));
 	}
@@ -127,6 +127,22 @@ class Index_EweiShopV2Page extends WebPage
 	/**
 	 * 删除背景音乐
 	 */
+	public function delete1()
+	{
+		header('Access-Control-Allow-Origin:*');
+		global $_W;
+		global $_GPC;
+		$id = intval($_GPC['id']);
+		if (empty($id)) {
+			$id = is_array($_GPC['ids']) ? implode(',', $_GPC['ids']) : 0;
+		}
+		$items = pdo_fetchall('SELECT id,title FROM ' . tablename('ewei_shop_music') . (' WHERE id in( ' . $id . ' ) AND uniacid=') . $_W['uniacid']);
+		foreach ($items as $item) {
+			pdo_delete('ewei_shop_music',array('id' => $item['id']));
+			plog('sale.bribe.music', '删除背景音乐id<br/>ID: ' . $item['id'] . '<br/>背景音乐名称: ' . $item['title'] . '<br/>状态: ' . $_GPC['status'] == 1 ? '上架' : '下架');
+		}
+		show_json(1, array('url' => referer()));
+	}
 }
 
 ?>
