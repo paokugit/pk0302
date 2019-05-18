@@ -29,19 +29,14 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         //第几页从第几个显示
         $psize = ($page-1)*$pageSize-$offset;
         //店铺信息
-        //$store = pdo_fetch('select id,address,uniacid,merchname,salecate,logo,realname from ' . tablename('ewei_shop_merch_user') . ' where id=:merchid and uniacid=:uniacid Limit 1', array(':uniacid' => $_W['uniacid'], ':merchid' => $_W['merchmanage']['merchid']));
-        $store = pdo_fetch('select id,address,uniacid,merchname,salecate,logo,realname from ' . tablename('ewei_shop_merch_user') . ' where id=:merchid and uniacid=:uniacid Limit 1', array(':uniacid' => $_W['uniacid'], ':merchid' => 31));
+        $store = pdo_fetch('select id,address,uniacid,merchname,salecate,logo,realname from ' . tablename('ewei_shop_merch_user') . ' where id=:merchid and uniacid=:uniacid Limit 1', array(':uniacid' => $_W['uniacid'], ':merchid' => $_W['merchmanage']['merchid']));
         //销量salesreal  和热度ishot  以及 抵扣额度 deduct 倒序
         // 还有排序倒序（默认排序都是0  所以就没作用，当手动进行上移排序的时候才操作） 取前三个
-//        $show = pdo_fetchall('select id,title,shorttitle,marketprice,deduct,total,salesreal,sort,thumb,share_title,share_icon from ' . tablename('ewei_shop_goods') .' where uniacid ="'.$_W['uniacid'].'" and merchid = 31 ORDER BY  `sort` desc ,`ishot` DESC  , `salesreal` desc , `deduct` DESC  Limit 3' );        //获取商品列表
-//        $show = set_medias($show, 'thumb');
-        //$list =  pdo_fetchall('select id,merchid,title,shorttitle,marketprice,deduct,total,salesreal,sort,thumb,share_title,share_icon from ' . tablename('ewei_shop_goods') . 'where uniacid = uniacid ="'.$_W['uniacid'].'" and merchid = "'.$_W['merchmanage']['merchid'].'" ORDER BY `sort` desc , `ishot` DESC, `salesreal` desc , `deduct` DESC LIMIT ' . $psize . ',' . $pageSize);
-        $list =  pdo_fetchall('select id,merchid,title,shorttitle,marketprice,deduct,total,salesreal,sort,thumb,share_title,share_icon from ' . tablename('ewei_shop_goods') . 'where uniacid = uniacid ="'.$_W['uniacid'].'" and merchid = 31 ORDER BY `sort` desc , `ishot` DESC, `salesreal` desc , `deduct` DESC LIMIT ' . $psize . ',' . $pageSize);
+        $list =  pdo_fetchall('select id,merchid,title,shorttitle,marketprice,deduct,total,salesreal,sort,thumb,share_title,share_icon from ' . tablename('ewei_shop_goods') . 'where uniacid = uniacid ="'.$_W['uniacid'].'" and merchid = "'.$_W['merchmanage']['merchid'].'" ORDER BY `sort` desc , `ishot` DESC, `salesreal` desc , `deduct` DESC LIMIT ' . $psize . ',' . $pageSize);
         $list = set_medias($list, 'thumb');
         foreach ($list as $key =>$val){
             $list[$key]["isreward"] =  m('reward')->good($val['id']);
         }
-//        show_json(1,[ 'store'=>$store,'show'=>$show,'list'=>$list]);
         show_json(1,[ 'store'=>$store,'list'=>$list]);
     }
 
@@ -64,7 +59,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         try{
             foreach ($ids as $item){
                 $item = explode(':',$item);
-                pdo_update('ewei_shop_goods',['sort'=>$item[1]],['id'=>$item[0],'merchid'=>31]);
+                pdo_update('ewei_shop_goods',['sort'=>$item[1]],['id'=>$item[0],'merchid'=>$_W['merchmanage']['merchid']]);
             }
             pdo_commit();
         }catch (Exception $exception){
@@ -83,7 +78,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         if(isset($_GPC['id'])){
             //查询goods部分字段
             $fields = "title,description,total,marketprice,thumb,thumb_url,commission1_pay,commission2_pay";
-            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>31]);
+            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>$_W['merchmanage']['merchid']]);
             //查询红包引流的全部字段
             $item2 = pdo_fetch('select * from' .tablename('ewei_shop_goods_bribe_expert').' where goods_id =:id',[':id'=>$_GPC['id']]);
             $item = array_merge($item1,$item2);
@@ -128,6 +123,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             'main'=>$_GPC['main'],                         //主办方
             'principal'=>$_GPC['principal'],               //负责人
             'address'=>$_GPC['address'],
+            'end_time'=>$_GPC['end_time'],
             'tel'=>$_GPC['tel'],
             'isdraft'=>$_GPC['isdraft'],
         ];
@@ -184,7 +180,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_W;
        // $list = pdo_fetchall(' select * from '.tablename('ewei_shop_music').'where uniacid = :uniacid and merchid = :merchid',[':uniacid'=>$_W['uniacid'],':merchid'=>$_W['merchmanage']['merchid']]);
-        $list = pdo_fetchall(' select * from '.tablename('ewei_shop_music').'where uniacid = :uniacid and merchid = :merchid',[':uniacid'=>$_W['uniacid'],':merchid'=>31]);
+        $list = pdo_fetchall(' select * from '.tablename('ewei_shop_music').'where uniacid = :uniacid and status = :status',[':uniacid'=>$_W['uniacid'],':status'=>1]);
         show_json(1,['list'=>$list]);
     }
 }

@@ -243,8 +243,10 @@
                 // 列表商品结束
                 // 左移
                 $(".good-list").on("click", ".leftbtn", function () {
-                    $(this).toggleClass('selected').siblings().removeClass(
-                        'selected');
+                    $('.leftbtn').removeClass('select')
+                    $('.centerbtn').removeClass('select')
+                    $('.rightbtn').removeClass('select')
+                    $(this).toggleClass('select').siblings().removeClass('select')
                     var goodid = ($(this).attr("data-id"))
                     console.log(goodid)
                     $.ajax({
@@ -274,8 +276,10 @@
                 })
                 // 中移
                 $(".good-list").on("click", ".centerbtn", function () {
-                    $(this).toggleClass('selected').siblings().removeClass(
-                        'selected');
+                    $('.leftbtn').removeClass('select')
+                    $('.centerbtn').removeClass('select')
+                    $('.rightbtn').removeClass('select')
+                    $(this).toggleClass('select').siblings().removeClass('select')
                     var goodid = ($(this).attr("data-id"))
                     console.log(goodid)
                     $.ajax({
@@ -305,8 +309,10 @@
                 })
                 // 右移
                 $(".good-list").on("click", ".rightbtn", function () {
-                    $(this).toggleClass('selected').siblings().removeClass(
-                        'selected');
+                    $('.leftbtn').removeClass('select')
+                    $('.centerbtn').removeClass('select')
+                    $('.rightbtn').removeClass('select')
+                    $(this).toggleClass('select').siblings().removeClass('select')
                     var goodid = ($(this).attr("data-id"))
                     console.log(goodid)
                     $.ajax({
