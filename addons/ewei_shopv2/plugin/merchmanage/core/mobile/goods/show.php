@@ -9,7 +9,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
     /**
      * 橱窗页面
      */
-    public function index(){
+    public function main(){
         include $this->template('merchmanage/goods/shop');
     }
 
