@@ -148,6 +148,11 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
         //获取赏金任务列表
         $rewards=pdo_fetchall("select * from ".tablename('ewei_shop_merch_reward')." where merch_id=:merch_id and is_end=0",array(':merch_id'=>$merchid));
 //         var_dump($rewards);
+        //判断openid
+        $m=pdo_get("ewei_shop_member",array("openid"=>$openid));
+        if (empty($m)&&str_replace("sns_wa_", '', $openid)){
+            app_error(1,"openid不正确");
+        }
         if ($rewards){
             
             foreach ($rewards as $k=>$v){

@@ -8,12 +8,14 @@ class Share_EweiShopV2Page extends MobilePage
     public function index(){
        global $_W;
        global $_GPC;
-      
+       
        if (empty($_W["openid"])){
            mc_oauth_account_userinfo();
        }
            var_dump("22");
            $openid=$_W["openid"];
+      //获取上级openid
+      $share_openid=$_GPC["share_openid"];
       
        var_dump($openid);
       
@@ -51,7 +53,7 @@ class Share_EweiShopV2Page extends MobilePage
         global $_GPC;
         $good_id=$_GPC["good_id"];
         $good=pdo_fetch("select * from ".tablename("ewei_shop_goods")."where id=:id",array(":id"=>$good_id));
-        
+//         var_dump($good);die;
         if (empty($good)){
             show_json(0,"商品不存在");
         }
@@ -74,6 +76,11 @@ class Share_EweiShopV2Page extends MobilePage
         $data["order_type"]=1;
         $data["createtime"]=time();
         $data["merchid"]=$good["merchid"];
+        
+        //获取分享的人
+        $data["share_openid1"]=$_GPC["share_openid1"];
+        $data["share_openid2"]=$_GPC["share_openid2"];
+        
         if ($good["other"]["pro_type"]==1){
             //物流
             $data["price"]=$good["marketprice"]+$good["other"]["express_price"];
@@ -129,6 +136,29 @@ class Share_EweiShopV2Page extends MobilePage
             $g["createtime"]=time();
             pdo_insert("ewei_shop_order_goods",$g);
             $order_sn["ordersn"]=$data["ordersn"];
+            //生成红包记录
+//             var_dump($data);
+            if ($good["commission1_pay"]!=0&&$data["share_openid1"]){
+                
+                $red1["openid"]=$data["share_openid"];
+                $red1["good⁯_id"]=$good_id;
+                $red1["order_sn"]=$data["ordersn"];
+                $red1["money"]=$good["commission1_pay"];
+                $red1["level"]=1;
+                $red1["status"]=0;
+                $red1["create_time"]=time();
+                pdo_insert("ewei_shop_goods_redlog",$red1);
+            }
+            if ($good["commission2_pay"]!=0&&$data["share_openid2"]){
+                $red2["openid"]=$data["share_openid2"];
+                $red2["good⁯_id"]=$good_id;
+                $red2["order_sn"]=$data["ordersn"];
+                $red2["money"]=$good["commission2_pay"];
+                $red2["level"]=2;
+                $red2["status"]=0;
+                $red2["create_time"]=time();
+                pdo_insert("ewei_shop_goods_redlog",$red2);
+            }
             show_json(1,$order_sn);
         }else{
             show_json(0,"生成订单失败");
@@ -170,6 +200,23 @@ class Share_EweiShopV2Page extends MobilePage
         show_json(1,$list);
     }
     
-    
+    //订单支付成功
+    public function order_wxback(){
+        global $_GPC;
+        global $_W;
+        $ordersn=$_GPC["order_sn"];
+        $order=pdo_get("ewei_shop_order",array("ordersn"=>$ordersn));
+        if (empty($order)){
+            show_json(0,"订单编号不存在");
+        }else{
+            if (pdo_update("ewei_shop_order",array("status"=>1),array("ordersn"=>$ordersn))){
+                //更新红包
+                pdo_update("ewei_shop_goods_redlog",array("status"=>1),array("order_sn"=>$ordersn));
+                show_json(1,"更新成功");
+            }else{
+                show_json(0,"更新失败");
+            }
+        }
+    }
 
 }
