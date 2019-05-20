@@ -535,7 +535,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
                 $merchInfo = $this->get_near_merch(1);
                 $args['merchid'] = $merchInfo['id'];
         }
-        $args['order'] = 'isrecommand';
+        $args['order'] = 'sort desc,isrecommand';
         $goodList = m('goods')->getList($args);
         $merchInfo['logo'] = tomedia($merchInfo['logo']);
         $data['merchInfo'] = $merchInfo;
