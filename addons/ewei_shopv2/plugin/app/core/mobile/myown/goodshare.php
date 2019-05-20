@@ -148,6 +148,11 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
         //获取赏金任务列表
         $rewards=pdo_fetchall("select * from ".tablename('ewei_shop_merch_reward')." where merch_id=:merch_id and is_end=0",array(':merch_id'=>$merchid));
 //         var_dump($rewards);
+        //判断openid
+        $m=pdo_get("ewei_shop_member",array("openid"=>$openid));
+        if (empty($m)&&str_replace("sns_wa_", '', $openid)){
+            app_error(1,"openid不正确");
+        }
         if ($rewards){
             
             foreach ($rewards as $k=>$v){
@@ -249,7 +254,7 @@ class Goodshare_EweiShopV2Page extends AppMobilePage{
                                 pdo_insert("ewei_shop_merch_rewardclick",$data);
                                 //用户佣金
                                 m('member')->setCredit($sharemember["openid"], 'credit1', $v["click_price"],"点击商品佣金");
-                                app_error(0,"分享获取佣金成功");
+                                app_error(0,"点击获取佣金成功");
                             }
                             
                             app_error(0,"分享成功");

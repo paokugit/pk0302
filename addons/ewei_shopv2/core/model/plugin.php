@@ -3,7 +3,8 @@ class Plugin_EweiShopV2Model
 {
 	/**
 	 * 判断是否有插件
-	 * @param type $pluginName
+	 * @param string $pluginName
+	 * @return bool
 	 */
 	public function exists($pluginName = '')
 	{

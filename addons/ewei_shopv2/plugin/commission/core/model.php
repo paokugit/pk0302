@@ -2114,9 +2114,8 @@ if( !class_exists("CommissionModel") )
 			            }
 			            
 			            m('member')->setCredit($openid, 'credit1', $credit, $info);
-                        //wxmessage($order['agentid'],$openid);
+                        //wxmessage($openid);
 			        }
-			        //会员开通消息
 			        $commission=pdo_fetch("select * from ".table("ewei_shop_commission_level")." where id=:id",array(':id'=>$goods["agentlevel"]));
 			        $postdata=array(
 			            'keyword1'=>array(
@@ -3870,24 +3869,25 @@ if( !class_exists("CommissionModel") )
 
         //卡路里奖励到账提醒
         //bopenid为被推荐人的
-       public function wxmessage($agentid,$bopenid){
+       public function wxmessage($bopenid){
             //获取推荐人的用户信息
             $bmember = m("member")->getMember($bopenid);//被推荐人的
-            if($bmember['agentid']==0 || $bmember['agentid']=='') return false;
+            if(!$bmember['agentid']) return false;
             $tmember = m("member")->getMember($bmember['agentid']);//推荐人的
-           $agentInfo=array();
+            $agentInfo=array();
             if($bmember['agentlevel']==0){
                 $agentInfo['levelname'] = "普通会员";
             }else{
                 $agentInfo = pdo_fetch("select id,levelname from " . tablename("ewei_shop_commission_level") . " where id = :id", array( ":id" => $bmember['agentlevel'] ));
             }
-            $postdata=array(//被推荐人
+
+            $postdata=array(//推荐人
                 'keyword1'=>array(
-                    'value'=>$bmember["nickname"],
+                    'value'=>$tmember["nickname"],
                     'color' => '#ff510'
-                ),//开通时间
+                ),//被推荐人
                 'keyword2'=>array(
-                    'value'=>date('Y-m-d',$bmember['agenttime']),
+                    'value'=>$tmember["nickname"],
                     'color' => '#ff510'
                 ),//级别
                 'keyword3'=>array(
@@ -3899,9 +3899,9 @@ if( !class_exists("CommissionModel") )
                     'color' => '#ff510'
                 )
             );
-           $res = p("app")->mysendNotice($tmember['openid'], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
-           return $res;
-        }
+            p("app")->mysendNotice($tmember["openid"], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
+            return true;
+		}
 	}
 }
 ?>

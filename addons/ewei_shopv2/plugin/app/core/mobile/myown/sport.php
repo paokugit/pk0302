@@ -557,8 +557,10 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             if ($parent_id!=0&&!empty($parent_id)){
                 $parent=m("member")->getmember($parent_id);
                 if (!empty($parent)){
-                    $cd=$this->prize();
-                    m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+//                     $cd=$this->prize();
+//                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+                    m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
+                    
                     
                 }
             }

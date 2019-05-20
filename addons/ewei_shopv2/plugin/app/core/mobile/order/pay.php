@@ -574,6 +574,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
 //        $res = m('reward')->addReward('sns_wa_owRAK4-smphSYPkphpDAFOnsuy08');
 //        $this->write_log('========');
         die();
+
     }
 }
 ?>

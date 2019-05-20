@@ -23,7 +23,8 @@ class Version_EweiShopV2Page extends AppMobilePage
     public function appversion()
     {
         global $_GPC;
-        if($_GPC['versions'] && $_GPC['versions']>=3) app_json(array(
+
+        if($_GPC['versions'] && $_GPC['versions']>=6) app_json(array(
             'app_version' => 0,
         ));
 
