@@ -912,6 +912,16 @@ class System_EweiShopV2Model {
                         )
                     ) ,
                     array(
+                        "title"=>"红包引流",
+                        "route" => "bribe",
+                        "items"=>array(
+                            array(
+                                "title"=>"背景音乐",
+                                "route" => "index",
+                            )
+                        ),
+                    ),
+                    array(
                         "title" => "优惠券",
                         "route" => "coupon",
                         "iscom" => "coupon",

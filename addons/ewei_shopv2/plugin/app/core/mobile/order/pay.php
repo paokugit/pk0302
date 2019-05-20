@@ -567,11 +567,9 @@ class Pay_EweiShopV2Page extends AppMobilePage
 	}
 
 	public function aa(){
-	    $res = p('commission')->wxmessage(83,'sns_wa_owRAK4-smphSYPkphpDAFOnsuy08');
-	    var_dump($res);
-        $res = m('reward')->addReward('sns_wa_owRAK4-smphSYPkphpDAFOnsuy08');
-        $this->write_log('========');
-        die();
+	    //$res = p('commission')->wxmessage('sns_wa_owRAK4-smphSYPkphpDAFOnsuy08');
+        $res = p('commission')->checkOrderFinish('1724');
+        var_dump($res);
     }
 }
 ?>
