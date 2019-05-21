@@ -194,32 +194,29 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
      */
     public function ceshi(){
         global $_W;
+        global $_GPC;
         list(, $payment) = m('common')->public_build();
         if( is_error($payment) )
         {
             return $payment;
         }
-        $payment = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_payment") . " WHERE uniacid=:uniacid AND id=:id", array( ":uniacid" => $_W["uniacid"], ":id" => 1));
-        $wechat = array(
-            "sub_appid" => (!empty($payment["sub_appid"]) ? trim($payment["sub_appid"]) : ""),
-            "sub_mch_id" => trim($payment["sub_mch_id"]),
-            "apikey" => trim($payment["apikey"]),
-        );
+        //查找订单状态
+        $query = pdo_fetch('select * from '.tablename('ewei_shop_goods_red_log').' where order_sn="'.$_GPC['order_sn'].'"');
+        if($query['status'] == 2){
+            show_json(0,'该订单已处理');
+        }
         $params = [
             'desc'=>'测试提现备注',
-            'order_sn'=>"RD20190520100911344638",
+            'order_sn'=>$query['order_sn'],
             'user_name'=>'郝成程',
-            'fee'=>5,
-            'openid'=>'owRAK44_gHTrMTJMVSxFy-jtNef8',
+            'fee'=>$query['money'],
+            'openid'=>$query['openid'],
         ];
-        $res = m('user')->get_transfers($wechat,$params);
+        //请求微信发送支付
+        $res = m('user')->get_transfers($params);
         if($res['return_code'] == "SUCCESS" && $res['result_code'] == "SUCCESS"){
             pdo_begin();
             try{
-                $status = pdo_getcolumn('ewei_shop_goods_red_log',['order_sn'=>$params['order_sn']],'status');
-                if($status == 2){
-                    show_json(0,'该订单已处理');
-                }
                 //更新订单状态
                 pdo_update('ewei_shop_goods_red_log',['status'=>2],['order_sn'=>$params['order_sn']]);
                 $openid = 'sns_wa_'.$params['openid'];

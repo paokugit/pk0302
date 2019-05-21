@@ -75,13 +75,19 @@ class User_EweiShopV2Model
 
 	/**
 	 * 微信小程序 提现到零钱
-	 * @param array $wechat
 	 * @param array $params
 	 * @return array|false|mixed|resource
 	 */
-	public function get_transfers($wechat = [],$params = [])
+	public function get_transfers($params = [])
 	{
 		global $_W;
+		//获取微信商户配置
+		$payment = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_payment") . " WHERE uniacid=:uniacid AND id=:id", array( ":uniacid" => $_W["uniacid"], ":id" => 1));
+		$wechat = array(
+			"sub_appid" => (!empty($payment["sub_appid"]) ? trim($payment["sub_appid"]) : ""),
+			"sub_mch_id" => trim($payment["sub_mch_id"]),
+			"apikey" => trim($payment["apikey"]),
+		);
 		$package = array( );
 		$package["mch_appid"] = trim($wechat["sub_appid"]);   //商户账号appid
 		$package["mchid"] = trim($wechat["sub_mch_id"]);   //商户号
