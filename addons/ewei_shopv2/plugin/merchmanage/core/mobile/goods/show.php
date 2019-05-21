@@ -183,6 +183,9 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         global $_W;
        // $list = pdo_fetchall(' select * from '.tablename('ewei_shop_music').'where uniacid = :uniacid and merchid = :merchid',[':uniacid'=>$_W['uniacid'],':merchid'=>$_W['merchmanage']['merchid']]);
         $list = pdo_fetchall(' select * from '.tablename('ewei_shop_music').'where uniacid = :uniacid and status = :status',[':uniacid'=>$_W['uniacid'],':status'=>1]);
+        foreach ($list as $key=>$item){
+            $list[$key]['music'] = tomedia($item['music']);
+        }
         show_json(1,['list'=>$list]);
     }
 
