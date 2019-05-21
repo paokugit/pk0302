@@ -2135,7 +2135,7 @@ if( !class_exists("CommissionModel") )
 			                'color' => '#ff510'
 			            )
 			        );
-			        
+
 			        p("app")->mysendNotice($order["openid"], $postdata, $order["id"], "2nQmrU1YkfMK0EWEO4v0QmL89Xpx1v3DqZk-LMsnd80");
                 
 			    
@@ -3880,6 +3880,7 @@ if( !class_exists("CommissionModel") )
             }else{
                 $agentInfo = pdo_fetch("select id,levelname from " . tablename("ewei_shop_commission_level") . " where id = :id", array( ":id" => $bmember['agentlevel'] ));
             }
+
             $postdata=array(//推荐人
                 'keyword1'=>array(
                     'value'=>$tmember["nickname"],

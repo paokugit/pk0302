@@ -60,8 +60,8 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         try{
             foreach ($ids as $item){
                 $item = explode(':',$item);
-                pdo_update('ewei_shop_goods',['sort'=>$item[1]],['id'=>$item[0],'merchid'=>$_W['merchmanage']['merchid']]);
                 pdo_update('ewei_shop_goods',['sort'=>0],['sort'=>$item[1],'merchid'=>$_W['merchmanage']['merchid']]);
+                pdo_update('ewei_shop_goods',['sort'=>$item[1]],['id'=>$item[0],'merchid'=>$_W['merchmanage']['merchid']]);
             }
             pdo_commit();
         }catch (Exception $exception){

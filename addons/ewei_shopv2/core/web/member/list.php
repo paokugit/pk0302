@@ -128,6 +128,12 @@ class List_EweiShopV2Page extends WebPage
 			$row["ordermoney"] = pdo_fetchcolumn("select sum(price) from " . tablename("ewei_shop_order") . " where uniacid=:uniacid and openid=:openid and status=3", array( ":uniacid" => $_W["uniacid"], ":openid" => $row["openid"] ));
 			$row["credit1"] = m("member")->getCredit($row["openid"], "credit1");
 			$row["credit2"] = m("member")->getCredit($row["openid"], "credit2");
+			//获取推荐人数和直推人数
+            $ztcount = pdo_fetchcolumn("select count(*) from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $row['id']));
+            $row["ztcount"] = $ztcount?$ztcount:0;
+            //总推荐
+            $row["alltcount"] = m('member')->allAgentCount($row['id']);
+
 		}
 		unset($row);
 		if( $_GPC["export"] == "1" ) 
