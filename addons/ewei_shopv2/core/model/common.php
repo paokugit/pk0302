@@ -656,7 +656,7 @@ class Common_EweiShopV2Model
 		$set = $this->getSysset("pay");
 		if( !empty($set["weixin_id"]) && $isapp == false ) 
 		{
-			$payments = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_payment") . " WHERE uniacid=:uniacid AND id=:id", array( ":uniacid" => $_W["uniacid"], ":id" => $set["weixin_id"] ));
+			$payments = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_payment") . " WHERE uniacid=:uniacid AND id=:id", array( ":uniacid" => $_W["uniacid"], ":id" => $set["weixin_id"] ));$payments = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_payment") . " WHERE uniacid=:uniacid AND id=:id", array( ":uniacid" => $_W["uniacid"], ":id" => $set["weixin_id"] ));
 			if( empty($payments) ) 
 			{
 				error(-1, "支付参数不存在!");

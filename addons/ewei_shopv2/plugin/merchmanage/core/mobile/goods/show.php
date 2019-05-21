@@ -185,6 +185,64 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         $list = pdo_fetchall(' select * from '.tablename('ewei_shop_music').'where uniacid = :uniacid and status = :status',[':uniacid'=>$_W['uniacid'],':status'=>1]);
         show_json(1,['list'=>$list]);
     }
+
+    /**
+     * 测试
+     */
+    public function ceshi(){
+        global $_W;
+        list(, $payment) = m('common')->public_build();
+        if( is_error($payment) )
+        {
+            return $payment;
+        }
+        $payment = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_payment") . " WHERE uniacid=:uniacid AND id=:id", array( ":uniacid" => $_W["uniacid"], ":id" => 1));
+        $wechat = array(
+            "sub_appid" => (!empty($payment["sub_appid"]) ? trim($payment["sub_appid"]) : ""),
+            "sub_mch_id" => trim($payment["sub_mch_id"]),
+            "apikey" => trim($payment["apikey"]),
+        );
+        $params = [
+            'desc'=>'测试提现备注',
+            'order_sn'=>"RD20190520100911344638",
+            'user_name'=>'郝成程',
+            'fee'=>5,
+            'openid'=>'owRAK44_gHTrMTJMVSxFy-jtNef8',
+        ];
+        $res = m('user')->get_transfers($wechat,$params);
+        if($res['return_code'] == "SUCCESS" && $res['result_code'] == "SUCCESS"){
+            pdo_begin();
+            try{
+                $status = pdo_getcolumn('ewei_shop_goods_red_log',['order_sn'=>$params['order_sn']],'status');
+                if($status == 2){
+                    show_json(0,'该订单已处理');
+                }
+                //更新订单状态
+                pdo_update('ewei_shop_goods_red_log',['status'=>2],['order_sn'=>$params['order_sn']]);
+                $openid = 'sns_wa_'.$params['openid'];
+                $credit = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit2');
+                $credit2 = bcmul($credit,$params['fee'],2);
+                //更新用户余额
+                pdo_update('ewei_shop_member',['credit2'=>$credit2],['openid'=>$openid]);
+                //添加操作日志
+                $logno = "RW".date(YmdHis).random(6,true);
+                $data = [
+                    'uniacid'=>$_W['uniacid'],
+                    'type'=>1,
+                    'openid'=>$openid,
+                    'title'=>'会员提现',
+                    'logno'=>$logno,
+                    'status'=>1,
+                    'createtime'=>time(),
+                    'money'=>$params['fee'],
+                ];
+                pdo_insert('ewei_shop_member_log',$data);
+                pdo_commit();
+            }catch (Exception $exception){
+                pdo_rollback();
+            }
+        }
+    }
 }
 
 

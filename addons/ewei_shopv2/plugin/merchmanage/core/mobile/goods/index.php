@@ -623,6 +623,14 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 
 
     }
+
+    /**
+     * 红包引流
+     */
+    public function bribe()
+    {
+        include $this->template();
+    }
 }
 
 
