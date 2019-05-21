@@ -132,7 +132,7 @@ class List_EweiShopV2Page extends WebPage
             $ztcount = pdo_fetchcolumn("select count(*) from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $row['id']));
             $row["ztcount"] = $ztcount?$ztcount:0;
             //总推荐
-
+            $row["alltcount"] = m('member')->allAgentCount($row['id']);
 
 		}
 		unset($row);

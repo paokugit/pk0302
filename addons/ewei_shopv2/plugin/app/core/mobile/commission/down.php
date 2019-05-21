@@ -115,7 +115,9 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		}
 
 		unset($row);
-		app_json(array('list' => $list, 'total' => $total_level, 'pagesize' => $psize));
+		//总推荐
+		$allcount = m('member')->allAgentCount($member['id']);
+		app_json(array('list' => $list, 'total' => $total_level,'allcount' => $allcount, 'pagesize' => $psize));
 	}
 
 	public function getagentcount($openid){

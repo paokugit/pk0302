@@ -1368,5 +1368,35 @@ class Member_EweiShopV2Model
 
         return pdo_update("ewei_shop_member",array('from_merchid'=>$merchInfo['id']),array('openid'=>$openid));
     }
+
+    /**
+     * 获取推荐人总数量（包含下级的所以推荐）
+     * @param $id
+     * @return int
+     */
+    public function allAgentCount($id){
+        $res = $this->getBottomUsers($id);
+        if(!$res) return 0;
+        $idlist = explode(",", $res);
+        return count($idlist)-1;
+    }
+
+    /**
+     * 查找一个粉丝下的所以粉丝
+     */
+    public function getBottomUsers($id,$uids=''){
+        $userList = pdo_fetchall("select * from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $id));
+        if(!$userList) return false;
+        foreach ($userList as $key=>$value){
+            $uids .= $value['id'].',';
+            $user = pdo_fetchall("select * from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $value['id']));
+            if($user){
+                $uids = $this->getBottomUsers($value['id'],$uids);
+            }
+        }
+        return $uids;
+
+    }
+
 }
 ?>
