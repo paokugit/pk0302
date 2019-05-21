@@ -544,26 +544,37 @@ class Sport_EweiShopV2Page extends AppMobilePage{
 //             show_json(0,"成功");
 //         }
        
-       
-            if ($member&&$member["agentid"]==0){
+          
+            if ($member&&$member["agentid"]==0&&$member["id"]!=$parent_id){
                 pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
+                //推荐人
+                if ($parent_id!=0&&!empty($parent_id)){
+                    $parent=m("member")->getmember($parent_id);
+                    if (!empty($parent)){
+                        //                     $cd=$this->prize();
+                        //                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+                        m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
+                        
+                        
+                    }
+                }
             }elseif (empty($member)){
                 
                 $m = array("uniacid" => $_W["uniacid"],"agentid"=>$parent_id,"uid" => 0, "openid" =>"sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
                 pdo_insert("ewei_shop_member", $m);
-                
-            }
-            //推荐人
-            if ($parent_id!=0&&!empty($parent_id)){
-                $parent=m("member")->getmember($parent_id);
-                if (!empty($parent)){
-//                     $cd=$this->prize();
-//                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
-                    m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
-                    
-                    
+                //推荐人
+                if ($parent_id!=0&&!empty($parent_id)){
+                    $parent=m("member")->getmember($parent_id);
+                    if (!empty($parent)){
+                        //                     $cd=$this->prize();
+                        //                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+                        m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
+                        
+                        
+                    }
                 }
             }
+            
             
             show_json(0,"成功");
         

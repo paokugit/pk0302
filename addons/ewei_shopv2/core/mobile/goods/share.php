@@ -27,6 +27,7 @@ class Share_EweiShopV2Page extends MobilePage
         global $_GPC;
         $good_id=$_GPC["good_id"];
         $good=pdo_fetch("select id,title,marketprice,total,thumb_url,commission1_pay,commission2_pay,viewcount,forwardcount,description from ".tablename("ewei_shop_goods")."where id=:id",array(":id"=>$good_id));
+        $openid=$_GPC["openid"];
         
         if (empty($good)){
             show_json(0,"商品不存在");
@@ -43,7 +44,36 @@ class Share_EweiShopV2Page extends MobilePage
         //获取音乐
         $music=pdo_get("ewei_shop_music",array("id"=>$good["other"]["music"]));
         $good["other"]["music"]=$music["music"];
-        
+        //获取红包记录
+        $resalut=pdo_fetchall("select openid,sum(money) as m from ".tablename("ewei_shop_goods_redlog")." where goodid=:goodid and status=1 group by openid order by m desc",array(":goodid"=>$good_id));
+        $my=array();
+        foreach ($resalut as $k=>$v){
+            $mc_fans=pdo_get("mc_mapping_fans",array("openid"=>$v["openid"]));
+            $mc_member=pdo_get("mc_members",array("uid"=>$mc_fans["uid"]));
+            $resalut[$k]["nickname"]=$mc_member["nickname"];
+            $resalut[$k]["avatar"]=$mc_member["avatar"];
+            if ($v["openid"]==$openid){
+                $my["money"]=$v["m"];
+                $my["sort"]=$k+1;
+            }
+        }
+        $good["red"]["log"]=$resalut;
+        if (empty($my)){
+            $my["money"]=0;
+            $my["sort"]=0;
+        }
+        $good["red"]["myred"]=$my;
+        //获取订单记录
+        $sql="select o.openid,o.price,o.createtime from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and o.status=1 ORDER BY o.createtime DESC ";
+        $good["order"]=pdo_fetch("select count(*) as count from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and o.status=1 ORDER BY o.createtime DESC ",array(":goodid"=>$good_id));
+        $good["order"]["log"]=pdo_fetchall($sql,array(":goodid"=>$good_id));
+        foreach ($good["order"]["log"] as $k=>$v){
+             $mc_fans=pdo_get("mc_mapping_fans",array("openid"=>$v["openid"]));
+             $mc_member=pdo_get("mc_members",array("uid"=>$mc_fans["uid"]));
+             $good["order"]["log"][$k]["nickname"]=$mc_member["nickname"];
+             $good["order"]["log"][$k]["avatar"]=$mc_member["avatar"];
+             $good["order"]["log"][$k]["createtime"]=date("Y-m-d H:i:s",$v["createtime"]);
+         }
         show_json(1,$good);
     }
     //立即抢购
@@ -140,8 +170,8 @@ class Share_EweiShopV2Page extends MobilePage
 //             var_dump($data);
             if ($good["commission1_pay"]!=0&&$data["share_openid1"]){
                 
-                $red1["openid"]=$data["share_openid"];
-                $red1["good⁯_id"]=$good_id;
+                $red1["openid"]=$data["share_openid1"];
+                $red1["goodid"]=$good_id;
                 $red1["order_sn"]=$data["ordersn"];
                 $red1["money"]=$good["commission1_pay"];
                 $red1["level"]=1;
@@ -151,7 +181,7 @@ class Share_EweiShopV2Page extends MobilePage
             }
             if ($good["commission2_pay"]!=0&&$data["share_openid2"]){
                 $red2["openid"]=$data["share_openid2"];
-                $red2["good⁯_id"]=$good_id;
+                $red2["goodid"]=$good_id;
                 $red2["order_sn"]=$data["ordersn"];
                 $red2["money"]=$good["commission2_pay"];
                 $red2["level"]=2;
@@ -212,11 +242,67 @@ class Share_EweiShopV2Page extends MobilePage
             if (pdo_update("ewei_shop_order",array("status"=>1),array("ordersn"=>$ordersn))){
                 //更新红包
                 pdo_update("ewei_shop_goods_redlog",array("status"=>1),array("order_sn"=>$ordersn));
+               
                 show_json(1,"更新成功");
             }else{
+                
                 show_json(0,"更新失败");
             }
         }
     }
-
+    
+    //充值--微信支付
+    public function order_wx(){
+        header('Access-Control-Allow-Origin:*');
+        global $_W;
+        global $_GPC;
+        
+        $openid=$_W["openid"];
+        if (empty($openid)){
+            $result = mc_oauth_userinfo();
+            $openid=$result["openid"];
+        }
+        
+        if (empty($openid)){
+            $openid=$_GPC["openid"];
+        }
+        $order_sn=$_GPC["order_sn"];
+        $log=pdo_get("ewei_shop_order",array('ordersn'=>$order_sn));
+        
+        $params["openid"]=$openid;
+        $params["fee"] =$log["price"];
+        $params["title"]="购买活动产品";
+        $params["tid"]=$order_sn;
+        load()->model("payment");
+        $setting = uni_setting($_W["uniacid"], array( "payment" ));
+        if( is_array($setting["payment"]) )
+        {
+            $options = $setting["payment"]["wechat"];
+            $options["appid"] = $_W["account"]["key"];
+            $options["secret"] = $_W["account"]["secret"];
+        }
+        $options["mch_id"]=$options["mchid"];
+       
+        $wechat = m("common")->fwechat_child_build($params, $options, 0);
+        
+       var_dump($wechat);die;
+        include $this->template();
+    }
+    
+    //分享信息
+    public function share_url()
+    {
+        global $_W;
+        global $_GPC;
+        $url = trim($_GPC['url']);
+        $account_api = WeAccount::create($_W['acid']);
+        $jssdkconfig = $account_api->getJssdkConfig($url);
+        show_json(1, $jssdkconfig);
+    }
+   //测试
+   public function cs(){
+       
+       $sql="select o.openid,o.price,o.createtime from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and o.status=1 ORDER BY o.createtime DESC ";
+       var_dump(pdo_fetchall($sql,array("goodid"=>451)));
+   }
 }
