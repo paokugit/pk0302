@@ -117,7 +117,16 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		unset($row);
 		//总推荐
 		$allcount = m('member')->allAgentCount($member['id']);
-		app_json(array('list' => $list, 'total' => $total_level,'allcount' => $allcount, 'pagesize' => $psize));
+		if($member['agentid']==1){
+			$frommember = '跑库';
+		}elseif($member['agentid']==0){
+			$frommember = '-';
+		}else{
+			$fromMemberInfo = $this->model->getInfo($member['agentid']);
+			$frommember = $fromMemberInfo['nickname'];
+		}
+
+		app_json(array('list' => $list, 'total' => $total_level,'allcount' => $allcount,'frommember'=>$frommember, 'pagesize' => $psize));
 	}
 
 	public function getagentcount($openid){
