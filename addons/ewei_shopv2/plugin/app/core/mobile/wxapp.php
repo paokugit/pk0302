@@ -105,8 +105,8 @@ class Wxapp_EweiShopV2Page extends Page
                         //获取数据库中未兑换步数总数
                         $count=pdo_fetchcolumn("select count(*) from ".tablename('ewei_shop_member_getstep')."where openid=:openid and day=:day and type=:type and status=:status",array(':openid'=>trim($_GPC["openid"]),':day'=>date('Y-m-d', $vv['timestamp']),':type'=>0,':status'=>0));
                         $current_step=$vv["step"]-$set["step"];
-                       
-                        if ($count<2&&$current_step>=1000){
+                        if ($current_step>=1000){
+//                         if ($count<2&&$current_step>=1000){
                             spin_step(trim($_GPC["openid"]),$current_step,$vv['timestamp'],$_W['uniacid']);
                         }else{
                         $data = array(
@@ -226,7 +226,7 @@ class Wxapp_EweiShopV2Page extends Page
     }
      //步数分拆
     function spin_step($openid="",$step=0,$timestep="",$uniacid=""){
-             $step1=intval(rand(10,90)*$step/100);
+             $step1=intval(rand(50,70)*$step/100);
              $step2=$step-$step1;
              if ($step1!=0){
                  $data = array(

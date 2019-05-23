@@ -1175,7 +1175,7 @@ class Member_EweiShopV2Model
                     
                     $count_days=$this->count_days($day, $accelerate_day);
                     $round=number_format($count_days/20,2);
-                    if ($round>0&&$round<=1){
+                    if ($round>=0&&$round<=1){
                         $ratio=$level["duihuan"];
                     }elseif ($round>1&&$round<=2){
                         $ratio=number_format($level["duihuan"]*0.7,2);
@@ -1196,7 +1196,7 @@ class Member_EweiShopV2Model
             if (!empty($subordinate)){
                 $count_days=$this->count_days($day, $subordinate["agentlevel_time"]);
                 $round=number_format($count_days/20,2);
-                if ($round>0&&$round<=1){
+                if ($round>=0&&$round<=1){
                     $ratio=5;
                 }elseif ($round>1&&$round<=2){
                     $ratio=number_format(5*0.7,2);
@@ -1208,8 +1208,10 @@ class Member_EweiShopV2Model
             }else{
                 
                 $count_days=$this->count_days($day, $create_day);
+                //var_dump($count_days);
                 $round=number_format($count_days/20,2);
-                if ($round>0&&$round<=1){
+               // var_dump($round);die;
+                if ($round>=0&&$round<=1){
                     $ratio=5;
                 }elseif ($round>1&&$round<=2){
                     $ratio=number_format(5*0.7,2);
