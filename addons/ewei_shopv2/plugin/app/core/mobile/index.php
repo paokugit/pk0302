@@ -232,6 +232,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         if ($step_number < $bushu) {
     //        $result = pdo_getall('ewei_shop_member_getstep', array('day' => $day, 'openid' => $_W['openid'], 'status' => 0));
               $result=pdo_fetchall("select * from ".tablename("ewei_shop_member_getstep")." where day=:day and openid=:openid and status=0 order by step asc",array(":day"=>$day,":openid"=>$_W["openid"]));
+        }else{
+            $result=pdo_fetchall("select * from ".tablename("ewei_shop_member_getstep")." where day=:day and openid=:openid and status=0 and type=2 order by step asc",array(":day"=>$day,":openid"=>$_W["openid"]));
         }
         $r=array();
         $i=0;
@@ -262,6 +264,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                         }else{
                             $r[$i]["currency"]=round($card1,4);
                         }
+                        $r[$i]["type"]=$vv["type"];
                         $step_number=$bushu;
                     }else{
                         //小于
@@ -274,6 +277,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                             $r[$i]["currency"]=round($card1,4);
                         }
                         $step_number=$step_number+$vv["step"];
+                        $r[$i]["type"]=$vv["type"];
                     }
                     $i=$i+1;
                 }
@@ -283,6 +287,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $r[$i]["step"]=$vv["step"];
                 
                 $r[$i]["currency"]=1;
+                $r[$i]["type"]=$vv["type"];
                 $i=$i+1; 
             }
             
@@ -355,6 +360,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         //获取步数
         $now_setp=$_GPC["step"];
         
+        $cs["step"]=$_GPC["step"];
+        $cs["step_id"]=$_GPC["id"];
+        $cs["create_time"]=time();
+        $cs["openid"]=$_W["openid"];
+        pdo_insert("ewei_shop_member_getsteplog",$cs);
         $day = date('Y-m-d');
         $member = m('member')->getMember($_W['openid']);
         $shopset = m("common")->getSysset("shop");
