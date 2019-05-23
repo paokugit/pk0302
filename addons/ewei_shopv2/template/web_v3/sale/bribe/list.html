@@ -12,7 +12,7 @@
         {/if}
     </td>
     <td>
-        <audio src="{php echo tomedia($item['music'])}" autoplay="false"></audio>
+        <audio src="{php echo tomedia($item['music'])}"  controls="controls" loop="loop" preload="auto"></audio>
     </td>
     <td  style="overflow:visible;">
         <span class='label {if $item['status']==1}label-primary{else}label-default{/if}'
@@ -37,12 +37,12 @@
             <span data-toggle="tooltip" data-placement="top" data-original-title="删除"><i class="icow icow-shanchu1"></i></span>
         </a>
         {/if}
-        <a href="javascript:;" class='btn  btn-op btn-operation js-clip' data-url="{php echo mobileUrl('goods/bribe/detail', array('pid' => $item['id']),true)}">
-            <span data-toggle="tooltip" data-placement="top" data-original-title="复制链接"><i class="icow icow-lianjie2"></i></span>
-        </a>
-        <a href="javascript:void(0);" class="btn  btn-op btn-operation" data-toggle="popover" data-trigger="hover" data-html="true" data-content="<img src='{$item['qrcode']}' width='130' alt='链接二维码'>" data-placement="auto right">
-            <i class="icow icow-erweima3"></i>
-        </a>
+<!--        <a href="javascript:;" class='btn  btn-op btn-operation js-clip' data-url="{php echo mobileUrl('goods/bribe/detail', array('pid' => $item['id']),true)}">-->
+<!--            <span data-toggle="tooltip" data-placement="top" data-original-title="复制链接"><i class="icow icow-lianjie2"></i></span>-->
+<!--        </a>-->
+<!--        <a href="javascript:void(0);" class="btn  btn-op btn-operation" data-toggle="popover" data-trigger="hover" data-html="true" data-content="<img src='{$item['qrcode']}' width='130' alt='链接二维码'>" data-placement="auto right">-->
+<!--            <i class="icow icow-erweima3"></i>-->
+<!--        </a>-->
     </td>
 </tr>
 {if !empty($item['merchname']) && $item['merchid'] > 0}

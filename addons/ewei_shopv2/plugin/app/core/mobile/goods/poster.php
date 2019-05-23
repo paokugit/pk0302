@@ -418,7 +418,9 @@ class Poster_EweiShopV2Page extends AppMobilePage
             load()->func("file");
             mkdirs($path);
         }
-        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"],"id" => $_GPC['id'])));
+        $goods = pdo_fetch("select * from " . tablename("ewei_shop_goods") . " where id=:id limit 1", array( ":id" => $_GPC['id'] ));
+
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"],"id" => $_GPC['id'],'minprice'=>$goods['minprice'])));
         $filename = $md5 . ".png";
         $filepath = $path . $filename;
         if( is_file($filepath) )
@@ -434,7 +436,6 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $thumb = $this->createImage(tomedia($thumb));
         imagecopyresized($target, $thumb, 0, 0, 0, 0, 450, 360, imagesx($thumb), imagesy($thumb));
 
-        $goods = pdo_fetch("select * from " . tablename("ewei_shop_goods") . " where id=:id limit 1", array( ":id" => $_GPC['id'] ));
         //商品图
         if( !empty($goods["thumb"]) )
         {
@@ -465,7 +466,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
             //现价
             $red = imagecolorallocate($target, 248, 5, 4);
             imagettftext($target, 28, 0, 297, 124, $red, $font,'¥' );
-            imagettftext($target, 32, 0, 318, 120, $red, $font, floatval($goods['minprice']));
+            imagettftext($target, 32, 0, 318, 120, $red, $font, floatval($goodsprice));
         }
        //原价
         $black = imagecolorallocate($target, 51, 51, 51);

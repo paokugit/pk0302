@@ -233,8 +233,24 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
         var_dump($a);
     }
 
-
-
+    /**
+     * 店主后台 客户接口
+     */
+    public function getclient()
+    {
+        global $_W;
+        global $_GPC;
+        //$data = pdo_fetchall('select h.*,g.merchid from '.tablename('ewei_shop_member_history').' h join '.tablename('ewei_shop_goods').(' g on g.id = h.goodsid where g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=>$_W['merchmanage']['merchid'],':uniacid'=>$_W['uniacid']));
+        $data = pdo_fetchall('select DISTINCT h.openid,g.merchid from '.tablename('ewei_shop_member_history').' h join '.tablename('ewei_shop_goods').(' g on g.id = h.goodsid where g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=>$_W['merchmanage']['merchid'],':uniacid'=>$_W['uniacid']));
+        //$data = pdo_fetchall('select DISTINCT h.openid,g.merchid,h.uniacid from '.tablename('ewei_shop_member_history').' h RIGHT JOIN '.tablename('ewei_shop_goods').(' g ON g.id = h.goodsid WHERE g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=> 31,':uniacid'=>$_W['uniacid']));
+        foreach ($data as $key=>$item){
+            $user = pdo_get('ewei_shop_member',array('openid'=>$item['openid']),['mobile','nickname','avatar']);
+            $data[$key]['mobile'] = $user['mobile']?$user['mobile']:'暂时没有获得';
+            $data[$key]['nickname'] = $user['nickname'];
+            $data[$key]['avatar'] = $user['avatar'];
+        }
+        show_json(1,['list'=>$data]);
+    }
 }
 
 
