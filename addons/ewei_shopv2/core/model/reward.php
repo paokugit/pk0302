@@ -33,7 +33,7 @@ class Reward_EweiShopV2Model
         if($rewardMoney>0){
             m('memberlog')->rewardMember($agentInfo['openid'],$rewardMoney,$memberopenid);//直推奖
         }
-        if($shopOwner){//有店长
+        if($shopOwner && $memberlevel<5){//有店长
             $ownerMoney = $this->shopOwnerMoney($memberlevel);
             if($ownerMoney>0) {
                 m('memberlog')->rewardShowOwnerMember($shopOwner, $ownerMoney, $memberopenid);
