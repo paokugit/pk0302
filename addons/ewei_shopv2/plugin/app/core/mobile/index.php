@@ -205,7 +205,9 @@ class Index_EweiShopV2Page extends AppMobilePage
             //  $subscription_ratio=1;
             $exchange=0.5/1500;
             $exchange_step=m("member")->exchange_step($openid);
+         //   var_dump($exchange_step);
             $bushu=ceil($exchange_step*1500/0.5);
+           
            
         } else {
             $memberlevel = pdo_get('ewei_shop_commission_level', array('id' => $member['agentlevel']));
@@ -217,37 +219,77 @@ class Index_EweiShopV2Page extends AppMobilePage
            //可兑换的步数
 //            var_dump($bushu);
         }
-        
+     //   var_dump($bushu);
         //已兑换的bushu
         $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $_W['openid'],':type'=>2));
         if (empty($jinri)){
             $jinri=0;
         }
-        
+    //    var_dump($jinri);
         
         $step_number=$jinri;
        
         if ($step_number < $bushu) {
-            $result = pdo_getall('ewei_shop_member_getstep', array('day' => $day, 'openid' => $_W['openid'], 'status' => 0));
+    //        $result = pdo_getall('ewei_shop_member_getstep', array('day' => $day, 'openid' => $_W['openid'], 'status' => 0));
+              $result=pdo_fetchall("select * from ".tablename("ewei_shop_member_getstep")." where day=:day and openid=:openid and status=0 order by step asc",array(":day"=>$day,":openid"=>$_W["openid"]));
         }
-        
+        $r=array();
+        $i=0;
         foreach ($result as &$vv) {
+            
             //var_dump($vv['step'] / $proportion["value"]);
+//             if ($vv["type"]!=2){
+//                 $r=$vv['step']*$exchange;
+//                 if ($r>0.01){
+//                  $vv['currency'] = round($vv['step']*$exchange,2);
+//                 }else{
+//                 $vv['currency'] = round($r,4);
+//                 }
+//             }else{
+//                 $vv['currency'] =1;
+//             }
+            
             if ($vv["type"]!=2){
-                $r=$vv['step']*$exchange;
-                if ($r>0.01){
-                 $vv['currency'] = round($vv['step']*$exchange,2);
-                }else{
-                $vv['currency'] = round($r,4);
+                //步数小于今日步数
+                if ($step_number<$bushu){
+                    if ($step_number+$vv["step"]>=$bushu){
+                        //大于
+                        $r[$i]["id"]=$vv["id"];
+                        $r[$i]["step"]=$bushu-$step_number;
+                        $card1=($bushu-$step_number)*$exchange;
+                        if ($card1>0.01){
+                        $r[$i]["currency"]=round($card1,2);
+                        }else{
+                            $r[$i]["currency"]=round($card1,4);
+                        }
+                        $step_number=$bushu;
+                    }else{
+                        //小于
+                        $r[$i]["id"]=$vv["id"];
+                        $r[$i]["step"]=$vv["step"];
+                        $card1=$vv["step"]*$exchange;
+                        if ($card1>0.01){
+                            $r[$i]["currency"]=round($card1,2);
+                        }else{
+                            $r[$i]["currency"]=round($card1,4);
+                        }
+                        $step_number=$step_number+$vv["step"];
+                    }
+                    $i=$i+1;
                 }
+                   
             }else{
-                $vv['currency'] =1;
+                $r[$i]["id"]=$vv["id"];
+                $r[$i]["step"]=$vv["step"];
+                
+                $r[$i]["currency"]=1;
+                $i=$i+1; 
             }
             
         }
         unset($vv);
         
-        app_json(array('result' => $result, 'url' => referer()));
+        app_json(array('result' => $r, 'url' => referer()));
         
         
         //  exit('{"info":{"author":{"is_author":1},"currency":[{"id":"2","currency":"2.00","member_id":"1","uniacid":"4","today":"1546358400","source":"3","status":"1","created":"1546394205","msg":"签到奖励"},{"id":"2","currency":"2.00","member_id":"1","uniacid":"4","today":"1546358400","source":"3","status":"1","created":"1546394205","msg":"签到奖励"},{"id":"2","currency":"2.00","member_id":"1","uniacid":"4","today":"1546358400","source":"3","status":"1","created":"1546394205","msg":"签到奖励"}],"my_currency":"4.00","toady":8000},"status":1}');
@@ -310,7 +352,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($openid)) {
             app_error(AppError::$ParamsError, '系统错误');
         }
-       
+        //获取步数
+        $now_setp=$_GPC["step"];
+        
         $day = date('Y-m-d');
         $member = m('member')->getMember($_W['openid']);
         $shopset = m("common")->getSysset("shop");
@@ -347,7 +391,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             
             if ($step["type"]!=2){
                 
-            if ($jinri> $bushu) {
+            if ($jinri>=$bushu) {
                 app_error(-2,"您每天最多可兑换".$bushu."卡路里");
             }
             
@@ -359,7 +403,22 @@ class Index_EweiShopV2Page extends AppMobilePage
                 
                 if ($step["type"]!=2){
                     //不是签到
-                
+                     //添加传入step字段
+                if (!empty($now_setp)){
+                    
+                    if (($jinri + $now_setp) >$bushu) {
+                        
+                        $keduihuan = ($bushu-$jinri)*$exchange;
+                        
+                    }else{
+                        
+                        $keduihuan =$now_setp*$exchange;
+                        
+                    }
+                    
+                    
+                }else{
+                    
                 if (($jinri + $step["step"]) > $bushu) {
                     
                     $keduihuan = ($bushu-$jinri)*$exchange;
@@ -369,7 +428,8 @@ class Index_EweiShopV2Page extends AppMobilePage
                     $keduihuan =$step["step"]*$exchange;
                     
                 }
-                    
+                
+                }
                 
                 }else{
                     //签到 1卡路里
