@@ -475,6 +475,10 @@ class Order_EweiShopV2Model
 	            m('reward')->addReward($openid);
                 $this->write_log('===='.$val['cates'].'====');
             }
+            //店主开通店铺
+	        if($val['goodsid']=='7'){
+	            $this->openstore($order['id']);
+            }
 
 	        if($order['agentid']){//会员关系绑定@lihanwen
 	            //推荐人信息
@@ -485,6 +489,133 @@ class Order_EweiShopV2Model
             }
         }
 	}
+
+    /**
+     * 开通店铺
+     */
+	public function openstore($orderid){
+        global $_W;
+        $orderInfo = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where  id = " . $orderid . " ");
+        $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where  openid = " . $orderInfo['openid'] . " ");
+
+        if($orderInfo['carrier']){
+            $addressInfo = unserialize($orderInfo['carrier']);
+            if(!$addressInfo) return false;
+            if(!$addressInfo['carrier_mobile'] || !$addressInfo['carrier_realname']) return false;
+            if($addressInfo['carrier_mobile']) $carrier_mobile = $addressInfo['carrier_mobile'];
+            if($addressInfo['carrier_realname']) $carrier_realname = $addressInfo['carrier_realname'];
+        }else{
+            return false;
+        }
+
+        $data['mobile'] = $data['merchname'] = $carrier_mobile;
+        $data['status'] = 1;
+        $data['accounttime'] = time();
+        $data['jointime'] = time();
+        $data['status'] = 1;
+        $data['uniacid'] = $data['groupid'] = 1;
+        $data['realname'] = $carrier_realname;
+        $data['member_id'] = $memberInfo['id'];
+        $merchInfo = pdo_fetch("select * from " . tablename("ewei_shop_merch_user") . " where  mobile = '" . $data['mobile'] . "'");
+        if($merchInfo) return true;
+
+        pdo_insert("ewei_shop_merch_user", $data);
+        $id = pdo_insertid();
+        $account["merchid"] = $id;
+        $salt = "";
+        $pwd = "";
+        if (empty($account) || empty($account["salt"]) || !empty($_GPC["pwd"])) {
+            $salt = random(8);
+            while (1) {
+                $saltcount = pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_merch_account") . " where salt=:salt limit 1", array(":salt" => $salt));
+                if ($saltcount <= 0) {
+                    break;
+                }
+
+                $salt = random(8);
+            }
+            $pwd = md5('123456' . $salt);
+        } else {
+            $salt = $account["salt"];
+            $pwd = $account["pwd"];
+        }
+        $account = array("uniacid" => $_W["uniacid"], "merchid" => $id, "username" => $data['mobile'], "pwd" => $pwd, "salt" => $salt, "status" => 1, "perms" => serialize(array()), "isfounder" => 1);
+        pdo_insert("ewei_shop_merch_account", $account);
+        $accountid = pdo_insertid();
+        pdo_update("ewei_shop_merch_user", array("accountid" => $accountid), array("id" => $id));
+        plog("merch.user.add", "添加商户 ID: " . $data["id"] . " 商户名: " . $data["merchname"] . "<br/>帐号: " . $data["username"] . "<br/>子帐号数: " . $data["accounttotal"] . "<br/>到期时间: " . date("Y-m-d", $data["accounttime"]));
+        //发送短信
+        $this->opensend(2,$data['mobile'],array($data['mobile']));
+        return true;
+    }
+
+    /**
+     *  发送阿里大鱼短信
+     * @param $id
+     * @param $mobile
+     * @param $data
+     * @return bool
+     */
+    public function opensend($id,$mobile,$data)
+    {
+        $send = false;
+
+        if (!empty($id)) {
+            $item = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_sms') . ' WHERE id=:id', array(':id' => $id));
+
+            if (!empty($item)) {
+                $item['data'] = iunserializer($item['data']);
+                if (!empty($item['data']) && is_array($item['data'])) {
+                    $send = true;
+                }
+                else {
+                    $errmsg = '模板数据错误，请编辑后重试!';
+                }
+            }
+            else {
+                $errmsg = '模板不存在，请刷新重试!';
+            }
+        }
+        else {
+            $errmsg = '参数错误，请刷新重试!';
+        }
+
+        if ($send) {
+            $mobile = trim($mobile);
+            $postdata = $data;
+
+            if (empty($mobile)) {
+                show_json(0, '手机号不能为空!');
+            }
+
+            if (empty($postdata)) {
+                show_json(0, '数据为空!');
+            }
+
+            if ($item['type'] == 'juhe' || $item['type'] == 'dayu' || $item['type'] == 'aliyun' || $item['type'] == 'aliyun_new') {
+                $sms_data = array();
+
+                foreach ($item['data'] as $i => $d) {
+                    $sms_data[$d['data_temp']] = $postdata[$i];
+                }
+            }
+            else {
+                if ($item['type'] == 'emay') {
+                    $sms_data = trim($postdata);
+                }
+            }
+
+            $result = com('sms')->send($mobile, $item['id'], $sms_data, false);
+            if (empty($result['status'])) {
+                return false;
+            }
+            else {
+               return true;
+            }
+        }
+
+    }
+
 	public function getGoodsCredit($goods) 
 	{
 		global $_W;

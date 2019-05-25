@@ -1341,6 +1341,7 @@ class Member_EweiShopV2Model
         $memberinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array(":openid" => $info['openid'] ));
         //助力人的信息
         //主
+        if($info['openid']==$info['agentopenid']) return true;
         if(!$memberinfo) return false;
         if($memberinfo['agentid']==0 || $memberinfo['agentid']==''){
             $agentinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array(":openid" => $info['agentopenid'] ));
