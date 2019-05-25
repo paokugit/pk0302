@@ -534,7 +534,7 @@ class Order_EweiShopV2Model
 
                 $salt = random(8);
             }
-            $pwd = md5('123456' . $salt);
+            $pwd = md5('12345678' . $salt);
         } else {
             $salt = $account["salt"];
             $pwd = $account["pwd"];
