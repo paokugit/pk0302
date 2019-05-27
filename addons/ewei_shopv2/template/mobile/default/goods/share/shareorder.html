@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+     <meta content="yes" name="apple-mobile-web-app-capable">
+<meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+    <title>分享订单</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/static/goodshare/shareorder.css">
+
+<body>
+    <div class="body-box">
+        <!-- 红包，一级红包，二级红包 -->
+        <div class="numerical">
+            <ul class="numerical_ul">
+                <li class="numerical_li">
+                    <span class="numerical-tit">红包收入</span>
+                    <span class="numerical-num"></span>
+                </li>
+                <li class="numerical_li">
+                    <span class="numerical-tit">一级红包</span>
+                    <span class="onecount-num"></span>
+                </li>
+                <li class="numerical_li">
+                    <span class="numerical-tit">二级红包</span>
+                    <span class="twocount-num"></span>
+                </li>
+            </ul>
+        </div>
+        <!-- 分享购买 -->
+        <div class="body-content">
+            <div class="content-auto">
+                <div class="sharepurchase_num">分享购买
+                    <span class="sharepurchase_count"></span>人
+                </div>
+                <div class="sharepurchase_person">
+                    <ul class="sharepurchase-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script src="../addons/ewei_shopv2/static/goodshare/jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
+    var str1 = ""
+    $(window).load(function () {
+        $.ajax({
+            type: 'post',
+            url: '{php echo mobileUrl("goods/share/share_order")}',
+            data: {
+                "openid": '{php echo $openid}',
+                "good_id": "{php echo $good_id}"
+            },
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                var totalcount=data.result.count
+                var oneCount=data.result.onecount
+                var twoCount=data.result.twocount
+                var logCount=data.result.logcount
+                $(".numerical-num").html(totalcount)
+                $(".onecount-num").html(oneCount)
+                $(".twocount-num").html(twoCount)
+                $(".sharepurchase_count").html(logCount)
+                $.each(data.result.log, function (i, item) {
+                    str1 += '<li class="sharepurchase-item">'+
+                            '<div class="item-avatar">'+
+                                '<img src=' + item.avatar + ' alt="">'+
+                            '</div>'+
+                            '<div class="name_phone">'+
+                                '<span class="item-nickname">'+item.nickname+'</span>'+
+                                '<span class="item-phone">'+item.mobile+'</span>'+
+                            '</div>'+
+                            '<div class="award-other">'+
+                                '<div class="award">'+'奖励'+
+                                '<span class="award-num">'+item.money+'</span>'+'元'+'</div>'+
+                                '<div class="time">'+item.create_time+'</div>'+
+                            '</div>'+
+                        '</li>'
+                    $(".sharepurchase-list").html(str1)
+                });
+            }
+        })
+    })
+</script>

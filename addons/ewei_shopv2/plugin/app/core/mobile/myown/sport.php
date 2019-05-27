@@ -521,6 +521,9 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         if (empty($openid)){
             app_error(AppError::$ParamsError);
         }
+        if (empty($parent_id)){
+            show_json(1,"推荐人不可为空");
+        }
         $member=m("member")->getmember("sns_wa_".$openid);
 //          if ($login==0){
 //              if ($member){

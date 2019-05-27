@@ -9,15 +9,18 @@ class Share_EweiShopV2Page extends MobilePage
        global $_W;
        global $_GPC;
        
+       $openid=$_W["openid"];
        if (empty($_W["openid"])){
-           mc_oauth_account_userinfo();
+//           $resault= mc_oauth_account_userinfo();
+//            $openid=$resault["openid"];
+             $openid="oQmU56Lf1GeIkpqsLStPq5Qktm9I";
        }
-           var_dump("22");
-           $openid=$_W["openid"];
+
+       
       //获取上级openid
-      $share_openid1=$_GPC["share_openid"];
+      $share_openid1=$_GPC["share_openid1"];
       //获取二级分享者
-      $share_openid2=$_GPC["parent_openid"];
+      $share_openid2=$_GPC["share_openid2"];
       //添加查看记录
       $good_id=$_GPC["good_id"];
       $good=pdo_get("ewei_shop_goods",array("id"=>$good_id));
@@ -31,8 +34,19 @@ class Share_EweiShopV2Page extends MobilePage
       }
       
       
-       var_dump($openid);
+      //商品id
+      $good_id=$_GPC["good_id"];
+      $good_id=451;
+      $good=pdo_get("ewei_shop_goods",array("id"=>$good_id));
       
+      
+       //分享url
+       if (empty($share_openid1)){
+       $url="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.index&good_id=".$good_id."&share_openid1=".$openid;
+       }else{
+           $url="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.index&good_id=".$good_id."&share_openid1=".$openid."&share_openid2=".$share_openid1;
+       }
+       include $this->template();
     }
     //活动页面商品
     public function good(){
@@ -289,10 +303,8 @@ class Share_EweiShopV2Page extends MobilePage
         global $_W;
         $ordersn=$_GPC["order_sn"];
         $order=pdo_get("ewei_shop_order",array("ordersn"=>$ordersn));
-        if (empty($order)){
-            show_json(0,"订单编号不存在");
-        }else{
-            if (pdo_update("ewei_shop_order",array("status"=>1),array("ordersn"=>$ordersn))){
+       
+               pdo_update("ewei_shop_order",array("status"=>1),array("ordersn"=>$ordersn));
                 //更新红包
                 pdo_update("ewei_shop_goods_redlog",array("status"=>1),array("order_sn"=>$ordersn));
                
@@ -327,12 +339,8 @@ class Share_EweiShopV2Page extends MobilePage
                   }
                   
                   }
-                show_json(1,"更新成功");
-            }else{
-                
-                show_json(0,"更新失败");
-            }
-        }
+              include $this->template();
+        
     }
     
     //充值--微信支付
@@ -376,15 +384,20 @@ class Share_EweiShopV2Page extends MobilePage
     //分享信息
     public function share_url()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
-        $url = trim($_GPC['url']);
+         $url = trim($_GPC['url']);
+//        var_dump("11");
+//         show_json(1,"111");
         $account_api = WeAccount::create($_W['acid']);
+//         var_dump($account_api);
         $jssdkconfig = $account_api->getJssdkConfig($url);
         show_json(1, $jssdkconfig);
     }
     //分享成功回调
     public function share_back(){
+        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
         $data["openid"]=$_GPC["openid"];
@@ -401,6 +414,7 @@ class Share_EweiShopV2Page extends MobilePage
     }
    //分享订单
    public function share_order(){
+       header('Access-Control-Allow-Origin:*');
        global $_W;
        global $_GPC;
        $openid=$_GPC["openid"];
@@ -461,8 +475,29 @@ class Share_EweiShopV2Page extends MobilePage
        $list["log"]=$l;
        show_json(1,$list);
    }
+   //结束页面
+   public function end(){
+       global $_W;
+       global $_GPC;
+       $good_id=$_GPC["good_id"];
+       include $this->template();
+   }
+   //分享订单页面
+   public function shareorder(){
+       global $_W;
+       global $_GPC;
+       $good_id=$_GPC["good_id"];
+       $openid=$_W["openid"];
+       if (empty($_W["openid"])){
+           //           $resault= mc_oauth_account_userinfo();
+           //            $openid=$resault["openid"];
+           $openid="oQmU56Lf1GeIkpqsLStPq5Qktm9I";
+       }
+       include $this->template();
+   }
    //测试
    public function cs(){
+      
 //        var_dump(mobileUrl("goods/share/order_wx")."&id=11");
 //        var_dump(mobileUrl("goods/share/order_wx",array("ordersn"=>11)));
 //        $sql="select o.openid,o.price,o.createtime from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and o.status=1 ORDER BY o.createtime DESC ";
@@ -471,8 +506,8 @@ class Share_EweiShopV2Page extends MobilePage
 //        var_dump(m("common")->getAccount());
 //        var_dump(m("common")->getSysset("app"));
        
-       $postdata["first"]=array("value"=>"跑库订单提醒","color"=>"#173177");
-        $postdata["keyword1"]=array("value"=>"星月","color"=>"#173177");
-       var_dump(m("message")->sendTplNotice("oQmU56Lf1GeIkpqsLStPq5Qktm9I","rPnwJBoYeGcLumJ7iIymhepzgO9dH4pB2YyGBRUITxc",$postdata));
+//        $postdata["first"]=array("value"=>"跑库订单提醒","color"=>"#173177");
+//         $postdata["keyword1"]=array("value"=>"星月","color"=>"#173177");
+//        var_dump(m("message")->sendTplNotice("oQmU56Lf1GeIkpqsLStPq5Qktm9I","rPnwJBoYeGcLumJ7iIymhepzgO9dH4pB2YyGBRUITxc",$postdata));
    }
 }
