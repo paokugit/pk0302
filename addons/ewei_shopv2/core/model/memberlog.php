@@ -10,8 +10,8 @@ class Memberlog_EweiShopV2Model
      * @param $money
      */
 	function rewardMember($openid,$money,$fromopenid){
-	   // try{
-	   //     pdo_begin();
+	    try{
+	        pdo_begin();
             $data['logno'] = 'RC'.$fromopenid.$openid.$money;
             $haslog = pdo_fetch("select * from " . tablename("ewei_shop_member_log") . " where logno=:logno limit 1", array( ":logno" => $data['logno']));
             if($haslog) return true;
@@ -26,14 +26,14 @@ class Memberlog_EweiShopV2Model
             $res = pdo_insert("ewei_shop_member_log",$data);
             if($res){//更新member表的cicle2值
                 $member = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $openid ));
-                //if(!$member)  throw new PDOException('会员信息不存在');
+                if(!$member)  throw new PDOException('会员信息不存在');
                 $memberdata['credit2'] = $member['credit2']+$money;
                 return pdo_update('ewei_shop_member',$memberdata,array('openid'=>$openid));
             }
             return $res;
-//	    }catch (PDOException $e){
-//	        pdo_rollback();
-//        }
+	    }catch (PDOException $e){
+	        pdo_rollback();
+        }
 	}
 
 
@@ -43,11 +43,11 @@ class Memberlog_EweiShopV2Model
      * @param $money
      */
     function rewardShowOwnerMember($openid,$money,$fromopenid){
-        //try{
+        try{
             $data['logno'] = 'RC'.$fromopenid.$openid.$money;
             $haslog = pdo_fetch("select * from " . tablename("ewei_shop_member_log") . " where logno=:logno limit 1", array( ":logno" => $data['logno']));
             if($haslog) return true;
-            //pdo_begin();
+            pdo_begin();
             $data['openid'] = $openid;
             $data['type'] = 3;//奖励
             $data['title'] = '店长奖励';
@@ -60,14 +60,14 @@ class Memberlog_EweiShopV2Model
 
             if($res){//更新member表的cicle2值
                 $member = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $openid ));
-                //if(!$member)  throw new PDOException('会员信息不存在');
+                if(!$member)  throw new PDOException('会员信息不存在');
                 $memberdata['credit2'] = $member['credit2']+$money;
-                pdo_update('ewei_shop_member_log',$memberdata,array('openid'=>$openid));
+                return pdo_update('ewei_shop_member',$memberdata,array('openid'=>$openid));
             }
 
-//        }catch (PDOException $e){
-//           pdo_rollback();
-//        }
+        }catch (PDOException $e){
+           pdo_rollback();
+        }
 
     }
 }
