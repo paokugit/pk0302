@@ -54,9 +54,11 @@ class Share_EweiShopV2Page extends MobilePage
         global $_W;
         global $_GPC;
         $good_id=$_GPC["good_id"];
-        $good=pdo_fetch("select id,title,marketprice,total,thumb_url,commission1_pay,commission2_pay,viewcount,forwardcount,description from ".tablename("ewei_shop_goods")."where id=:id",array(":id"=>$good_id));
+        $good=pdo_fetch("select id,merchid,title,marketprice,total,thumb_url,commission1_pay,commission2_pay,viewcount,forwardcount,description from ".tablename("ewei_shop_goods")."where id=:id",array(":id"=>$good_id));
         $openid=$_GPC["openid"];
-        
+        //获取商家信息
+        $merch=pdo_get("ewei_shop_merch_user",array("id"=>$good["merchid"]));
+        $good["merchname"]=$merch["merchname"];
         if (empty($good)){
             show_json(0,"商品不存在");
         }
@@ -497,7 +499,7 @@ class Share_EweiShopV2Page extends MobilePage
    }
    //测试
    public function cs(){
-      
+         var_dump(phpinfo());
 //        var_dump(mobileUrl("goods/share/order_wx")."&id=11");
 //        var_dump(mobileUrl("goods/share/order_wx",array("ordersn"=>11)));
 //        $sql="select o.openid,o.price,o.createtime from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and o.status=1 ORDER BY o.createtime DESC ";

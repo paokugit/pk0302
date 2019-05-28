@@ -224,10 +224,24 @@
         </div>
         
         
-        <div class="fui-title">卡路里抵扣设置</div>
+        <div class="fui-title">抵扣设置</div>
         <div class="fui-cell-group fui-cell-click">
+           <div class="fui-cell">
+                <div class="fui-cell-label">抵扣选项</div>
+                <div class="fui-cell-info">
+                          
+                <select id="deduct_type">
+                <option value="0">选择设置</option>
+                <option value="1" {if $item['deduct_type'] == 1}selected="selected"{/if}>卡路里抵扣</option>
+                <option value="2" {if $item['deduct_type'] == 2}selected="selected"{/if}>折扣宝抵扣</option>
+                </select>
+                
+                </div>
+                <div class="fui-cell-remark"></div>
+            </div>
+            
             <div class="fui-cell">
-                <div class="fui-cell-label">卡路里</div>
+                <div class="fui-cell-label">抵扣金额</div>
                 <div class="fui-cell-info">
                     <input type="number" placeholder="最多抵扣" class="fui-input" value="{php echo $item['deduct']}" id="deduct" />
                 </div>
