@@ -31,6 +31,9 @@ define(['core', './sortable.js'], function (core, Sortable) {
     modal.initSort = function () {
         new Sortable(thumbs, {draggable: 'li'})
     };
+
+
+    //多张大飒飒大苏打倒萨撒旦
     modal.initClick = function () {
         $('.fui-uploader').uploader({
             uploadUrl: core.getUrl('util/uploader'),
