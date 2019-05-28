@@ -30,7 +30,7 @@ class Pay_EweiShopV2Model
 		$params['appid'] = $config['sub_appid'];
 		$params['mch_id'] = $config['sub_mch_id'];
 		$params['nonce_str'] = $data['random'];
-		$params['out_trade_no'] = time();
+		$params['out_trade_no'] = $data['out_order'];
 		$params['total_fee'] = $data['money'] * 100;
 		$params['body'] = $data['body'];
 		$params['spbill_create_ip'] = $data['ip'];

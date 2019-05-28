@@ -15,12 +15,15 @@ class Index_EweiShopV2Page extends AppMobilePage
         $mid = $_W['merchmanage']['merchid'];
         //获得当前的域名
         $host = $_SERVER['HTTP_HOST'];
+        //折扣宝收款码
         $url1 = 'merchmanage/goods/show/main';
+        $back1 = 'zhekoubao.png';
+        //卡路里收款码
         $url2  = 'merchmanage/goods/show/main';
+        $back2 = 'kaluli.png';
         //生成二维码
-        $qrcode1 = m('qrcode')->createSQrcode($mid,$url1);
-        $qrcode2 =  m('qrcode')->createSQrcode($mid,$url2);
-        show_json(1,['qrcode1'=>$qrcode1,'qrcode2'=>$qrcode2]);
+        $qrcode1 = m('qrcode')->createSQrcode($mid,$url1,$back1);
+        $qrcode2 =  m('qrcode')->createSQrcode($mid,$url2,$back2);
     }
 
     /**
@@ -31,14 +34,14 @@ class Index_EweiShopV2Page extends AppMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_GPC;
         global $_W;
-        var_dump($_W['siteroot']);exit;
         $data = [
             'random'=>random(32),
             'body'=>'商家商户收款码收款',
             'ip'=>CLIENT_IP,
             'money'=>$_GPC['money'],
-            'url'=>$_W['siteroot'],
-            'openid'=>''
+            'url'=>$_W['siteroot'].'addons/ewei_shopv2/payment/wchat/notify/shopCode',   //回调地址
+            'openid'=>$_GPC['openid'],
+            'out_order'=>$_W['merchmanage']['merchid'].'_'.$_W['openid'].'_'.time(),     //订单号
         ];
         $res = m('pay')->pay($data);
         show_json(1,['res'=>$res]);
