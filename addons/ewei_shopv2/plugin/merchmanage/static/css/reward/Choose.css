@@ -31,9 +31,8 @@ button{
     position: relative;
     display: flex;
     align-items: center;
-    position: absolute;
-    top: 0;
-    z-index: 5
+    position: fixed;
+    top: 0px;
 }
 .choose-back{
     width: 26px;
@@ -54,12 +53,13 @@ button{
 }
 .choose_content{
     width: 100%;
-    /* height: 600px; */
+    height: auto;
     overflow:auto;
-    top:4px;
+    background: #f00;
+    top:-10px;
     position:absolute;
-    z-index:10;
-    bottom:60px;
+    /* z-index:10; */
+    /* bottom:120px; */
 
 }
 .ipt_box{
@@ -257,13 +257,19 @@ input:focus{
     color: #9a9a9a;
     font-size: 12px
 }
-.submitbox{
+
+.choose_footer{
     width:100%;
-    height:50px;
-    line-height:50px;
-    /* background:#008be4; */
+    height:60px;
+    background:#f00;
     text-align:center;
-    margin-top: 20px
+    margin-top: 20px;
+    position: fixed;
+    bottom: 0px;
+    display: flex;
+    border-top: 1px solid #f1f1f1;
+    justify-content: center;
+    align-items: center
 }
 .submit{
     width: 120px;

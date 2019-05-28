@@ -195,7 +195,7 @@ class Goods_EweiShopV2Model
         }
 		if (!($random)) 
 		{
-			$sql = 'SELECT id,title,content,subtitle,deduct,thumb,agentlevel,thumb_url' . $officsql . ',marketprice,productprice,minprice,maxprice,isdiscount,isdiscount_time,isdiscount_discounts,sales,salesreal,total,description,bargain,`type`,ispresell,`virtual`,hasoption,video,bargain,hascommission,nocommission,commission,commission1_rate,commission1_pay' . "\r\n" . '            FROM ' . tablename('ewei_shop_goods') . ' where  ' . $condition . ' ORDER BY ' . $order . ' ' . $orderby . ' LIMIT ' . (($page - 1) * $pagesize) . ',' . $pagesize;
+			$sql = 'SELECT id,title,issendfree,content,subtitle,deduct,thumb,agentlevel,thumb_url' . $officsql . ',marketprice,productprice,minprice,maxprice,isdiscount,isdiscount_time,isdiscount_discounts,sales,salesreal,total,description,bargain,`type`,ispresell,`virtual`,hasoption,video,bargain,hascommission,nocommission,commission,commission1_rate,commission1_pay' . "\r\n" . '            FROM ' . tablename('ewei_shop_goods') . ' where  ' . $condition . ' ORDER BY ' . $order . ' ' . $orderby . ' LIMIT ' . (($page - 1) * $pagesize) . ',' . $pagesize;
 			$total = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_goods') . ' where  ' . $condition . ' ', $params);
 		}
 		else 
@@ -264,6 +264,8 @@ class Goods_EweiShopV2Model
             if( $list[$lk]["deduct"]>0 ){
                 $list[$lk]["showprice"] = round($list[$lk]["minprice"]-$list[$lk]["deduct"],2);
             }
+            //判断是否是赏金任务的商品
+            $list[$lk]["isreward"] =  m('reward')->good($lv['id']);
 		}
 		$list = set_medias($list, 'thumb');
 		return array('list' => $list, 'total' => $total);
@@ -1165,5 +1167,23 @@ class Goods_EweiShopV2Model
 		$b = hexdec($b);
 		return array('red' => $r, 'green' => $g, 'blue' => $b);
 	}
+
+    /**
+     * 计算参与人数和交易订单数
+     * @param array $data
+     * @return array
+     */
+	public function count($data = [])
+    {
+        foreach ($data as $key => $item){
+            $member = pdo_fetchall('select distinct o.openid from '.tablename('ewei_shop_order').'o join '.
+                tablename('ewei_shop_order_goods').('og on o.id=og.orderid').' where og.goodsid = :goods_id',[':goods_id'=>$item['goods_id']]);
+            $order = pdo_fetchall('select o.openid from '.tablename('ewei_shop_order').'o join '.
+                tablename('ewei_shop_order_goods').('og on o.id=og.orderid').' where og.goodsid = :goods_id',[':goods_id'=>$item['goods_id']]);
+            $data[$key]['member'] = count($member);
+            $data[$key]['order'] = count($order);
+        }
+        return $data;
+    }
 }
 ?>

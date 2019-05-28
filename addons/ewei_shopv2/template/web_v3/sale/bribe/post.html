@@ -1,0 +1,60 @@
+{template '_header'}
+<div class="page-header">
+    当前位置：<span class="text-primary">{if !empty($item['id'])}编辑{else}添加{/if}音乐 <small>{if !empty($item['id'])}修改【{$item['title']}】{/if}</small></span>
+</div>
+
+
+<div class="page-content">
+    <div class="page-sub-toolbar">
+        <span class=''>
+            {ifp 'sale.bribe.add'}
+                <a class='btn btn-primary btn-sm' href="{php echo webUrl('sale/bribe/add',array('type'=>$type))}"><i class='fa fa-plus'></i> 添加背景音乐</a>
+            {/if}
+        </span>
+    </div>
+    <form {ife 'sale.bribe' $item}action="" method="post"{/if} class="form-horizontal form-validate" enctype="multipart/form-data">
+    <input type="hidden" name="id" value="{$item['id']}" />
+    <div class="tab-content ">
+        <div class="tab-pane active">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-lg control-label must">音乐标题</label>
+                    <div class="col-sm-9 col-xs-12 ">
+                        {ife 'sale.bribe' $item}
+                        <input type="text" id='title' name="title" class="form-control" value="{$item['title']}" data-rule-required="true"/>
+                        {else}
+                        <div class='form-control-static'>{$item['title']}</div>
+                        {/if}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg control-label">背景音乐</label>
+                    <div class="col-sm-9 col-xs-12">
+                        {ife 'sale.bribe' $item}
+                        {php echo tpl_form_field_audio('music', $item['music']);}
+                        <span class="help-block image-block" style="display: block;">建议上传6M以下的音频文件。</span>
+                        {else}
+                        <input type="hidden" name="music" value="{$item['music']}" />
+                        <div class='form-control-static'>{$item['music']}</div>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {ife 'sale.bribe' $item}
+    <div class="form-group">
+        <label class="col-lg control-label"></label>
+        <div class="col-sm-9 col-xs-12">
+            <input type="submit"  value="提交" class="btn btn-primary" />
+            <a class="btn btn-default" href="{php echo webUrl('sale/bribe',array('type'=>$type))}">返回列表</a>
+        </div>
+    </div>
+    {/if}
+
+    </form>
+
+</div>
+{template '_footer'}

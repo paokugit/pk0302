@@ -53,7 +53,7 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		$levelcount2 = $member['level2'];
 		$levelcount3 = $member['level3'];
 		$pindex = max(1, intval($_GPC['page']));
-		$psize = 20;
+		$psize = 10;
 
 		if ($level == 1) {
 			$condition = ' and agentid=' . $member['id'];
@@ -112,9 +112,19 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 			$row['moneycount'] = number_format(floatval($moneycount), 2);
 			$row['createtime'] = date('Y-m-d H:i', $row['createtime']);
 		}
-
 		unset($row);
-		app_json(array('list' => $list, 'total' => $total_level, 'pagesize' => $psize));
+		//总推荐
+		//$allcount = m('member')->allAgentCount($member['id']);
+		if($member['agentid']==1){
+			$frommember = '跑库';
+		}elseif($member['agentid']==0){
+			$frommember = '-';
+		}else{
+			$fromMemberInfo = $this->model->getInfo($member['agentid']);
+			$frommember = $fromMemberInfo['nickname'];
+		}
+
+		app_json(array('list' => $list, 'total' => $total_level,'frommember'=>$frommember, 'pagesize' => $psize));
 	}
 
 	public function getagentcount($openid){

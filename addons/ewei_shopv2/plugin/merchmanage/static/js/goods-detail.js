@@ -71,7 +71,8 @@ define(['core', './sortable.js'], function (core, Sortable) {
                 diyformid: modal.getVal('diyformid', true),
                 dispatchtype: modal.radioVal('dispatchtype', true),
                 displayorder: modal.getVal('displayorder', true),
-                deduct:modal.getVal('deduct')
+                deduct:modal.getVal('deduct'),
+                deduct_type:modal.getVal('deduct_type')
             };
             var thumbs = [];
             $("#thumbs li").each(function () {

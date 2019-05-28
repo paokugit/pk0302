@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta name="viewport"
+        content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+    <title>发布活动</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/reddrainage.css">
+<link rel="stylesheet" type="text/css" href="../addons/ewei_shopv2/static/js/dist/foxui/css/foxui.min.css?v=0.2">
+<body>
+    <div class="all_box">
+        <!-- 活动标题 -->
+        <div class="headline">
+            <div class="line">
+                <span class="line_text">活动标题</span>
+            </div>
+            <div class="headline_text">
+                <input class="input_text" type="text" placeholder="例如：迎三月，健身卡1折抢购啦！！！" />
+            </div>
+        </div>
+        <!-- 上传图片 -->
+        <div class="fui-cell-group">
+            <div class="fui-cell borderb noactive">
+                <div class="fui-cell-info">
+                    <div class="fui-uploader" data-count="10" data-max="10" data-name="images[]" >
+                        <input type="file" name='imgFile0[]' id='imgFile0' multiple="" accept="image/*" >
+                    </div>
+                </div>
+            </div>
+            <div class="fui-title">首张图片为商品主图(拖拽可排序)</div>
+        </div>
+        <!-- 活动介绍 -->
+        <div class="activity_introduction">
+            <div class="introduction">
+                <span class="introduction_head">活动介绍</span>
+            </div>
+            <div class="activity_introduction_two">
+                <textarea class="activity_introduction_text" placeholder="输入文字介绍......"></textarea>
+            </div>
+        </div>
+        <!-- 背景音乐 -->
+        <div class="background_music">
+            <div class="background_music_head">
+                <span class="background_music_head_text">背景音乐</span>
+            </div>
+            <div class="come_music">
+                <input class="come_button" type="button" value="进入音乐库" />
+            </div>
+        </div>
+        <!-- 商品和红包 -->
+        <div class="commodity_red_packet">
+            <ul class="xinhuai">
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">商品数量</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" placeholder="请设置商品库存" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">截止时间</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="date" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">订单金额</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" placeholder="请设置订单金额" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">一级红包</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" placeholder="用户分享奖励" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">二级红包</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" placeholder="分享二级奖励" />
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!-- 实物和收货 -->
+        <div class="in_kind_consignee">
+            <ul class="in_kind_ul">
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">实物产品</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <img class="button_img_cc" id="img_img_id" src="img/on@2x.png">
+                    </div>
+                </li>
+                <div id="shouhuo">
+                    <li class="list_xinhuai">
+                        <div class="list_xinhuai_head">
+                            <span class="xinhuai_head">收货方式</span>
+                        </div>
+                        <div class="xinhuai_come">
+                            <select class="select_xiala" dir="rtl" id="select_id">
+                                <option value="1">门店自提</option>
+                                <option value="2">快递</option>
+                            </select>
+                        </div>
+                    </li>
+                </div>
+                <div id="youfei">
+                    <li class="list_xinhuai">
+                        <div class="list_xinhuai_head">
+                            <span class="xinhuai_head">邮费</span>
+                        </div>
+                        <div class="xinhuai_come">
+                            <input class="xinhuai_text" type="text" placeholder="请设置邮费" />
+                        </div>
+                    </li>
+                </div>
+            </ul>
+        </div>
+        <!-- 主办方，负责人，电话 -->
+        <div class="sponsor_principaldian_phone">
+            <ul class="sponsor_principaldian_phone_text">
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">主办方</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" placeholder="请设置名称" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">负责人</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" placeholder="姓名" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">客服电话</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" placeholder="手机号码" />
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!-- 门店地址 -->
+        <div class="address">
+            <div class="address_head">
+                <span class="address_head_text">门店地址</span>
+            </div>
+            <div class="address_text">
+                <textarea class="address_text_text" placeholder="具体到门牌号"></textarea>
+            </div>
+        </div>
+        <!-- 底部 -->
+        <div class="bottom">
+            <div class="save">
+                <span class="save_text">存为草稿</span>
+            </div>
+            <div class="preview">
+                <span class="preview_text">预览</span>
+            </div>
+            <div class="saveandpublish">
+                <span class="saveandpublish_text">保存并发布</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
+<script src="../web/resource/js/require.js"></script>
+<script type="text/javascript">
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) { return pair[1]; }
+        }
+        return (false);
+    }
+    var music = getQueryVariable("music")
+    //console.log(music);
+    var xinhuai_come = document.getElementsByClassName("xinhuai_come")
+    var button_img_cc = document.getElementsByClassName("button_img_cc")
+
+    $('.come_button').click(function () {
+        location.href = './backgroundmusic.html'
+    })
+    var select = document.getElementById("select_id");
+    var value = select.value;
+    // console.log(value);
+    $('.button_img_cc').click(function () {
+        // alert("123")
+        var select = document.getElementById("select_id");
+        var value = select.value;
+        var obj = document.getElementById("img_img_id")
+        if (obj.getAttribute("src") == "img/on@2x.png") {
+            obj.setAttribute("src", "img/off@2x.png")
+            $("#shouhuo").css('display', 'none')
+            $("#youfei").css('display', 'none')
+        } else if(value ==1){
+            obj.setAttribute("src", "img/on@2x.png")
+            $("#shouhuo").css('display', 'block')
+            // $("#youfei").css('display','block')
+        }else if(value ==2){
+            obj.setAttribute("src", "img/on@2x.png")
+            $("#shouhuo").css('display', 'block')
+             $("#youfei").css('display','block')
+        }
+    })
+    $('.select_xiala').change(function(){
+        var select = document.getElementById("select_id");
+        var value = select.value;
+        if(value ==1){
+            $("#youfei").css('display', 'none')
+        }else{
+            $("#youfei").css('display','block')
+        }
+    });
+</script>
+

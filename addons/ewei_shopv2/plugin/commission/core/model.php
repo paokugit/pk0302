@@ -2114,8 +2114,8 @@ if( !class_exists("CommissionModel") )
 			            }
 			            
 			            m('member')->setCredit($openid, 'credit1', $credit, $info);
+                        //wxmessage($openid);
 			        }
-			        //会员开通消息
 			        $commission=pdo_fetch("select * from ".table("ewei_shop_commission_level")." where id=:id",array(':id'=>$goods["agentlevel"]));
 			        $postdata=array(
 			            'keyword1'=>array(
@@ -2135,7 +2135,7 @@ if( !class_exists("CommissionModel") )
 			                'color' => '#ff510'
 			            )
 			        );
-			        
+
 			        p("app")->mysendNotice($order["openid"], $postdata, $order["id"], "2nQmrU1YkfMK0EWEO4v0QmL89Xpx1v3DqZk-LMsnd80");
                 
 			    
@@ -3865,6 +3865,42 @@ if( !class_exists("CommissionModel") )
 				pdo_query("DELETE FROM " . tablename("ewei_shop_commission_relation") . " WHERE id = " . $item["id"] . " and level >" . $item["level"]);
 				$this->saveRelation($item["id"], $item["pid"], $item["level"]);
 			}
+		}
+
+        //卡路里奖励到账提醒
+        //bopenid为被推荐人的
+       public function wxmessage($bopenid){
+            //获取推荐人的用户信息
+            $bmember = m("member")->getMember($bopenid);//被推荐人的
+            if(!$bmember['agentid']) return false;
+            $tmember = m("member")->getMember($bmember['agentid']);//推荐人的
+            $agentInfo=array();
+            if($bmember['agentlevel']==0){
+                $agentInfo['levelname'] = "普通会员";
+            }else{
+                $agentInfo = pdo_fetch("select id,levelname from " . tablename("ewei_shop_commission_level") . " where id = :id", array( ":id" => $bmember['agentlevel'] ));
+            }
+
+            $postdata=array(//推荐人
+                'keyword1'=>array(
+                    'value'=>$tmember["nickname"],
+                    'color' => '#ff510'
+                ),//被推荐人
+                'keyword2'=>array(
+                    'value'=>$tmember["nickname"],
+                    'color' => '#ff510'
+                ),//级别
+                'keyword3'=>array(
+                    'value'=>$agentInfo['levelname'],
+                    'color' => '#ff510'
+                ),//备注
+                'keyword4'=>array(
+                    'value'=>'每一步，都值得鼓励，点击查看小程序明细',
+                    'color' => '#ff510'
+                )
+            );
+            p("app")->mysendNotice($tmember["openid"], $postdata, "", "L62g_dw8f-ruX3YKQDxsJH0J8-CBQrGFVMXZ1wTe4PM");
+            return true;
 		}
 	}
 }

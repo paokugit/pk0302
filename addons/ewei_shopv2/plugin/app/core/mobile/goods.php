@@ -35,7 +35,6 @@ class Goods_EweiShopV2Page extends AppMobilePage
                 $args["order"] = '(minprice-deduct) asc,deduct desc';
                 $args["ishot"] = 1;
                 $args["deducts"] = 1;
-                
             }
 
 			$goods = m("goods")->getList($args);
@@ -50,6 +49,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
                         if(in_array($item['id'],array(3,4,5,7))){
                             $goods_list[$index]['thumb'] = $this->levelurlup($item['id']);
                         }
+                        $goods_list[$index]['salesreal'] = $goods_list[$index]['sales'] = $goods_list[$index]['salesreal']*2;
                     }
 				    if($_GPC['cate']==4){//会员产品获取有效期
                         $agentlevel = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where id=:id limit 1", array( ":id" => $item['agentlevel']));
@@ -74,6 +74,9 @@ class Goods_EweiShopV2Page extends AppMobilePage
                     if( isset($_GPC["deduct"]) ){
                         $goods_list[$index]["showprice"] = round($goods_list[$index]["minprice"]-$goods_list[$index]["deduct"],2);
                     }
+//                    if($this->appversion()!=1 && in_array($goods_list[$index]['id'],array(366,367))){//不显示
+//                        unset($goods_list[$index]);
+//                    }
 				}
 			}
 			app_json(array( "list" => $goods_list, "total" => $goods["total"], "pagesize" => $args["pagesize"] ));
@@ -2042,6 +2045,23 @@ class Goods_EweiShopV2Page extends AppMobilePage
         if(count($cids)==1 && in_array(5,$cids)) return "店主专享";
         if(count($cids)>1 && in_array(2,$cids)) return "星选达人以上级别专享";
         return "您当前会员等级没有购买权限";
+    }
+
+    /**
+     * 获取小程序版本
+     */
+    public function appversion()
+    {
+        $referer = $_SERVER['HTTP_REFERER'];
+        preg_match('/https:\/\/servicewechat\.com\/(.+?)\/(.+?)\/page-frame\.html/i', $referer,$matches);
+        if($matches[1]){
+            $res = array(
+                'app_id' => $matches[1],
+                'app_version' => $matches[2],
+            );
+            if($res['app_version']>1) return 1;
+        }
+        return 0;
     }
 }
 ?>

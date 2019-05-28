@@ -1175,7 +1175,7 @@ class Member_EweiShopV2Model
                     
                     $count_days=$this->count_days($day, $accelerate_day);
                     $round=number_format($count_days/20,2);
-                    if ($round>0&&$round<=1){
+                    if ($round>=0&&$round<=1){
                         $ratio=$level["duihuan"];
                     }elseif ($round>1&&$round<=2){
                         $ratio=number_format($level["duihuan"]*0.7,2);
@@ -1196,7 +1196,7 @@ class Member_EweiShopV2Model
             if (!empty($subordinate)){
                 $count_days=$this->count_days($day, $subordinate["agentlevel_time"]);
                 $round=number_format($count_days/20,2);
-                if ($round>0&&$round<=1){
+                if ($round>=0&&$round<=1){
                     $ratio=5;
                 }elseif ($round>1&&$round<=2){
                     $ratio=number_format(5*0.7,2);
@@ -1208,8 +1208,10 @@ class Member_EweiShopV2Model
             }else{
                 
                 $count_days=$this->count_days($day, $create_day);
+                //var_dump($count_days);
                 $round=number_format($count_days/20,2);
-                if ($round>0&&$round<=1){
+               // var_dump($round);die;
+                if ($round>=0&&$round<=1){
                     $ratio=5;
                 }elseif ($round>1&&$round<=2){
                     $ratio=number_format(5*0.7,2);
@@ -1341,6 +1343,7 @@ class Member_EweiShopV2Model
         $memberinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array(":openid" => $info['openid'] ));
         //助力人的信息
         //主
+        if($info['openid']==$info['agentopenid']) return true;
         if(!$memberinfo) return false;
         if($memberinfo['agentid']==0 || $memberinfo['agentid']==''){
             $agentinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array(":openid" => $info['agentopenid'] ));
@@ -1368,5 +1371,35 @@ class Member_EweiShopV2Model
 
         return pdo_update("ewei_shop_member",array('from_merchid'=>$merchInfo['id']),array('openid'=>$openid));
     }
+
+    /**
+     * 获取推荐人总数量（包含下级的所以推荐）
+     * @param $id
+     * @return int
+     */
+    public function allAgentCount($id){
+        $res = $this->getBottomUsers($id);
+        if(!$res) return 0;
+        $idlist = explode(",", $res);
+        return count($idlist)-1;
+    }
+
+    /**
+     * 查找一个粉丝下的所以粉丝
+     */
+    public function getBottomUsers($id,$uids=''){
+        $userList = pdo_fetchall("select * from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $id));
+        if(!$userList) return false;
+        foreach ($userList as $key=>$value){
+            $uids .= $value['id'].',';
+            $user = pdo_fetchall("select * from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $value['id']));
+            if($user){
+                $uids = $this->getBottomUsers($value['id'],$uids);
+            }
+        }
+        return $uids;
+
+    }
+
 }
 ?>

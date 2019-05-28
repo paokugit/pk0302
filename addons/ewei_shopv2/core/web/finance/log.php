@@ -505,6 +505,7 @@ class Log_EweiShopV2Page extends WebPage
 		global $_W;
 		global $_GPC;
 		$id = intval($_GPC["id"]);
+        $reason = $_GPC["reason"]?$_GPC["reason"]:'客服会通过电话联系您';
 		$log = pdo_fetch("select * from " . tablename("ewei_shop_member_log") . " where id=:id and uniacid=:uniacid limit 1", array( ":id" => $id, ":uniacid" => $_W["uniacid"] ));
 		if( empty($log) ) 
 		{
@@ -520,9 +521,25 @@ class Log_EweiShopV2Page extends WebPage
 			m("member")->setCredit($log["openid"], "credit2", $log["money"], array( 0, "余额提现退回" ));
 		}
 		$member = pdo_fetchall("SELECT * FROM " . tablename("ewei_shop_member") . " WHERE uniacid =:uniacid AND openid=:openid", array( ":uniacid" => $_W["uniacid"], ":openid" => $log["openid"] ));
-		m("notice")->sendMemberLogMessage($log["id"]);
-		plog("finance.log.refuse", "拒绝余额度提现 ID: " . $log["id"] . " 金额: " . $log["money"] . " <br/>会员信息:  ID: " . $member["id"] . " / " . $member["openid"] . "/" . $member["nickname"] . "/" . $member["realname"] . "/" . $member["mobile"]);
-		show_json(1);
+		//m("notice")->sendMemberLogMessage($log["id"]);
+
+        $postdata=array(
+            'keyword1'=>array(
+                'value'=>$log["money"],
+                'color' => '#ff510'
+            ),
+            'keyword2'=>array(
+                'value'=>'您的提现申请被拒绝了，资金已返回到您的账户余额，拒绝原因：'.$reason,
+                'color' => '#ff510'
+            ),
+            'keyword3'=>array(
+                'value'=>date("Y-m-d",time()),
+                'color' => '#ff510'
+            ),
+        );
+       $res =  p("app")->mysendNotice($member[0]["openid"], $postdata,'', "qN-Wi2Jw8HnheTTuJRFivIKrevwk70m8lvH4mnf_ad0");
+       plog("finance.log.refuse", "拒绝余额度提现 ID: " . $log["id"] . " 金额: " . $log["money"] . " <br/>会员信息:  ID: " . $member["id"] . " / " . $member["openid"] . "/" . $member["nickname"] . "/" . $member["realname"] . "/" . $member["mobile"]);
+       show_json(1);
 	}
 	public function recharge() 
 	{

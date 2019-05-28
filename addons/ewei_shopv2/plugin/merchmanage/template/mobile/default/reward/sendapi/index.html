@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="yes" name="apple-mobile-web-app-capable"> 
+    <meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+    
+    <title>短信模板</title>
+    <script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script>
+    <script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/jquery.min.js"></script>
+    <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/template.css">
+</head>
+
+
+<body>
+    <div class="all_box">
+        <ul class="template_all">
+        </ul>
+    </div>
+</body>
+
+</html>
+
+<script type="text/javascript">
+    var str1 = ""
+   
+    $(window).load(function () {
+        $.ajax({
+            type: 'POST',
+            url:'{php echo mobileUrl('merchmanage/reward/sendapi/codetemplate')}',
+            data: {
+            },
+            dataType: "json",
+            success: function (data) {
+                console.log(data)
+                $.each(data.result.template, function (i, item) {
+                    console.log(item.id);
+                    str1 += '<li class="template_item ">' + '<div class="template_text">' +
+                        '<span class="template1">' + item.content + '</span>' +
+                        '</div>'
+                        + '<div class="use_tempalte01">' +
+                        '<input data-id=' + item.id +' class="button_template" type="button" value="使用模板" />' +
+                        '</div>' +
+                        '</li>'
+                    // var templateid = item.id
+                    $(".template_all").html(str1)
+                });
+            }
+        })
+        $(".template_all").delegate('.button_template', 'click', function () {
+            $(this).addClass("active")
+            var itemId=$(this).attr("data-id")
+            console.log(itemId)
+           
+            location.href='../index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.sendapi.detail&id='+itemId
+        })
+       
+    })
+
+</script>

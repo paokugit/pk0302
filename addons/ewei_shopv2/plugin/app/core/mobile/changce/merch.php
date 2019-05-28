@@ -29,7 +29,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
             if (!(empty($_GPC['cateid']))) {
                 $data['cateid'] = $_GPC['cateid'];
             }
-            $data = array_merge($data, array('status' => 1, 'field' => 'id,uniacid,merchname,salecate,logo,groupid,cateid,address,tel,lng,lat,reward_type'));
+            $data = array_merge($data, array('status' => 1, 'field' => 'id,uniacid,merchname,mobile,salecate,logo,groupid,cateid,address,tel,lng,lat,reward_type'));
             if (!(empty($sorttype))) {
                 $data['orderby'] = array('id' => 'desc');
             }
@@ -85,9 +85,14 @@ class Merch_EweiShopV2Page extends AppMobilePage
                     }else{
                         //获取是否有进行中的赏金
                         $reward=pdo_get("ewei_shop_merch_reward",array('is_end'=>0,'merch_id'=>$v["id"]));
+//                         var_dump($reward);
                         if ($reward){
+                           
                             $merchuser[$k]["is_reward"]=1;
                             //获取赏金
+//                             var_dump($v["id"]);
+//                             var_dump($v["reward_type"]);
+//                             var_dump(m("merch")->reward_money($v["id"],$v["reward_type"]));
                             $merchuser[$k]["reward_money"]=m("merch")->reward_money($v["id"],$v["reward_type"]);
                         }else{
                             $merchuser[$k]["is_reward"]=0;
@@ -530,7 +535,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
                 $merchInfo = $this->get_near_merch(1);
                 $args['merchid'] = $merchInfo['id'];
         }
-        $args['order'] = 'isrecommand';
+        $args['order'] = 'sort desc,isrecommand';
         $goodList = m('goods')->getList($args);
         $merchInfo['logo'] = tomedia($merchInfo['logo']);
         $data['merchInfo'] = $merchInfo;

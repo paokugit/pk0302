@@ -10,6 +10,7 @@ class Uploader_EweiShopV2Page extends MobilePage
 		global $_GPC;
 		load()->func("file");
 		$field = $_GPC["file"];
+// 		var_dump($_FILES[$field]["name"]);die;
 		if( !empty($_FILES[$field]["name"]) ) 
 		{
 			if( is_array($_FILES[$field]["name"]) ) 

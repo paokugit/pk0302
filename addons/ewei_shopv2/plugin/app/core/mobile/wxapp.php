@@ -105,8 +105,8 @@ class Wxapp_EweiShopV2Page extends Page
                         //获取数据库中未兑换步数总数
                         $count=pdo_fetchcolumn("select count(*) from ".tablename('ewei_shop_member_getstep')."where openid=:openid and day=:day and type=:type and status=:status",array(':openid'=>trim($_GPC["openid"]),':day'=>date('Y-m-d', $vv['timestamp']),':type'=>0,':status'=>0));
                         $current_step=$vv["step"]-$set["step"];
-                       
-                        if ($count<2&&$current_step>=1000){
+                        if ($current_step>=1000){
+//                         if ($count<2&&$current_step>=1000){
                             spin_step(trim($_GPC["openid"]),$current_step,$vv['timestamp'],$_W['uniacid']);
                         }else{
                         $data = array(
@@ -186,9 +186,6 @@ class Wxapp_EweiShopV2Page extends Page
         }
         $openid=str_replace("sns_wa_", '', $openid);
 
-
-
-        
         $wxopenid = "sns_wa_" . $openid;
         
         $member = m("member")->getMember($wxopenid);
@@ -208,51 +205,49 @@ class Wxapp_EweiShopV2Page extends Page
    
 }
 
-function app_error($errcode = 0, $message = "")
-{
-    exit(json_encode(array("error" => $errcode, "message" => (empty($message) ? AppError::getError($errcode) : $message))));
-}
-
-function app_json($result = NULL, $openid)
-{
-    global $_GPC;
-    global $_W;
-    $ret = array();
-    if (!is_array($result)) {
-        $result = array();
+    function app_error($errcode = 0, $message = "")
+    {
+        exit(json_encode(array("error" => $errcode, "message" => (empty($message) ? AppError::getError($errcode) : $message))));
     }
-    $ret["error"] = 0;
-    $key = time() . "@" . $openid;
-    $auth = array("authkey" => base64_encode(authcode($key, "ENCODE", "ewei_shopv2_wxapp")));
-    m("cache")->set($auth["authkey"], 1);
-    exit(json_encode(array_merge($ret, $auth, $result)));
-}
- //步数分拆 
- function spin_step($openid="",$step=0,$timestep="",$uniacid=""){
-            
-             $step1=intval(rand(10,90)*$step/100);
+
+    function app_json($result = NULL, $openid)
+    {
+        global $_GPC;
+        global $_W;
+        $ret = array();
+        if (!is_array($result)) {
+            $result = array();
+        }
+        $ret["error"] = 0;
+        $key = time() . "@" . $openid;
+        $auth = array("authkey" => base64_encode(authcode($key, "ENCODE", "ewei_shopv2_wxapp")));
+        m("cache")->set($auth["authkey"], 1);
+        exit(json_encode(array_merge($ret, $auth, $result)));
+    }
+     //步数分拆
+    function spin_step($openid="",$step=0,$timestep="",$uniacid=""){
+             $step1=intval(rand(50,70)*$step/100);
              $step2=$step-$step1;
              if ($step1!=0){
-             $data = array(
-                 'timestamp' => time(),
-                 'openid' => trim($openid),
-                 'day' => date('Y-m-d', $timestep),
-                 'uniacid' => $uniacid,
-                 'step' => $step1
-             );
-             pdo_insert('ewei_shop_member_getstep', $data);
+                 $data = array(
+                     'timestamp' => time(),
+                     'openid' => trim($openid),
+                     'day' => date('Y-m-d', $timestep),
+                     'uniacid' => $uniacid,
+                     'step' => $step1
+                 );
+                 pdo_insert('ewei_shop_member_getstep', $data);
              }
              if ($step2!=0){
-             $data = array(
-                 'timestamp' => time(),
-                 'openid' => trim($openid),
-                 'day' => date('Y-m-d', $timestep),
-                 'uniacid' => $uniacid,
-                 'step' => $step2
-             );
-             pdo_insert('ewei_shop_member_getstep', $data);
+                 $data = array(
+                     'timestamp' => time(),
+                     'openid' => trim($openid),
+                     'day' => date('Y-m-d', $timestep),
+                     'uniacid' => $uniacid,
+                     'step' => $step2
+                 );
+                 pdo_insert('ewei_shop_member_getstep', $data);
              }
-
- }
+    }
  
 ?>

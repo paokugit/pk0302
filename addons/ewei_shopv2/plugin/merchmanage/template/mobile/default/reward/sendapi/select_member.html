@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="yes" name="apple-mobile-web-app-capable"> 
+    <meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+    
+    <script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/jquery.min.js"></script>
+    <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/code/select.css">
+    <title>选择会员</title>
+</head>
+
+
+<body>
+    <div class="select_content">
+        <!-- 头部的全选 -->
+        <div class="selectAll">
+            <div class="selectall_img">
+                <input class="checkAll" type="checkbox" value="" />
+            </div>
+            <span class="selectall_text">全选</span>
+        </div>
+        <!-- 后台传来的数据进行循环展示 -->
+        <div class="list_box">
+            <ul class="list-for">
+            </ul>
+        </div>
+    </div>
+    <!-- 底部选择发送 -->
+    <div class="bottom" id="bottom">
+        <span>发送到已选择的</span>
+        <!--获取页面勾选值-->
+        <span class="text" id="0">0</span>
+        <span>个会员</span>
+    </div>
+    <!-- 错误提示 -->
+    <div id="warning">
+        <div class="mask-text"></div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    //paraName 等找参数的名称
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) { return pair[1]; }
+        }
+        return (false);
+    }
+    var templateId = '{php echo $template_id}'
+    console.log(templateId)
+    var str1 = ""
+    var openid = ""
+    var num = ""
+    var hynum = ""
+    //从后台拿到用户列表
+    $(window).load(function () {
+        $.ajax({
+            type: 'POST',
+            url: '{php echo mobileUrl('merchmanage/reward/sendapi/member')}',
+           
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                $.each(data.result.member, function (i, item) {
+                    str1 += '<li class="list-item">' +
+                        '<div class="item-img">' +
+                        '<img class="head_img" src="' + item.avatar + '">' +
+                        '</div>' +
+                        '<div class="item-info">' +
+                        '<div class="info-name">' + item.nickname + '</div>' +
+                        '<div class="info-phone">' + item.mobile + '</div>' +
+                        '</div>' +
+                        '<div class="item-check">' +
+                        '<input class="hobby" type="checkbox" value="" data-id=' + item.openid + ' name="sub" />'
+                    '</div>' +
+                        '</li>'
+                    $(".list_box").html(str1)
+                    // 全选
+                    $(".checkAll").click(function () {
+                        if (this.checked) {
+                            $(".hobby").prop("checked", true);
+                            $(".bottom").css('background', '#008be4')
+                            num = $("input[class='hobby']:checked").length;
+                            $('.text').text(num)
+                        } else {
+                            $(".hobby").prop("checked", false);
+                            $(".bottom").css('background', '#ccc')
+                            num = $("input[class='hobby']:checked").length;
+                            $('.text').text(num)
+                            $(".bottom").unbind('click')
+                        }
+                    })
+                    //单选
+                    $(".hobby").click(function () {
+                        if (this.checked || $("input[class='hobby']:checked").length > 0) {
+                            num = $("input[class='hobby']:checked").length;
+                            $(".bottom").css('background', '#008be4')
+                            $('.text').text(num)
+                        } else {
+                            $(".bottom").css('background', '#ccc')
+                            num = $("input[class='hobby']:checked").length;
+                            $('.text').text(num)
+                        }
+                    })
+                })
+            }
+        })
+    })
+    // 再点击下边的跳转时根据checkbox的选中状态获取openid
+    $(".bottom").click(function () {
+        var arr = [];
+        //根据name的值获取到所有选中checkbox，并遍历
+        $(".list-item input:checkbox[name='sub']:checked").each(function (i) {
+            arr[i] = $(this).attr("data-id");
+            // alert(arr)
+            if (arr == '') {
+                // alert("请至少选择一位用户")
+                $("#warning").show().delay(1000).hide(300);
+                $("#warning .mask-text ").text("请至少选择一位用户");
+            } else {
+                openid = arr.toString();
+                // alert(arrToStr)
+                hynum = document.getElementById("0").innerHTML
+                if (hynum > 0) {
+                	 location.href = '../index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.reward.sendapi.detail&id=' + templateId+'&num='+hynum + '&openid=' + openid
+                } else {
+                    $("#warning").show().delay(1000).hide(300);
+                    $("#warning .mask-text ").text("请至少选择一位用户");
+                }
+            }
+        })
+    })
+</script>
+
+

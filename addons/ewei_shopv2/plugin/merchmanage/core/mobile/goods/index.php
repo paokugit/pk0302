@@ -16,6 +16,11 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 		include $this->template();
 	}
 
+	public function red()
+    {
+        include $this->template('merchmanage/goods/red');
+    }
+
 	public function add()
 	{
 		global $_W;
@@ -49,6 +54,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 		    $data = array('title' => trim($_GPC['title']), 'subtitle' => trim($_GPC['subtitle']), 'unit' => trim($_GPC['unit']), 'status' => intval($_GPC['status']), 'showtotal' => intval($_GPC['showtotal']), 'cash' => intval($_GPC['cash']), 'invoice' => intval($_GPC['invoice']), 'isnodiscount' => intval($_GPC['isnodiscount']), 'nocommission' => intval($_GPC['nocommission']), 'isrecommand' => intval($_GPC['isrecommand']), 'isnew' => intval($_GPC['isnew']), 'ishot' => intval($_GPC['ishot']), 'issendfree' => intval($_GPC['issendfree']), 'totalcnf' => intval($_GPC['totalcnf']), 'dispatchtype' => intval($_GPC['dispatchtype']), 'showlevels' => trim($_GPC['showlevels']), 'showgroups' => trim($_GPC['showgroups']), 'buylevels' => trim($_GPC['buylevels']), 'buygroups' => trim($_GPC['buygroups']), 'maxbuy' => intval($_GPC['maxbuy']), 'minbuy' => intval($_GPC['minbuy']), 'usermaxbuy' => intval($_GPC['usermaxbuy']), 'diypage' => intval($_GPC['diypage']), 'displayorder' => intval($_GPC['displayorder']));
 
 		    $data['deduct']=trim($_GPC["deduct"]);
+		    $data['deduct_type']=$_GPC["deduct_type"];
 			if (empty($item)) {
 				$data['type'] = intval($_GPC['type']);
 			}
@@ -476,6 +482,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 
 	public function getlist()
 	{
+        header('Access-Control-Allow-Origin:*');
 		global $_W;
 		global $_GPC;
 		$offset = intval($_GPC['offset']);
@@ -487,8 +494,9 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 		$params = array(':uniacid' => $_W['uniacid']);
 		$goodsfrom = strtolower(trim($_GPC['status']));
 		empty($goodsfrom) && ($_GPC['status'] = $goodsfrom = 'sale');
+        if($_GPC['stepfrom']){
 
-		if ($goodsfrom == 'sale') {
+        }elseif ($goodsfrom == 'sale') {
 			$condition .= ' AND g.`status` > 0 and g.`checked`=0 and g.`total`>0 and g.`deleted`=0';
 		}
 		 else if ($goodsfrom == 'out') {
@@ -509,10 +517,12 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 			$params[':keywords'] = '%' . $keywords . '%';
 		}
 
-
+		//步数引流
+        if(isset($_GPC['stepfrom']) && $_GPC['stepfrom']==1){
+            $condition .= " and deduct>0";
+        }
 		$sql = 'SELECT count(g.id) FROM ' . tablename('ewei_shop_goods') . 'g' . $condition;
 		$total = pdo_fetchcolumn($sql, $params);
-
 		if (0 < $total) {
 			$presize = (($pindex - 1) * $psize) - $offset;
 			$sql = 'SELECT g.* FROM ' . tablename('ewei_shop_goods') . 'g' . $condition . ' ORDER BY g.`status` DESC, g.`displayorder` DESC,' . "\r\n" . '                g.`id` DESC LIMIT ' . $presize . ',' . $psize;
@@ -601,6 +611,32 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 
 		show_json(1);
 	}
+
+    /**
+     * 获取店铺信息
+     */
+	public function getStore(){
+        global $_W;
+        global $_GPC;
+        $merchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where id=:merchid and uniacid=:uniacid Limit 1', array(':uniacid' => $_W['uniacid'], ':merchid' => $_GPC['merchid']));
+        $goodsNum = pdo_count("ewei_shop_goods", "deleted =0 and status=1 and merchid = " . $_GPC['merchid']);
+        $args['merchid'] = $merchInfo['id'];
+        $goodList = m('goods')->getList($args);
+        $merchInfo['logo'] = tomedia($merchInfo['logo']);
+        $data['merchInfo'] = $merchInfo;
+        $data['goodList'] = $goodList;
+        $data['goodsNum'] = $goodsNum;
+
+
+    }
+
+    /**
+     * 红包引流
+     */
+    public function bribe()
+    {
+        include $this->template();
+    }
 }
 
 

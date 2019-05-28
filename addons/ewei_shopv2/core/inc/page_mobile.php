@@ -18,13 +18,14 @@ class MobilePage extends Page
         m("shop")->checkClose();
         
         $preview = intval($_GPC["preview"]);
+       // var_dump($preview);
         $wap = m("common")->getSysset("wap");
-//         var_dump($wap);
-//         var_dump(is_weixin());
+       //  var_dump($wap);
+       //   var_dump(is_weixin());
 //         var_dump($preview);
         if( !empty($wap["open"]) && !is_weixin() && empty($preview) )
         {
-           
+          
             if( $this instanceof MobileLoginPage || $this instanceof PluginMobileLoginPage )
             {
                 if( empty($_W["openid"]) )
@@ -55,7 +56,7 @@ class MobilePage extends Page
             }
 
         }
-//           var_dump($_W["openid"]);
+        //    var_dump($_W["openid"]);
 //            $member = m("member")->checkMember();
 //         var_dump($member);
         $_W["mid"] = (!empty($member) ? $member["id"] : "");

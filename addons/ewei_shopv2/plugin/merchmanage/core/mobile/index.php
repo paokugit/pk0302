@@ -204,8 +204,62 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 // 	    show_json(1,$resault);
 	    include $this->template();
 	}
-	
-	
+
+
+    public function getshopcode($width = 430){
+        global $_W;
+        $merchid = $_W['uniaccount']['merchid']?$_W['merchid']:0;
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/storecode/";
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "id" => $merchid,'width'=>$width)));
+        $filename = $md5 . ".png";
+        $filepath = $path . $filename;
+        if( is_file($filepath) )
+        {
+            return $_W["siteroot"] . "addons/ewei_shopv2/data/storecode/".$filename . "?v=1.0";
+        }
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&id=".$merchid."&fromid=".$merchid, "page" => 'pages/changce/merch/detail',"width"=>$width));
+        if( !is_error($qrcode) )
+        {
+            $qrcode = imagecreatefromstring($qrcode);
+        }
+        imagepng($qrcode, $filepath);
+        imagedestroy($qrcode);
+        $a =  $_W["siteroot"] . "addons/ewei_shopv2/data/storecode/".$filename . "?v=1.0";
+        var_dump($a);
+    }
+
+    /**
+     * 店主后台 客户接口
+     */
+    public function getclient()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_W;
+        global $_GPC;
+        //$data = pdo_fetchall('select h.*,g.merchid from '.tablename('ewei_shop_member_history').' h join '.tablename('ewei_shop_goods').(' g on g.id = h.goodsid where g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=>$_W['merchmanage']['merchid'],':uniacid'=>$_W['uniacid']));
+        //$data = pdo_fetchall('select DISTINCT h.openid,g.merchid from '.tablename('ewei_shop_member_history').' h join '.tablename('ewei_shop_goods').(' g on g.id = h.goodsid where g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=>$_W['merchmanage']['merchid'],':uniacid'=>$_W['uniacid']));
+        $data = pdo_fetchall('select DISTINCT h.openid,g.merchid,h.uniacid from '.tablename('ewei_shop_member_history').' h RIGHT JOIN '.tablename('ewei_shop_goods').(' g ON g.id = h.goodsid WHERE g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=> 31,':uniacid'=>$_W['uniacid']));
+        $paid = 0;
+        foreach ($data as $key=>$item){
+            $user = pdo_get('ewei_shop_member',array('openid'=>$item['openid']),['mobile','nickname','avatar']);
+            $data[$key]['mobile'] = $user['mobile']?$user['mobile']:'暂时没有获得';
+            $data[$key]['nickname'] = $user['nickname'];
+            $data[$key]['avatar'] = $user['avatar'];
+            $count= pdo_fetch('select count(1) as count,sum(price) as sum from '.tablename('ewei_shop_order').' where merchid=:merchid and openid=:openid and status=:status',array(':merchid'=>31,':status'=>3,':openid'=>$item['openid']));
+            $data[$key]['count'] = $count['count'];
+            $data[$key]['sum'] = $count['sum']?:0;
+            if($count['count'] > 0){
+                $paid++;
+            }
+        }
+        $fans = count($data);
+        show_json(1,['fans'=>$fans,'paid'=>$paid,'list'=>$data]);
+    }
 }
 
 
