@@ -897,8 +897,83 @@ class EweiShopWechatPay
      */
 	public function shopCode()
     {
-        global $_W;
-        global $_GPC;
+        $input = file_get_contents('php://input');
+        $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $data = json_decode(json_encode($obj), true);
+        if (!$data) {
+            exit("FAIL");
+        }
+        $res = $this->check_sign($data);
+        if (!$res) {
+            exit("FAIL");
+        }
+        if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
+            pdo_begin();
+            try {
+                $array = explode('_',$data['out_trade_no']);
+                $merchid = $array[0];
+                $openid = $array[1];
+                $money = $array[2];
+                $merch = pdo_fetch('select m.openid,m.uniacid,m.credit2 from '.tablename('ewei_shop_member').'m join '.tablename('ewei_shop_merch_user').('mu on m.id=mu.member_id').' where mu.id = "'.$merchid.'"');
+                //商家收款的日志
+                $add1 = [
+                    'uniacid'=>$merch['uniacid'],
+                    'openid'=>$merch['openid'],
+                    'type'=>4,
+                    'logno'=>'shop'.$data['out_trade_no'],
+                    'title'=>'商家收款',
+                    'createtime'=> time(),
+                    'status'=>1,
+                    'money'=>$money,
+                    'realmoney'=>$money,
+                ];
+                pdo_insert('ewei_shop_member_log',$add1);
+                pdo_update('ewei_shop_member',['openid'=>$merch['onpenid']],['credit2'=>bcadd($merch['credit2'],$money,2)]);
+                //用户付款的日志
+                $add2= [
+                    'uniacid'=>$merch['uniacid'],
+                    'openid'=>'sns_wa_'.$openid,
+                    'type'=>2,
+                    'logno'=>$data['out_trade_no'],
+                    'title'=>'扫商家付款码支付',
+                    'createtime'=>time(),
+                    'status'=>1,
+                    'money'=>-$money,
+                    'rechargetype'=>'wxscan'
+                ];
+                pdo_insert('ewei_shop_member_log',$add2);
+                pdo_commit();
+            }catch(Exception $exception){
+                pdo_rollback();
+            }
+        }
+    }
+
+    /**
+     * 验签
+     * @param $arr
+     * @return bool
+     */
+    public function check_sign($arr)
+    {
+        $sign = $arr['sign'];
+        unset($arr['sign']);
+        $config = pdo_getcolumn('ewei_shop_payment',['id'=>1],'apikey');
+        $skey = $config;
+        ksort($arr, SORT_STRING);
+        $stringA = '';
+        foreach ($arr as $key => $val) {
+            if ($val != null) {
+                $stringA .= $key . '=' . $val . '&';
+            }
+        }
+        $stringA .= 'key=' . $skey;
+        $check_sign = strtoupper(MD5($stringA));
+        if ($sign != $check_sign) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 ?>

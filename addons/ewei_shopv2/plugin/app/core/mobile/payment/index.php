@@ -13,17 +13,19 @@ class Index_EweiShopV2Page extends AppMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_W;
         $mid = $_W['merchmanage']['merchid'];
+        $mid = 31;
         //获得当前的域名
         $host = $_SERVER['HTTP_HOST'];
         //折扣宝收款码
-        $url1 = 'merchmanage/goods/show/main';
-        $back1 = 'zhekoubao.png';
+        $rebate_url = 'merchmanage/goods/show/main';
+        $rebate_back= 'zhekoubao';
         //卡路里收款码
-        $url2  = 'merchmanage/goods/show/main';
-        $back2 = 'kaluli.png';
+        $calorie_url  = 'merchmanage/goods/show/main';
+        $calorie_back = 'kaluli';
         //生成二维码
-        $qrcode1 = m('qrcode')->createSQrcode($mid,$url1,$back1);
-        $qrcode2 =  m('qrcode')->createSQrcode($mid,$url2,$back2);
+        $rebate = m('qrcode')->createSQrcode($mid,$rebate_url,$rebate_back);
+        $calorie =  m('qrcode')->createSQrcode($mid,$calorie_url,$calorie_back);
+        show_json(1,['rebate'=>$rebate,'calorie'=>$calorie]);
     }
 
     /**
@@ -41,7 +43,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             'money'=>$_GPC['money'],
             'url'=>$_W['siteroot'].'addons/ewei_shopv2/payment/wchat/notify/shopCode',   //回调地址
             'openid'=>$_GPC['openid'],
-            'out_order'=>$_W['merchmanage']['merchid'].'_'.$_W['openid'].'_'.time(),     //订单号
+            'out_order'=>$_W['merchmanage']['merchid'].'_'.$_W['openid'].'_'.$_GPC['money'],     //订单号
         ];
         $res = m('pay')->pay($data);
         show_json(1,['res'=>$res]);
@@ -63,10 +65,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         $pageSize = 2;
         //第几页从第几个显示
         $psize = ($page-1)*$pageSize;
-        $openid = pdo_getcolumn('ewei_shop_merch_user',['id'=>$mch_id],'openid');
-        $openid = 'sns_wa_'.$openid;
-        $openid = 'sns_wa_owRAK43wx_oL2guY7GYwMOXwB0ak';
-        $list =  pdo_fetchall('select * from '.tablename('ewei_shop_member_log') . ' where uniacid ="'.$_W['uniacid'].'" and openid = "'.$openid.'"');
+        var_dump($pageSize,$psize);
+        $openid = pdo_fetch('select m.openid from '.tablename('ewei_shop_member').'m join '.tablename('ewei_shop_merch_user').('mu on m.id=mu.member_id').' where mu.id = "'.$mch_id.'"');
+        $list =  pdo_fetchall('select * from '.tablename('ewei_shop_member_log') . ' where uniacid ="'.$_W['uniacid'].'" and openid = "'.$openid['openid'].'" LIMIT '.$psize. ','.$pageSize);
         show_json(1,['list'=>$list]);
     }
 
@@ -164,6 +165,16 @@ class Index_EweiShopV2Page extends AppMobilePage
             $credit3 = $member['credit3'] + $money;
             //更新用户的卡路里和折扣宝的余额
             pdo_update('',['credit1'=>$credit1,'credit3'=>$credit3],['openid'=>$openid]);
+            $data = [
+                'openid'=>$openid,
+                'uniacid'=>$_W['uniacid'],
+                'credittype'=>'credit1',
+                'num'=>$money,
+                'createtime'=>time(),
+                'remark'=>"卡路里转换折扣宝",
+                'module'=>"ewei_shopv2",
+            ];
+            pdo_insert('ewei_shop_credit_record',$data);
             show_json(1);
         }
     }

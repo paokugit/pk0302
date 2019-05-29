@@ -37,6 +37,39 @@ class Pay_EweiShopV2Model
 		$params['trade_type'] = 'JSAPI';
 		$params['notify_url'] = $data['url'];
 		$params['openid'] = $data['openid'];
+		$string1 = $this->buildParams($params);
+		$string1 .= "key=" . $config["apikey"];
+		$params["sign"] = strtoupper(md5(trim($string1)));    //签名
+		$data = array2xml($params);
+		$response = ihttp_request("https://api.mch.weixin.qq.com/pay/unifiedorder", $data);
+		if( is_error($response) )
+		{
+			return $response;
+		}
+		$xml = simplexml_load_string(trim($response["content"]), "SimpleXMLElement", LIBXML_NOCDATA);
+		$result = json_decode(json_encode($xml), true);
+		if($result['return_code'] == "success"){
+			$array = array(
+				'appId' => $result['appid'],
+				'package' => 'prepay_id='.$result['prepay_id'],
+				'nonceStr' => $result['nonce_str'],
+				'timeStamp' => time(),
+				'signType'=>'md5'
+			);
+			//第二次生成签名
+			$string2 = $this->buildParams($array);
+			$string2 .= "key=" . $config["apikey"];
+			$array["paySign"] = strtoupper(md5(trim($string2)));    //再次签名
+			return $array;
+		}
+	}
+
+	/**
+	 * @param $params
+	 * @return string
+	 */
+	public function buildParams($params)
+	{
 		ksort($params, SORT_STRING);
 		$string1 = "";
 		foreach( $params as $key => $v )
@@ -47,17 +80,7 @@ class Pay_EweiShopV2Model
 			}
 			$string1 .= (string) $key . "=" . $v . "&";
 		}
-		$string1 .= "key=" . $config["apikey"];
-		$params["sign"] = strtoupper(md5(trim($string1)));    //签名
-		$dat = array2xml($params);
-		$response = ihttp_request("https://api.mch.weixin.qq.com/pay/unifiedorder", $dat);
-		if( is_error($response) )
-		{
-			return $response;
-		}
-		$xml = simplexml_load_string(trim($response["content"]), "SimpleXMLElement", LIBXML_NOCDATA);
-		$result = json_decode(json_encode($xml), true);
-		return $result;
+		return $string1;
 	}
 }
 

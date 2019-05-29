@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>红包引流列表</title>
+</head>
+<link rel="stylesheet" href="./common.css">
+<link rel="stylesheet" href="./list.css">
+
+<body>
+    <div class="body_box">
+        <!-- header -->
+        <div class="header">红包引流</div>
+        <!-- header -->
+        <!-- content -->
+        <div class="content">
+            <div class="content_relative">
+                <!-- 暂无内容 -->
+                <div class="content_none">
+                    <div class="step-explain">
+                        <div class="explainImg"><img src="http://paokucoin.com/img/backgroup/explain01.png" alt="">
+                        </div>
+                        <div class="explainText">红包引流是一个H5活动插件,商家可以自由发布,支持用户通过H5下单购买。
+                        </div>
+                    </div>
+                    <div class="none_bg"><img src="http://paokucoin.com/img/backgroup/zanwuneirong@2x.png" alt=""></div>
+                    <div class="none_text">暂无内容</div>
+                </div>
+                <!-- 暂无内容 -->
+                <!-- 内容列表 -->
+                <div class="content_list">
+                    <div class="content_list_positive">
+                        <div class="tab-box">
+                            <ul class="tab_list">
+                                <li class="active">活动进行中</li>
+                                <li>历史活动</li>
+                                <li>草稿箱</li>
+                            </ul>
+                            <div class="tab-content">
+                                <!-- 活动进行中 -->
+                                <div class="activiting active-txt">
+                                    <div class="activity-con">
+                                        <ul class="activity-list">
+
+                                        </ul>
+                                    </div>
+                                    <div class="none_text_div">
+                                        <span class="none_text_cc">没有更多数据</span>
+                                    </div>
+                                </div>
+                                <!-- 活动进行中 -->
+                                <!-- 历史活动 -->
+                                <div class="history-activity">
+                                    <div class="activity-con">
+                                        <ul class="activity-list">
+
+                                        </ul>
+                                    </div>
+                                    <div class="none_text_div">
+                                        <span class="none_text_cc">没有更多数据</span>
+                                    </div>
+                                </div>
+                                <!-- 历史活动 -->
+                                <!-- 草稿箱 -->
+                                <div class="drafts">
+                                    <div class="activity-con">
+                                        <ul class="activity-list">
+
+                                        </ul>
+                                    </div>
+                                    <div class="none_text_div">
+                                        <span class="none_text_cc">没有更多数据</span>
+                                    </div>
+                                </div>
+                                <!-- 草稿箱 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 内容列表 -->
+            </div>
+        </div>
+        <!-- content -->
+        <!-- footer -->
+        <div class="footer">发布活动</div>
+        <!-- footer -->
+    </div>
+</body>
+
+</html>
+<script src="./jquery.min.js"></script>
+<script type="text/javascript">
+    var str1 = ""
+    var str2 = ""
+    var str3 = ""
+    // 点击事件
+    var navIndex = ""
+    Date.prototype.toLocaleString = function () {
+        return this.getFullYear() + "." + (this.getMonth() + 1) + "." + this.getDate() + "  " + this.getHours() + ":" + this.getMinutes() + ":" + this.getSeconds() + "";
+    };
+    $(".tab-box li").click(function () {
+        $(this).addClass("active").siblings().removeClass("active");
+        var index = $(this).index();
+        // console.log(index)
+        $(this).parent().siblings().children().eq(index).addClass("active-txt")
+            .siblings().removeClass("active-txt");
+        navIndex = index
+        // console.log(navIndex)
+        if (navIndex == 0) {
+            $(".activiting").css('display', 'block')
+            $(".history-activity").css('display', 'none')
+            $(".drafts").css('display', 'none')
+        } else if (navIndex == 1) {
+            $(".activiting").css('display', 'none')
+            $(".history-activity").css('display', 'block')
+            $(".drafts").css('display', 'none')
+        } else if (navIndex == 2) {
+            $(".drafts").css('display', 'block')
+            $(".activiting").css('display', 'none')
+            $(".history-activity").css('display', 'none')
+        }
+    });
+    $.ajax({
+        type: 'POST',
+        url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.email',
+        data: {
+        },
+        dataType: "json",
+        success: function (data) {
+            // console.log(data);
+            $.each(data.result.ing, function (i, item) {
+                // 进行中
+                console.log(item)
+                var time_text = item.createtime
+                var unixTimestamp = new Date(time_text * 1000)
+                var commonTime = unixTimestamp.toLocaleString();
+                str2 += "<li class='activity-item'>" +
+                    "<div class='item-top'>" +
+                    "<div class='activity-state'>进行中</div>" +
+                    "<p class='activity-tit'>" + item.gtitle + "</p>" +
+                    "<div class='release-time'>发布于" + commonTime + "</div>" +
+                    "<div class='amount_box'>" +
+                    "<span class='amount-item'>" +
+                    "<i class='share-text'>分享次数</i>" +
+                    "<strong class='share-amount'>" + item.forwardcount +
+                    "</strong>" +
+                    "</span>" +
+                    "<span class='amount-item'>" +
+                    "<i class='join-text'>参与人数</i>" +
+                    "<strong class='join-amount'>" + item.member + "</strong>" +
+                    "</span>" +
+                    "<span class='amount-item'>" +
+                    "<i class='trade-text'>交易</i>" +
+                    "<strong class='trade-amount'>" + item.order + "</strong>" +
+                    "</span>" +
+                    "</div>" +
+                    "</div>" +
+                    "<div class='item-bottom'>" +
+                    "<div class='item-handle'>" +
+                    "<button class='orderbtn'>订单</button>" +
+                    "<button class='editbtn' data-id='"+item.goods_id+"'>编辑</button>" +
+                    "</div>" +
+                    "<div class='item-sharebox'>" +
+                    "<button class='sharebtn'>分享</button>" +
+                    "</div>" +
+                    "</div>" +
+                    "</li>"
+                $(".active-txt").html(str2)
+            })
+            $.each(data.result.end, function (i, item) {
+                //历史
+                var time_text = item.createtime
+                var unixTimestamp = new Date(time_text * 1000)
+                var commonTime = unixTimestamp.toLocaleString();
+                str3 += "<li class='activity-item'>" +
+                    "<div class='item-top'>" +
+                    "<div class='history-state'>已结束</div>" +
+                    "<p class='activity-tit'>" + item.gtitle +
+                    "</p>" +
+                    "<div class='history-amount_box'>" +
+                    "<span class='amount-item'>" +
+                    "<i class='share-text'>分享次数</i>" +
+                    "<strong class='share-amount'>" + item.forwardcount + "</strong>" +
+                    "</span>" +
+                    "<span class='amount-item'>" +
+                    "<i class='join-text'>参与人数</i>" +
+                    "<strong class='join-amount'>" + item.member + "</strong>" +
+                    "</span>" +
+                    "<span class='amount-item'>" +
+                    "<i class='trade-text'>交易</i>" +
+                    "<strong class='trade-amount'>" + item.order + "</strong>" +
+                    "</span>" +
+                    "</div>" +
+                    "</div>" +
+                    "<div class='item-bottom'>" +
+                    "<div class='history-item-handle'>" +
+                    "<div class='history-release-time'>发布于" + commonTime + "</div>" +
+                    "</div>" +
+                    "<div class='item-sharebox'>" +
+                    "<button class='sharebtn'>订单</button>" +
+                    "</div>" +
+                    "</div>" +
+                    "</li>"
+                $(".history-activity").html(str3)
+            })
+            $.each(data.result.draft, function (i, item) {
+                // 草稿
+                console.log(item);
+                var time_text = item.createtime
+                var unixTimestamp = new Date(time_text * 1000)
+                var commonTime = unixTimestamp.toLocaleString();
+                str1 += "<li class='activity-item'>" +
+                    "<div class='item-top'>" +
+                    "<p class='activity-tit'>" + item.gtitle +
+                    "</p>" +
+                    "<div class='release-time'>创建于" + commonTime + "</div>" +
+                    " <div class='amount_box'>" +
+                    "<span class='amount-item'>" +
+                    "<i class='share-text'>分享次数</i>" +
+                    "<strong class='share-amount'>0</strong>" +
+                    "</span>" +
+                    "<span class='amount-item'>" +
+                    "<i class='join-text'>参与人数</i>" +
+                    "<strong class='join-amount'>0</strong>" +
+                    "</span>" +
+                    "<span class='amount-item'>" +
+                    "<i class='trade-text'>交易</i>" +
+                    "<strong class='trade-amount'>0</strong>" +
+                    "</span>" +
+                    "</div>" +
+                    "</div>" +
+                    "<div class='item-bottom'>" +
+                    "<div class='item-handle'></div>" +
+                    "<div class='item-editbox'>" +
+                    "<button class='bianjibtn' data-id='"+item.goods_id+"'>编辑</button>" +
+                    "</div>" +
+                    "</div>" +
+                    "</li>"
+                $(".drafts").html(str1)
+            })
+           $(".bianjibtn").click(function(){
+               var dd = $(this).attr("data-id")
+               console.log(dd);
+            location.href = './reddrainage.html?id='+dd
+           })
+           $(".editbtn").click(function(){
+                var dd = $(this).attr("data-id")
+                console.log(dd);
+                location.href = './reddrainage.html?id='+dd
+           })
+        }
+    })
+      
+</script>

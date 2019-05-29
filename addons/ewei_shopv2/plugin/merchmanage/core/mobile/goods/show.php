@@ -284,6 +284,44 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         show_json(1,['end'=>$end,'ing'=>$ing,'draft'=>$draft]);
     }
 
+    /**
+     * detail页面渲染
+     */
+    public function detail()
+    {
+        include $this->template("merchmanage/goods/detail");
+    }
 
+    /**
+     * end页面渲染
+     */
+    public function end()
+    {
+        include $this->template("merchmanage/goods/end");
+    }
+
+    /**
+     * feedback页面渲染
+     */
+    public function feedback()
+    {
+        include $this->template("merchmanage/goods/feedback");
+    }
+
+    /**
+     * paymentsuccess页面渲染
+     */
+    public function paymentsuccess()
+    {
+        include $this->template("merchmanage/goods/paymentsuccess");
+    }
+
+    /**
+     * shareorder页面渲染
+     */
+    public function shareorder()
+    {
+        include $this->template("merchmanage/goods/shareorder");
+    }
 }
 ?>
