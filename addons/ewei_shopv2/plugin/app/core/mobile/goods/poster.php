@@ -275,7 +275,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
 	}
 
 
-    private function createHelpPoster($member = array( ),$mid)
+    private function createHelpPoster($member = array(),$mid)
     {
         global $_W;
         set_time_limit(0);
@@ -478,6 +478,60 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $imgurl =  $_W["siteroot"] . "addons/ewei_shopv2/data/sharegoods/".$filename . "?v=1.0";
         app_json(array( "url" => $imgurl ));
 
+    }
+
+    /**
+     * 商家收款二维码
+     */
+    public function merch_img(){
+        global $_GPC;
+        global $_W;
+        set_time_limit(0);
+        @ini_set("memory_limit", "256M");
+        //图片保存的路径
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/merch/";
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        //查找商家信息
+        $merch_user = pdo_fetch("select * from " . tablename("ewei_shop_merch_user") . " where id=:id limit 1", array( ":id" => 31 ));
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"],"id" => 31)));
+        //图片
+        $filename = $md5 . ".png";
+        //图片路径
+        $filepath = $path . $filename;
+        //是否有这张图片 有的话返回 没有的话结束
+        if( is_file($filepath) )
+        {
+            $imgurl = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$filename;
+            app_json(array( "url" => $imgurl ));
+        }
+        //底部图
+        $target = imagecreatetruecolor(450,360);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+        $thumb = "/addons/ewei_shopv2/static/images/sharegoodsbg.png";
+        $thumb = $this->createImage(tomedia($thumb));
+        imagecopyresized($target, $thumb, 0, 0, 0, 0, 450, 360, imagesx($thumb), imagesy($thumb));
+        //商品图
+        if( !empty($merch_user["thumb"]) )
+        {
+            if( stripos($merch_user["thumb"], "//") === false )
+            {
+                $thumb = $this->createImage(tomedia($merch_user["thumb"]));
+            } else {
+                $thumbStr = substr($merch_user["thumb"], stripos($merch_user["thumb"], "//"));
+                $thumb = $this->createImage(tomedia("https:" . $thumbStr));
+            }
+            imagecopyresized($target, $thumb, 11, 11, 0, 0, 280, 280, imagesx($thumb), imagesy($thumb));
+        }
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "id=" . $_GPC['id'] . "&mid=" . $_GPC['mid'], "page" => "pages/goods/detail/index" ));
+        imagepng($target, $filepath);
+        imagedestroy($target);
+        $imgurl =  $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$filename . "?v=1.0";
+        app_json(array( "url" => $imgurl ));
     }
 
      public function goodsminprice($goods){

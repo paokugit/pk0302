@@ -80,9 +80,9 @@ class Withdraw_EweiShopV2Page extends MobileLoginPage
 		$set_array["end"] = floatval($set["withdrawend"]);
 		$money = floatval($_GPC["money"]);
 		$credit = m("member")->getCredit($_W["openid"], "credit2");
-		if( $money <= 0 ) 
+		if( $money < 10 )
 		{
-			show_json(0, "提现金额错误!");
+			show_json(0, "提现金额需大于10元!");
 		}
 		if( $credit < $money ) 
 		{

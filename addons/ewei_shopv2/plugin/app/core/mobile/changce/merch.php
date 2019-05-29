@@ -29,7 +29,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
             if (!(empty($_GPC['cateid']))) {
                 $data['cateid'] = $_GPC['cateid'];
             }
-            $data = array_merge($data, array('status' => 1, 'field' => 'id,uniacid,merchname,salecate,logo,groupid,cateid,address,tel,lng,lat,reward_type'));
+            $data = array_merge($data, array('status' => 1, 'field' => 'id,uniacid,merchname,mobile,salecate,logo,groupid,cateid,address,tel,lng,lat,reward_type'));
             if (!(empty($sorttype))) {
                 $data['orderby'] = array('id' => 'desc');
             }

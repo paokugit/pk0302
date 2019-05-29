@@ -891,5 +891,14 @@ class EweiShopWechatPay
 			p("membercard")->payResult($orderno, "wechat", ($this->isapp ? true : false));
 		}
 	}
+
+	/**
+     * 商家收款码的后调
+     */
+	public function shopCode()
+    {
+        global $_W;
+        global $_GPC;
+    }
 }
 ?>

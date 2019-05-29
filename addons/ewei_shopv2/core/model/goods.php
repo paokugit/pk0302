@@ -1167,5 +1167,23 @@ class Goods_EweiShopV2Model
 		$b = hexdec($b);
 		return array('red' => $r, 'green' => $g, 'blue' => $b);
 	}
+
+    /**
+     * 计算参与人数和交易订单数
+     * @param array $data
+     * @return array
+     */
+	public function count($data = [])
+    {
+        foreach ($data as $key => $item){
+            $member = pdo_fetchall('select distinct o.openid from '.tablename('ewei_shop_order').'o join '.
+                tablename('ewei_shop_order_goods').('og on o.id=og.orderid').' where og.goodsid = :goods_id',[':goods_id'=>$item['goods_id']]);
+            $order = pdo_fetchall('select o.openid from '.tablename('ewei_shop_order').'o join '.
+                tablename('ewei_shop_order_goods').('og on o.id=og.orderid').' where og.goodsid = :goods_id',[':goods_id'=>$item['goods_id']]);
+            $data[$key]['member'] = count($member);
+            $data[$key]['order'] = count($order);
+        }
+        return $data;
+    }
 }
 ?>
