@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>分享</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/shareorder.css">
+
+<body>
+    <div class="body-box">
+        <!-- 红包，一级红包，二级红包 -->
+        <div class="numerical">
+            <ul class="numerical_ul">
+                <li class="numerical_li">
+                    <div class="numerical_head">
+                        <span class="numerical_span">红包收入</span>
+                    </div>
+                    <div class="numerical_num">
+                        <span class="numerical_text">0.00</span>
+                    </div>
+                </li>
+                <li class="numerical_li">
+                    <div class="numerical_head">
+                        <span class="numerical_span">一级红包</span>
+                    </div>
+                    <div class="numerical_num">
+                        <span class="numerical_text">0.00</span>
+                    </div>
+                </li>
+                <li class="numerical_li">
+                    <div class="numerical_head">
+                        <span class="numerical_span">二级红包</span>
+                    </div>
+                    <div class="numerical_num">
+                        <span class="numerical_text">0.00</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!-- 分享购买 -->
+        <div class="body-content">
+            <div class="sharepurchase_num">
+                <span class="sharepurchase_text1">分享购买</span>
+                <span class="num">0</span>
+                <span class="sharepurchase_text2">人</span>
+            </div>
+            <div class="sharepurchase_person">
+                <ul class="sharepurchase_person_ul">
+                    <li class="sharepurchase_person_li">
+                        <div class="sharepurchase_person_head">
+                            <img class="sharepurchase_person_img" src="../addons/ewei_shopv2/plugin/merchmanage/static/img/add@2x.png">
+                        </div>
+                        <div class="name_phone">
+                            <span class="sharepurchase_name">你是谁</span>
+                            <span class="sharepurchase_phone">12356789</span>
+                        </div>
+                        <div class="award_time">
+                            <div class="award">
+                                <span class="award_text">奖励</span>
+                                <span class="award_num">50</span>
+                                <span class="award_text">元</span>
+                            </div>
+                            <div class="time">
+                                <span class="ymd">2019-05-16</span>
+                                <span class="hms">12：12：12</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="sharepurchase_person_li">
+                        <div class="sharepurchase_person_head">
+                            <img class="sharepurchase_person_img" src="../addons/ewei_shopv2/plugin/merchmanage/static/img/add@2x.png">
+                        </div>
+                        <div class="name_phone">
+                            <span class="sharepurchase_name">你是谁</span>
+                            <span class="sharepurchase_phone">12356789</span>
+                        </div>
+                        <div class="award_time">
+                            <div class="award">
+                                <span class="award_text">奖励</span>
+                                <span class="award_num">50</span>
+                                <span class="award_text">元</span>
+                            </div>
+                            <div class="time">
+                                <span class="ymd">2019-05-16</span>
+                                <span class="hms">12：12：12</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="sharepurchase_person_li">
+                        <div class="sharepurchase_person_head">
+                            <img class="sharepurchase_person_img" src="../addons/ewei_shopv2/plugin/merchmanage/static/img/add@2x.png">
+                        </div>
+                        <div class="name_phone">
+                            <span class="sharepurchase_name">你是谁</span>
+                            <span class="sharepurchase_phone">12356789</span>
+                        </div>
+                        <div class="award_time">
+                            <div class="award">
+                                <span class="award_text">奖励</span>
+                                <span class="award_num">50</span>
+                                <span class="award_text">元</span>
+                            </div>
+                            <div class="time">
+                                <span class="ymd">2019-05-16</span>
+                                <span class="hms">12：12：12</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="sharepurchase_person_li">
+                        <div class="sharepurchase_person_head">
+                            <img class="sharepurchase_person_img" src="../addons/ewei_shopv2/plugin/merchmanage/static/img/add@2x.png">
+                        </div>
+                        <div class="name_phone">
+                            <span class="sharepurchase_name">你是谁</span>
+                            <span class="sharepurchase_phone">12356789</span>
+                        </div>
+                        <div class="award_time">
+                            <div class="award">
+                                <span class="award_text">奖励</span>
+                                <span class="award_num">50</span>
+                                <span class="award_text">元</span>
+                            </div>
+                            <div class="time">
+                                <span class="ymd">2019-05-16</span>
+                                <span class="hms">12：12：12</span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $.ajax({
+            type:'post',
+            url:'http://192.168.0.140:8081/',
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+            }
+        })
+    })
+</script>

@@ -104,7 +104,7 @@ input:focus {
 .all_img {
   margin-top: 13px;
   width: 100%;
-  height: 170px;
+  height: auto;
   background: #fff;
   margin-bottom: 13px;
 }
@@ -119,12 +119,6 @@ input:focus {
   margin-left: 13px;
   font-size: 16px;
   color: #333;
-}
-.img_img_uploading {
-  width: 75px;
-  height: 75px;
-  margin-left: 13px;
-  margin-top: 30px;
 }
 .activity_introduction {
   width: 100%;
@@ -201,6 +195,7 @@ input:focus {
 .list_xinhuai {
   width: 100%;
   height: 50px;
+  position: relative;
   display: flex;
   align-items: center;
   border-bottom: 1px solid rgb(243, 243, 243);
@@ -269,7 +264,7 @@ input:focus {
   background: #fff;
 }
 .address_head {
-  width: 100%;
+  width: 95%;
   height: 40px;
   display: flex;
   align-items: center;
@@ -280,7 +275,7 @@ input:focus {
   color: #333;
 }
 .address_text {
-  width: 100%;
+  width: 95%;
   height: 60px;
   margin-left: 13px;
 }
@@ -344,18 +339,297 @@ input:focus {
   width: 150px;
   height: 30px;
   font-size: 16px;
+  background: #fff;
   /* border: 0; */
+  outline:none;
   border-width: 0px;
   border-top-style: none;
   border-right-style: none;
   border-left-style: none;
   border-bottom-style: none;
   -webkit-appearance: none;
-
   -moz-appearance: none;
-
   appearance: none;
 }
 #youfei{
   display: none;
 }
+.xinhuai_text1{
+  width: 150px;
+  font-size: 16px;
+  text-align: right;
+}
+.img_uploading{
+  width: 100%;
+  height: 107px;
+  display: flex;
+}
+#doc{
+  width: 75px;
+  height: 75px;
+  position: absolute;
+  margin-left: -75px;
+  margin-top: 30px;
+  opacity: 0;
+}
+#dd{
+  width: auto;
+  height: auto;
+  position: absolute;
+  margin-left: 87px;
+  margin-top: 30px;
+}
+#date_date{
+  width: 120px;
+  position: absolute;
+  font-size: 16px;
+  color: #333;
+  right: 0;
+  -webkit-calendar-picker-indicator:none;
+  -webkit-inner-spin-button:none;
+  -webkit-clear-button:none;
+}
+.box ul {
+  list-style-type: none;
+  margin: 0px;
+  padding: 0px;
+}
+.box li {
+  float: left;
+  width: 75px;
+  height: 75px;
+}
+
+
+.background_music_div {
+  width: 100%;
+  height: 100%;
+  background: #f1f1f1;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: none
+}
+
+
+
+
+/* 页面内容 */
+.all_box_cc {
+  width: 100%;
+  height: 100%;
+  top: -10px;
+  /* position: absolute; */
+  z-index: 10;
+  /* background: #0f0; */
+}
+.music{
+    width: 100%;
+    height: auto;
+    /* background: #f00; */
+}
+.all_music{
+    width: 100%;
+    height: auto;
+}
+.list_music{
+    width: 100%;
+    height: 49px;
+    display: flex;
+    /* justify-content: center; */
+    align-items: center;
+    background: #fff;
+    border-bottom: 1px solid rgb(245, 245, 245);
+}
+.music_name{
+    width: 200px;
+    height: 30px;
+    /* background: #f00; */
+    display: flex;
+    align-items: center;
+}
+.music_name_text{
+    font-size: 16px;
+    color: #333333;
+    margin-left: 13px;
+}
+.music_img{
+    width: 30px;
+    height: 30px;
+    margin-left: 60px;
+    /* background: #0f0; */
+}
+.img_img{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position:absolute;
+    right: 85px;
+}
+.select{
+    width: 45px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    position:absolute;
+    right: 13px;
+}
+.select_text{
+    font-size: 16px;
+    color: #b2b2b2;
+}
+.none{
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* background: #f00; */
+}
+.feedback{
+    bottom: 0%;
+    width: 100%;
+    height: 52px;
+    position:absolute;
+    bottom:0;
+    background: #fff;
+    display: flex;
+    align-items: center;
+}
+.none_music{
+    width: 80%;
+    height: 52px;
+    /* background: #f00; */
+    display: flex;
+    align-items: center;
+}
+.none_music_text{
+    font-size: 16px;
+    color: #333333;
+    margin-left: 13px;
+}
+.problemfeedback{
+    width: 180px;
+    height: 35px;
+    background: #008be4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    margin-left: 30px;
+    margin-right: 13px;
+    font-size: 16px;
+    color: #fffefe;
+}
+
+.header_select{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position:absolute;
+    right: 85px;
+    -webkit-animation:rotateImg 5s linear infinite;
+    /* border: 1px solid #ccc; */
+    vertical-align: middle;
+}
+@keyframes rotateImg {
+    0% {transform : rotate(0deg);}
+    100% {transform : rotate(360deg);}
+  }
+  
+  @-webkit-keyframes rotateImg {
+      0%{-webkit-transform : rotate(0deg);}
+    100%{-webkit-transform : rotate(360deg);}
+  }
+
+  #upBox {
+    text-align: center;
+    width: 100%;
+    height: auto;
+    /* border: 1px solid #666; */
+    margin: auto;
+    margin-top: 30px;
+    position: relative;
+    border-radius: 10px;
+    display: flex;
+  }
+
+  #inputBox {
+    width: 75px;
+    height: 75px;
+    position: relative;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .img_img_uploading {
+    width: 75px;
+    height: 75px;
+  }
+
+  #inputBox input {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    position: absolute;
+    top: 0%;
+    left: 0%;
+  }
+
+  #imgBox {
+    text-align: left;
+    display: flex;
+  }
+
+  .imgContainer {
+    display: inline-block;
+    width: 75px;
+    height: 75px;
+    margin-left: 1%;
+    position: relative;
+    margin-top: 0px;
+    box-sizing: border-box;
+  }
+
+  .imgContainer img {
+    width: 75px;
+    height: 75px;
+  }
+
+  .imgContainer p {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 75px;
+    background: black;
+    text-align: center;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: none;
+  }
+
+  .imgContainer:hover p {
+    display: block;
+  }
+
+  #btn {
+    outline: none;
+    width: 100px;
+    height: 30px;
+    background: cornflowerblue;
+    border: 1px solid cornflowerblue;
+    color: white;
+    cursor: pointer;
+    margin-top: 30px;
+    border-radius: 5px;
+  }
+  .timeipt{
+    position: absolute;
+    width:31%;
+    height: 100%;
+  }
+  

@@ -1,0 +1,156 @@
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td,hr,button,article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {
+    margin:0;
+    padding:0;
+    }
+    html{
+    background: #f1f1f1;
+    height: 100%
+    }
+    a{
+    text-decoration: none
+    }
+    li{
+    list-style: none
+    }
+    i{
+    font-style: normal
+    }
+.body-box{
+    width: 100%;
+    height: 100%;
+    /* background: pink */
+}
+.numerical{
+    width: 96%;
+    height: 100px;
+    /* background: #f00; */
+    margin: auto;
+    border-radius: 5px;
+}
+.numerical_ul{
+    width: 100%;
+    height: 100px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+.numerical_li{
+    width: auto;
+    height: 100px;
+}
+.numerical_head{
+    margin-top: 25px;
+}
+.numerical_span{
+    font-size: 15px;
+    color: #8a8a8a;
+}
+.numerical_num{
+
+}
+.numerical_text{
+    font-size: 18px;
+    color: #333333;
+}
+.body-content{
+    width: 96%;
+    height: auto;
+    margin: 13px auto;
+    background: #fff;
+    border-radius: 5px;
+}
+.sharepurchase_num{
+    background: #fff;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+}
+.sharepurchase_text1{
+    font-size: 17px;
+    color: #333333;
+    margin-left: 18px;
+}
+.num{
+    font-size: 17px;
+    color: rgb(255, 32, 32)
+}
+.sharepurchase_text2{
+    font-size: 17px;
+    color: #333333;
+}
+
+.sharepurchase_person{
+    width: 100%;
+    height: auto;
+}
+.sharepurchase_person_ul{
+    width: 100%;
+    height: auto;
+}
+.sharepurchase_person_li{
+    width: 100%;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgb(243, 243, 243); 
+}
+.sharepurchase_person_head{
+  width: 40px;
+  height: 40px;
+  margin-left: 5px;
+}
+.sharepurchase_person_img{
+  width: 40px;
+  height: 40px;
+}
+.name_phone{
+  width: auto;
+  height: 40px;
+  /* background: #0f0; */
+  margin-left: 10px;
+  display: flex;
+  align-items: center
+}
+.sharepurchase_name{
+  font-size: 16px;
+  color: #333333;
+}
+.sharepurchase_phone{
+  margin-left: 5px;
+  font-size: 16px;
+  color: #333333;
+}
+.award_time{
+  width: 170px;
+  height: 50px;
+}
+.award{
+  width: 170px;
+  height: 25px;
+  text-align: right;
+  margin-right: 5px
+}
+.award_text{
+  font-size: 16px;
+  color: #f82626
+}
+.award_num{
+  font-size: 16px;
+  color: #f82626
+}
+.time{
+  width: 170px;
+  height: 25px;
+  text-align: right;
+  margin-right: 5px;
+}
+.ymd{
+  font-size: 13px;
+  color: #8a8a8a;
+}
+.hms{
+  font-size: 13px;
+  color: #8a8a8a;
+}

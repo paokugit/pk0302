@@ -284,6 +284,96 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         show_json(1,['end'=>$end,'ing'=>$ing,'draft'=>$draft]);
     }
 
+    /**
+     * 红包引流发布页面
+     */
+    public function red()
+    {
+        include $this->template('merchmanage/goods/red');
+    }
 
+    /**
+     * detail页面渲染
+     */
+    public function detail()
+    {
+        include $this->template("merchmanage/goods/detail");
+    }
+
+    /**
+     * end页面渲染
+     */
+    public function end()
+    {
+        include $this->template("merchmanage/goods/end");
+    }
+
+    /**
+     * feedback页面渲染
+     */
+    public function feedback()
+    {
+        include $this->template("merchmanage/goods/feedback");
+    }
+
+    /**
+     * paymentsuccess页面渲染
+     */
+    public function paymentsuccess()
+    {
+        include $this->template("merchmanage/goods/paymentsuccess");
+    }
+
+    /**
+     * shareorder页面渲染
+     */
+    public function shareorder()
+    {
+        include $this->template("merchmanage/goods/shareorder");
+    }
+
+    /**
+     * list页面渲染
+     */
+    public function list()
+    {
+        include $this->template("merchmanage/goods/list");
+    }
+
+    /**
+     * 预览存缓存接口
+     */
+    public function preview(){
+        global $_GPC;
+        global $_W;
+        $openid = $_GPC['openid'];
+        $openid = "sns_wa_owRAK44_gHTrMTJMVSxFy-jtNef8";
+        $uniacid = $_W['uniacid'];
+        $merchid = $_W['merchmanage']['merchid'];
+        $key = md5($openid.$uniacid.$merchid);
+        m('cache')->set($key,$_GPC,3600);
+        show_json(1,['key'=>$key]);
+    }
+
+    /**
+     * 获得缓存的接口
+     */
+    public function getpre()
+    {
+        global $_W;
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        $post_key = $_GPC['post_key'];
+        $uniacid = $_W['uniacid'];
+        $merchid = $_W['merchmanage']['merchid'];
+        $key = md5($openid.$uniacid.$merchid);
+        if($key == $post_key){
+            $value = m('cache')->get($key);
+            show_json(1,['val'=>$value]);
+        }else{
+            show_json(0);
+        }
+
+    }
 }
 ?>
