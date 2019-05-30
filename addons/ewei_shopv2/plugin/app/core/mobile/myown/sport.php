@@ -194,7 +194,22 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         
        
     }
-    
+    public function ew(){
+       // header( "Content-type: image/png");
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/" ;
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        
+        $filename = "1_".time() . ".png";
+        $filepath = $path . $filename;
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" =>1, "page" => "pages/index/index" ));
+        imagecreatefromstring($qrcode);
+        imagepng($qrcode,$filepath);
+       
+    }
     public function createposter($openid="",$backgroup="")
     {
         global $_W;
@@ -520,6 +535,9 @@ class Sport_EweiShopV2Page extends AppMobilePage{
        
         if (empty($openid)){
             app_error(AppError::$ParamsError);
+        }
+        if (empty($parent_id)){
+            show_json(1,"推荐人不可为空");
         }
         $member=m("member")->getmember("sns_wa_".$openid);
 //          if ($login==0){

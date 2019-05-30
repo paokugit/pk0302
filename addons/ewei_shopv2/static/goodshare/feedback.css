@@ -1,0 +1,97 @@
+textarea{
+    outline: none;
+    resize: none;
+    border: none
+}
+.music-box{
+    width: 96%;
+    height: 150px;
+    background: #fff;
+    padding: 0 2%
+}
+.music-tit{
+    width: 100%;
+    height: 30px;
+    /* background: #f00; */
+    line-height: 30px;
+    font-size: 16px;
+    color: #333
+}
+.music-text{
+    width: 100%;
+    height: 100px;
+    margin-top: 10px;
+    /* background: #ff0; */
+    line-height: 20px;
+    font-size: 15px
+}
+.upload-box{
+    width: 96%;
+    height: auto;
+    padding: 0 2%;
+    background: #fff;
+    margin-top: 15px;
+
+}
+.upload-tit{
+    width: 100%;
+    height: 50px;
+    /* background: #f00; */
+    line-height: 50px;
+    font-size: 16px;
+    color: #333
+}
+.m-list{
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around
+}
+.m-item{
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+    border: 1px solid #eee
+}
+.m-item img{
+    width: 100%
+}
+.m-name-box{
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+    font-size: 16px;
+    color: #333;
+    display: flex;
+    justify-content: space-between
+}
+.m-name{
+    width: 70%;
+    height: 50px;
+    line-height: 50px;
+    font-size: 16px;
+    color: #333
+}
+.m-delete{
+    width: 20%;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    color: #ef3b3e;
+    font-size: 16px
+}
+.submitbox{
+    width: 300px;
+    height: 44px;
+    margin: 25px auto;
+    
+}
+.submitbtn{
+    width: 100%;
+    height: 100%;
+    background: #008be4;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 18px
+}

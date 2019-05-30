@@ -54,6 +54,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 		    $data = array('title' => trim($_GPC['title']), 'subtitle' => trim($_GPC['subtitle']), 'unit' => trim($_GPC['unit']), 'status' => intval($_GPC['status']), 'showtotal' => intval($_GPC['showtotal']), 'cash' => intval($_GPC['cash']), 'invoice' => intval($_GPC['invoice']), 'isnodiscount' => intval($_GPC['isnodiscount']), 'nocommission' => intval($_GPC['nocommission']), 'isrecommand' => intval($_GPC['isrecommand']), 'isnew' => intval($_GPC['isnew']), 'ishot' => intval($_GPC['ishot']), 'issendfree' => intval($_GPC['issendfree']), 'totalcnf' => intval($_GPC['totalcnf']), 'dispatchtype' => intval($_GPC['dispatchtype']), 'showlevels' => trim($_GPC['showlevels']), 'showgroups' => trim($_GPC['showgroups']), 'buylevels' => trim($_GPC['buylevels']), 'buygroups' => trim($_GPC['buygroups']), 'maxbuy' => intval($_GPC['maxbuy']), 'minbuy' => intval($_GPC['minbuy']), 'usermaxbuy' => intval($_GPC['usermaxbuy']), 'diypage' => intval($_GPC['diypage']), 'displayorder' => intval($_GPC['displayorder']));
 
 		    $data['deduct']=trim($_GPC["deduct"]);
+		    $data['deduct_type']=$_GPC["deduct_type"];
 			if (empty($item)) {
 				$data['type'] = intval($_GPC['type']);
 			}

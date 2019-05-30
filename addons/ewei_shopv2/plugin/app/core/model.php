@@ -765,6 +765,7 @@ if (!class_exists("AppModel")) {
             }
             if ($item['id'] == 'goods') {
                 if (empty($item['params']['goodsdata']) && !(empty($item['data'])) && is_array($item['data'])) {
+                  
                     $goodsids = array();
                     foreach ($item['data'] as $index => $data) {
                         if (!(empty($data['gid']))) {
@@ -774,7 +775,7 @@ if (!class_exists("AppModel")) {
                     if (!(empty($goodsids)) && is_array($goodsids)) {
                         $goodsids = array_filter($goodsids);
                         $newgoodsids = implode(',', $goodsids);
-                        $goods = pdo_fetchall('select deduct,id, title, subtitle, thumb, minprice, sales, salesreal, total, showlevels, showgroups, bargain,hascommission,nocommission,commission,commission1_rate,commission1_rate,marketprice,commission1_pay,maxprice, productprice, video,`type` from ' . tablename('ewei_shop_goods') . ' where id in( ' . $newgoodsids . ' ) and status=1 and deleted=0 and checked=0 and uniacid=:uniacid order by displayorder desc ', array(':uniacid' => $_W['uniacid']));
+                        $goods = pdo_fetchall('select deduct_type,deduct,id, title, subtitle, thumb, minprice, sales, salesreal, total, showlevels, showgroups, bargain,hascommission,nocommission,commission,commission1_rate,commission1_rate,marketprice,commission1_pay,maxprice, productprice, video,`type` from ' . tablename('ewei_shop_goods') . ' where id in( ' . $newgoodsids . ' ) and status=1 and deleted=0 and checked=0 and uniacid=:uniacid order by displayorder desc ', array(':uniacid' => $_W['uniacid']));
                     }
                 } else if (($item['params']['goodsdata'] == 1) && !(empty($item['params']['cateid'])) && $mobile) {
                     $orderby = ' displayorder desc, createtime desc';
@@ -800,7 +801,7 @@ if (!class_exists("AppModel")) {
                             $orderby = ' order by minprice asc, displayorder desc';
                         }
                         $item['params']['goodsnum'] = ((!(empty($item['params']['goodsnum'])) ? $item['params']['goodsnum'] : 20));
-                        $goods = pdo_fetchall('select deduct,id, title, subtitle, thumb, minprice, sales, salesreal, total, showlevels, showgroups, bargain, productprice,hascommission,nocommission,commission,commission1_rate,commission1_rate,marketprice,commission1_pay,maxprice,video,`type` from ' . tablename('ewei_shop_goods') . ' where id in( ' . $group['goodsids'] . ' ) and status=1 and `deleted`=0 and `status`=1 and uniacid=:uniacid ' . $orderby . ' limit ' . $item['params']['goodsnum'], array(':uniacid' => $_W['uniacid']));
+                        $goods = pdo_fetchall('select deduct_type,deduct,id, title, subtitle, thumb, minprice, sales, salesreal, total, showlevels, showgroups, bargain, productprice,hascommission,nocommission,commission,commission1_rate,commission1_rate,marketprice,commission1_pay,maxprice,video,`type` from ' . tablename('ewei_shop_goods') . ' where id in( ' . $group['goodsids'] . ' ) and status=1 and `deleted`=0 and `status`=1 and uniacid=:uniacid ' . $orderby . ' limit ' . $item['params']['goodsnum'], array(':uniacid' => $_W['uniacid']));
                     }
                 } else if ((2 < $item['params']['goodsdata']) && $mobile) {
                     $args = array('pagesize' => $item['params']['goodsnum'], 'page' => 1, 'order' => ' displayorder desc, createtime desc');
@@ -867,7 +868,7 @@ if (!class_exists("AppModel")) {
                                     if ($mobile && !(m('goods')->visit($good, $this->member))) {
                                         continue;
                                     }
-                                    $item['data'][$childid] = array('gid' => $good['id'],'deduct' => $good['deduct'], 'title' => $good['title'], 'subtitle' => $good['subtitle'], 'price' => $good['minprice'], 'thumb' => $good['thumb'], 'total' => $good['total'], 'productprice' => $good['productprice'], 'ctype' => $good['type'], 'sales' => $good['sales'] + intval($good['salesreal']), 'video' => $good['video'], 'seecommission' => $good['seecommission'], 'cansee' => ($cansee ? $good['cansee'] : $cansee), 'seetitle' => $good['seetitle'], 'bargain' => $good['bargain']);
+                                    $item['data'][$childid] = array('gid' => $good['id'],'deduct_type'=>$good['deduct_type'],'deduct' => $good['deduct'], 'title' => $good['title'], 'subtitle' => $good['subtitle'], 'price' => $good['minprice'], 'thumb' => $good['thumb'], 'total' => $good['total'], 'productprice' => $good['productprice'], 'ctype' => $good['type'], 'sales' => $good['sales'] + intval($good['salesreal']), 'video' => $good['video'], 'seecommission' => $good['seecommission'], 'cansee' => ($cansee ? $good['cansee'] : $cansee), 'seetitle' => $good['seetitle'], 'bargain' => $good['bargain']);
                                 }
                             }
                         }
@@ -905,7 +906,7 @@ if (!class_exists("AppModel")) {
                         }
                         foreach ($goods as $index => $good) {
                             $childid = 'C' . rand(1000000000, 9999999999);
-                            $item['data'][$childid] = array('gid' => $good['id'],'deduct' => $good['deduct'], 'title' => $good['title'], 'subtitle' => $good['subtitle'], 'price' => $good['minprice'], 'thumb' => $good['thumb'], 'total' => $good['total'], 'productprice' => $good['productprice'], 'ctype' => $good['type'], 'seecommission' => $good['seecommission'], 'cansee' => $good['cansee'], 'seetitle' => $good['seetitle'], 'sales' => $good['sales'] + intval($good['salesreal']), 'video' => $good['video'], 'bargain' => $good['bargain']);
+                            $item['data'][$childid] = array('gid' => $good['id'],'deduct_type'=>$good['deduct_type'],'deduct' => $good['deduct'], 'title' => $good['title'], 'subtitle' => $good['subtitle'], 'price' => $good['minprice'], 'thumb' => $good['thumb'], 'total' => $good['total'], 'productprice' => $good['productprice'], 'ctype' => $good['type'], 'seecommission' => $good['seecommission'], 'cansee' => $good['cansee'], 'seetitle' => $good['seetitle'], 'sales' => $good['sales'] + intval($good['salesreal']), 'video' => $good['video'], 'bargain' => $good['bargain']);
                         }
                     }
                 }

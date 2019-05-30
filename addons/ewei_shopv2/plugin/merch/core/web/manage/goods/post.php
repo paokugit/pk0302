@@ -19,7 +19,7 @@ if (0 < $maxgoods) {
 		$this->message('抱歉，您的商品数量已经达到最高设置,不能添加商品！', '', 'error');
 	}
 }
-
+ 
 $item = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_goods') . ' WHERE id = :id and uniacid=:uniacid and merchid=:merchid', array(':id' => $id, ':uniacid' => $_W['uniacid'], ':merchid' => $_W['merchid']));
 $area_set = m('util')->get_area_config_set();
 $new_area = intval($area_set['new_area']);

@@ -108,7 +108,7 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		$set = $_W['shopset']['trade'];
 
 		if (empty($set['withdraw'])) {
-			show_json(0, '系统未开启提现!');
+			app_error(1, '系统未开启提现!');
 		}
 
 		$set_array = array();
@@ -118,12 +118,12 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		$money = floatval($_GPC['money']);
 		$credit = m('member')->getCredit($_W['openid'], 'credit2');
 
-		if ($money <= 0) {
-			show_json(0, '提现金额错误!');
+		if ($money <10 ) {
+			app_error(2, '提现金额不能低于10元!');
 		}
 
 		if ($credit < $money) {
-			show_json(0, '提现金额过大!');
+			app_error(3, '提现金额过大!');
 		}
 
 		$apply = array();

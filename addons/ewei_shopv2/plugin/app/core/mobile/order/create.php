@@ -477,6 +477,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$weight = 0;
 			$total = 0;
 			$goodsprice = 0;
+            $goodsdeduct = 0;
 			$realprice = 0;
 			$deductprice = 0;
 			$taskdiscountprice = 0;
@@ -518,6 +519,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			}
 			foreach( $goods as &$g ) 
 			{
+                $goodsdeduct += $g['deduct'];
 				if( empty($g["total"]) || intval($g["total"]) < 1 ) 
 				{
 					$g["total"] = 1;
@@ -1020,11 +1022,12 @@ class Create_EweiShopV2Page extends AppMobilePage
 			}
 			$goods = array( );
 			$goodsprice = 0;
+            $goodsdeduct = 0;
 			$marketprice = 0;
 			$goods_list = array( );
 			foreach( $g as $key => $value ) 
 			{
-				$goods[$key] = pdo_fetch("select id,title,thumb,marketprice,merchid,dispatchtype,dispatchid,dispatchprice from " . tablename("ewei_shop_goods") . "\r\n                            where id = " . $value["goodsid"] . " and uniacid = " . $uniacid . " ");
+				$goods[$key] = pdo_fetch("select id,title,thumb,marketprice,merchid,dispatchtype,dispatchid,dispatchprice,deduct from " . tablename("ewei_shop_goods") . "\r\n                            where id = " . $value["goodsid"] . " and uniacid = " . $uniacid . " ");
 				if( $is_openmerch == 1 ) 
 				{
 					$merchid = $goods[$key]["merchid"];
@@ -1059,7 +1062,9 @@ class Create_EweiShopV2Page extends AppMobilePage
 					$merch_array[$merchid]["ggprice"] += $goods[$key]["packageprice"];
 				}
 				$goodsprice += price_format($goods[$key]["packageprice"]);
-				$marketprice += price_format($goods[$key]["marketprice"]);
+                $goodsdeduct += price_format($goods[$key]["deduct"]);
+
+                $marketprice += price_format($goods[$key]["marketprice"]);
 			}
 			$address = pdo_fetch("select * from " . tablename("ewei_shop_member_address") . " where openid=:openid and deleted=0 and isdefault=1  and uniacid=:uniacid limit 1", array( ":uniacid" => $uniacid, ":openid" => $openid ));
 			$total = count($goods);
@@ -1115,7 +1120,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			}
 		}
 		$sysset = m("common")->getSysset("trade");
-		$result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "showTab" => 0 < count($carrier_list) && !$isverify && !$isvirtual, "showAddress" => !$isverify && !$isvirtual, "isverify" => $isverify, "isvirtual" => $isvirtual, "set_realname" => $sysset["set_realname"], "set_mobile" => $sysset["set_mobile"], "carrierInfo" => (!empty($carrier_list) ? $carrier_list[0] : false), "storeInfo" => false, "address" => $address, "goods" => $allgoods, "merchid" => $merch_id, "packageid" => $packageid, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle, "changenum" => $changenum, "hasinvoice" => (bool) $hasinvoice, "invoicename" => $invoicename, "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" => $goodsprice, "taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => round($realprice, 2), "total" => $total, "buyagain" => round($buyagain, 2), "fromcart" => (int) $fromcart, "isonlyverifygoods" => $isonlyverifygoods, "isforceverifystore" => $isforceverifystore, "city_express_state" => (empty($dispatch_array["city_express_state"]) ? 0 : $dispatch_array["city_express_state"]), "canusecard" => $canusecard, "card_info" => $card_info, "carddiscountprice" => $carddiscountprice, "card_free_dispatch" => $card_free_dispatch );
+		$result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "showTab" => 0 < count($carrier_list) && !$isverify && !$isvirtual, "showAddress" => !$isverify && !$isvirtual, "isverify" => $isverify, "isvirtual" => $isvirtual, "set_realname" => $sysset["set_realname"], "set_mobile" => $sysset["set_mobile"], "carrierInfo" => (!empty($carrier_list) ? $carrier_list[0] : false), "storeInfo" => false, "address" => $address, "goods" => $allgoods, "merchid" => $merch_id, "packageid" => $packageid, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle, "changenum" => $changenum, "hasinvoice" => (bool) $hasinvoice, "invoicename" => $invoicename, "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" => $goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => round($realprice, 2), "total" => $total, "buyagain" => round($buyagain, 2), "fromcart" => (int) $fromcart, "isonlyverifygoods" => $isonlyverifygoods, "isforceverifystore" => $isforceverifystore, "city_express_state" => (empty($dispatch_array["city_express_state"]) ? 0 : $dispatch_array["city_express_state"]), "canusecard" => $canusecard, "card_info" => $card_info, "carddiscountprice" => $carddiscountprice, "card_free_dispatch" => $card_free_dispatch );
 		if( $iscycel ) 
 		{
 			$cycelset = m("common")->getSysset("cycelbuy");
@@ -2149,7 +2154,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			{
 				app_error(AppError::$ParamsError);
 			}
-			$sql = "SELECT id as goodsid,title,type, weight,total,issendfree,isnodiscount, thumb,marketprice,cash,isverify,isforceverifystore,verifytype," . " goodssn,productsn,sales,istime,timestart,timeend,isendtime,usetime,endtime,ispresell,presellprice,preselltimeend," . " usermaxbuy,minbuy,maxbuy,unit,buylevels,buygroups,deleted," . " status,deduct,manydeduct,`virtual`,discounts,deduct2,ednum,edmoney,edareas,diyformtype,diyformid,diymode," . " dispatchtype,dispatchid,dispatchprice,merchid,merchsale,cates," . " isdiscount,isdiscount_time,isdiscount_discounts, virtualsend," . " buyagain,buyagain_islong,buyagain_condition, buyagain_sale,verifygoodsdays,verifygoodslimittype,verifygoodslimitdate" . " FROM " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid  limit 1";
+			$sql = "SELECT id as goodsid,title,type, weight,total,issendfree,isnodiscount, thumb,marketprice,cash,isverify,isforceverifystore,verifytype," . " goodssn,productsn,sales,istime,timestart,timeend,isendtime,usetime,endtime,ispresell,presellprice,preselltimeend," . " usermaxbuy,minbuy,maxbuy,unit,buylevels,buygroups,deleted," . " status,deduct,deduct_type,manydeduct,`virtual`,discounts,deduct2,ednum,edmoney,edareas,diyformtype,diyformid,diymode," . " dispatchtype,dispatchid,dispatchprice,merchid,merchsale,cates," . " isdiscount,isdiscount_time,isdiscount_discounts, virtualsend," . " buyagain,buyagain_islong,buyagain_condition, buyagain_sale,verifygoodsdays,verifygoodslimittype,verifygoodslimitdate" . " FROM " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid  limit 1";
 			$data = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $goodsid ));
 			$data["seckillinfo"] = plugin_run("seckill::getSeckill", $goodsid, $optionid, true, $_W["openid"]);
 			if( 0 < $data["ispresell"] && ($data["preselltimeend"] == 0 || time() < $data["preselltimeend"]) ) 

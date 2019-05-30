@@ -466,7 +466,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
             //现价
             $red = imagecolorallocate($target, 248, 5, 4);
             imagettftext($target, 28, 0, 297, 124, $red, $font,'¥' );
-            imagettftext($target, 32, 0, 318, 120, $red, $font, floatval($goods['minprice']));
+            imagettftext($target, 32, 0, 318, 120, $red, $font, floatval($goodsprice));
         }
        //原价
         $black = imagecolorallocate($target, 51, 51, 51);
