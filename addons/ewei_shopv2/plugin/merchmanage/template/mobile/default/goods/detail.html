@@ -396,8 +396,8 @@
         console.log(realname, realphone)
         $.ajax({
             type: 'POST',
-            url:"https://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order",
-            //url: '{php echo mobileUrl("goods.share.order")}',
+            //url:"https://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order",
+            url: '{php echo mobileUrl("goods.share.order")}',
             data: {
                 "good_id": '451',
                 "openid": 'oQmU56Lf1GeIkpqsLStPq5Qktm9I',

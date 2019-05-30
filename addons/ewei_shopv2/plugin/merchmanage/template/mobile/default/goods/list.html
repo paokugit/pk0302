@@ -85,7 +85,7 @@
         </div>
         <!-- content -->
         <!-- footer -->
-        <div class="footer" onclick="location.href='{php echo mobileUrl("merchmanage/goods/show/red")}'">发布活动</div>
+        <div class="footer">发布活动</div>
         <!-- footer -->
     </div>
     <div id="warning">
@@ -248,23 +248,25 @@
                     "</li>"
                 $(".drafts").html(str1)
             })
-           $(".bianjibtn").click(function(){
-               var id = $(this).attr("data-id");
-               console.log(id);
-               location.href = "{php echo mobileUrl('merchmanage/goods/show/red')}&id="+id;
-           })
-           $(".editbtn").click(function(){
-                var id = $(this).attr("data-id");
-               console.log(id);
-               location.href = "{php echo mobileUrl('merchmanage/goods/show/red')}&id="+id;
-           })
-            $(".sharebtn").click(function () {
-                $('#warning').css('display', 'block')
-            })
-            $("#warning").click(function(){
-                $('#warning').css('display', 'none')
-            })
         }
     })
-      
+    $(".bianjibtn").click(function(){
+        var id = $(this).attr("data-id");
+        console.log(id);
+        location.href = "{php echo mobileUrl('merchmanage/goods/show/red')}&id="+id;
+    })
+    $(".editbtn").click(function(){
+        var id = $(this).attr("data-id");
+        console.log(id);
+        location.href = "{php echo mobileUrl('merchmanage/goods/show/red')}&id="+id;
+    })
+    $(".sharebtn").click(function () {
+        $('#warning').css('display', 'block')
+    })
+    $("#warning").click(function(){
+        $('#warning').css('display', 'none')
+    })
+    $('.footer').click(function () {
+        location.href='{php echo mobileUrl("merchmanage/goods/show/red")}';
+    })
 </script>
