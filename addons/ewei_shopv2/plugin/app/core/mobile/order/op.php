@@ -21,7 +21,7 @@ class Op_EweiShopV2Page extends AppMobilePage
 			app_error(AppError::$ParamsError);
 		}
 
-		$order = pdo_fetch('select id,ordersn,openid,status,deductcredit,deductcredit2,deductprice,couponid,`virtual`,`virtual_info`,merchid  from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
+		$order = pdo_fetch('select id,ordersn,openid,status,deductcredit,deductcredit2,deductprice,discount_price,couponid,`virtual`,`virtual_info`,merchid  from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
 
 		if (empty($order)) {
 			app_error(AppError::$OrderNotFound);
@@ -58,7 +58,11 @@ class Op_EweiShopV2Page extends AppMobilePage
 		if (0 < $order['deductprice']) {
 			m('member')->setCredit($order['openid'], 'credit1', $order['deductcredit'], array('0', $_W['shopset']['shop']['name'] . ('购物返还抵扣卡路里 卡路里: ' . $order['deductcredit'] . ' 抵扣金额: ' . $order['deductprice'] . ' 订单号: ' . $order['ordersn'])));
 		}
-
+          //折扣宝
+		if (0 < $order['discount_price']) {
+		    m('member')->setCredit($order['openid'], 'credit3', $order['discount_price'], array('0', $_W['shopset']['shop']['name'] . ('购物返还抵扣折扣宝 折扣宝: ' . $order['discount_price'] . ' 抵扣金额: ' . $order['discount_price'] . ' 订单号: ' . $order['ordersn'])));
+		}
+		
 		m('order')->setDeductCredit2($order);
 		if (com('coupon') && !empty($order['couponid'])) {
 			com('coupon')->returnConsumeCoupon($orderid);

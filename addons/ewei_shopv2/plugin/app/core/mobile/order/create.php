@@ -526,9 +526,8 @@ class Create_EweiShopV2Page extends AppMobilePage
 			    //折扣宝
 			    if ($g['deduct_type']==1){
                 $goodsdeduct += $g['deduct'];
-			    }else{
-			    $discount+=$g['deduct'];
 			    }
+			    
                 
 				if( empty($g["total"]) || intval($g["total"]) < 1 ) 
 				{
@@ -622,14 +621,25 @@ class Create_EweiShopV2Page extends AppMobilePage
 						{
 							if( $g["manydeduct"] ) 
 							{
+							    //添加判断  折扣宝
 							   if ($g["deduct_type"]==1){
+							       //卡路里
 								$deductprice += $g["deduct"] * $g["total"];
+								
+							   }else{
+							       //折扣宝
+							       $discount+=$g["deduct"]*$g["total"];
 							   }
 							}
 							else 
 							{
+							    //添加判断
 							    if ($g["deduct_type"]==1){
+							        //卡路里
 								$deductprice += $g["deduct"];
+							    }else{
+							        //折扣宝
+							        $discount+=$g["deduct"];
 							    }
 								
 							}
@@ -857,7 +867,6 @@ class Create_EweiShopV2Page extends AppMobilePage
 				{
 				    //个人卡路里
 					$credit = $member["credit1"];
-					
 					$pcredit = intval($saleset["credit"]);
 					$pmoney = round(floatval($saleset["money"]), 2);
 					
@@ -1084,7 +1093,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 				$goodsprice += price_format($goods[$key]["packageprice"]);
 				//折扣
 				if ($goods[$key]["deduct_type"]==1){
-                $goodsdeduct += price_format($goods[$key]["deduct"]);
+                   $goodsdeduct += price_format($goods[$key]["deduct"]);
 				}else{
 				    $discount+=price_format($goods[$key]["deduct"]);
 				}
@@ -1145,6 +1154,13 @@ class Create_EweiShopV2Page extends AppMobilePage
 			}
 		}
 		$sysset = m("common")->getSysset("trade");
+		
+		//折扣宝
+		$credit3=$member["credit3"];
+		if ($credit3<$discount){
+		    $discount=$credit3;
+		}
+		
 		$result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "showTab" => 0 < count($carrier_list) && !$isverify && !$isvirtual, "showAddress" => !$isverify && !$isvirtual, "isverify" => $isverify, "isvirtual" => $isvirtual, "set_realname" => $sysset["set_realname"], "set_mobile" => $sysset["set_mobile"], "carrierInfo" => (!empty($carrier_list) ? $carrier_list[0] : false), "storeInfo" => false, "address" => $address, "goods" => $allgoods, "merchid" => $merch_id, "packageid" => $packageid, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle, "changenum" => $changenum, "hasinvoice" => (bool) $hasinvoice, "invoicename" => $invoicename, "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "discount"=>$discount,"deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" => $goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => round($realprice, 2), "total" => $total, "buyagain" => round($buyagain, 2), "fromcart" => (int) $fromcart, "isonlyverifygoods" => $isonlyverifygoods, "isforceverifystore" => $isforceverifystore, "city_express_state" => (empty($dispatch_array["city_express_state"]) ? 0 : $dispatch_array["city_express_state"]), "canusecard" => $canusecard, "card_info" => $card_info, "carddiscountprice" => $carddiscountprice, "card_free_dispatch" => $card_free_dispatch );
 		
 		if( $iscycel ) 
@@ -2119,7 +2135,11 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$isdiscountprice = 0;
 		$merchisdiscountprice = 0;
 		$cash = 1;
+		
 		$deductprice = 0;
+		//折扣宝
+		$discount=0;
+		
 		$deductprice2 = 0;
 		$virtualsales = 0;
 		$dispatch_price = 0;
@@ -2549,11 +2569,23 @@ class Create_EweiShopV2Page extends AppMobilePage
 				}
 				if( $data["manydeduct"] ) 
 				{
-					$deductprice += $data["deduct"] * $data["total"];
+				    //折扣卡
+				    if ($data["deduct_type"]==1){
+					   $deductprice += $data["deduct"] * $data["total"];
+				    }else{
+				        $discount+=$data["deduct"]*$data["total"];
+				    }
+					
 				}
 				else 
 				{
+				    //折扣卡
+				    if ($data["deduct_type"]==1){
 					$deductprice += $data["deduct"];
+				    }else{
+				        $discount+=$data["deduct"];
+				    }
+				    
 				}
 				if( $data["deduct2"] == 0 ) 
 				{
@@ -2750,6 +2782,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$deductcredit2 = 0;
 			if( $sale_plugin ) 
 			{
+			    //判断卡路里
 				if( !empty($_GPC["deduct"]) ) 
 				{
 					$credit = $member["credit1"];
@@ -2779,7 +2812,9 @@ class Create_EweiShopV2Page extends AppMobilePage
 						$deductcredit = round($deductmoney / $pmoney * $pcredit, 2);
 					}
 				}
+				
 				$totalprice -= $deductmoney;
+				
 			}
 			if( !empty($saleset["moneydeduct"]) ) 
 			{
@@ -2924,6 +2959,15 @@ class Create_EweiShopV2Page extends AppMobilePage
 		if ($_GPC["mid"]){
 		    $order["share_id"]=$_GPC["mid"];
 		}
+		//判断折扣宝
+	    $credit3=$member["credit3"];
+	    if (!empty($_GPC["discount"])){
+	        if ($credit3<$discount){
+	            $discount=$credit3;
+	        }
+	        $totalprice-=$discount;
+	    }
+	    
 		$order["ismerch"] = $ismerch;
 		$order["parentid"] = 0;
 		$order["uniacid"] = $uniacid;
@@ -2956,6 +3000,9 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$order["couponmerchid"] = $couponmerchid;
 		$order["paytype"] = 0;
 		$order["deductprice"] = $deductmoney;
+		//抵扣宝
+		$order["discount_price"]=$discount;
+		
 		$order["deductcredit"] = $deductcredit;
 		$order["deductcredit2"] = $deductcredit2;
 		$order["deductenough"] = $deductenough;
@@ -3254,6 +3301,11 @@ class Create_EweiShopV2Page extends AppMobilePage
 		if( 0 < $deductcredit ) 
 		{
 			m("member")->setCredit($openid, "credit1", 0 - $deductcredit, array( "0", $_W["shopset"]["shop"]["name"] . "购物卡路里抵扣 消费卡路里: " . $deductcredit . " 抵扣金额: " . $deductmoney . " 订单号: " . $ordersn ));
+		}
+		//添加折扣宝记录
+		if( 0 < $discount )
+		{
+		    m("member")->setCredit($openid, "credit3", 0 - $discount, array( "0", $_W["shopset"]["shop"]["name"] . "购物卡路里抵扣 消费折扣宝: " . $discount . " 抵扣金额: " . $discount . " 订单号: " . $ordersn ));
 		}
 		if( 0 < $buyagainprice ) 
 		{
