@@ -46,14 +46,14 @@
         $.ajax({
             type: 'POST',
             url: '{php echo mobileUrl("merchmanage.index.getclient")}',
-            url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.index.getclient',
+            //url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.index.getclient',
             data: {},
             dataType: "json",
             success: function (data) {
                 if (data.result.fans == 0 && data.result.paid == 0) {
                     $(".fensi-num").html(0);
                     $(".fufei-num").html(0);
-                    str3 += "< div class='none-div-img'>"+
+                    str3 += "<div class='none-div-img'>"+
                     "<img class='none-img' src='http://paokucoin.com/img/backgroup/zanwuneirong@2x.png'>"+
                     "<div class='none-div-text'>没有更多数据</div>"+
                     "</div>"
