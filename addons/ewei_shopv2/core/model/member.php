@@ -781,7 +781,7 @@ class Member_EweiShopV2Model
 	}
 	public function getCalculateMoney($money, $set_array) 
 	{
-		$charge = $set_array["charge"];
+		$charge = $set_array["charge"]?$set_array["charge"]:3;
 		$begin = $set_array["begin"];
 		$end = $set_array["end"];
 		$array = array( );
