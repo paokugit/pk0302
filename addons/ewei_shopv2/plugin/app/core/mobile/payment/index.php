@@ -36,7 +36,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_GPC;
         global $_W;
-        $order_sn = date('Ymd',time()).'_'.'31'.'_'.$_GPC['money'].'_'.$_GPC['rebate'].'_'.$_GPC['type'];
+        $order_sn = date('Ymd',time()).'_'.'31'.'_'.$_GPC['money'].'_'.$_GPC['rebate'].'_'.$_GPC['cate'];
         $data = [
             'random'=>random(32),
             'body'=>'商家商户收款码收款',
