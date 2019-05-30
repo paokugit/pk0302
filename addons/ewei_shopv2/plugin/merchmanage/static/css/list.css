@@ -106,9 +106,10 @@
 }
 .tab-box .tab-content>div{display:none;}
 .tab-box .tab-content>div.active-txt{display:block;}
-.active-txt{
-    width: 100%;
-    height: 100%
+.active-txt {
+    width: 94%;
+    height: auto;
+    padding: 0 3%;
 }
 .activiting{
     display: none
@@ -221,14 +222,24 @@
     font-size: 14px;
     color: #909090
 }
-.orderbtn, .editbtn{
+.orderbtn {
     width: 60px;
     height: 30px;
     border: 1px solid #afafaf;
     background: #fff;
     border-radius: 5px;
     color: #666;
-    font-size: 15px
+    font-size: 15px;
+}
+.editbtn {
+    width: 60px;
+    height: 30px;
+    border: 1px solid #afafaf;
+    background: #fff;
+    border-radius: 5px;
+    color: #666;
+    font-size: 15px;
+    margin-left: 2px;
 }
 .item-sharebox{
     width: 75px;
@@ -273,4 +284,37 @@
 .none_text_cc{
     font-size: 17px;
     color: #909090;
+}
+.sharebtn-ding{
+    width: 75px;
+    height: 30px;
+    background: #fec400;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 15px;
+}
+#warning {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+}
+.mask-con {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+.mask-img {
+    width: 203px;
+    height: 143px;
+    position: absolute;
+    right: 5px;
+    top: 50px;
+}
+.mask-img img {
+    width: 100%;
 }

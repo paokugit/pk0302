@@ -7,8 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>红包引流列表</title>
 </head>
-<link rel="stylesheet" href="./common.css">
-<link rel="stylesheet" href="./list.css">
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/common.css">
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/list.css">
 
 <body>
     <div class="body_box">
@@ -85,13 +85,20 @@
         </div>
         <!-- content -->
         <!-- footer -->
-        <div class="footer">发布活动</div>
+        <div class="footer" onclick="location.href='{php echo mobileUrl("merchmanage/goods/show/red")}'">发布活动</div>
         <!-- footer -->
+    </div>
+    <div id="warning">
+        <div class="mask-con">
+            <div class="mask-img">
+                <img src="http://paokucoin.com/img/backgroup/sharetc@2x.png">
+            </div>
+        </div>
     </div>
 </body>
 
 </html>
-<script src="./jquery.min.js"></script>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
 <script type="text/javascript">
     var str1 = ""
     var str2 = ""
@@ -125,7 +132,7 @@
     });
     $.ajax({
         type: 'POST',
-        url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.email',
+        url: '{php echo mobileUrl("merchmanage.goods.show.email")}',
         data: {
         },
         dataType: "json",
@@ -200,7 +207,7 @@
                     "<div class='history-release-time'>发布于" + commonTime + "</div>" +
                     "</div>" +
                     "<div class='item-sharebox'>" +
-                    "<button class='sharebtn'>订单</button>" +
+                    "<button class='sharebtn-ding'>订单</button>" +
                     "</div>" +
                     "</div>" +
                     "</li>"
@@ -242,15 +249,21 @@
                 $(".drafts").html(str1)
             })
            $(".bianjibtn").click(function(){
-               var dd = $(this).attr("data-id")
-               console.log(dd);
-            location.href = './reddrainage.html?id='+dd
+               var id = $(this).attr("data-id");
+               console.log(id);
+               location.href = "{php echo mobileUrl('merchmanage/goods/show/red')}&id="+id;
            })
            $(".editbtn").click(function(){
-                var dd = $(this).attr("data-id")
-                console.log(dd);
-                location.href = './reddrainage.html?id='+dd
+                var id = $(this).attr("data-id");
+               console.log(id);
+               location.href = "{php echo mobileUrl('merchmanage/goods/show/red')}&id="+id;
            })
+            $(".sharebtn").click(function () {
+                $('#warning').css('display', 'block')
+            })
+            $("#warning").click(function(){
+                $('#warning').css('display', 'none')
+            })
         }
     })
       

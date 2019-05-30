@@ -36,14 +36,16 @@ class Index_EweiShopV2Page extends AppMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_GPC;
         global $_W;
+        $order_sn = date('Ymd',time()).'_'.'31'.'_'.$_GPC['money'].'_'.$_GPC['rebate'].'_'.$_GPC['type'];
         $data = [
             'random'=>random(32),
             'body'=>'商家商户收款码收款',
             'ip'=>CLIENT_IP,
             'money'=>$_GPC['money'],
+            'rebate'=>$_GPC['rebate'],
             'url'=>$_W['siteroot'].'addons/ewei_shopv2/payment/wchat/notify/shopCode',   //回调地址
-            'openid'=>$_GPC['openid'],
-            'out_order'=>$_W['merchmanage']['merchid'].'_'.$_W['openid'].'_'.$_GPC['money'],     //订单号
+            'openid'=>substr($_GPC['openid'],7),
+            'out_order'=>$order_sn,     //订单号
         ];
         $res = m('pay')->pay($data);
         show_json(1,['res'=>$res]);

@@ -16,11 +16,6 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 		include $this->template();
 	}
 
-	public function red()
-    {
-        include $this->template('merchmanage/goods/red');
-    }
-
 	public function add()
 	{
 		global $_W;

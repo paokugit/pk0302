@@ -341,6 +341,7 @@ input:focus {
   font-size: 16px;
   background: #fff;
   /* border: 0; */
+  outline:none;
   border-width: 0px;
   border-top-style: none;
   border-right-style: none;

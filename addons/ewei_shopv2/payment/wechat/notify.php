@@ -911,10 +911,13 @@ class EweiShopWechatPay
             pdo_begin();
             try {
                 $array = explode('_',$data['out_trade_no']);
-                $merchid = $array[0];
-                $openid = $array[1];
+                $merchid = $array[1];
+                $openid = 'sns_wa_'.$data['openid'];
                 $money = $array[2];
+                $rebate = $array[3];
+                $type = $array[4];
                 $merch = pdo_fetch('select m.openid,m.uniacid,m.credit2 from '.tablename('ewei_shop_member').'m join '.tablename('ewei_shop_merch_user').('mu on m.id=mu.member_id').' where mu.id = "'.$merchid.'"');
+                $member = pdo_fetch('select credit1,credit3 from '.tablename('ewei_shop_member').'where openid = "'.$openid.'"');
                 //商家收款的日志
                 $add1 = [
                     'uniacid'=>$merch['uniacid'],
@@ -925,7 +928,7 @@ class EweiShopWechatPay
                     'createtime'=> time(),
                     'status'=>1,
                     'money'=>$money,
-                    'realmoney'=>$money,
+                    'realmoney'=>$money - $rebate,
                 ];
                 pdo_insert('ewei_shop_member_log',$add1);
                 pdo_update('ewei_shop_member',['openid'=>$merch['onpenid']],['credit2'=>bcadd($merch['credit2'],$money,2)]);
@@ -942,6 +945,13 @@ class EweiShopWechatPay
                     'rechargetype'=>'wxscan'
                 ];
                 pdo_insert('ewei_shop_member_log',$add2);
+                if($type == 1){
+                    $credit1 = $member['credit1'] - $rebate;
+                    pdo_update('ewei_shop_member',['openid'=>$openid],['credit1'=>$credit1]);
+                }elseif ($type == 2){
+                    $credit3 = $member['credit3'] - $rebate;
+                    pdo_update('ewei_shop_member',['openid'=>$openid],['credit3'=>$credit3]);
+                }
                 pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();
