@@ -48,8 +48,7 @@ class Pay_EweiShopV2Model
 		}
 		$xml = simplexml_load_string(trim($response["content"]), "SimpleXMLElement", LIBXML_NOCDATA);
 		$result = json_decode(json_encode($xml), true);
-		var_dump($result);exit;
-		if($result['return_code'] == "success"){
+		if($result['return_code'] == "SUCCESS"){
 			$array = array(
 				'appId' => $result['appid'],
 				'package' => 'prepay_id='.$result['prepay_id'],
