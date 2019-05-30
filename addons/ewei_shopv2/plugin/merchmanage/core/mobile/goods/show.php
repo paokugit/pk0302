@@ -341,6 +341,14 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
     }
 
     /**
+     * kehu 页面渲染
+     */
+    public function kehu()
+    {
+        include $this->template("merchmanage/goods/kehu");
+    }
+
+    /**
      * 预览存缓存接口
      */
     public function preview(){
