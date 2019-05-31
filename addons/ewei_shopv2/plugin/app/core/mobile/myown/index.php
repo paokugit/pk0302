@@ -66,6 +66,14 @@ class Index_EweiShopV2Page extends AppMobilePage{
          show_json(1,"成功");
     }
     
+    //首页广告位
+    public function adsense(){
+        $list=pdo_fetchall("select * from ".tablename("ewei_shop_adsense")." order by sort desc");
+        foreach ($list as $k=>$v){
+            $list[$k]["thumb"]=tomedia($v["thumb"]);
+        }
+        show_json(1,$list);
+    }
 }
 
 ?>

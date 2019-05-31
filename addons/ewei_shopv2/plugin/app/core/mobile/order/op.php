@@ -45,7 +45,7 @@ class Op_EweiShopV2Page extends AppMobilePage
 			foreach ($arr as $k => $v) {
 				if (!$v) {
 					unset($arr[$k]);
-				}
+				}     
 			}
 
 			$vkeynum = count($arr);
