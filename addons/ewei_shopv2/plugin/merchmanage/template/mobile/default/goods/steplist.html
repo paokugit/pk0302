@@ -88,7 +88,7 @@
                                 '<div class="item-top">' +
                                 '<div class="pro-information">' +
                                 '<div class="pro-img">' +
-                                '<img src="http://paokucoin.com/img/backgroup/morenpic@2x.png" alt="">' +
+                                '<img src="'+item.thumb+'" alt="">' +
                                 '<span class="state-storage">' + '仓库中' + '</span>' +
                                 '</div>' +
                                 '<div class="pro-info">' +
@@ -125,15 +125,15 @@
                                 '</div>' +
                                 '</div>' +
                                 '</li>'
-                                $(".listBox"). append(str1)
-                        }
+                                $(".listBox"). html(str1)
+                        }else
                         if(item.status==1){
                             // 出售中
                             str2 += '<li class="list-item">' +
                                 '<div class="item-top">' +
                                 '<div class="pro-information">' +
                                 '<div class="pro-img">' +
-                                '<img src="http://paokucoin.com/img/backgroup/morenpic@2x.png" alt="">' +
+                                '<img src="'+item.thumb+'" alt="">' +
                                 '<span class="state-sell">' + '出售中' + '</span>' +
                                 '</div>' +
                                 '<div class="pro-info">' +
@@ -169,7 +169,7 @@
                                 '</div>' +
                                 '</div>' +
                                 '</li>'
-                                $(".listBox").append(str2)
+                                $(".listBox").html(str2)
                         }
                         
 
