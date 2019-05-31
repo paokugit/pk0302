@@ -354,13 +354,12 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
     public function preview(){
         global $_GPC;
         global $_W;
-        $openid = $_GPC['openid'];
-        //$openid = "sns_wa_owRAK44_gHTrMTJMVSxFy-jtNef8";
         $uniacid = $_W['uniacid'];
         $merchid = $_W['merchmanage']['merchid'];
-        $key = md5($openid.$uniacid.$merchid);
-        m('cache')->set($key,$_GPC,3600);
-        show_json(1,['key'=>$key]);
+        $str = random(36);
+        $key = md5($uniacid.$merchid.$str);
+        m('cache')->set($key,$_GPC);
+        show_json(1,['key'=>$key,'str'=>$str]);
     }
 
     /**
@@ -370,11 +369,11 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
     {
         global $_W;
         global $_GPC;
-        $openid = $_GPC['openid'];
         $post_key = $_GPC['post_key'];
+        $str = $_GPC['str'];
         $uniacid = $_W['uniacid'];
         $merchid = $_W['merchmanage']['merchid'];
-        $key = md5($openid.$uniacid.$merchid);
+        $key = md5($uniacid.$merchid.$str);
         if($key == $post_key){
             $value = m('cache')->get($key);
             show_json(1,['val'=>$value]);
