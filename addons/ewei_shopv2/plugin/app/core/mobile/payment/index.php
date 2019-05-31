@@ -14,8 +14,6 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_W;
         $mid = $_W['merchmanage']['merchid'];
         $mid = 31;
-        //获得当前的域名
-        $host = $_SERVER['HTTP_HOST'];
         //折扣宝收款码
         $rebate_url = 'pages/discount/zkbscancode/zkbscancode';
         $rebate_back= 'zhekoubao';
@@ -23,11 +21,22 @@ class Index_EweiShopV2Page extends AppMobilePage
         $calorie_url  = 'pages/discount/kllscancode/kllscancode';
         $calorie_back = 'kaluli';
         //生成二维码
-        $rebate = m('qrcode')->createSQrcode($mid,$rebate_url,$rebate_back);
-        $calorie =  m('qrcode')->createSQrcode($mid,$calorie_url,$calorie_back);
+        $rebate = m('qrcode')->createHelpPoster(['back'=>$rebate_back,'url'=>$rebate_url],$mid);
+        $calorie =  m('qrcode')->createHelpPoster(['back'=>$calorie_back,'url'=>$calorie_url],$mid);
         show_json(1,['rebate'=>$rebate['qrcode'],'rebate_qr'=>$rebate['qr'],'calorie'=>$calorie['qrcode'],'calorie_qr'=>$calorie['qr']]);
     }
 
+    /**
+     * 获得卡路里和折扣宝余额
+     */
+    public function getCredit(){
+        header('Access-Control-Allow-Origin:*');
+        global $_W;
+        global $_GPC;
+        $credit = pdo_get('ewei_shop_member',['openid'=>$_GPC['openid'],'credit1,credit3']);
+        show_json(1,['credit1'=>$credit['credit1'],'credit3'=>$credit['credit3']]);
+    }
+    
     /**
      *  支付生成订单
      */
@@ -144,9 +153,8 @@ class Index_EweiShopV2Page extends AppMobilePage
     public function getset()
     {
         header('Access-Control-Allow-Origin:*');
-        global $_W;
         global $_GPC;
-        $list = pdo_fetchall('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid and cate=:cate',array(':merchid'=>$_W['merchmanage']['merchid'],':cate'=>$_GPC['cate']));
+        $list = pdo_fetchall('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid and cate=:cate',array(':merchid'=>$_GPC['merchid'],':cate'=>$_GPC['cate']));
         show_json(1,['list'=>$list]);
     }
 

@@ -254,7 +254,6 @@
         var request = GetRequest("id")
         var goods_id = request.id;
         if (goods_id) {
-            alert(123)
             $.ajax({
                 type: 'POST',
                 url: '{php echo mobileUrl("merchmanage.goods.show.editgoods")}',
@@ -274,7 +273,23 @@
                     } else {
                         $('.activity_introduction_text').val(data.result.item.description)//介绍
                     }
+                    if (data.result.item.thumb_url == "") {
 
+                    } else {
+                        var thumb = "";
+                        $.each(data.result.item.thumb_url,function (i,item) {
+                            var img = "http://"+"{php echo $_SERVER['HTTP_HOST']}/attachment/"+item;
+                            thumb += "<li style='background-image:url("+img+")' class='image' data-filename=' + item +'>\n" +
+                                "           <span class='image-remove'><i class='icon icon-close'></i></span>\n" +
+                                "     </li>";
+                            // thumb += "<li style='background-image:url("+img+")' class='image' data-filename='"+item+"'>"+
+                            //             "<span class='image-remove'>" +
+                            //                 "<i class='icon icon-close'></i>" +
+                            //             "</span>"+
+                            //         "</li>"
+                        })
+                        $('#thumbs').html(thumb)//介绍
+                    }
                     if (data.result.item.music == "") {
 
                     } else {
@@ -333,7 +348,6 @@
                     if (kuaidi == 2) {
                         $(".select_xiala").find("option:contains('门店自提')").attr("selected", true);
                     } else if (kuaidi == 1) {
-                        // alert(123)
                         $(".select_xiala").find("option:contains('快递')").attr("selected", true);
                         $("#shouhuo").css('display', 'block')
                         $("#youfei").css('display', 'block')
@@ -697,7 +711,9 @@
             },
             dataType: "json",
             success: function (data) {
-               //location.href = '{php echo mobileUrl("merchmanage/goods/show/detail")}'
+                sessionStorage.setItem("key",data.result.key)
+                sessionStorage.setItem("str",data.result.str)
+                location.href = '{php echo mobileUrl("merchmanage/goods/show/detail")}'
             }
         })
     })

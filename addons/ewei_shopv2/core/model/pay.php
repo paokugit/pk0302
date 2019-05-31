@@ -31,7 +31,7 @@ class Pay_EweiShopV2Model
 		$params['mch_id'] = $config['sub_mch_id'];
 		$params['nonce_str'] = $data['random'];
 		$params['out_trade_no'] = $data['out_order'];
-		$params['total_fee'] = bcsub($data['money'],$data['rebate'],2) * 100;  //金额减去卡路里或者折扣宝的钱
+		$params['total_fee'] = $data['money'] * 100;  //金额减去卡路里或者折扣宝的钱
 		$params['body'] = $data['body'];
 		$params['spbill_create_ip'] = $data['ip'];
 		$params['trade_type'] = 'JSAPI';
