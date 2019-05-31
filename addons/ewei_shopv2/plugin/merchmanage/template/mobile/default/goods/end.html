@@ -76,8 +76,8 @@
     $(function(){
         $.ajax({
             type: 'POST',
-            url: 'http://192.168.1.10/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.good',
-            //url: '{php echo mobileUrl("goods.share.good")}',
+            //url: 'http://192.168.1.10/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.good',
+            url: '{php echo mobileUrl("goods.share.good")}',
             data: {
                 post: "post",
             },

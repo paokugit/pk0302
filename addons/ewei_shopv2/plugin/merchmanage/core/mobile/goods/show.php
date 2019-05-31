@@ -332,13 +332,13 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         include $this->template("merchmanage/goods/shareorder");
     }
 
-    /**
-     * list页面渲染
-     */
-    public function list()
-    {
-        include $this->template("merchmanage/goods/list");
-    }
+//    /**
+//     * list页面渲染
+//     */
+//    public function list()
+//    {
+//        include $this->template("merchmanage/goods/list");
+//    }
 
     /**
      * kehu 页面渲染
