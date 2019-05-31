@@ -514,6 +514,9 @@ class Merch_EweiShopV2Page extends AppMobilePage
         $member = m('member')->getMember($_GPC['openid']);
         $memberMerchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where member_id=:member_id Limit 1', array(':member_id' => $member['id']));
         $data = array();
+        if($member['agentid']>0){
+            $agentMerchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where member_id=:member_id Limit 1', array(':member_id' => $member['agentid']));
+        }
         if($memberMerchInfo) {//店主
             $args['merchid'] = $memberMerchInfo['id'];
             $merchInfo = $memberMerchInfo;
@@ -531,6 +534,9 @@ class Merch_EweiShopV2Page extends AppMobilePage
                 $args['merchid'] = $merchInfo['id'];
             }
 
+        }elseif($agentMerchInfo){//查看推荐人是否有店铺
+            $args['merchid'] = $agentMerchInfo['id'];
+            $merchInfo = $agentMerchInfo;
         }else{//推荐附近商店
                 $merchInfo = $this->get_near_merch(1);
                 $args['merchid'] = $merchInfo['id'];

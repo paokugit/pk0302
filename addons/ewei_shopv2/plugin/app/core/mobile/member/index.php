@@ -220,7 +220,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             case 1:
                 $data['one']['info'] = '每天可兑换10卡路里，连续5天';
                 $data['two']['info'] = '赠送10卡路里';
-                $data['three']['info'] = '直推奖2元';
+                $data['three']['info'] = '直推奖3元';
                 $data['one']['img'] = '/member/01@2x.png';
                 $data['two']['img'] = '/member/02@2x.png';
                 $data['three']['img'] = '/member/03@2x.png';
@@ -228,7 +228,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             case 2:
                 $data['one']['info'] = '每天可兑换20卡路里，连续10天';
                 $data['two']['info'] = '赠送99卡路里';
-                $data['three']['info'] = '直推奖20元（最高）';
+                $data['three']['info'] = '直推奖40元（最高）';
                 $data['one']['img'] = '/member/01@2x.png';
                 $data['two']['img'] = '/member/02@2x.png';
                 $data['three']['img'] = '/member/03@2x.png';

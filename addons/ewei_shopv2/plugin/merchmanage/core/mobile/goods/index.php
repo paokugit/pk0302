@@ -16,11 +16,6 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 		include $this->template();
 	}
 
-	public function red()
-    {
-        include $this->template('merchmanage/goods/red');
-    }
-
 	public function add()
 	{
 		global $_W;
@@ -48,7 +43,6 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 			}
 		}
  
-// 		var_dump($item);
 
 		if ($_W['ispost']) {
 		    $data = array('title' => trim($_GPC['title']), 'subtitle' => trim($_GPC['subtitle']), 'unit' => trim($_GPC['unit']), 'status' => intval($_GPC['status']), 'showtotal' => intval($_GPC['showtotal']), 'cash' => intval($_GPC['cash']), 'invoice' => intval($_GPC['invoice']), 'isnodiscount' => intval($_GPC['isnodiscount']), 'nocommission' => intval($_GPC['nocommission']), 'isrecommand' => intval($_GPC['isrecommand']), 'isnew' => intval($_GPC['isnew']), 'ishot' => intval($_GPC['ishot']), 'issendfree' => intval($_GPC['issendfree']), 'totalcnf' => intval($_GPC['totalcnf']), 'dispatchtype' => intval($_GPC['dispatchtype']), 'showlevels' => trim($_GPC['showlevels']), 'showgroups' => trim($_GPC['showgroups']), 'buylevels' => trim($_GPC['buylevels']), 'buygroups' => trim($_GPC['buygroups']), 'maxbuy' => intval($_GPC['maxbuy']), 'minbuy' => intval($_GPC['minbuy']), 'usermaxbuy' => intval($_GPC['usermaxbuy']), 'diypage' => intval($_GPC['diypage']), 'displayorder' => intval($_GPC['displayorder']));
@@ -115,7 +109,9 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 			$ccateid = 0;
 			$tcateid = 0;
 			$cates = $_GPC['cates'];
-
+            if (!$_GPC['cates']) {
+                show_json(0, '请选择商品分类');
+            }
 			if (!(is_array($cates)) && !(empty($cates))) {
 				$cates = explode(',', $cates);
 			}

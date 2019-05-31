@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta name="viewport"
+        content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+    <title>发布活动</title>
+</head>
+<link rel="stylesheet" href="./reddrainage.css">
+
+<body>
+    <div class="all_box">
+        <!-- 活动标题 -->
+        <div class="headline">
+            <div class="line">
+                <span class="line_text">活动标题</span>
+            </div>
+            <div class="headline_text">
+                <input class="input_text" type="text" placeholder="例如：迎三月，健身卡1折抢购啦！！！" value="" />
+            </div>
+        </div>
+        <div class="all_img">
+            <div class="img_uploading_head">
+                <span class="uploading_head">请上传商品主图、详情图、奖励规则等</span>
+            </div>
+            <div id="upBox">
+                <div id="inputBox">
+                    <img class="img_img_uploading" src="img/add@2x.png">
+                    <input type="file" title="请选择图片" id="file" multiple
+                        accept="image/png,image/jpg,image/gif,image/JPEG" />
+                </div>
+                <div id="imgBox"></div>
+                <!-- <button id="btn">上传</button> -->
+            </div>
+        </div>
+        <!-- <div class="img_uploading"></div> -->
+        <!-- 活动介绍 -->
+        <div class="activity_introduction">
+            <div class="introduction">
+                <span class="introduction_head">活动介绍</span>
+            </div>
+            <div class="activity_introduction_two">
+                <textarea class="activity_introduction_text" placeholder="输入文字介绍......"></textarea>
+            </div>
+        </div>
+        <!-- 背景音乐 -->
+        <div class="background_music">
+            <div class="background_music_head">
+                <span class="background_music_head_text">背景音乐</span>
+            </div>
+            <div class="come_music">
+                <input class="come_button" type="button" value="进入音乐库" />
+            </div>
+        </div>
+        <!-- 商品和红包 -->
+        <div class="commodity_red_packet">
+            <ul class="xinhuai">
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">商品数量</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" id="kucun" placeholder="请设置商品库存" name="cc" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">截止时间</span>
+                    </div>
+                    <div class="timeipt xinhuai_come">
+                        <input class="xinhuai_text" id="date_date" type="date" name="cc" value="" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">订单金额</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" id="jine" type="text" placeholder="请设置订单金额" name="cc" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">一级红包</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" id="yiji" placeholder="用户分享奖励" name="cc" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">二级红包</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" id="erji" placeholder="分享二级奖励" name="cc" />
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!-- 实物和收货 -->
+        <div class="in_kind_consignee">
+            <ul class="in_kind_ul">
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">实物产品</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <img class="button_img_cc" id="img_img_id" src="img/on@2x.png">
+                    </div>
+                </li>
+                <div id="shouhuo">
+                    <li class="list_xinhuai">
+                        <div class="list_xinhuai_head">
+                            <span class="xinhuai_head">收货方式</span>
+                        </div>
+                        <div class="xinhuai_come">
+                            <select class="select_xiala" dir="rtl" id="select_id">
+                                <option value="1">门店自提</option>
+                                <option value="2">快递</option>
+                            </select>
+                        </div>
+                    </li>
+                </div>
+                <div id="youfei">
+                    <li class="list_xinhuai">
+                        <div class="list_xinhuai_head">
+                            <span class="xinhuai_head">邮费</span>
+                        </div>
+                        <div class="xinhuai_come">
+                            <input class="xinhuai_text1" type="text" placeholder="请设置邮费" id="uu" />
+                        </div>
+                    </li>
+                </div>
+            </ul>
+        </div>
+        <!-- 主办方，负责人，电话 -->
+        <div class="sponsor_principaldian_phone">
+            <ul class="sponsor_principaldian_phone_text">
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">主办方</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" id="zhubanfang" placeholder="请设置名称" name="xx" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">负责人</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" id="fuzeren" placeholder="姓名" name="xx" />
+                    </div>
+                </li>
+                <li class="list_xinhuai">
+                    <div class="list_xinhuai_head">
+                        <span class="xinhuai_head">客服电话</span>
+                    </div>
+                    <div class="xinhuai_come">
+                        <input class="xinhuai_text" type="text" id="kefu" placeholder="手机号码" name="xx" />
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!-- 门店地址 -->
+        <div class="address">
+            <div class="address_head">
+                <span class="address_head_text">门店地址</span>
+            </div>
+            <div class="address_text">
+                <textarea class="address_text_text" placeholder="具体到门牌号"></textarea>
+            </div>
+        </div>
+        <!-- 底部 -->
+        <div class="bottom">
+            <div class="save">
+                <span class="save_text">存为草稿</span>
+            </div>
+            <div class="preview">
+                <span class="preview_text">预览</span>
+            </div>
+            <div class="saveandpublish">
+                <span class="saveandpublish_text">保存并发布</span>
+            </div>
+        </div>
+    </div>
+    <div class="background_music_div">
+        <div class="mask-relative">
+            <div class="all_box_cc">
+                <!-- 调取后台取到的值 -->
+                <div class="music">
+                    <ul class="all_music">
+                    </ul>
+                </div>
+                <div class="none">
+                    <span class="select_text">没有更多音乐了</span>
+                </div>
+                <div class="feedback">
+                    <div class="none_music">
+                        <span class="none_music_text">没有你想要的音乐?</span>
+                    </div>
+                    <div class="problemfeedback">
+                        <span>反馈问题</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script src="./jquery-1.11.3.min(1).js"></script>
+<script src="./uploadImg.js"></script>
+<script type="text/javascript">
+    imgUpload({
+        inputId: 'file', //input框id
+        imgBox: 'imgBox', //图片容器id
+        buttonId: 'btn', //提交按钮id
+        upUrl: '',  //提交地址
+        data: 'file1' //参数名
+    })
+    Date.prototype.toLocaleString = function () {
+        return this.getFullYear() + "年" + (this.getMonth() + 1) + "月" + this.getDate() + "日";
+    };
+
+    var music_background = ""
+    // 解决传参乱码问题
+    $(function () {
+        var postData = GetRequest();
+        $(".release_num em").html(postData.jobname)
+        $("#img").attr('src', postData.headimgurl)
+        $(".nick_name").html(postData.nickname)
+
+    })
+    function GetRequest() {
+        var url = decodeURI(decodeURI(location.search)); //获取url中"?"符后的字串，使用了两次decodeRUI解码
+        var theRequest = new Object();
+        if (url.indexOf("?") != -1) {
+            var str = url.substr(1);
+            strs = str.split("&");
+            for (var i = 0; i < strs.length; i++) {
+                theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+            }
+            return theRequest;
+        }
+    }
+
+    $(function () {
+        var shangpinid = GetRequest("id")
+        var cc = shangpinid.id;
+        console.log(cc);
+
+        if (shangpinid != "") {
+            // alert(123)
+            $.ajax({
+                type: 'POST',
+                url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.editgoods',
+                data: {
+                    "id": cc,
+                },
+                dataType: "json",
+                success: function (data) {
+                    var obj = document.getElementById("img_img_id")
+                    console.log(data);
+                    if (data.result.item.title == "") {
+
+                    } else {
+                        $('.input_text').val(data.result.item.title)//标题
+                    }
+                    if (data.result.item.description == "") {
+
+                    } else {
+                        $('.activity_introduction_text').val(data.result.item.description)//介绍
+                    }
+
+                    if (data.result.item.music == "") {
+
+                    } else {
+                        $('.come_button').val(data.result.item.music)//音乐
+                    }
+                    if (data.result.item.total == "") {
+
+                    } else {
+                        $('#kucun').val(data.result.item.total)//数量
+                    }
+
+                    if (data.result.item.end_time == "") {
+
+                    } else {
+                        var time_text = data.result.item.end_time
+                        // console.log(time_text);
+                        var unixTimestamp = new Date(time_text * 1000)
+                        // console.log(unixTimestamp);
+                        var commonTime = unixTimestamp.toLocaleString();
+                        // console.log(commonTime);
+                        $(".timeipt").html(commonTime)
+                    }
+                    if (data.result.item.marketprice == "") {
+
+                    } else {
+                        $('#jine').val(data.result.item.marketprice)//订单金额
+                    }
+                    if (data.result.item.marketprice == "") {
+
+                    } else {
+                        $('#yiji').val(data.result.item.commission1_pay)//一级红包
+                    }
+                    if (data.result.item.commission2_pay == "") {
+
+                    } else {
+                        $('#erji').val(data.result.item.commission2_pay)//二级
+                    }
+                    if (data.result.item.main == "") {
+
+                    } else {
+                        $('#zhubanfang').val(data.result.item.main)
+                    }
+                    if (data.result.item.principal == "") {
+
+                    } else {
+                        $('#fuzeren').val(data.result.item.principal)
+                    }
+                    if (data.result.item.tel == "") {
+
+                    } else {
+                        $('#kefu').val(data.result.item.tel)
+                    }
+                    if (data.result.item.address == "") {
+
+                    } else {
+                        $('.address_text_text').val(data.result.item.address)
+                    }
+                    var kuaidi = data.result.item.pro_type//快递
+                    if (kuaidi == 2) {
+                        $(".select_xiala").find("option:contains('门店自提')").attr("selected", true);
+                    } else if (kuaidi == 1) {
+                        // alert(123)
+                        $(".select_xiala").find("option:contains('快递')").attr("selected", true);
+                        $("#shouhuo").css('display', 'block')
+                        $("#youfei").css('display', 'block')
+                        $('#uu').val(data.result.item.express_price)
+                    } else {
+                        obj.setAttribute("src", "img/off@2x.png")
+                        $("#shouhuo").css('display', 'none')
+                        $("#youfei").css('display', 'none')
+                    }
+                }
+            })
+        } else {
+
+        }
+    })
+    var xinhuai_come = document.getElementsByClassName("xinhuai_come")
+    var button_img_cc = document.getElementsByClassName("button_img_cc")
+    var select = document.getElementById("select_id");
+    var value = select.value;
+    // console.log(value);
+    $('.button_img_cc').click(function () {
+        // alert("123")
+        var select = document.getElementById("select_id");
+        var value = select.value;
+        var obj = document.getElementById("img_img_id")
+        if (obj.getAttribute("src") == "img/on@2x.png") {
+            obj.setAttribute("src", "img/off@2x.png")
+            $("#shouhuo").css('display', 'none')
+            $("#youfei").css('display', 'none')
+        } else if (value == 1) {
+            obj.setAttribute("src", "img/on@2x.png")
+            $("#shouhuo").css('display', 'block')
+            // $("#youfei").css('display','block')
+        } else if (value == 2) {
+            obj.setAttribute("src", "img/on@2x.png")
+            $("#shouhuo").css('display', 'block')
+            $("#youfei").css('display', 'block')
+        }
+    })
+    //下拉框、邮费
+    $('.select_xiala').change(function () {
+        var select = document.getElementById("select_id");
+        var value = select.value;
+        if (value == 1) {
+            $("#youfei").css('display', 'none')
+        } else {
+            $("#youfei").css('display', 'block')
+        }
+    })
+    // 草稿
+    $('.save').click(function () {
+        var huodonghead = $('.input_text').val();//活动标题
+        var huodongintroduce = $('.activity_introduction_text').val()//活动介绍
+        // alert(huodongintroduce)
+        //邮费
+        var youfei = $('#uu').val()
+        // $('.come_button').val()//背景音乐
+        var music_document = document.getElementsByClassName("come_button");
+        var haha = $(music_document).attr("data-id")
+        // console.log(haha);
+        var music =haha
+        // 商品数量
+        var total = $('#kucun').val();
+        // 时间
+        var end_time = $('#date_date').val();
+        //订单金额
+        var marketprice = $('#jine').val();
+        // 一级红包
+        var commission1_pay = $('#yiji').val();
+        // 二级红包
+        var commission2_pay = $('#erji').val();
+        var pro_type = ""
+        var obj = document.getElementById("img_img_id")
+        if (obj.getAttribute("src") == "img/on@2x.png") {
+            if ($('.select_xiala').val() == 1) {
+                pro_type = 2
+            } else {
+                pro_type = 1
+                //邮费
+                var youfei = $('#uu').val()
+            }
+        } else {
+            pro_type = 3
+        }
+        // alert(pro_type)
+        // 主办方
+        var main = $('#zhubanfang').val();
+        // 负责人
+        var principle = $('#fuzeren').val();
+        // 客服
+        var tel = $('#kefu').val();
+        // 门店地址
+        var address = $('.address_text_text').val()
+        $.ajax({
+            type: 'POST',
+            url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.addgoods',
+            data: {
+                "title": huodonghead,
+                "description": huodongintroduce,
+                "marketprice": marketprice,
+                "end_time": end_time,
+                "total": total,
+                //图片
+                "commission1_pay": commission1_pay,
+                "commission2_pay": commission2_pay,
+                "isdraft": 0,
+                "pro_type": pro_type,
+                "express_price": youfei,
+                "main": main,
+                "principal": principle,
+                "tel": tel,
+                "address": address,
+                "music": music,
+            },
+            dataType: "json",
+            success: function (data) {
+                console.log(data)
+                location.href = './list.html'
+            }
+        })
+    })
+
+    // 保存并发布
+    $('.saveandpublish').click(function () {
+        var huodonghead = $('.input_text').val();//活动标题
+        var huodongintroduce = $('.activity_introduction_text').val()//活动介绍
+        //邮费
+        var youfei = $('#uu').val()
+        var music_document = document.getElementsByClassName("come_button");
+        var haha = $(music_document).attr("data-id")
+        // console.log(haha);
+        var music =haha
+        // 商品数量
+        var total = $('#kucun').val();
+        // 时间
+        var end_time = $('#date_date').val();
+        //订单金额
+        var marketprice = $('#jine').val();
+        // 一级红包
+        var commission1_pay = $('#yiji').val();
+        // 二级红包
+        var commission2_pay = $('#erji').val();
+        var pro_type = ""
+        var obj = document.getElementById("img_img_id")
+        if (obj.getAttribute("src") == "img/on@2x.png") {
+            if ($('.select_xiala').val() == 1) {
+                pro_type = 2
+            } else {
+                pro_type = 1
+                //邮费
+                var youfei = $('#uu').val()
+            }
+        } else {
+            pro_type = 3
+        }
+        // alert(pro_type)
+        // 主办方
+        var main = $('#zhubanfang').val();
+        // 负责人
+        var principle = $('#fuzeren').val();
+        // 客服
+        var tel = $('#kefu').val();
+        // 门店地址
+        var address = $('.address_text_text').val()
+        $.ajax({
+            type: 'POST',
+            url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.addgoods',
+            data: {
+                "title": huodonghead,
+                "desc": huodongintroduce,
+                "marketprice": marketprice,
+                "total": total,
+                //图片
+                "commission1_pay": commission1_pay,
+                "commission2_pay": commission2_pay,
+                "music": music,
+                "pro_type": pro_type,
+                "express_price": youfei,
+                "end_time": end_time,
+                "main": main,
+                "principal": principle,
+                "tel": tel,
+                "address": address,
+                "isdraft": 1,
+            },
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                location.href = './list.html'
+            }
+        })
+    })
+    //点击音乐在原有界面进行加载
+    $('.come_button').click(function () {
+        $('.background_music_div').css('display', 'block')
+        var str1 = ""
+        var arr = ""
+        $.ajax({
+            type: 'POST',
+            url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.getmusic',
+            data: {
+
+            },
+            dataType: "json",
+            success: function (data) {
+                $.each(data.result.list, function (i, item) {
+                    // console.log(item.music);
+                    str1 += '<li class="list_music">' +
+                        '<div class="music_name">' +
+                        '<span class="music_name_text">' + item.title +
+                        '</span>' +
+                        '</div>' +
+                        '<div class="music_img">' +
+                        '<audio class="audios" id="voice" controls="controls" loop="false" hidden="true" src="' + item.music + '">' +
+                        '</audio>' +
+                        '<img class="img_img" data_title="' + item.title + '" src="img/start@2x.png">' +
+                        '</div>' +
+                        '<div class="select">' +
+                        '<input class="select_text" data_title="' + item.title + '" id="' + item.id + '" type="button" name="sub" value="选择">' +
+                        '</div>' +
+                        '</li>'
+                    $('.music').html(str1)
+                })
+            }
+        })
+    })
+
+    // 选择音乐完毕
+    $(".music").on("click", ".select_text", function () {
+        var arr = ""
+        arr = $(this).attr("data_title")
+        music_background = $(this).attr("id")
+        // console.log(music_background);
+        $('.background_music_div').css('display', 'none')
+        $('.come_button').val(arr)
+        $('.come_button').attr("data-id",music_background);
+    })
+    
+    // 反馈问题
+    $(".problemfeedback").click(function () {
+        location.href = './feedback.html'
+    })
+
+    // 点击图片图片旋转
+    $(".music").on("click", ".img_img", function () {
+        $(".img_img").removeClass('header_select')
+        $(this).toggleClass('header_select')
+        var voice = document.getElementById('voice'); //获取到audio元素
+        $('.header_select').click(function () {
+            if (voice.paused) { //判断音乐是否在播放中，暂停状态
+                voice.play(); //音乐播放
+                // $('.but').text('暂停'); //切换文字
+            } else { //播放状态
+                voice.pause(); //音乐停止
+                voice.load()
+            }
+        });
+
+    })
+    function go_mark(id, jobname, headimgurl, nickname) {
+        window.location.href = "mark.html?id=" + id + "&jobname=" + encodeURI(jobname) + "&headimgurl=" + headimgurl + "&nickname=" + encodeURI(nickname);
+    }
+
+    //预览
+    $('.preview').click(function () {
+       
+    })
+</script>

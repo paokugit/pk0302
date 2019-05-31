@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>反馈问题</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/feedback.css">
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/common.css">
+<body>
+        <div class="body_box">
+            <!-- header -->
+            <div class="header">反馈问题</div>
+            <!-- header -->
+            <!-- content -->
+            <div class="content">
+                <div class="music-box">
+                    <p class="music-tit">没有你想要的音乐?</p>
+                    <textarea class="music-text" name="" id="" cols="30" rows="10" placeholder="输入你想要的音乐名称，我们将尽快为你处理..."></textarea>
+                </div>
+                <div class="upload-box">
+                    <p class="upload-tit">请上传mp3、wmv等格式文件(非必填项)</p>
+                    <ul class="m-list">
+                        <li class="m-item"><img src="http://paokucoin.com/img/backgroup/adds@2x.png" class="uploading_img" alt=""></li>
+                        <!-- <li class="m-item"></li>
+                        <li class="m-item"></li>
+                        <li class="m-item"></li>
+                        <li class="m-item"></li>
+                        <li class="m-item"></li>
+                        <li class="m-item"></li>
+                        <li class="m-item"></li>
+                        <li class="m-item"></li>
+                        <li class="m-item"></li>
+                        <li class="m-item"></li> -->
+                    </ul>
+                    <div class="m-name-box">
+                        <span class="m-name">这里显示上传成功的文件名称</span>
+                        <span class="m-delete">删除</span>
+                    </div>
+                </div>
+                <!-- 提交 -->
+                <div class="submitbox">
+                    <button class="submitbtn">提交</button>
+                </div>
+                <!-- 提交 -->
+            </div>
+            <!-- content -->
+            <!-- footer -->
+            <!-- <div class="footer" style="background:#fff;color:#333;border-top: 1px solid #eee">反馈问题</div> -->
+            <!-- footer -->
+        </div>
+</body>
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $('.submitbtn').click(function(){
+        $.ajax({
+            type: 'POST',
+            url:'{php echo mobileUrl("merchmanage.goods.show.addmusic")}',
+            data:{
+                
+            },
+            dataType: "json",
+            success:function(data){
+                console.log(data);
+            }
+        })
+    })
+    $('.m-name-box').click(function(){
+        
+    })
+    $('.uploading_img').click(function(){
+
+    })
+
+</script>

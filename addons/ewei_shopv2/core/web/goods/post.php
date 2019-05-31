@@ -217,6 +217,9 @@ if ($_W['ispost']) {
     $pcateid = 0;
     $ccateid = 0;
     $tcateid = 0;
+    if (!$_GPC['cates']) {
+        show_json(0, '请选择商品分类');
+    }
     if (is_array($_GPC['cates'])) {
         $cates = $_GPC['cates'];
         foreach ($cates as $key => $cid) {

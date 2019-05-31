@@ -7,10 +7,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta content="yes" name="apple-mobile-web-app-capable">
     <meta name="viewport"
-          content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no">
+        content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
     <title>发布活动</title>
 </head>
-<link rel="stylesheet" type="text/css" href="../addons/ewei_shopv2/static/js/dist/foxui/css/foxui.min.css?v=0.2">
+<link rel="stylesheet" type="text/css" href="../addons/ewei_shopv2/static/js/dist/foxui/css/foxui.css">
 <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/reddrainage.css">
 <body>
     <div class="all_box fui-page fui-page-current">
@@ -73,8 +73,8 @@
                     <div class="list_xinhuai_head">
                         <span class="xinhuai_head">截止时间</span>
                     </div>
-                    <div class="xinhuai_come">
-                        <input class="xinhuai_text" id="date_date" type="date" name="cc" />
+                    <div class="timeipt xinhuai_come">
+                        <input class="xinhuai_text" id="date_date" type="date" name="cc" value="" />
                     </div>
                 </li>
                 <li class="list_xinhuai">
@@ -111,7 +111,7 @@
                         <span class="xinhuai_head">实物产品</span>
                     </div>
                     <div class="xinhuai_come">
-                        <img class="button_img_cc" id="img_img_id" src="img/on@2x.png">
+                        <img class="button_img_cc" id="img_img_id" src="../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png">
                     </div>
                 </li>
                 <div id="shouhuo">
@@ -249,15 +249,111 @@
             return theRequest;
         }
     }
-    var music_url = GetRequest("music")
-    // console.log(music_url.music);
+
+    $(function () {
+        var request = GetRequest("id")
+        var goods_id = request.id;
+        if (goods_id) {
+            alert(123)
+            $.ajax({
+                type: 'POST',
+                url: '{php echo mobileUrl("merchmanage.goods.show.editgoods")}',
+                data: {
+                    "id": goods_id,
+                },
+                dataType: "json",
+                success: function (data) {
+                    var obj = document.getElementById("img_img_id")
+                    if (data.result.item.title) {
+
+                    } else {
+                        $('.input_text').val(data.result.item.title)//标题
+                    }
+                    if (data.result.item.description == "") {
+
+                    } else {
+                        $('.activity_introduction_text').val(data.result.item.description)//介绍
+                    }
+
+                    if (data.result.item.music == "") {
+
+                    } else {
+                        $('.come_button').val(data.result.item.music)//音乐
+                    }
+                    if (data.result.item.total == "") {
+
+                    } else {
+                        $('#kucun').val(data.result.item.total)//数量
+                    }
+
+                    if (data.result.item.end_time == "") {
+
+                    } else {
+                        var time_text = data.result.item.end_time
+                        var unixTimestamp = new Date(time_text * 1000)
+                        var commonTime = unixTimestamp.toLocaleString();
+                        $(".timeipt").html(commonTime)
+                    }
+                    if (data.result.item.marketprice == "") {
+
+                    } else {
+                        $('#jine').val(data.result.item.marketprice)//订单金额
+                    }
+                    if (data.result.item.marketprice == "") {
+
+                    } else {
+                        $('#yiji').val(data.result.item.commission1_pay)//一级红包
+                    }
+                    if (data.result.item.commission2_pay == "") {
+
+                    } else {
+                        $('#erji').val(data.result.item.commission2_pay)//二级
+                    }
+                    if (data.result.item.main == "") {
+
+                    } else {
+                        $('#zhubanfang').val(data.result.item.main)
+                    }
+                    if (data.result.item.principal == "") {
+
+                    } else {
+                        $('#fuzeren').val(data.result.item.principal)
+                    }
+                    if (data.result.item.tel == "") {
+
+                    } else {
+                        $('#kefu').val(data.result.item.tel)
+                    }
+                    if (data.result.item.address == "") {
+
+                    } else {
+                        $('.address_text_text').val(data.result.item.address)
+                    }
+                    var kuaidi = data.result.item.pro_type//快递
+                    if (kuaidi == 2) {
+                        $(".select_xiala").find("option:contains('门店自提')").attr("selected", true);
+                    } else if (kuaidi == 1) {
+                        // alert(123)
+                        $(".select_xiala").find("option:contains('快递')").attr("selected", true);
+                        $("#shouhuo").css('display', 'block')
+                        $("#youfei").css('display', 'block')
+                        $('#uu').val(data.result.item.express_price)
+                    } else {
+                        obj.setAttribute("src", "img/off@2x.png")
+                        $("#shouhuo").css('display', 'none')
+                        $("#youfei").css('display', 'none')
+                    }
+                }
+            })
+        } else {
+
+        }
+    })
     var xinhuai_come = document.getElementsByClassName("xinhuai_come")
     var button_img_cc = document.getElementsByClassName("button_img_cc")
     var select = document.getElementById("select_id");
     var value = select.value;
-    // console.log(value);
     $('.button_img_cc').click(function () {
-        // alert("123")
         var select = document.getElementById("select_id");
         var value = select.value;
         var obj = document.getElementById("img_img_id")
@@ -268,7 +364,6 @@
         } else if (value == 1) {
             obj.setAttribute("src", "img/on@2x.png")
             $("#shouhuo").css('display', 'block')
-            // $("#youfei").css('display','block')
         } else if (value == 2) {
             obj.setAttribute("src", "img/on@2x.png")
             $("#shouhuo").css('display', 'block')
@@ -297,13 +392,16 @@
             }
         });
         if (thumbs.length < 1) {
-            FoxUI.toast.show("请选择商品图片");
+            alert("请选择商品图片");
             return
         }
-        console.log(thumbs);
         //邮费
         var youfei = $('#uu').val()
-        $('.come_button').val()//背景音乐
+        // $('.come_button').val()//背景音乐
+        var music_document = document.getElementsByClassName("come_button");
+        var haha = $(music_document).attr("data-id")
+        // console.log(haha);
+        var music =haha
         // 商品数量
         var total = $('#kucun').val();
         // 时间
@@ -338,46 +436,54 @@
         var address = $('.address_text_text').val()
         $.ajax({
             type: 'POST',
-            url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.addgoods',
+            url: '{php echo mobileUrl("merchmanage.goods.show.addgoods")}',
             data: {
                 "title": huodonghead,
                 "description": huodongintroduce,
                 "marketprice": marketprice,
+                "end_time": end_time,
                 "total": total,
                 //图片
+                "thumb":thumbs,
                 "commission1_pay": commission1_pay,
                 "commission2_pay": commission2_pay,
-                //商品id
                 "isdraft": 0,
-                "pro_type":pro_type,
-                "express_price":youfei,
-                "main":main,
-                "principle":principle,
-                "tel":tel,
-                "address":address,
-                "music": 3,
+                "pro_type": pro_type,
+                "express_price": youfei,
+                "main": main,
+                "principal": principle,
+                "tel": tel,
+                "address": address,
+                "music": music,
             },
             dataType: "json",
             success: function (data) {
-                console.log(data)
-                location.href = './list.html'
+                location.href = '{php echo mobileUrl("merchmanage/goods/show/list")}'
             }
         })
     })
-//     $(".ui-state-default").click(function(){
-//      var src=$(this).attr("src");
-//      console.log(src)
-// });
+
     // 保存并发布
     $('.saveandpublish').click(function () {
-        console.log($(".imgimg").attr("src"))
         var huodonghead = $('.input_text').val();//活动标题
-        var huodongintroduce = $('.activity_introduction_text').val()//活动介绍
+        var huodongintroduce = $('.activity_introduction_text').val(); //活动介绍
+        var thumbs = [];
+        $("#thumbs li").each(function () {
+            var filename = $.trim($(this).data('filename'));
+            if (filename) {
+                thumbs.push(filename)
+            }
+        });
+        if (thumbs.length < 1) {
+            alert("请选择商品图片");
+            return
+        }
         //邮费
         var youfei = $('#uu').val()
-        $('.come_button').val()//背景音乐
-        //图片
-
+        var music_document = document.getElementsByClassName("come_button");
+        var haha = $(music_document).attr("data-id")
+        // console.log(haha);
+        var music =haha
         // 商品数量
         var total = $('#kucun').val();
         // 时间
@@ -412,74 +518,32 @@
         var address = $('.address_text_text').val()
         $.ajax({
             type: 'POST',
-            url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.addgoods',
+            url: '{php echo mobileUrl("merchmanage.goods.show.addgoods")}',
             data: {
                 "title": huodonghead,
                 "desc": huodongintroduce,
                 "marketprice": marketprice,
                 "total": total,
                 //图片
+                "thumb":thumbs,
                 "commission1_pay": commission1_pay,
                 "commission2_pay": commission2_pay,
-                "music": 3,
-                "pro_type":pro_type,
-                "express_price":youfei,
-                "end_time":end_time,
-                "main":main,
-                "principle":principle,
-                "tel":tel,
-                "address":address,
+                "music": music,
+                "pro_type": pro_type,
+                "express_price": youfei,
+                "end_time": end_time,
+                "main": main,
+                "principal": principle,
+                "tel": tel,
+                "address": address,
                 "isdraft": 1,
             },
             dataType: "json",
             success: function (data) {
-                
+                location.href = '{php echo mobileUrl("merchmanage/goods/show/list")}'
             }
         })
-    });
-
-    // 上传图片 最大上传数3 大于3 则只显示前三个
-    function setImagePreviews(avalue) {
-        var docObj = document.getElementById("doc");
-        var dd = document.getElementById("foo");
-        dd.innerHTML = "";
-        var fileList = docObj.files;
-        for (var i = 0; i < 4; i++) {
-            dd.innerHTML += "<li class='ui-state-default'><img class='imgimg' id='img" + i + "'/></li>";
-            var imgObjPreview = document.getElementById("img" + i);
-            if (docObj.files && docObj.files[i]) {
-                //火狐下，直接设img属性
-                imgObjPreview.style.display = 'block';
-                imgObjPreview.style.width = '75px';
-                imgObjPreview.style.height = '75px';
-                //imgObjPreview.src = docObj.files[0].getAsDataURL();
-                //火狐7以上版本不能用上面的getAsDataURL()方式获取，需要一下方式
-                imgObjPreview.src = window.URL.createObjectURL(docObj.files[i]);
-            }
-            else {
-                //IE下，使用滤镜
-                docObj.select();
-                var imgSrc = document.selection.createRange().text;
-                alert(imgSrc)
-                var localImagId = document.getElementById("img" + i);
-                //必须设置初始大小
-                localImagId.style.width = "150px";
-                localImagId.style.height = "180px";
-                //图片异常的捕捉，防止用户修改后缀来伪造图片
-                try {
-                    localImagId.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale)";
-                    localImagId.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = imgSrc;
-                }
-                catch (e) {
-                    alert("您上传的图片格式不正确，请重新选择!");
-                    return false;
-                }
-                imgObjPreview.style.display = 'none';
-                document.selection.empty();
-            }
-        }
-        return true;
-    }
+    })
     //点击音乐在原有界面进行加载
     $('.come_button').click(function () {
         $('.background_music_div').css('display', 'block')
@@ -487,21 +551,23 @@
         var arr = ""
         $.ajax({
             type: 'POST',
-            url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.getmusic',
+            url: '{php echo mobileUrl("merchmanage.goods.show.getmusic")}',
             data: {
 
             },
             dataType: "json",
             success: function (data) {
                 $.each(data.result.list, function (i, item) {
-                    console.log(item);
+                    // console.log(item.music);
                     str1 += '<li class="list_music">' +
                         '<div class="music_name">' +
                         '<span class="music_name_text">' + item.title +
                         '</span>' +
                         '</div>' +
                         '<div class="music_img">' +
-                        '<img class="img_img" src="img/start@2x.png">' +
+                        '<audio class="audios" id="voice" controls="controls" loop="false" hidden="true" src="' + item.music + '">' +
+                        '</audio>' +
+                        '<img class="img_img" data_title="' + item.title + '" src="../addons/ewei_shopv2/plugin/merchmanage/static/img/start@2x.png">' +
                         '</div>' +
                         '<div class="select">' +
                         '<input class="select_text" data_title="' + item.title + '" id="' + item.id + '" type="button" name="sub" value="选择">' +
@@ -512,32 +578,69 @@
             }
         })
     })
+
     // 选择音乐完毕
     $(".music").on("click", ".select_text", function () {
         var arr = ""
         arr = $(this).attr("data_title")
+        music_background = $(this).attr("id")
+        // console.log(music_background);
         $('.background_music_div').css('display', 'none')
         $('.come_button').val(arr)
+        $('.come_button').attr("data-id",music_background);
     })
+    
     // 反馈问题
     $(".problemfeedback").click(function () {
         location.href = './feedback.html'
     })
-    // 点击图片图片旋转
-    $(".music").on("click", ".img_img", function () {
-        $(".img_img").removeClass('header_select')
-        $(this).toggleClass('header_select').siblings().removeClass('header_select')
+
+    // 点击图片图片旋转,播放音乐
+    $(".music").on("click", ".img_img", function pauseAll() {
+        //点击其他图片删除上个class并且暂停音乐
+        var cc= document.getElementsByClassName("header_select")
+        for(var i=0;i<cc.length;i++){
+            var nn = $(cc[i]).parent().children("audio").attr("id")
+            var voice = document.getElementById(nn);
+            voice.pause()
+            $(cc[i]).removeClass("header_select")
+        }
+        var dd = $(this).parent().children("audio").attr("id")
+        var voice = document.getElementById(dd);
+        if (typeof ($(this).attr("header_select")) == "undefined") {
+            $(this).addClass('header_select')
+            voice.play(); //音乐播放
+        }
     })
-    function go_mark(id, jobname, headimgurl, nickname) {
-        window.location.href = "mark.html?id=" + id + "&jobname=" + encodeURI(jobname) + "&headimgurl=" + headimgurl + "&nickname=" + encodeURI(nickname);
-    }
+
+    $(".music").on("click", ".header_select", function () {
+        var dd = $(this).parent().children("audio").attr("id")
+        var voice = document.getElementById(dd);
+        $(this).removeClass("header_select")
+        voice.pause()
+    })
+
     //预览
-    $('.preview').click(function(){
+    $('.preview').click(function () {
         var huodonghead = $('.input_text').val();//活动标题
-        var huodongintroduce = $('.activity_introduction_text').val()//活动介绍
+        var huodongintroduce = $('.activity_introduction_text').val(); //活动介绍
+        var thumbs = [];
+        $("#thumbs li").each(function () {
+            var filename = $.trim($(this).data('filename'));
+            if (filename) {
+                thumbs.push(filename)
+            }
+        });
+        if (thumbs.length < 1) {
+            alert("请选择商品图片");
+            return
+        }
         //邮费
         var youfei = $('#uu').val()
-        $('.come_button').val()//背景音乐
+        var music_document = document.getElementsByClassName("come_button");
+        var haha = $(music_document).attr("data-id")
+        // console.log(haha);
+        var music =haha
         // 商品数量
         var total = $('#kucun').val();
         // 时间
@@ -572,29 +675,29 @@
         var address = $('.address_text_text').val()
         $.ajax({
             type: 'POST',
-            url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.goods.show.addgoods',
+            url: '{php echo mobileUrl("merchmanage.goods.show.preview")}',
             data: {
                 "title": huodonghead,
-                "description": huodongintroduce,
+                "desc": huodongintroduce,
                 "marketprice": marketprice,
                 "total": total,
                 //图片
+                "thumb":thumbs,
                 "commission1_pay": commission1_pay,
                 "commission2_pay": commission2_pay,
-                //商品id
-                "isdraft": 0,
-                "pro_type":pro_type,
-                "express_price":youfei,
-                "main":main,
-                "principle":principle,
-                "tel":tel,
-                "address":address,
-                "music": 3,
+                "music": music,
+                "pro_type": pro_type,
+                "express_price": youfei,
+                "end_time": end_time,
+                "main": main,
+                "principal": principle,
+                "tel": tel,
+                "address": address,
+                "isdraft": 1,
             },
             dataType: "json",
             success: function (data) {
-                console.log(data)
-                // location.href = './.html'
+               location.href = '{php echo mobileUrl("merchmanage/goods/show/detail")}'
             }
         })
     })
