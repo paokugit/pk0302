@@ -928,7 +928,7 @@ class EweiShopWechatPay
                     'createtime'=> time(),
                     'status'=>1,
                     'money'=>$money,
-                    'realmoney'=>$money - $rebate,
+                    'realmoney'=>$money,
                 ];
                 //如果没有这条日志  加日志  并  给商家加钱
                 if(!pdo_fetch('select * from '.tablename('ewei_shop_member_log').' where logno = "'.$add1['logno'].'"')){

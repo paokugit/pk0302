@@ -120,12 +120,14 @@ class Qrcode_EweiShopV2Model
 		$file = md5('shop_qrcode_' . $posterid . $mid . $background .$merch['merchname']).'.png';
 		$qr_file = md5('shop_qr_' . $posterid . $mid . $background .$merch['merchname']).'.png';
 		$qrcode_file = $path . $file;
-		$qr_file = $path . $qr_file;
+		$code_file = $path . $qr_file;
 		if (!is_file($qrcode_file)) {
 			require_once IA_ROOT . '/framework/library/qrcode/phpqrcode.php';
 			QRcode::png($url, $qrcode_file, QR_ECLEVEL_L, 5);
 		}else{
-			return $_W['siteroot'] . 'addons/ewei_shopv2/data/merch/' . $_W['uniacid'] . '/' . $file;
+			$qrcode = $_W['siteroot'] . 'addons/ewei_shopv2/data/merch/' . $_W['uniacid'] . '/' . $file;
+			$qr = $_W['siteroot'] . 'addons/ewei_shopv2/data/merch/' . $_W['uniacid'] . '/' . $qr_file;
+			return ['qrcode'=>$qrcode,'qr'=>$qr];
 		}
 		//把二维码放在设定好的背景图里面  $logo二维码的背景图   imagecopyresampled 设置二维码在背景图的位置
 		$logo = IA_ROOT . '/addons/ewei_shopv2/static/images/'.$background.'.png';
@@ -149,11 +151,92 @@ class Qrcode_EweiShopV2Model
 		imagettftext($logo,60, 0, 416, 1136, $color, $font,mb_substr($merch['merchname'],0,4));
 		//输出图片
 		imagepng($logo,$qrcode_file);
-		imagepng($qr,$qr_file);
+		imagepng($qr,$code_file);
 		//设置二维码的路径
 		$qrcode = $_W['siteroot'] . 'addons/ewei_shopv2/data/merch/' . $_W['uniacid'] . '/' . $file;
 		$qr= $_W['siteroot'] . 'addons/ewei_shopv2/data/merch/' . $_W['uniacid'] . '/' . $qr_file;
 		return ['qrcode'=>$qrcode,'qr'=>$qr];
+	}
+
+	/**
+	 * @param array $member
+	 * @param $mid
+	 * @return array
+	 */
+	public function createHelpPoster($member = [],$mid)
+	{
+		global $_W;
+		set_time_limit(0);
+		@ini_set("memory_limit", "256M");
+		$merch = pdo_fetch('select merchname,logo from '.tablename('ewei_shop_merch_user').' where id = "'.$mid.'"');
+		$path = IA_ROOT . "/addons/ewei_shopv2/data/merch/".$mid."/";
+		if( !is_dir($path) )
+		{
+			load()->func("file");
+			mkdirs($path);
+		}
+		$qrcode = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $mid , 'back'=>$member['back'],'type'=>'qrcode')));
+		$qr = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $mid , 'back'=>$member['back'])));
+		$filename = $qrcode . ".png";
+		$qr_filename = $qr . ".png";
+		$filepath = $path . $filename;
+		$qr_filepath = $path . $qr_filename;
+		if( is_file($filepath) )
+		{
+			$qrcode_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$mid."/".$filename . "?v=1.0";
+			$qr_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$mid."/".$qr_filename . "?v=1.0";
+			return ['qrcode'=>$qrcode_url,'qr'=>$qr_url];
+		}
+		$thumb = "/addons/ewei_shopv2/static/images/".$member['back'].'.png';
+		$target = $this->createImage(tomedia($thumb));
+
+		$font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_MEDIUM.TTF";
+		if( !is_file($font) )
+		{
+			$font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
+		}
+		$white = imagecolorallocate($target, 255, 255, 255);
+		//把商家的名字写在二维码下面
+		imagettftext($target,60, 0, 416, 1136, $white, $font,mb_substr($merch['merchname'],0,4));
+		//lihanwen
+		$qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $mid,"page" => $member['url'] ));
+		if( !is_error($qrcode) )
+		{
+			$qrcode = imagecreatefromstring($qrcode);
+			imagecopyresampled($target, $qrcode, 238, 311, 0, 0, 638, 638, imagesx($qrcode), imagesy($qrcode));
+		}
+		imagepng($target, $filepath);
+		imagepng($qrcode, $qr_filepath);
+		$qrcode_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$mid."/".$filename . "?v=1.0";
+		$qr_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$mid."/".$qr_filename . "?v=1.0";
+		return ['qrcode'=>$qrcode_url,'qr'=>$qr_url];
+	}
+
+	/**
+	 * @param $imgurl
+	 * @return false|resource|string
+	 */
+	private function createImage($imgurl)
+	{
+		if( empty($imgurl) )
+		{
+			return "";
+		}
+		load()->func("communication");
+		$resp = ihttp_request($imgurl);
+		if( $resp["code"] == 200 && !empty($resp["content"]) )
+		{
+			return imagecreatefromstring($resp["content"]);
+		}
+		for( $i = 0; $i < 3; $i++ )
+		{
+			$resp = ihttp_request($imgurl);
+			if( $resp["code"] == 200 && !empty($resp["content"]) )
+			{
+				return imagecreatefromstring($resp["content"]);
+			}
+		}
+		return "";
 	}
 }
 

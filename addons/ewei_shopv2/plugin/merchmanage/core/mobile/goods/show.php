@@ -80,7 +80,8 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         if(isset($_GPC['id'])){
             //查询goods部分字段
             $fields = "title,description,total,marketprice,thumb,thumb_url,commission1_pay,commission2_pay";
-            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>$_W['merchmanage']['merchid']]);
+            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>31]);
+            $item1['thumb_url'] = unserialize($item1['thumb_url']);
             //查询红包引流的全部字段
             $item2 = pdo_fetch('select * from' .tablename('ewei_shop_goods_bribe_expert').' where goods_id =:id',[':id'=>$_GPC['id']]);
             $item = array_merge($item1,$item2);
@@ -357,9 +358,13 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         $uniacid = $_W['uniacid'];
         $merchid = $_W['merchmanage']['merchid'];
         $str = random(36);
-        $key = md5($uniacid.$merchid.$str);
-        m('cache')->set($key,$_GPC);
-        show_json(1,['key'=>$key,'str'=>$str]);
+        $post_key = md5($uniacid.$merchid.$str);
+        $_GPC['end_time'] = strtotime($_GPC['end_time']);
+        foreach ($_GPC['thumb'] as $key=>$thumb){
+            $_GPC['thumb'][$key] = tomedia($thumb);
+        }
+        m('cache')->set($post_key,$_GPC);
+        show_json(1,['key'=>$post_key,'str'=>$str]);
     }
 
     /**
