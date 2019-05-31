@@ -254,7 +254,6 @@
         var request = GetRequest("id")
         var goods_id = request.id;
         if (goods_id) {
-            alert(123)
             $.ajax({
                 type: 'POST',
                 url: '{php echo mobileUrl("merchmanage.goods.show.editgoods")}',
@@ -274,7 +273,23 @@
                     } else {
                         $('.activity_introduction_text').val(data.result.item.description)//介绍
                     }
+                    if (data.result.item.thumb_url == "") {
 
+                    } else {
+                        var thumb = "";
+                        $.each(data.result.item.thumb_url,function (i,item) {
+                            var img = "http://"+"{php echo $_SERVER['HTTP_HOST']}/attachment/"+item;
+                            thumb += "<li style='background-image:url("+img+")' class='image' data-filename=' + item +'>\n" +
+                                "           <span class='image-remove'><i class='icon icon-close'></i></span>\n" +
+                                "     </li>";
+                            // thumb += "<li style='background-image:url("+img+")' class='image' data-filename='"+item+"'>"+
+                            //             "<span class='image-remove'>" +
+                            //                 "<i class='icon icon-close'></i>" +
+                            //             "</span>"+
+                            //         "</li>"
+                        })
+                        $('#thumbs').html(thumb)//介绍
+                    }
                     if (data.result.item.music == "") {
 
                     } else {
@@ -333,13 +348,12 @@
                     if (kuaidi == 2) {
                         $(".select_xiala").find("option:contains('门店自提')").attr("selected", true);
                     } else if (kuaidi == 1) {
-                        // alert(123)
                         $(".select_xiala").find("option:contains('快递')").attr("selected", true);
                         $("#shouhuo").css('display', 'block')
                         $("#youfei").css('display', 'block')
                         $('#uu').val(data.result.item.express_price)
                     } else {
-                        obj.setAttribute("src", "img/off@2x.png")
+                        obj.setAttribute("src", "../addons/ewei_shopv2/plugin/merchmanage/static/img/off@2x.png")
                         $("#shouhuo").css('display', 'none')
                         $("#youfei").css('display', 'none')
                     }
@@ -357,15 +371,15 @@
         var select = document.getElementById("select_id");
         var value = select.value;
         var obj = document.getElementById("img_img_id")
-        if (obj.getAttribute("src") == "img/on@2x.png") {
-            obj.setAttribute("src", "img/off@2x.png")
+        if (obj.getAttribute("src") == "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png") {
+            obj.setAttribute("src", "../addons/ewei_shopv2/plugin/merchmanage/static/img/off@2x.png")
             $("#shouhuo").css('display', 'none')
             $("#youfei").css('display', 'none')
         } else if (value == 1) {
-            obj.setAttribute("src", "img/on@2x.png")
+            obj.setAttribute("src", "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png")
             $("#shouhuo").css('display', 'block')
         } else if (value == 2) {
-            obj.setAttribute("src", "img/on@2x.png")
+            obj.setAttribute("src", "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png")
             $("#shouhuo").css('display', 'block')
             $("#youfei").css('display', 'block')
         }
@@ -414,7 +428,7 @@
         var commission2_pay = $('#erji').val();
         var pro_type = ""
         var obj = document.getElementById("img_img_id")
-        if (obj.getAttribute("src") == "img/on@2x.png") {
+        if (obj.getAttribute("src") == "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png") {
             if ($('.select_xiala').val() == 1) {
                 pro_type = 2
             } else {
@@ -458,7 +472,7 @@
             },
             dataType: "json",
             success: function (data) {
-                location.href = '{php echo mobileUrl("merchmanage/goods/show/list")}'
+                location.href = '{php echo mobileUrl("merchmanage/goods/show/history")}'
             }
         })
     })
@@ -496,7 +510,7 @@
         var commission2_pay = $('#erji').val();
         var pro_type = ""
         var obj = document.getElementById("img_img_id")
-        if (obj.getAttribute("src") == "img/on@2x.png") {
+        if (obj.getAttribute("src") == "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png") {
             if ($('.select_xiala').val() == 1) {
                 pro_type = 2
             } else {
@@ -540,7 +554,7 @@
             },
             dataType: "json",
             success: function (data) {
-                location.href = '{php echo mobileUrl("merchmanage/goods/show/list")}'
+                location.href = '{php echo mobileUrl("merchmanage/goods/show/history")}'
             }
         })
     })
@@ -653,7 +667,7 @@
         var commission2_pay = $('#erji').val();
         var pro_type = ""
         var obj = document.getElementById("img_img_id")
-        if (obj.getAttribute("src") == "img/on@2x.png") {
+        if (obj.getAttribute("src") == "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png") {
             if ($('.select_xiala').val() == 1) {
                 pro_type = 2
             } else {
@@ -697,7 +711,9 @@
             },
             dataType: "json",
             success: function (data) {
-               location.href = '{php echo mobileUrl("merchmanage/goods/show/detail")}'
+                sessionStorage.setItem("key",data.result.key)
+                sessionStorage.setItem("str",data.result.str)
+                location.href = '{php echo mobileUrl("merchmanage/goods/show/detail")}'
             }
         })
     })

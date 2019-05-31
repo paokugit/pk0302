@@ -910,7 +910,7 @@ class EweiShopWechatPay
         if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
             pdo_begin();
             try {
-                $array = explode('_',$data['out_trade_no']);
+                $array = explode('_',base64_decode($data['out_trade_no']));
                 $merchid = $array[1];
                 $openid = 'sns_wa_'.$data['openid'];
                 $money = $array[2];
@@ -928,10 +928,13 @@ class EweiShopWechatPay
                     'createtime'=> time(),
                     'status'=>1,
                     'money'=>$money,
-                    'realmoney'=>$money - $rebate,
+                    'realmoney'=>$money,
                 ];
-                pdo_insert('ewei_shop_member_log',$add1);
-                pdo_update('ewei_shop_member',['openid'=>$merch['onpenid']],['credit2'=>bcadd($merch['credit2'],$money,2)]);
+                //如果没有这条日志  加日志  并  给商家加钱
+                if(!pdo_fetch('select * from '.tablename('ewei_shop_member_log').' where logno = "'.$add1['logno'].'"')){
+                    pdo_insert('ewei_shop_member_log',$add1);
+                    pdo_update('ewei_shop_member',['openid'=>$merch['onpenid']],['credit2'=>bcadd($merch['credit2'],$money,2)]);
+                }
                 //用户付款的日志
                 $add2= [
                     'uniacid'=>$merch['uniacid'],
@@ -944,13 +947,16 @@ class EweiShopWechatPay
                     'money'=>-$money,
                     'rechargetype'=>'wxscan'
                 ];
-                pdo_insert('ewei_shop_member_log',$add2);
-                if($type == 1){
-                    $credit1 = $member['credit1'] - $rebate;
-                    pdo_update('ewei_shop_member',['openid'=>$openid],['credit1'=>$credit1]);
-                }elseif ($type == 2){
-                    $credit3 = $member['credit3'] - $rebate;
-                    pdo_update('ewei_shop_member',['openid'=>$openid],['credit3'=>$credit3]);
+                //如果没有这条记录 则加入记录  并且扣除对应的金额
+                if(!pdo_fetch('select * from '.tablename('ewei_shop_member_log').' where logno = "'.$add2['logno'].'"')){
+                    pdo_insert('ewei_shop_member_log',$add2);
+                    if($type == 1){
+                        $credit1 = $member['credit1'] - $rebate;
+                        pdo_update('ewei_shop_member',['openid'=>$openid],['credit1'=>$credit1]);
+                    }elseif ($type == 2){
+                        $credit3 = $member['credit3'] - $rebate;
+                        pdo_update('ewei_shop_member',['openid'=>$openid],['credit3'=>$credit3]);
+                    }
                 }
                 pdo_commit();
             }catch(Exception $exception){

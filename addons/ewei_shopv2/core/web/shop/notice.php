@@ -47,8 +47,7 @@ class Notice_EweiShopV2Page extends WebPage
 		$id = intval($_GPC['id']);
 
 		if ($_W['ispost']) {
-			$data = array('uniacid' => $_W['uniacid'], 'displayorder' => intval($_GPC['displayorder']), 'title' => trim($_GPC['title']), 'thumb' => save_media($_GPC['thumb']), 'link' => trim($_GPC['link']), 'detail' => m('common')->html_images($_GPC['detail']), 'status' => intval($_GPC['status']), 'createtime' => time());
-
+			$data = array('uniacid' => $_W['uniacid'], 'displayorder' => intval($_GPC['displayorder']), 'title' => trim($_GPC['title']), 'thumb' => save_media($_GPC['thumb']), 'link' => trim($_GPC['link']), 'detail' => m('common')->html_images_a($_GPC['detail']), 'status' => intval($_GPC['status']), 'createtime' => time());
 			if (!empty($id)) {
 				pdo_update('ewei_shop_notice', $data, array('id' => $id));
 				plog('shop.notice.edit', '修改公告 ID: ' . $id);
