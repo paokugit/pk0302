@@ -583,6 +583,11 @@ class System_EweiShopV2Model {
                         "title" => "商城",
                         "items" => array(
                             array(
+                                "title" => "小程序广告位",
+                                "route" => "adsense",
+                                "desc" => "小程序首页广告位"
+                            ) ,
+                            array(
                                 "title" => "公告管理",
                                 "route" => "notice",
                                 "desc" => "店铺公告管理"

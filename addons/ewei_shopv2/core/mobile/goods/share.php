@@ -499,7 +499,7 @@ class Share_EweiShopV2Page extends MobilePage
    }
    //测试
    public function cs(){
-       var_dump(base64_decode("LCJ2aWRlbyI6IiIsInNlZWNvbW1pc3Npb24iOiIwIiwiY2Fuc2VlIjoiMCIsInNlZXRpdGxlIjoiIiwiYmFyZ2FpbiI6IjAifSwiTTE1NTI5Nzk3MjMyMTMiOnsiZ2lkIjoiMzUxIiwiZGVkdWN0IjoiOS45MCIsInRpdGxlIjoiXHU1MmEwXHU2ZTdmXHU1NjY4XHU4ZmY3XHU0ZjYwVVNCXHU1YmI2XHU3NTI4XHU1YzBmXHU1NzhiXHU5NzU5XHU5N2YzXHU1MzY3XHU1YmE0XHU1YmJmXHU4MjBkXHU1MjllXHU1MTZjXHU1YmE0XHU2ODRjXHU5NzYyXHU4ZjY2XHU4ZjdkXHU1YjU1XHU1OTg3XHU1YTc0XHU1MTNmXHU4ODY1XHU2YzM0XHU1NWI3XHU5NmZlXHU0ZmJmXHU2NDNhXHU1ZjBmXHU1OTI3XHU1YmI5XHU5MWNmXHU2Mjk2XHU5N2YzXHU1NDBjXHU2YjNlXHU5OTk5XHU4NWIwXHU2NzNhXHU3MDZmXHU1M2VmXHU1MTQ1XHU3NTM1Iiwic3VidGl0bGUiOiIiLCJwcmljZSI6IjI5LjgwIiwidGh1bWIiOiJpbWFnZXNcLzFcLzIwMTlcLzA0XC9vekpZODB6ang2dVEwWXkwWFF2dXBNeVJNTVVaNlhVeS5qcGciLCJ0b3RhbCI6IjEwIiwicHJvZHVjdHByaWNlIjoiODkuMDAiLCJjdHlwZSI6IjEiLCJzYWxlcyI6IjE5IiwidmlkZW8iOiIiLCJzZWVjb21taXNzaW9uIjoiMCIsImNhbnNlZSI6IjAiLCJzZWV0aXRsZSI6IiIsImJhcmdhaW4iOiIwIn19LCJpZCI6Imdvb2RzIn19fQ=="));
+    
 //        var_dump(mobileUrl("goods/share/order_wx")."&id=11");
 //        var_dump(mobileUrl("goods/share/order_wx",array("ordersn"=>11)));
 //        $sql="select o.openid,o.price,o.createtime from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and o.status=1 ORDER BY o.createtime DESC ";
