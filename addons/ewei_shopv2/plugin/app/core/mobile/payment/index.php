@@ -17,15 +17,15 @@ class Index_EweiShopV2Page extends AppMobilePage
         //获得当前的域名
         $host = $_SERVER['HTTP_HOST'];
         //折扣宝收款码
-        $rebate_url = 'merchmanage/goods/show/main';
+        $rebate_url = 'pages/discount/zkbscancode/zkbscancode';
         $rebate_back= 'zhekoubao';
         //卡路里收款码
-        $calorie_url  = 'merchmanage/goods/show/main';
+        $calorie_url  = 'pages/discount/kllscancode/kllscancode';
         $calorie_back = 'kaluli';
         //生成二维码
         $rebate = m('qrcode')->createSQrcode($mid,$rebate_url,$rebate_back);
         $calorie =  m('qrcode')->createSQrcode($mid,$calorie_url,$calorie_back);
-        show_json(1,['rebate'=>$rebate,'calorie'=>$calorie]);
+        show_json(1,['rebate'=>$rebate['qrcode'],'rebate_qr'=>$rebate['qr'],'calorie'=>$calorie['qrcode'],'calorie_qr'=>$calorie['qr']]);
     }
 
     /**
