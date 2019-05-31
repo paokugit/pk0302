@@ -210,10 +210,9 @@
                         <div class="kefu-phone-tit">客服电话：</div>
                         <div class="kefu-phone">18236962763</div>
                     </div>
-                    <div class="kefu-address-box">店面地址：河南省郑州市金水区未来路玉风路环球大厦
-                        <!-- <span class="kefu-address-tit">店面地址:</span>
-                        <span class="kefu-name">河南省郑州市金水区未来路玉风路环球大厦</span> -->
-                    </div>
+                    <div class="kefu-address-box">
+                     <div class="kefu-address-head">店面地址：</div>
+                   <div class="kefu-address-text"></div>
                 </div>
             </div>
         </div>
@@ -270,6 +269,9 @@
                 $(".packetcount-first").html(data.result.commission1_pay)
                 $(".packetcount-second").html(data.result.commission2_pay)
                 $(".people-count").html(data.result.order.count)
+                $(".kefu-name").html(data.result.other.main)
+                $(".kefu-phone").html(data.result.other.tel)
+                $(".kefu-address-text").html(data.result.other.address)
                 $.each(data.result.thumb_url, function (i, item) {
                     // console.log(item)
                     str1 += '<li class="img-item"><img class="img01" src=' + item +

@@ -80,7 +80,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         if(isset($_GPC['id'])){
             //查询goods部分字段
             $fields = "title,description,total,marketprice,thumb,thumb_url,commission1_pay,commission2_pay";
-            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid']]);
+            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>$_W['merchmanage']['merchid']]);
             //查询红包引流的全部字段
             $item2 = pdo_fetch('select * from' .tablename('ewei_shop_goods_bribe_expert').' where goods_id =:id',[':id'=>$_GPC['id']]);
             $item = array_merge($item1,$item2);
@@ -332,13 +332,13 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         include $this->template("merchmanage/goods/shareorder");
     }
 
-//    /**
-//     * list页面渲染
-//     */
-//    public function list()
-//    {
-//        include $this->template("merchmanage/goods/list");
-//    }
+    /**
+     * list页面渲染
+     */
+    public function history()
+    {
+        include $this->template("merchmanage/goods/list");
+    }
 
     /**
      * kehu 页面渲染
@@ -354,13 +354,12 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
     public function preview(){
         global $_GPC;
         global $_W;
-        $openid = $_GPC['openid'];
-        $openid = "sns_wa_owRAK44_gHTrMTJMVSxFy-jtNef8";
         $uniacid = $_W['uniacid'];
         $merchid = $_W['merchmanage']['merchid'];
-        $key = md5($openid.$uniacid.$merchid);
-        m('cache')->set($key,$_GPC,3600);
-        show_json(1,['key'=>$key]);
+        $str = random(36);
+        $key = md5($uniacid.$merchid.$str);
+        m('cache')->set($key,$_GPC);
+        show_json(1,['key'=>$key,'str'=>$str]);
     }
 
     /**
@@ -370,18 +369,17 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
     {
         global $_W;
         global $_GPC;
-        $openid = $_GPC['openid'];
         $post_key = $_GPC['post_key'];
+        $str = $_GPC['str'];
         $uniacid = $_W['uniacid'];
         $merchid = $_W['merchmanage']['merchid'];
-        $key = md5($openid.$uniacid.$merchid);
+        $key = md5($uniacid.$merchid.$str);
         if($key == $post_key){
             $value = m('cache')->get($key);
             show_json(1,['val'=>$value]);
         }else{
             show_json(0);
         }
-
     }
 }
 ?>

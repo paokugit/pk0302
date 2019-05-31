@@ -118,10 +118,12 @@ class Qrcode_EweiShopV2Model
 		}
 		//生成二维码
 		$file = md5('shop_qrcode_' . $posterid . $mid . $background .$merch['merchname']).'.png';
+		$qr_file = md5('shop_qr_' . $posterid . $mid . $background .$merch['merchname']).'.png';
 		$qrcode_file = $path . $file;
+		$qr_file = $path . $qr_file;
 		if (!is_file($qrcode_file)) {
 			require_once IA_ROOT . '/framework/library/qrcode/phpqrcode.php';
-			QRcode::png($url, $qrcode_file, QR_ECLEVEL_L, 4);
+			QRcode::png($url, $qrcode_file, QR_ECLEVEL_L, 5);
 		}else{
 			return $_W['siteroot'] . 'addons/ewei_shopv2/data/merch/' . $_W['uniacid'] . '/' . $file;
 		}
@@ -147,10 +149,11 @@ class Qrcode_EweiShopV2Model
 		imagettftext($logo,60, 0, 416, 1136, $color, $font,mb_substr($merch['merchname'],0,4));
 		//输出图片
 		imagepng($logo,$qrcode_file);
-		imagedestroy($logo);
+		imagepng($qr,$qr_file);
 		//设置二维码的路径
 		$qrcode = $_W['siteroot'] . 'addons/ewei_shopv2/data/merch/' . $_W['uniacid'] . '/' . $file;
-		return $qrcode;
+		$qr= $_W['siteroot'] . 'addons/ewei_shopv2/data/merch/' . $_W['uniacid'] . '/' . $qr_file;
+		return ['qrcode'=>$qrcode,'qr'=>$qr];
 	}
 }
 

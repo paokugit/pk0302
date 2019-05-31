@@ -17,15 +17,15 @@ class Index_EweiShopV2Page extends AppMobilePage
         //获得当前的域名
         $host = $_SERVER['HTTP_HOST'];
         //折扣宝收款码
-        $rebate_url = 'merchmanage/goods/show/main';
+        $rebate_url = 'pages/discount/zkbscancode/zkbscancode';
         $rebate_back= 'zhekoubao';
         //卡路里收款码
-        $calorie_url  = 'merchmanage/goods/show/main';
+        $calorie_url  = 'pages/discount/kllscancode/kllscancode';
         $calorie_back = 'kaluli';
         //生成二维码
         $rebate = m('qrcode')->createSQrcode($mid,$rebate_url,$rebate_back);
         $calorie =  m('qrcode')->createSQrcode($mid,$calorie_url,$calorie_back);
-        show_json(1,['rebate'=>$rebate,'calorie'=>$calorie]);
+        show_json(1,['rebate'=>$rebate['qrcode'],'rebate_qr'=>$rebate['qr'],'calorie'=>$calorie['qrcode'],'calorie_qr'=>$calorie['qr']]);
     }
 
     /**
@@ -36,7 +36,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_GPC;
         global $_W;
-        $order_sn = date('Ymd',time()).'_'.'31'.'_'.$_GPC['money'].'_'.$_GPC['rebate'].'_'.$_GPC['cate'];
+        $order_sn = base64_encode(date('Ymd',time()).'_'.'31'.'_'.$_GPC['money'].'_'.$_GPC['rebate'].'_'.$_GPC['cate']);
         $data = [
             'random'=>random(32),
             'body'=>'商家商户收款码收款',
@@ -67,9 +67,16 @@ class Index_EweiShopV2Page extends AppMobilePage
         $pageSize = 2;
         //第几页从第几个显示
         $psize = ($page-1)*$pageSize;
-        var_dump($pageSize,$psize);
         $openid = pdo_fetch('select m.openid from '.tablename('ewei_shop_member').'m join '.tablename('ewei_shop_merch_user').('mu on m.id=mu.member_id').' where mu.id = "'.$mch_id.'"');
-        $list =  pdo_fetchall('select * from '.tablename('ewei_shop_member_log') . ' where uniacid ="'.$_W['uniacid'].'" and openid = "'.$openid['openid'].'" LIMIT '.$psize. ','.$pageSize);
+        $list =  pdo_fetchall('select logno from '.tablename('ewei_shop_member_log') . ' where uniacid ="'.$_W['uniacid'].'" and openid = "'.$openid['openid'].'" and type = 3 LIMIT '.$psize. ','.$pageSize);
+        foreach ($list as $key=>$item){
+            $user = pdo_get('ewei_shop_member_log',['logno'=>substr($item['logno'],7)],'openid,realmoney,createtime');
+            $list[$key]['logno'] = substr($item['logno'],7);
+            $list[$key]['openid'] = $user['openid'];
+            $list[$key]['money'] = $user['realname'];
+            $list[$key]['createtime'] = date('Y-m-d H:i:s',$user['createtime']);
+            $list[$key]['nickname'] = pdo_getcolumn('ewei_shop_member',['openid'=>$user['openid']],'nickname');
+        }
         show_json(1,['list'=>$list]);
     }
 
@@ -138,7 +145,8 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         header('Access-Control-Allow-Origin:*');
         global $_W;
-        $list = pdo_fetchall('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid',array(':merchid'=>$_W['merchmanage']['merchid']));
+        global $_GPC;
+        $list = pdo_fetchall('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid and cate=:cate',array(':merchid'=>$_W['merchmanage']['merchid'],':cate'=>$_GPC['cate']));
         show_json(1,['list'=>$list]);
     }
 
@@ -154,7 +162,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             app_error(AppError::$RequestError);
         }
         $money = $_GPC['money'];
-        $openid = $_W['openid'];
+        $openid = $_GPC['openid'];
         $openid = "sns_wa_owRAK4-smphSYPkphpDAFOnsuy08";
         //查用户的卡路里和折扣宝的信息
         $member = pdo_fetch('select credit1,credit3 from '.tablename('ewei_shop_member').'where openid=:openid and uniacid=:uniacid',array(':openid'=>$openid,':uniacid'=>$_W['uniacid']));
