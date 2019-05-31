@@ -120,7 +120,7 @@ if ($_W['ispost']) {
 	$data['tcates'] = implode(',', $tcates);
 	$data['content'] = m('common')->html_images($_GPC['content']);
 	$data['buycontent'] = m('common')->html_images($_GPC['buycontent']);
-
+    $data['deduct_type'] = $_GPC['deduct_type'];
 	if (p('commission')) {
 		$cset = p('commission')->getSet();
 		if (!empty($cset['level']) && $merch_user['commissionchecked'] == 1) {
@@ -215,7 +215,10 @@ if ($_W['ispost']) {
 	$data['deduct'] = $_GPC['deduct'];
 	$data['deduct2'] = $_GPC['deduct2'];
 	$data['manydeduct'] = $_GPC['manydeduct'];
-	if (empty($id)) {
+    if($_GPC['marketprice']<$data['deduct']) $data['deduct'] =$_GPC['marketprice'];
+    if($_GPC['marketprice']<$data['deduct2']) $data['deduct2'] =$_GPC['marketprice'];
+
+    if (empty($id)) {
 		if (empty($_W['merch_user']['goodschecked'])) {
 			$data['checked'] = 1;
 		}
