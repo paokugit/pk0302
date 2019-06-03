@@ -11,9 +11,8 @@ class Index_EweiShopV2Page extends AppMobilePage
 	public function qrcode()
     {
         header('Access-Control-Allow-Origin:*');
-        global $_W;
-        $mid = $_W['merchmanage']['merchid'];
-        $mid = 31;
+        global $_GPC;
+        $mid = $_GPC['merchid'];
         //折扣宝收款码
         $rebate_url = 'pages/discount/zkbscancode/zkbscancode';
         $rebate_back= 'zhekoubao';
@@ -31,7 +30,6 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function getCredit(){
         header('Access-Control-Allow-Origin:*');
-        global $_W;
         global $_GPC;
         $credit1 = pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],credit1);
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],credit3);
@@ -182,7 +180,6 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         $money = $_GPC['money'];
         $openid = $_GPC['openid'];
-        $openid = "sns_wa_owRAK4-smphSYPkphpDAFOnsuy08";
         //查用户的卡路里和折扣宝的信息
         $member = pdo_fetch('select credit1,credit3 from '.tablename('ewei_shop_member').'where openid=:openid and uniacid=:uniacid',array(':openid'=>$openid,':uniacid'=>$_W['uniacid']));
         //判断要转换的卡路里和用户的卡路里的多少
