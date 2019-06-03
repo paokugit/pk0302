@@ -38,7 +38,7 @@ foreach ($uniacids as $uniacid) {
 	foreach ($orders as $o) {
 		$onew = pdo_fetch('select id,status  from ' . tablename('ewei_shop_order') . (' where id=:id and status=0 and paytype<>3  and createtime + ' . $daytimes . '- ' . $minute . ' <=unix_timestamp()  limit 1'), array(':id' => $o['id']));
 		if (!empty($onew) && $onew['status'] == 0) {
-			m('notice')->sendOrderWillCancelMessage($onew['id'], $daytimes);
+		//	m('notice')->sendOrderWillCancelMessage($onew['id'], $daytimes);
 		}
 	}
 }

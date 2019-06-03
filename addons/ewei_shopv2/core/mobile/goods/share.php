@@ -47,8 +47,12 @@ class Share_EweiShopV2Page extends MobilePage
        if (empty($share_openid1)){
        $url="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.index&good_id=".$good_id."&share_openid1=".$openid;
        }elseif ($share_openid1==$openid){
+           if ($share_openid2){
            $url="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.index&good_id=".$good_id."&share_openid1=".$openid."&share_openid2=".$share_openid2;
-       }else{
+           }else{
+               $url="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.index&good_id=".$good_id."&share_openid1=".$openid;
+           }
+        }else{
            $url="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.index&good_id=".$good_id."&share_openid1=".$openid."&share_openid2=".$share_openid1;
            
        }
@@ -84,7 +88,7 @@ class Share_EweiShopV2Page extends MobilePage
         //获取红包记录
         $resalut=pdo_fetchall("select openid,sum(money) as m from ".tablename("ewei_shop_goods_redlog")." where goodid=:goodid and status=1 group by openid order by m desc",array(":goodid"=>$good_id));
         $my=array();
-        
+        $i=0;
         foreach ($resalut as $k=>$v){
             $mc_fans=pdo_get("mc_mapping_fans",array("openid"=>$v["openid"]));
             $mc_member=pdo_get("mc_members",array("uid"=>$mc_fans["uid"]));
@@ -157,17 +161,21 @@ class Share_EweiShopV2Page extends MobilePage
         $data["merchid"]=$good["merchid"];
         
         //获取分享的人
+        if ($_GPC["share_openid1"]==$openid){
+            $data["share_openid1"]=$_GPC["share_openid2"];
+        }else{
         $data["share_openid1"]=$_GPC["share_openid1"];
         $data["share_openid2"]=$_GPC["share_openid2"];
+        }
         
         if ($good["other"]["pro_type"]==1){
             //物流
             $data["price"]=$good["marketprice"]+$good["other"]["express_price"];
-            if (!empty($_GPC["share_openid1"])){
+            if (!empty($data["share_openid1"])){
                 $data["price"]=$data["price"]-$good["commission1_pay"];
                 $data["commission1_pay"]=$good["commission1_pay"];
             }
-            if (!empty($_GPC["share_openid2"])){
+            if (!empty($data["share_openid2"])){
                 $data["price"]=$data["price"]-$good["commission2_pay"];
                 $data["commission2_pay"]=$good["commission2_pay"];
             }
