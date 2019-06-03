@@ -69,8 +69,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
-        $mch_id = $_W['merchmanage']['merchid'];
-        $mch_id = 6;
+        $mch_id = $_GPC['merchid'];
         //页数
         $page = max(1,($_GPC['page']));
         //每页显示条数
@@ -111,7 +110,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         if($fee && $money){
             $data = [
                 'uniacid'=>$_W['uniacid'],
-                'merchid'=>$_W['merchmanage']['merchid'],
+                'merchid'=>$_GPC['merchid'],
                 'money'=>$money,
                 'deduct'=>$fee,
                 'cate'=>$cate,
@@ -119,8 +118,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             //有$id 修改 没有添加
             if($id){
                 //判断$money金额的满减条件是否存在
-                //$res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where merchid="'.$_W['merchmanage']['merchid'].'" and money="'.$money.'" and cate="'.$cate.'" and id!="'.$_GPC['id'].'"');
-                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where merchid=10 and money="'.$money.'" and cate="'.$cate.'" and id!="'.$_GPC['id'].'"');
+                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where merchid="'.$_GPC['merchid'].'" and money="'.$money.'" and cate="'.$cate.'" and id!="'.$_GPC['id'].'"');
                 if($res){
                     show_json(0,$money.'的满减条件已存在，请前往修改或者更换满减条件');
                 }
@@ -128,8 +126,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 		        $msg = "修改成功";
             }else{
                 //判断$money金额的满减条件是否存在
-                //$res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where merchid=:merchid and money=:money and cate=:cate',array(':merchid'=>$_W['merchmanage']['merchid'],':money'=>$money,':cate'=>$cate));
-                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where merchid=:merchid and money=:money and cate=:cate',array(':merchid'=>10,':money'=>$money,':cate'=>$cate));
+                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where merchid=:merchid and money=:money and cate=:cate',array(':merchid'=>$_GPC['merchid'],':money'=>$money,':cate'=>$cate));
                 if($res){
                     show_json(0,$money.'的满减条件已存在，请前往修改或者更换满减条件');
                 }
@@ -154,8 +151,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$_W['ispost']){
             app_error(AppError::$RequestError);
         }
-        //$data = pdo_fetch('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where id = "'.$_GPC['id'].'" and merchid = "'.$_W['merchmanage']['merchid'].'"');
-        $data = pdo_fetch('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where id = "'.$_GPC['id'].'" and merchid = 10');
+        $data = pdo_fetch('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where id = "'.$_GPC['id'].'" and merchid = "'.$_GPC['merchid'].'"');
         show_json(1,['data'=>$data]);
     }
 
@@ -170,7 +166,6 @@ class Index_EweiShopV2Page extends AppMobilePage
         $pageSize = 8;
         $spage = ($page-1)*$pageSize;
         $list = pdo_fetchall('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid and cate=:cate order by money asc LIMIT '.$spage.','.$pageSize,array(':merchid'=>$_GPC['merchid'],':cate'=>$_GPC['cate']));
-        var_dump($list);exit;
         show_json(1,['list'=>$list]);
     }
 
