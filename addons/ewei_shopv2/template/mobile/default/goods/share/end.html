@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>活动结束</title>
 </head>
-<link rel="stylesheet" href="end.css">
+<link rel="stylesheet" href="../addons/ewei_shopv2/static/goodshare/end.css">
 
 <body>
     <div class="all_div">
@@ -27,7 +27,7 @@
                             <span class="text_text_li_text">商家名称：</span>
                         </div>
                         <div class="text_text_li_text_text">
-                            <span class="text_text_li_text_span">跑库</span>
+                            <span class="text_text_li_text_span mingcheng"></span>
                         </div>
                     </li>
                     <li class="text_text_li">
@@ -35,7 +35,7 @@
                             <span class="text_text_li_text">客服电话：</span>
                         </div>
                         <div class="text_text_li_text_text">
-                            <span class="text_text_li_text_span_red">010-88888888</span>
+                            <span class="text_text_li_text_span_red"></span>
                         </div>
                     </li>
                     <li class="text_text_li">
@@ -43,16 +43,13 @@
                             <span class="text_text_li_text">商户地址：</span>
                         </div>
                         <div class="text_text_li_text_text">
-                            <span class="text_text_li_text_span">河南省郑州市金水区环球大厦c座</span>
+                            <span class="text_text_li_text_span text_address"></span>
                         </div>
                     </li>
                     <li class="text_text_li">
                         <div class="text_text_li_head">
                             <span class="text_text_li_text_xuzhi">购买须知：</span>
                         </div>
-                        <!-- <div class="text_text_li_text_text">
-                                <span class="text_text_li_text_span">跑库</span>
-                            </div> -->
                     </li>
                     <li class="text_text_text_li_aa">
                         <p>1、购买成功凭手机号或订单通知联系商家；</p>
@@ -65,15 +62,37 @@
         </div>
         <div class="fenxiangdingdan">
             <div class="redfenxiang">
-                <span class="hh">我的分享订单</span>
+                <span class="hh"">我的分享订单</span>
             </div>
         </div>
     </div>
 </body>
 
 </html>
-<script src="./jquery.min.js"></script>
+<script src="../addons/ewei_shopv2/static/goodshare/jquery-1.11.3.min.js"></script>
 <script type="text/javascript">
-
-
+    $(function () {
+        $.ajax({
+            type: 'POST',
+            url: '{php echo mobileUrl("goods/share/good")}',
+            data: {
+                "good_id": '{php echo $good_id}',
+                "openid": '{php echo $openid}'
+            },
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                var data_shuju = data.result
+                $(".mingcheng").html(data_shuju.other.main)
+                $(".text_text_li_text_span_red").html(data_shuju.other.tel)
+                $(".text_address").html(data_shuju.other.address)
+            }
+        })
+    })
+    
+     // 分享订单的点击事件
+    $(".hh").click(function () {
+    	var good_id={php echo $good_id};
+        location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.shareorder&good_id='+good_id;
+    })
 </script>

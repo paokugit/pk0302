@@ -249,7 +249,6 @@
             return theRequest;
         }
     }
-
     $(function () {
         var request = GetRequest("id")
         var goods_id = request.id;
@@ -263,7 +262,7 @@
                 dataType: "json",
                 success: function (data) {
                     var obj = document.getElementById("img_img_id")
-                    if (data.result.item.title) {
+                    if (data.result.item.title == "") {
 
                     } else {
                         $('.input_text').val(data.result.item.title)//标题
@@ -279,7 +278,7 @@
                         var thumb = "";
                         $.each(data.result.item.thumb_url,function (i,item) {
                             var img = "http://"+"{php echo $_SERVER['HTTP_HOST']}/attachment/"+item;
-                            thumb += "<li style='background-image:url("+img+")' class='image' data-filename=' + item +'>\n" +
+                            thumb += "<li style='background-image:url("+img+")' class='image' data-filename=' "+item+"'>\n" +
                                 "           <span class='image-remove'><i class='icon icon-close'></i></span>\n" +
                                 "     </li>";
                             // thumb += "<li style='background-image:url("+img+")' class='image' data-filename='"+item+"'>"+
@@ -293,7 +292,8 @@
                     if (data.result.item.music == "") {
 
                     } else {
-                        $('.come_button').val(data.result.item.music)//音乐
+                        $('.come_button').val(data.result.item.music_title)//音乐
+                        $('.come_button').attr("data-id",data.result.item.music)//音乐
                     }
                     if (data.result.item.total == "") {
 
@@ -304,10 +304,10 @@
                     if (data.result.item.end_time == "") {
 
                     } else {
-                        var time_text = data.result.item.end_time
-                        var unixTimestamp = new Date(time_text * 1000)
-                        var commonTime = unixTimestamp.toLocaleString();
-                        $(".timeipt").html(commonTime)
+                        var time_text = data.result.item.end_time;
+                        var unixTimestamp = new Date(time_text * 1000);
+                        var time = unixTimestamp.toJSON().substr(0,10);
+                        $("#date_date").val(time);
                     }
                     if (data.result.item.marketprice == "") {
 
@@ -359,8 +359,6 @@
                     }
                 }
             })
-        } else {
-
         }
     })
     var xinhuai_come = document.getElementsByClassName("xinhuai_come")
@@ -396,6 +394,8 @@
     })
     // 草稿
     $('.save').click(function () {
+        var request = GetRequest("id")
+        var goods_id = request.id?request.id:"";
         var huodonghead = $('.input_text').val();//活动标题
         var huodongintroduce = $('.activity_introduction_text').val()//活动介绍
         var thumbs = [];
@@ -452,8 +452,9 @@
             type: 'POST',
             url: '{php echo mobileUrl("merchmanage.goods.show.addgoods")}',
             data: {
+                "id":goods_id,
                 "title": huodonghead,
-                "description": huodongintroduce,
+                "desc": huodongintroduce,
                 "marketprice": marketprice,
                 "end_time": end_time,
                 "total": total,
@@ -479,6 +480,8 @@
 
     // 保存并发布
     $('.saveandpublish').click(function () {
+        var request = GetRequest("id")
+        var goods_id = request.id?request.id:"";
         var huodonghead = $('.input_text').val();//活动标题
         var huodongintroduce = $('.activity_introduction_text').val(); //活动介绍
         var thumbs = [];
@@ -534,6 +537,7 @@
             type: 'POST',
             url: '{php echo mobileUrl("merchmanage.goods.show.addgoods")}',
             data: {
+                "id": goods_id,
                 "title": huodonghead,
                 "desc": huodongintroduce,
                 "marketprice": marketprice,
