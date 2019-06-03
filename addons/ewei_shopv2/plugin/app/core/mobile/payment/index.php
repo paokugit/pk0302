@@ -10,7 +10,6 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
 	public function qrcode()
     {
-        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $mid = $_GPC['merchid'];
         //折扣宝收款码
@@ -29,7 +28,6 @@ class Index_EweiShopV2Page extends AppMobilePage
      * 获得卡路里和折扣宝余额
      */
     public function getCredit(){
-        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $credit1 = pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],credit1);
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],credit3);
@@ -41,10 +39,9 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function order()
     {
-        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         global $_W;
-        $order_sn = base64_encode(date('Ymd',time()).'_'.'31'.'_'.$_GPC['money'].'_'.$_GPC['rebate'].'_'.$_GPC['cate']);
+        $order_sn = base64_encode(date('Ymd',time()).'_'.$_GPC['merchid'].'_'.$_GPC['money'].'_'.$_GPC['rebate'].'_'.$_GPC['cate']);
         $data = [
             'random'=>random(32),
             'body'=>'商家商户收款码收款',
@@ -64,7 +61,6 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function record()
     {
-        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
         $mch_id = $_GPC['merchid'];
@@ -93,7 +89,6 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function set()
     {
-        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
         //判断提交方式
@@ -142,7 +137,6 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function edit()
     {
-        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
         //判断提交方式
@@ -158,7 +152,6 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function getset()
     {
-        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $page = intval($_GPC['page']);
         $pageSize = 8;
@@ -172,7 +165,6 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function change()
     {
-        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
         if($_W['ispost']){
@@ -208,16 +200,16 @@ class Index_EweiShopV2Page extends AppMobilePage
     /**
      * 输入买单金额  返回用户可用的折扣
      */
-    public function getDeduct(){
-        header('Access-Control-Allow-Origin:*');
+    public function getDeduct()
+    {
         global $_GPC;
         $credit1 = pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],'credit1');
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],'credit3');
         //cate == 1  卡路里 ==2  折扣宝
         if($_GPC['cate'] == 1){
-            $list = pdo_fetchall('select * from '.tablename('ewei_shop_deduct_setting').' where money<="'.$_GPC['money'].'" and cate = "'.$_GPC['cate'].'" and deduct <="'.$credit1.'" and merchid = "'.$_GPC['merchid'].'" order by money desc');
+            $list = pdo_fetch('select * from '.tablename('ewei_shop_deduct_setting').' where money<="'.$_GPC['money'].'" and cate = "'.$_GPC['cate'].'" and deduct <="'.$credit1.'" and merchid = "'.$_GPC['merchid'].'" order by money desc');
         }else{
-            $list = pdo_fetchall('select * from '.tablename('ewei_shop_deduct_setting').' where money<="'.$_GPC['money'].'" and cate = "'.$_GPC['cate'].'" and deduct <="'.$credit3.'"  and merchid = "'.$_GPC['merchid'].'" order by money desc');
+            $list = pdo_fetch('select * from '.tablename('ewei_shop_deduct_setting').' where money<="'.$_GPC['money'].'" and cate = "'.$_GPC['cate'].'" and deduct <="'.$credit3.'"  and merchid = "'.$_GPC['merchid'].'" order by money desc');
         }
         show_json(1,['list'=>$list]);
     }
