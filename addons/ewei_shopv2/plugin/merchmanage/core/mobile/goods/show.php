@@ -82,11 +82,12 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             $fields = "title,description,total,marketprice,thumb,thumb_url,commission1_pay,commission2_pay";
             $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>31]);
             $item1['thumb_url'] = unserialize($item1['thumb_url']);
+            array_unshift($item1['thumb_url'],$item1['thumb']);
             //查询红包引流的全部字段
-            $item2 = pdo_fetch('select * from' .tablename('ewei_shop_goods_bribe_expert').' where goods_id =:id',[':id'=>$_GPC['id']]);
+            $item2 = pdo_fetch('select * from ' .tablename('ewei_shop_goods_bribe_expert').' where goods_id =:id',[':id'=>$_GPC['id']]);
             $item = array_merge($item1,$item2);
             //获取某个字段
-            $item['music'] = pdo_getcolumn('ewei_shop_music',array('id'=>$item['music']),'title');
+            $item['music_title'] = pdo_getcolumn('ewei_shop_music',array('id'=>$item['music']),'title');
             show_json(1,['item'=>$item]);
         }else{
             show_json(0,'参数错误');
@@ -141,7 +142,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             unset($thumb_url[0]);
             $data['thumb_url'] = serialize(m('common')->array_images($thumb_url));
         }
-        if(isset($_GPC['id'])){
+        if($_GPC['id']!=""){
             pdo_update('ewei_shop_goods',$data,['id'=>$_GPC['id']]);
             pdo_update('ewei_shop_goods_bribe_expert',$add,['goods_id'=>$_GPC['id']]);
         }else{
