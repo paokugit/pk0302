@@ -3303,9 +3303,9 @@ class Create_EweiShopV2Page extends AppMobilePage
 			m("member")->setCredit($openid, "credit1", 0 - $deductcredit, array( "0", $_W["shopset"]["shop"]["name"] . "购物卡路里抵扣 消费卡路里: " . $deductcredit . " 抵扣金额: " . $deductmoney . " 订单号: " . $ordersn ));
 		}
 		//添加折扣宝记录
-		if( 0 < $discount )
+		if( 0 < $discount&&$_GPC["discount"])
 		{
-		    m("member")->setCredit($openid, "credit3", 0 - $discount, array( "0", $_W["shopset"]["shop"]["name"] . "购物卡路里抵扣 消费折扣宝: " . $discount . " 抵扣金额: " . $discount . " 订单号: " . $ordersn ));
+		   m("member")->setCredit($openid, "credit3", 0 - $discount, array( "0", $_W["shopset"]["shop"]["name"] . "购物折扣宝抵扣 消费折扣宝: " . $discount . " 抵扣金额: " . $discount . " 订单号: " . $ordersn ));
 		}
 		if( 0 < $buyagainprice ) 
 		{

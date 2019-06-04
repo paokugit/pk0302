@@ -64,10 +64,13 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         global $_W;
-        if(!$_GPC['rebate'] || !$_GPC['merchid'] || !$_GPC['money'] || !$_GPC['cate']){
+
+        if(!$_GPC['rebate'] || !$_GPC['merchid'] || !$_GPC['money'] || !$_GPC['cate'] || !$_GPC['openid']){
             show_json(0,"请完善参数信息");
         }
-        $order_sn = date('YmdHis',time()).'_'.$_GPC['merchid'].'_'.$_GPC['money'].'_'.$_GPC['rebate'].'_'.$_GPC['cate'];
+       	$param = [$_GPC['merchid'],$_GPC['money'],$_GPC['rebate'],$_GPC['cate']];
+        $order_sn =random(4).base64_encode(json_encode($param));
+        $order_sn = base64_encode(date('Ymd',time()).'_'.$_GPC['merchid'].'_'.$_GPC['money'].'_'.$_GPC['rebate'].'_'.$_GPC['cate']);
         $data = [
             'random'=>random(32),
             'body'=>'商家商户收款码收款',
@@ -84,7 +87,26 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         show_json(1,['res'=>$res]);
     }
-
+    
+   //支付
+    public function order_cs()
+    {
+        global $_GPC;
+        if(!$_GPC['rebate'] || !$_GPC['merchid'] || !$_GPC['money'] || !$_GPC['cate'] || !$_GPC['openid']){
+            show_json(0,"请完善参数信息");
+        }
+	    $param = [$_GPC['merchid'],$_GPC['money'],$_GPC['rebate'],$_GPC['cate']];
+        $order_sn =random(4).base64_encode(json_encode($param));
+        $payinfo = array( "openid" => substr($_GPC['openid'],7), "title" => "商家商户收款码收款", "tid" => $order_sn, "fee" =>$_GPC["money"] );
+        $res = $this->model->wxpay($payinfo, 14);
+       
+        //var_dump($data);
+        if(!is_error($res)){
+            show_json(1,$res);
+        }
+        show_json(0,['res'=>$res]);
+    }
+    
     /**
      * 收款记录
      */
@@ -131,10 +153,14 @@ class Index_EweiShopV2Page extends AppMobilePage
         $fee = $_GPC['deduct'];
         $cate = $_GPC['cate'];
         $id = $_GPC['id'];
+
+
         if(!$money || !$fee || !$cate || !$_GPC['merchid']){
             show_json(0,"请完善参数信息");
         }
-        if($fee || $money){
+
+        if($fee && $money){
+
             $data = [
                 'uniacid'=>$_W['uniacid'],
                 'merchid'=>$_GPC['merchid'],
@@ -175,6 +201,13 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$_GPC['id']) show_json(0,"参数信息不完整");
         $data = pdo_fetch('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where id = "'.$_GPC['id'].'"');
         if(!$data) show_json(0,'信息不存在');
+
+        //判断提交方式
+        if(!$_W['ispost']){
+            app_error(AppError::$RequestError);
+        }
+        $data = pdo_fetch('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where id = "'.$_GPC['id'].'" and merchid = "'.$_GPC['merchid'].'"');
+
         show_json(1,['data'=>$data]);
     }
 
@@ -190,11 +223,15 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$_GPC['merchid'] || !$_GPC['cate']){
             show_json(0,"参数不完整");
         }
+
+        $total = pdo_count('ewei_shop_deduct_setting',['merchid'=>$_GPC['merchid'],'cate'=>$_GPC['cate']]);
         $list = pdo_fetchall('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid and cate=:cate order by money asc LIMIT '.$spage.','.$pageSize,array(':merchid'=>$_GPC['merchid'],':cate'=>$_GPC['cate']));
         if(!$list){
             show_json(0,"暂无信息");
         }
-        show_json(1,['list'=>$list]);
+
+        show_json(1,['list'=>$list,'pageSize'=>$pageSize,'total'=>$total,'page'=>$page]);
+
     }
 
     /**
@@ -204,6 +241,13 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
+
+        $money = $_GPC['money'];
+        $openid = $_GPC['openid'];
+        if(!$money || !$openid){
+            show_json(0,"参数不完整");
+        }
+
         if($_W['ispost']){
             app_error(AppError::$RequestError);
         }
@@ -240,6 +284,10 @@ class Index_EweiShopV2Page extends AppMobilePage
     public function getDeduct()
     {
         global $_GPC;
+        if(!$_GPC['money'] || !$_GPC['openid'] || !$_GPC['cate'] || !$_GPC['merchid']){
+            show_json(0,"参数不完整");
+        }
+
         $credit1 = pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],'credit1');
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],'credit3');
         //cate == 1  卡路里 ==2  折扣宝
@@ -248,9 +296,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         }else{
             $list = pdo_fetch('select * from '.tablename('ewei_shop_deduct_setting').' where money<="'.$_GPC['money'].'" and cate = "'.$_GPC['cate'].'" and deduct <="'.$credit3.'"  and merchid = "'.$_GPC['merchid'].'" order by money desc');
         }
+
         if(!$list){
             show_json(0,"暂无信息");
         }
+
         show_json(1,['list'=>$list]);
     }
 }
