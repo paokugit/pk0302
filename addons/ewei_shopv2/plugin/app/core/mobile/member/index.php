@@ -300,7 +300,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     /**
      * 获取用户信息
      */
-    public function get_member_info(){
+    public function member_info(){
         global $_W;
         global $_GPC;
         $member_info = m('member')->getInfo($_GPC['openid']);
