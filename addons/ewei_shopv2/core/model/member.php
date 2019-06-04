@@ -313,32 +313,33 @@ class Member_EweiShopV2Model
 		}
 		pdo_insert("mc_credits_record", $log_data);
 		$member_log_table_flag = pdo_tableexists("ewei_shop_member_credit_record");
-		if( $member_log_table_flag ) 
-		{
-			$log_data["openid"] = $openid;
-			$open_redis = function_exists("redis") && !is_error(redis());
-			if( $open_redis ) 
-			{
-				$redis_key = (string) $_W["uniacid"] . "_member_redit_" . $openid;
-				$redis = redis();
-				if( !is_error($redis) ) 
-				{
-					if( $redis->setnx($redis_key, time()) ) 
-					{
-						pdo_insert("ewei_shop_member_credit_record", $log_data);
-						$redis->expireAt($redis_key, time() + 1);
-					}
-					else 
-					{
-						if( $redis->get($redis_key) + 1 < time() ) 
-						{
-							pdo_insert("ewei_shop_member_credit_record", $log_data);
-							$redis->del($redis_key);
-						}
-					}
-				}
-			}
-		}
+		pdo_insert("ewei_shop_member_credit_record", $log_data);
+// 		if( $member_log_table_flag ) 
+// 		{
+// 			$log_data["openid"] = $openid;
+// 			$open_redis = function_exists("redis") && !is_error(redis());
+// 			if( $open_redis ) 
+// 			{
+// 				$redis_key = (string) $_W["uniacid"] . "_member_redit_" . $openid;
+// 				$redis = redis();
+// 				if( !is_error($redis) ) 
+// 				{
+// 					if( $redis->setnx($redis_key, time()) ) 
+// 					{
+// 						pdo_insert("ewei_shop_member_credit_record", $log_data);
+// 						$redis->expireAt($redis_key, time() + 1);
+// 					}
+// 					else 
+// 					{
+// 						if( $redis->get($redis_key) + 1 < time() ) 
+// 						{
+// 							pdo_insert("ewei_shop_member_credit_record", $log_data);
+// 							$redis->del($redis_key);
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
 		if( p("task") ) 
 		{
 			if( $credittype == "credit1" ) 
