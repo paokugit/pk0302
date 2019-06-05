@@ -187,9 +187,10 @@ class Qrcode_EweiShopV2Model
 			$qr_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$mid."/".$qr_filename . "?v=1.0";
 			return ['qrcode'=>$qrcode_url,'qr'=>$qr_url];
 		}
+		//这是背景图
 		$thumb = "/addons/ewei_shopv2/static/images/".$member['back'].'.png';
 		$target = $this->createImage(tomedia($thumb));
-
+		//这是字体设置
 		$font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_MEDIUM.TTF";
 		if( !is_file($font) )
 		{
@@ -199,7 +200,7 @@ class Qrcode_EweiShopV2Model
 		//把商家的名字写在二维码下面
 		imagettftext($target,60, 0, 416, 1136, $white, $font,mb_substr($merch['merchname'],0,4));
 		//lihanwen
-		$qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $mid,"page" => $member['url'] ));
+		$qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $mid ."&cate=".$member['cate'],"page" => $member['url'] ));
 		if( !is_error($qrcode) )
 		{
 			$qrcode = imagecreatefromstring($qrcode);

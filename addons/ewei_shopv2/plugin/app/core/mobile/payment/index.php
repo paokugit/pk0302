@@ -32,8 +32,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         $calorie_url  = 'pages/discount/kllscancode/kllscancode';
         $calorie_back = 'kaluli';
         //生成二维码
-        $rebate = m('qrcode')->createHelpPoster(['back'=>$rebate_back,'url'=>$rebate_url],$mid);
-        $calorie =  m('qrcode')->createHelpPoster(['back'=>$calorie_back,'url'=>$calorie_url],$mid);
+        $rebate = m('qrcode')->createHelpPoster(['back'=>$rebate_back,'url'=>$rebate_url,'cate'=>2],$mid);
+        $calorie =  m('qrcode')->createHelpPoster(['back'=>$calorie_back,'url'=>$calorie_url,'cate'=>1],$mid);
         if(!$rebate || !$calorie){
             show_json(0,'生成商家二维码错误');
         }
@@ -64,49 +64,203 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         global $_W;
-
-        if(!$_GPC['rebate'] || !$_GPC['merchid'] || !$_GPC['money'] || !$_GPC['cate'] || !$_GPC['openid']){
+        if($_GPC['rebate'] == "" || $_GPC['merchid'] == "" || $_GPC['money'] == "" || $_GPC['cate'] == "" || $_GPC['openid'] ==""){
             show_json(0,"请完善参数信息");
         }
-       	$param = [$_GPC['merchid'],$_GPC['money'],$_GPC['rebate'],$_GPC['cate']];
-        $order_sn =random(4).base64_encode(json_encode($param));
-        $order_sn = base64_encode(date('Ymd',time()).'_'.$_GPC['merchid'].'_'.$_GPC['money'].'_'.$_GPC['rebate'].'_'.$_GPC['cate']);
+        //扫码订单前缀 SC  生成订单号
+        $order_sn = "SC".$_GPC['cate'].date('YmdHis',time()).random(12);
+        $add = [
+            'openid'=>$_GPC['openid'],
+            'uniacid'=>$_W['uniacid'],
+            'ordersn'=>$order_sn,
+            'price'=>$_GPC['money'],
+            'goodsprice'=>bcadd($_GPC['money'],$_GPC['rebate'],2),
+            'status'=>0,
+            'paytype'=>21,
+            'createtime'=>time(),
+            'merchid'=>$_GPC['merchid'],
+            'ismerch'=>1,
+        ];
+        //加入订单记录
+        $order = pdo_insert('ewei_shop_order',$add);
+        //微信支付的参数
         $data = [
             'random'=>random(32),
             'body'=>'商家商户收款码收款',
             'ip'=>CLIENT_IP,
             'money'=>$_GPC['money'],
-            'rebate'=>$_GPC['rebate'],
             'url'=>$_W['siteroot'].'addons/ewei_shopv2/payment/wchat/notify/shopCode',   //回调地址
             'openid'=>substr($_GPC['openid'],7),
             'out_order'=>$order_sn,     //订单号
         ];
+        //请求微信的支付接口    返回的是唤醒支付的参数
         $res = m('pay')->pay($data);
-        if(!$res){
-            show_json(0,'支付信息错误');
+        if(is_error($res)){
+            show_json(0,$res);
         }
-        show_json(1,['res'=>$res]);
+        //用户付款的日志
+        $add2= [
+            'uniacid'=>$_W['uniacid'],
+            'openid'=>$_GPC['openid'],
+            'type'=>2,
+            'logno'=>$order,
+            'title'=>'扫商家付款码支付',
+            'createtime'=>time(),
+            'status'=>0,
+            'money'=>-$_GPC['money'],
+            'rechargetype'=>'wxscan',
+        ];
+        pdo_insert('ewei_shop_member_log',$add2);
+        //获得用户的卡路里  和  折扣宝
+        $member = pdo_get('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1','credit3']);
+        if($_GPC['cate'] == 1){
+            $credit1 = $member['credit1'] - $_GPC['rebate'];
+        }elseif ($_GPC['cate'] == 2){
+            $credit3 = $member['credit3'] - $_GPC['rebate'];
+        }
+        pdo_update('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1'=>$credit1,'credit3'=>$credit3]);
+        show_json(1,$res);
     }
     
    //支付
     public function order_cs()
     {
         global $_GPC;
+        global $_W;
+        if($_GPC['rebate'] == "" || $_GPC['merchid'] == "" || $_GPC['money'] == "" || $_GPC['cate'] == "" || $_GPC['openid'] == ""){
+            show_json(0,"请完善参数信息");
+        }
+        //扫码订单前缀 SC  生成订单号
+        $order_sn = "SC".$_GPC['cate'].date('YmdHis',time()).random(12);
+        $add = [
+            'openid'=>$_GPC['openid'],
+            'uniacid'=>$_W['uniacid'],
+            'ordersn'=>$order_sn,
+            'price'=>$_GPC['money'],
+            'goodsprice'=>bcadd($_GPC['money'],$_GPC['rebate'],2),
+            'status'=>0,
+            'paytype'=>21,
+            'createtime'=>time(),
+            'merchid'=>$_GPC['merchid'],
+            'ismerch'=>1,
+        ];
+        //加入订单记录
+        $order = pdo_insert('ewei_shop_order',$add);
+        //微信支付的参数
+        $data = [
+            'random'=>random(32),
+            'body'=>'商家商户收款码收款',
+            'ip'=>CLIENT_IP,
+            'money'=>$_GPC['money'],
+            'url'=>$_W['siteroot'].'addons/ewei_shopv2/payment/wchat/notify/shopCode',   //回调地址
+            'openid'=>substr($_GPC['openid'],7),
+            'out_order'=>$order_sn,     //订单号
+        ];
+        //请求微信的支付接口    返回的是唤醒支付的参数
+        $res = m('pay')->pay($data);
+        if(is_error($res)){
+            show_json(0,$res);
+        }
+        //用户付款的日志
+        $add2= [
+            'uniacid'=>$_W['uniacid'],
+            'openid'=>$_GPC['openid'],
+            'type'=>2,
+            'logno'=>$order,
+            'title'=>'扫商家付款码支付',
+            'createtime'=>time(),
+            'status'=>0,
+            'money'=>-$_GPC['money'],
+            'rechargetype'=>'wxscan',
+        ];
+        pdo_insert('ewei_shop_member_log',$add2);
+        //获得用户的卡路里  和  折扣宝
+        $member = pdo_get('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1','credit3']);
+        //先减去他用的折扣宝
+        if($_GPC['cate'] == 1){
+            $credit1 = $member['credit1'] - $_GPC['rebate'];
+        }elseif ($_GPC['cate'] == 2){
+            $credit3 = $member['credit3'] - $_GPC['rebate'];
+        }
+        pdo_update('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1'=>$credit1,'credit3'=>$credit3]);
+        show_json(1,$res);
+    }
+
+    //支付
+    public function order_css()
+    {
+        global $_GPC;
+        global $_W;        
         if(!$_GPC['rebate'] || !$_GPC['merchid'] || !$_GPC['money'] || !$_GPC['cate'] || !$_GPC['openid']){
             show_json(0,"请完善参数信息");
         }
-	    $param = [$_GPC['merchid'],$_GPC['money'],$_GPC['rebate'],$_GPC['cate']];
-        $order_sn =random(4).base64_encode(json_encode($param));
+        //扫码订单前缀 SC
+        $order_sn ="SC".date('YmdHis',time()).random(12);
+        //如果没有这条日志  加日志  并  给商家加钱
+        pdo_insert('ewei_shop_member_log',$add1);
+        //用户付款的日志
+        $add2= [
+            'uniacid'=>$_W['uniacid'],
+            'openid'=>$_GPC['openid'],
+            'type'=>2,
+            'logno'=>$order_sn,
+            'title'=>'扫商家付款码支付',
+            'createtime'=>time(),
+            'status'=>0,
+            'money'=>-$_GPC['money'],
+            'rechargetype'=>'wxscan',
+        ];
+        pdo_insert('ewei_shop_member_log',$add2);
         $payinfo = array( "openid" => substr($_GPC['openid'],7), "title" => "商家商户收款码收款", "tid" => $order_sn, "fee" =>$_GPC["money"] );
         $res = $this->model->wxpay($payinfo, 14);
-       
-        //var_dump($data);
         if(!is_error($res)){
             show_json(1,$res);
         }
         show_json(0,['res'=>$res]);
     }
     
+    /**
+     * 收款记录
+     */
+    public function oldrecord()
+    {
+        global $_W;
+        global $_GPC;
+        $mch_id = $_GPC['merchid'];
+        //页数
+        $page = max(1,($_GPC['page']));
+        //每页显示条数
+        $pageSize = 8;
+        //第几页从第几个显示
+        $psize = ($page-1)*$pageSize;
+        if(!$mch_id || !$_GPC['openid']){
+            show_json(0,"请完善参数信息");
+        }
+        //计算这个店铺成交的第一个订单的日期
+        $start_time = pdo_getcolumn('ewei_shop_order',['status'=>3,'merchid'=>$mch_id],'createtime');
+        //计算时间
+        $day = round((time()-$start_time)/86400);
+        $list = [];
+        for ($i = 0;$i<=$day;$i++){
+            $start = strtotime(date('Y-m-d',strtotime('-'.$i.'day')));
+            $time = date('Y-m-d',$start);
+            $end = $start + 86400;
+            $list[$time] = pdo_fetchall('select id,ordersn,openid,price,createtime from '.tablename('ewei_shop_order').' where createtime between "'.$start.'" and "'.$end.'" and status = 3 and merchid = "'.$mch_id.'" ');
+            $list[$time]['count'] = count($list[$time]);
+            $money = array_column($list[$time],'price');
+            $list[$time]['total'] = round(array_sum($money),2);
+            foreach ($list[$time] as $key=>$item){
+                $list[$time][$key]['createtime'] = date('H:i:s',$item['createtime']);
+                $list[$time][$key]['nickname'] = pdo_getcolumn('ewei_shop_member',['openid'=>$item['openid']],'nickname');
+            }
+            $total+=$list[$time]['count'];
+        }
+        if(!$list){
+            show_json(0,"暂无信息");
+        }
+        show_json(1,['list'=>$list,'total'=>$total,'pageSize'=>$pageSize,'page'=>$page]);
+    }
+
     /**
      * 收款记录
      */
@@ -118,27 +272,21 @@ class Index_EweiShopV2Page extends AppMobilePage
         //页数
         $page = max(1,($_GPC['page']));
         //每页显示条数
-        $pageSize = 2;
+        $pageSize = 8;
         //第几页从第几个显示
         $psize = ($page-1)*$pageSize;
         if(!$mch_id || !$_GPC['openid']){
             show_json(0,"请完善参数信息");
         }
-        $openid = pdo_fetch('select m.openid from '.tablename('ewei_shop_member').'m join '.tablename('ewei_shop_merch_user').('mu on m.id=mu.member_id').' where mu.id = "'.$mch_id.'"');
-        $list =  pdo_fetchall('select logno from '.tablename('ewei_shop_member_log') . ' where uniacid ="'.$_W['uniacid'].'" and openid = "'.$openid['openid'].'" and type = 3 LIMIT '.$psize. ','.$pageSize);
+        $list = pdo_fetchall('select id,openid,price,createtime from '.tablename('ewei_shop_order').' where status = 3 and merchid = "'.$mch_id.'" LIMIT '.$psize.','.$pageSize);
         foreach ($list as $key=>$item){
-            //$user = pdo_get('ewei_shop_member_log',['logno'=>substr($item['logno'],7)],['openid','money','createtime']);
-            $user = pdo_get('ewei_shop_member_log',['logno'=>$item['logno']],['openid','money','createtime']);
-            $list[$key]['logno'] = substr($item['logno'],7);
-            $list[$key]['openid'] = $user['openid'];
-            $list[$key]['money'] = $user['money'];
-            $list[$key]['createtime'] = date('Y-m-d H:i:s',$user['createtime']);
-            $list[$key]['nickname'] = pdo_getcolumn('ewei_shop_member',['openid'=>$user['openid']],'nickname');
+            $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
+            $list[$key]['nickname'] = pdo_getcolumn('ewei_shop_member',['openid'=>$item['openid']],'nickname');
         }
         if(!$list){
             show_json(0,"暂无信息");
         }
-        show_json(1,['list'=>$list]);
+        show_json(1,['list'=>$list,'total'=>count($list),'pageSize'=>$pageSize,'page'=>$page]);
     }
 
     /**
@@ -153,14 +301,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         $fee = $_GPC['deduct'];
         $cate = $_GPC['cate'];
         $id = $_GPC['id'];
-
-
         if(!$money || !$fee || !$cate || !$_GPC['merchid']){
             show_json(0,"请完善参数信息");
         }
-
-        if($fee && $money){
-
+        if($fee || $money){
             $data = [
                 'uniacid'=>$_W['uniacid'],
                 'merchid'=>$_GPC['merchid'],
@@ -201,13 +345,6 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$_GPC['id']) show_json(0,"参数信息不完整");
         $data = pdo_fetch('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where id = "'.$_GPC['id'].'"');
         if(!$data) show_json(0,'信息不存在');
-
-        //判断提交方式
-        if(!$_W['ispost']){
-            app_error(AppError::$RequestError);
-        }
-        $data = pdo_fetch('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where id = "'.$_GPC['id'].'" and merchid = "'.$_GPC['merchid'].'"');
-
         show_json(1,['data'=>$data]);
     }
 
@@ -223,15 +360,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$_GPC['merchid'] || !$_GPC['cate']){
             show_json(0,"参数不完整");
         }
-
         $total = pdo_count('ewei_shop_deduct_setting',['merchid'=>$_GPC['merchid'],'cate'=>$_GPC['cate']]);
         $list = pdo_fetchall('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid and cate=:cate order by money asc LIMIT '.$spage.','.$pageSize,array(':merchid'=>$_GPC['merchid'],':cate'=>$_GPC['cate']));
         if(!$list){
             show_json(0,"暂无信息");
         }
-
         show_json(1,['list'=>$list,'pageSize'=>$pageSize,'total'=>$total,'page'=>$page]);
-
     }
 
     /**
@@ -241,18 +375,11 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
-
         $money = $_GPC['money'];
         $openid = $_GPC['openid'];
         if(!$money || !$openid){
             show_json(0,"参数不完整");
         }
-
-        if($_W['ispost']){
-            app_error(AppError::$RequestError);
-        }
-        $money = $_GPC['money'];
-        $openid = $_GPC['openid'];
         //查用户的卡路里和折扣宝的信息
         $member = pdo_fetch('select credit1,credit3 from '.tablename('ewei_shop_member').'where openid=:openid and uniacid=:uniacid',array(':openid'=>$openid,':uniacid'=>$_W['uniacid']));
         //判断要转换的卡路里和用户的卡路里的多少
@@ -263,18 +390,34 @@ class Index_EweiShopV2Page extends AppMobilePage
             $credit1 = $member['credit1'] - $money;
             $credit3 = $member['credit3'] + $money;
             //更新用户的卡路里和折扣宝的余额
-            pdo_update('',['credit1'=>$credit1,'credit3'=>$credit3],['openid'=>$openid]);
+            $update = pdo_update('ewei_shop_member',['credit1'=>$credit1,'credit3'=>$credit3],['openid'=>$openid]);
+            if(!$update){
+                show_json(0,'卡路里转换成功');
+            }
             $data = [
                 'openid'=>$openid,
                 'uniacid'=>$_W['uniacid'],
                 'credittype'=>'credit1',
-                'num'=>$money,
+                'num'=>-$money,
                 'createtime'=>time(),
-                'remark'=>"卡路里转换折扣宝",
+                'remark'=>"卡路里转换折扣宝,减少卡路里".$money,
                 'module'=>"ewei_shopv2",
             ];
-            pdo_insert('ewei_shop_credit_record',$data);
-            show_json(1);
+            $add = [
+                'openid'=>$openid,
+                'uniacid'=>$_W['uniacid'],
+                'credittype'=>'credit3',
+                'num'=>$money,
+                'createtime'=>time(),
+                'remark'=>"卡路里转换折扣宝,折扣宝增加".$money,
+                'module'=>"ewei_shopv2",
+            ];
+            $record = pdo_insert('mc_credits_record',$data);
+            $record = pdo_insert('mc_credits_record',$add);
+            if(!$record){
+                show_json(0,"加入记录失败");
+            }
+            show_json(1,"转账成功");
         }
     }
 
@@ -287,7 +430,6 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$_GPC['money'] || !$_GPC['openid'] || !$_GPC['cate'] || !$_GPC['merchid']){
             show_json(0,"参数不完整");
         }
-
         $credit1 = pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],'credit1');
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],'credit3');
         //cate == 1  卡路里 ==2  折扣宝
@@ -296,12 +438,57 @@ class Index_EweiShopV2Page extends AppMobilePage
         }else{
             $list = pdo_fetch('select * from '.tablename('ewei_shop_deduct_setting').' where money<="'.$_GPC['money'].'" and cate = "'.$_GPC['cate'].'" and deduct <="'.$credit3.'"  and merchid = "'.$_GPC['merchid'].'" order by money desc');
         }
-
+        //查下这个商家这个类型的  折扣信息
+        $array = pdo_fetchall('select * from '.tablename('ewei_shop_deduct_setting').' where cate = "'.$_GPC['cate'].'" and merchid = "'.$_GPC['merchid'].'"');
+        if(count($array) <= 0){
+            show_json(-1,'暂无折扣信息');
+        }
         if(!$list){
             show_json(0,"暂无信息");
         }
-
         show_json(1,['list'=>$list]);
+    }
+
+    /**
+     * 折扣宝的收支记录
+     */
+    public function rebateRecord()
+    {
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        if(!$openid){
+            show_json(0,"用户信息错误");
+        }
+        $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit3');
+        $fields = "id,num,createtime,remark,openid";
+        //收入(也就是充值)  只有 后台充值和卡路里转换两种方式  和商家没关系
+        $income = pdo_fetchall(' select '.$fields.' from '.tablename('mc_credits_record').' where credittype = "credit3" and num > 0 and openid = "'.$openid.'"');
+        //支出  只有扫码折扣付支出   和商家有关 所以在回调时  加入merchid
+        $pay = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype = "credit3" and num < 0 and openid = "'.$openid.'"');
+        foreach ($income as $key=>$item){
+            $income[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
+        }
+        foreach ($pay as $key=>$item){
+            $pay[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
+        }
+        show_json(1,['credit3'=>$credit3,'income'=>$income,'pay'=>$pay]);
+    }
+
+    /**
+     * 扫码付款明细 详情
+     */
+    public function detail(){
+        global $_GPC;
+        $id = $_GPC['id'];
+        $openid = $_GPC['openid'];
+        if(!$id || !$openid) show_json(0,"请完善参数");
+        $data = pdo_fetch('select openid,num,createtime,merchid from '.tablename('mc_credits_record').' where id = "'.$id.'" and openid  = "'.$openid.'"');
+        $data['createtime'] = date('Y-m-d H:i:s',$data['createtime']);
+        $data['merch_name'] = pdo_getcolumn('ewei_shop_merch_user',['id'=>$data['merchid']],'merchname');
+        if(!$data){
+            show_json(0,"暂无信息");
+        }
+        show_json(1,$data);
     }
 }
 ?>

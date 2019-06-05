@@ -907,61 +907,53 @@ class EweiShopWechatPay
         if (!$res) {
             exit("FAIL");
         }
+        $ordersn = $data['out_trade_no'];  //获得订单信息
+        //如果失败  先获得分类  cate  == 1  卡路里   cate == 2  折扣宝
+        $cate = substr($ordersn,2,1);
+        //用ordersn订单号 查订单信息
+        $order = pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
+        //从order里面获得openID 查用户的卡路里和折扣宝余额
+        $member = pdo_fetch('select credit1,credit3 from '.tablename('ewei_shop_member').'where openid = "'.$order['openid'].'"');
         if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
             pdo_begin();
             try {
-                $array = explode('_',base64_decode($data['out_trade_no']));
-                $merchid = $array[1];
-                $openid = 'sns_wa_'.$data['openid'];
-                $money = $array[2];
-                $rebate = $array[3];
-                $type = $array[4];
-                $merch = pdo_fetch('select m.openid,m.uniacid,m.credit2 from '.tablename('ewei_shop_member').'m join '.tablename('ewei_shop_merch_user').('mu on m.id=mu.member_id').' where mu.id = "'.$merchid.'"');
-                $member = pdo_fetch('select credit1,credit3 from '.tablename('ewei_shop_member').'where openid = "'.$openid.'"');
-                //商家收款的日志
-                $add1 = [
-                    'uniacid'=>$merch['uniacid'],
-                    'openid'=>$merch['openid'],
-                    'type'=>4,
-                    'logno'=>'shop'.$data['out_trade_no'],
-                    'title'=>'商家收款',
-                    'createtime'=> time(),
-                    'status'=>1,
-                    'money'=>$money,
-                    'realmoney'=>$money,
-                ];
-                //如果没有这条日志  加日志  并  给商家加钱
-                if(!pdo_fetch('select * from '.tablename('ewei_shop_member_log').' where logno = "'.$add1['logno'].'"')){
-                    pdo_insert('ewei_shop_member_log',$add1);
-                    pdo_update('ewei_shop_member',['openid'=>$merch['onpenid']],['credit2'=>bcadd($merch['credit2'],$money,2)]);
-                }
-                //用户付款的日志
-                $add2= [
-                    'uniacid'=>$merch['uniacid'],
-                    'openid'=>'sns_wa_'.$openid,
-                    'type'=>2,
-                    'logno'=>$data['out_trade_no'],
-                    'title'=>'扫商家付款码支付',
+                //如果成功  修改订单的status 状态 和 日志的状态
+                pdo_update('ewei_shop_order',['ordersn'=>$ordersn],['status'=>3]);
+                pdo_update('ewei_shop_member_log',['logno'=>$ordersn],['status'=>1]);
+                $data = [
+                    'openid'=>$order['openid'],
+                    'uniacid'=>$order['uniacid'],
+                    'num'=>-$order['money'],
                     'createtime'=>time(),
-                    'status'=>1,
-                    'money'=>-$money,
-                    'rechargetype'=>'wxscan'
+                    'module'=>"ewei_shopv2",
+                    'merchid'=>$order['merchid'],
                 ];
-                //如果没有这条记录 则加入记录  并且扣除对应的金额
-                if(!pdo_fetch('select * from '.tablename('ewei_shop_member_log').' where logno = "'.$add2['logno'].'"')){
-                    pdo_insert('ewei_shop_member_log',$add2);
-                    if($type == 1){
-                        $credit1 = $member['credit1'] - $rebate;
-                        pdo_update('ewei_shop_member',['openid'=>$openid],['credit1'=>$credit1]);
-                    }elseif ($type == 2){
-                        $credit3 = $member['credit3'] - $rebate;
-                        pdo_update('ewei_shop_member',['openid'=>$openid],['credit3'=>$credit3]);
-                    }
+                if($cate == 1){
+                    $add1 = [
+                       'remark'=>"用户折扣付款,减少卡路里".$order['money'],
+                       'credittype'=>"credit1",
+                    ];
+                    $add = array_merge($add1,$data);
+                }elseif ($cate == 2){
+                    $add2 = [
+                        'remark'=>"用户折扣付款,减少折扣宝".$order['money'],
+                        'credittype'=>"credit3",
+                    ];
+                    $add = array_merge($add2,$data);
                 }
+                pdo_insert('mc_credits_record',$add);
                 pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();
             }
+        }else{
+            //失败的话 给用户加进扣除的卡路里  和 折扣宝
+            if($cate == 1){
+                $credit1 = $member['credit1'] + ($order['goodsprice'] - $order['price']);
+            }elseif($cate == 2){
+                $credit3 = $member['credit3'] + ($order['goodsprice'] - $order['price']);
+            }
+            pdo_update('ewei_shop_member',['credit3'=>$credit3,'credit1'=>$credit1],['openid'=>$order['openid']]);
         }
     }
 
