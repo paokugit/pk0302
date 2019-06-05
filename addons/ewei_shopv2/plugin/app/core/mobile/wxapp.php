@@ -49,7 +49,11 @@ class Wxapp_EweiShopV2Page extends Page
             //第一次登录
             $arr["login"]=0;
         }
-        
+        //判断用户是否是商家
+        $merchUser=pdo_get('ewei_shop_merch_user',array('member_id'=>$data['id']));
+        if($merchUser){
+            $data['merchInfo'] = $merchUser;
+        }
        
         app_json($arr, $arr["openid"]);
     }
@@ -171,6 +175,13 @@ class Wxapp_EweiShopV2Page extends Page
             if (p("commission")) {
                 p("commission")->checkAgent($member["openid"]);
             }
+            //判断用户是否是商家
+            $merchUser=pdo_get('ewei_shop_merch_user',array('member_id'=>$data['id']));
+            if($merchUser){
+                $data['merchInfo'] = $merchUser;
+            }else{
+                $data['merchInfo'] = false;
+            }
             app_json($data, $data["openId"]);
         }
         app_error(AppError::$WxAppError, "登录错误, 错误代码: " . $errCode);
@@ -199,7 +210,14 @@ class Wxapp_EweiShopV2Page extends Page
                 m("member")->memberRadisCountDelete();
             }
         }
-        app_json(array("uniacid" => $member["uniacid"], "openid" => $member["openid"], "id" => $member["id"], "nickname" => $member["nickname"], "avatarUrl" => tomedia($member["avatar"]), "isblack" => $member["isblack"]), $member["openid"]);
+        //判断用户是否是商家
+        $merchUser=pdo_get('ewei_shop_merch_user',array('member_id'=>$member['id']));
+        if($merchUser){
+            $merchInfo = $merchUser;
+        }else{
+            $merchInfo = false;
+        }
+        app_json(array("merchInfo"=>$merchInfo,"uniacid" => $member["uniacid"], "openid" => $member["openid"], "id" => $member["id"], "nickname" => $member["nickname"], "avatarUrl" => tomedia($member["avatar"]), "isblack" => $member["isblack"]), $member["openid"]);
     }
     
    
