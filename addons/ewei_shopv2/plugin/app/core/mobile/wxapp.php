@@ -44,17 +44,16 @@ class Wxapp_EweiShopV2Page extends Page
         $member=pdo_get('ewei_shop_member',array('openid'=>$openid));
         if ($member){
            $arr["login"]=$member["is_login"];
-         
+            //判断用户是否是商家
+            $merchUser=pdo_get('ewei_shop_merch_user',array('member_id'=>$member['id']));
+            if($merchUser){
+                $arr['merchInfo'] = $merchUser;
+            }
         }else{
             //第一次登录
             $arr["login"]=0;
         }
-        //判断用户是否是商家
-        $merchUser=pdo_get('ewei_shop_merch_user',array('member_id'=>$data['id']));
-        if($merchUser){
-            $data['merchInfo'] = $merchUser;
-        }
-       
+
         app_json($arr, $arr["openid"]);
     }
     
@@ -210,7 +209,6 @@ class Wxapp_EweiShopV2Page extends Page
                 m("member")->memberRadisCountDelete();
             }
         }
-        //判断用户是否是商家
         $merchUser=pdo_get('ewei_shop_merch_user',array('member_id'=>$member['id']));
         if($merchUser){
             $merchInfo = $merchUser;
