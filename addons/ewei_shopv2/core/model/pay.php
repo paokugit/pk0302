@@ -26,12 +26,13 @@ class Pay_EweiShopV2Model
 	{
 		global $_W;
 		$config = pdo_fetch('select * from '.tablename('ewei_shop_payment').' where id=:id and uniacid=:uniacid',[':id'=>1,':uniacid'=>$_W['uniacid']]);
+		$wxpay = m('common')->getSysset('app');   //用来获得小程序的APPID
 		$params = [];
-		$params['appid'] = $config['sub_appid'];
+		$params['appid'] = $wxpay['appid'];
 		$params['mch_id'] = $config['sub_mch_id'];
 		$params['nonce_str'] = $data['random'];
 		$params['out_trade_no'] = $data['out_order'];
-		$params['total_fee'] = $data['money'] * 100;  //金额减去卡路里或者折扣宝的钱
+		$params['total_fee'] = $data['money'] * 100;
 		$params['body'] = $data['body'];
 		$params['spbill_create_ip'] = $data['ip'];
 		$params['trade_type'] = 'JSAPI';
@@ -48,18 +49,26 @@ class Pay_EweiShopV2Model
 		}
 		$xml = simplexml_load_string(trim($response["content"]), "SimpleXMLElement", LIBXML_NOCDATA);
 		$result = json_decode(json_encode($xml), true);
-		if($result['return_code'] == "SUCCESS"){
+		if (strval($result['return_code']) == 'FAIL') {
+			return error(-2, strval($result['return_msg']));
+		}
+		if (strval($result['result_code']) == 'FAIL') {
+			return error(-3, strval($result['err_code']) . ': ' . strval($result['err_code_des']));
+		}
+		if($result['return_code'] == "SUCCESS" && $result['result_code'] == "SUCCESS"){
+			pdo_update('ewei_shop_order',['wxapp_prepay_id'=>$result['prepay_id']],['ordersn'=>$data['out_order']]);
 			$array = array(
 				'appId' => $result['appid'],
 				'package' => 'prepay_id='.$result['prepay_id'],
 				'nonceStr' => $result['nonce_str'],
-				'timeStamp' => time(),
+				'timeStamp' => (string)time(),
 				'signType'=>'md5'
 			);
 			//第二次生成签名
 			$string2 = $this->buildParams($array);
 			$string2 .= "key=" . $config["apikey"];
 			$array["paySign"] = strtoupper(md5(trim($string2)));    //再次签名
+			unset($array['appId']);   //删除数组中的APPID
 			return $array;
 		}
 	}
