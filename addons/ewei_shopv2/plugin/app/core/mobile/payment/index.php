@@ -270,7 +270,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $start = strtotime(date('Y-m-d',strtotime('-'.$i.'day')));
             $time = date('Y-m-d',$start);
             $end = $start + 86400;
-            $list[$time] = pdo_fetchall('select id,openid,price,createtime from '.tablename('ewei_shop_order').' where createtime between "'.$start.'" and "'.$end.'" and status = 3 and merchid = "'.$mch_id.'" ');
+            $list[$time]['list'] = pdo_fetchall('select id,openid,price,createtime from '.tablename('ewei_shop_order').' where createtime between "'.$start.'" and "'.$end.'" and status = 3 and merchid = "'.$mch_id.'" ');
             $list[$time]['count'] = count($list[$time]);
             $money = array_column($list[$time],'price');
             $list[$time]['total'] = round(array_sum($money),2);
