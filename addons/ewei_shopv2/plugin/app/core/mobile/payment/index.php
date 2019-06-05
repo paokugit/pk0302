@@ -268,10 +268,14 @@ class Index_EweiShopV2Page extends AppMobilePage
         $total = 0;
         for ($i = 0;$i<=$day;$i++){
             $start = strtotime(date('Y-m-d',strtotime('-'.$i.'day')));
-            $time = date('Y-m-d',$start);
+            $time = date('Y年m月d日',$start);
             $end = $start + 86400;
             $list[$time]['list'] = pdo_fetchall('select id,openid,price,createtime from '.tablename('ewei_shop_order').' where createtime between "'.$start.'" and "'.$end.'" and status = 3 and merchid = "'.$mch_id.'" ');
             $list[$time]['count'] = count($list[$time]['list']);
+            if($list[$time]['count'] == 0){
+                unset($list[$time]);
+                continue;
+            }
             $money = array_column($list[$time]['list'],'price');
             $list[$time]['total'] = round(array_sum($money),2);
             foreach ($list[$time]['list'] as $key=>$item){
