@@ -123,7 +123,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $mch_add = [
             'uniacid'=>$_W['uniacid'],
             'openid'=>$_GPC['openid'],
-            'money'=>$_GPC['money'],
+            'price'=>$_GPC['money'],
             'cate'=>$_GPC['cate'],
             'ordersn'=>$order_sn,
             'merchid'=>$_GPC['merchid'],
@@ -199,7 +199,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $mch_add = [
             'uniacid'=>$_W['uniacid'],
             'openid'=>$_GPC['openid'],
-            'money'=>$_GPC['money'],
+            'price'=>$_GPC['money'],
             'cate'=>$_GPC['cate'],
             'ordersn'=>$order_sn,
             'merchid'=>$_GPC['merchid'],
@@ -251,13 +251,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $mch_id = $_GPC['merchid'];
-        //页数
-        $page = max(1,($_GPC['page']));
-        //每页显示条数
-        $pageSize = 8;
-        //第几页从第几个显示
-        $psize = ($page-1)*$pageSize;
-        if(!$mch_id || !$_GPC['openid']){
+        if(!$mch_id || !$_GPC['openid'] || !$_GPC['cate']){
             show_json(0,"请完善参数信息");
         }
         //计算这个店铺成交的第一个订单的日期
@@ -266,11 +260,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         $day = round((time()-$start_time)/86400);
         $list = [];
         $total = 0;
+        $total_money = 0;
         for ($i = 0;$i<=$day;$i++){
             $start = strtotime(date('Y-m-d',strtotime('-'.$i.'day')));
             $time = date('Y年m月d日',$start);
             $end = $start + 86400;
-            $list[$time]['list'] = pdo_fetchall('select id,openid,price,createtime from '.tablename('ewei_shop_order').' where createtime between "'.$start.'" and "'.$end.'" and status = 3 and merchid = "'.$mch_id.'" ');
+            $list[$time]['list'] = pdo_fetchall('select id,openid,price,createtime,cate from '.tablename('ewei_shop_merch_log').' where createtime between "'.$start.'" and "'.$end.'" and status = 1 and merchid = "'.$mch_id.'"  and price > 0 and cate = "'.$_GPC['cate'].'"');
             $list[$time]['count'] = count($list[$time]['list']);
             if($list[$time]['count'] == 0){
                 unset($list[$time]);
@@ -283,11 +278,12 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $list[$time]['list'][$key]['nickname'] = pdo_getcolumn('ewei_shop_member',['openid'=>$item['openid']],'nickname');
             }
             $total+=$list[$time]['count'];
-        }
+            $total_money += $list[$time]['total'];
+         }
         if(!$list){
             show_json(0,"暂无信息");
         }
-        show_json(1,['list'=>$list,'total'=>$total,'pageSize'=>$pageSize,'page'=>$page]);
+        show_json(1,['list'=>$list,'total'=>$total,'total_money'=>$total_money,'cate'=>$_GPC['cate']]);
     }
 
     /**
@@ -429,7 +425,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                 'credittype'=>'credit1',
                 'num'=>-$money,
                 'createtime'=>time(),
-                'remark'=>"卡路里转换折扣宝,减少卡路里".$money,
+                'remark'=>"卡路里转换折扣宝",
                 'module'=>"ewei_shopv2",
             ];
             $add = [
@@ -438,7 +434,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                 'credittype'=>'credit3',
                 'num'=>$money,
                 'createtime'=>time(),
-                'remark'=>"卡路里转换折扣宝,折扣宝增加".$money,
+                'remark'=>"卡路里转换折扣宝",
                 'module'=>"ewei_shopv2",
             ];
             $record = pdo_insert('mc_credits_record',$data);

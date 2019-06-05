@@ -931,13 +931,13 @@ class EweiShopWechatPay
                 ];
                 if($cate == 1){
                     $add1 = [
-                       'remark'=>"用户折扣付款,减少卡路里".$order['money'],
+                       'remark'=>"卡路里付款",
                        'credittype'=>"credit1",
                     ];
                     $add = array_merge($add1,$data);
                 }elseif ($cate == 2){
                     $add2 = [
-                        'remark'=>"用户折扣付款,减少折扣宝".$order['money'],
+                        'remark'=>"折扣宝付款",
                         'credittype'=>"credit3",
                     ];
                     $add = array_merge($add2,$data);
