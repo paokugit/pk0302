@@ -176,6 +176,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         pdo_insert('ewei_shop_member_log',$add2);
         //获得用户的卡路里  和  折扣宝
         $member = pdo_get('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1','credit3']);
+        //先减去他用的折扣宝
         if($_GPC['cate'] == 1){
             $credit1 = $member['credit1'] - $_GPC['rebate'];
         }elseif ($_GPC['cate'] == 2){
@@ -459,7 +460,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             show_json(0,"用户信息错误");
         }
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit3');
-        $fields = "num,createtime,remark,openid";
+        $fields = "id,num,createtime,remark,openid";
         $income = pdo_fetchall(' select '.$fields.' from '.tablename('mc_credits_record').' where credittype = "credit3" and num > 0 and openid = "'.$openid.'"');
         $pay = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype = "credit3" and num < 0 and openid = "'.$openid.'"');
         foreach ($income as $key=>$item){
@@ -478,7 +479,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $id = $_GPC['id'];
         if(!$id) show_json(0,"请完善参数");
-        $list = pdo_fetch('select openid,price,createtime,merchid from '.tablename('ewei_shop_order').' where id = "'.$id.'" and merchid = "'.$_GPC['merchid'].'"');
+        $list = pdo_fetch('select openid,price,createtime,merchid from '.tablename('ewei_shop_order').' where id = "'.$id.'"');
         foreach ($list as $key=>$item){
             $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             $list[$key]['merch_name'] = pdo_getcolumn('ewei_shop_merch_user',['merchid'=>$_GPC['merchid']],'merchname');

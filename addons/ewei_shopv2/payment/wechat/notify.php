@@ -926,6 +926,7 @@ class EweiShopWechatPay
                     'num'=>-$order['money'],
                     'createtime'=>time(),
                     'module'=>"ewei_shopv2",
+                    'merchid'=>$order['merchid'],
                 ];
                 if($cate == 1){
                     $add1 = [
@@ -935,8 +936,8 @@ class EweiShopWechatPay
                     $add = array_merge($add1,$data);
                 }elseif ($cate == 2){
                     $add2 = [
-                        'remark'=>"用户折扣付款,减少卡路里".$order['money'],
-                        'credittype'=>"credit1",
+                        'remark'=>"用户折扣付款,减少折扣宝".$order['money'],
+                        'credittype'=>"credit3",
                     ];
                     $add = array_merge($add2,$data);
                 }
