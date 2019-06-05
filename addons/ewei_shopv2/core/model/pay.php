@@ -62,7 +62,7 @@ class Pay_EweiShopV2Model
 				'package' => 'prepay_id='.$result['prepay_id'],
 				'nonceStr' => $result['nonce_str'],
 				'timeStamp' => (string)time(),
-				'signType'=>'md5'
+				'signType'=>'MD5'
 			);
 			//第二次生成签名
 			$string2 = $this->buildParams($array);

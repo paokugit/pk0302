@@ -900,6 +900,7 @@ class EweiShopWechatPay
         $input = file_get_contents('php://input');
         $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
         $data = json_decode(json_encode($obj), true);
+        file_put_contents("../addons/ewei_shopv2/payment/wechat/pay.txt",$data);
         if (!$data) {
             exit("FAIL");
         }
@@ -918,9 +919,9 @@ class EweiShopWechatPay
             pdo_begin();
             try {
                 //如果成功  修改订单的status 状态 和 用户日志   还有商户收款日志的  状态为成功
-                pdo_update('ewei_shop_order',['ordersn'=>$ordersn],['status'=>3]);
-                pdo_update('ewei_shop_merch_log',['ordersn'=>$ordersn],['status'=>1]);
-                pdo_update('ewei_shop_member_log',['logno'=>$ordersn],['status'=>1]);
+                pdo_update('ewei_shop_order',['status'=>3],['ordersn'=>$ordersn]);
+                pdo_update('ewei_shop_merch_log',['status'=>1],['ordersn'=>$ordersn]);
+                pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn]);
                 $data = [
                     'openid'=>$order['openid'],
                     'uniacid'=>$order['uniacid'],
@@ -929,6 +930,7 @@ class EweiShopWechatPay
                     'module'=>"ewei_shopv2",
                     'merchid'=>$order['merchid'],
                 ];
+                file_put_contents('../addons/ewei_shopv2/payment/wechat/pay1.txt',$data);
                 if($cate == 1){
                     $add1 = [
                        'remark'=>"卡路里付款",
@@ -955,9 +957,9 @@ class EweiShopWechatPay
                 $credit3 = $member['credit3'] + ($order['goodsprice'] - $order['price']);
             }
             //如果支付失败  修改订单  用户日志  和 商户收款日志为失败状态
-            pdo_update('ewei_shop_order',['ordersn'=>$ordersn],['status'=>-1]);
-            pdo_update('ewei_shop_member_log',['logno'=>$ordersn],['status'=>-1]);
-            pdo_update('ewei_shop_merch_log',['ordersn'=>$ordersn],['status'=>-1]);
+            pdo_update('ewei_shop_order',['status'=>-1],['ordersn'=>$ordersn]);
+            pdo_update('ewei_shop_member_log',['status'=>-1],['logno'=>$ordersn]);
+            pdo_update('ewei_shop_merch_log',['status'=>-1],['ordersn'=>$ordersn]);
             pdo_update('ewei_shop_member',['credit3'=>$credit3,'credit1'=>$credit1],['openid'=>$order['openid']]);
         }
     }
