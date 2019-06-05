@@ -297,5 +297,29 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
     }
 
+    /**
+     * 获取用户信息
+     */
+    public function member_info(){
+        global $_W;
+        global $_GPC;
+        $member_info = m('member')->getInfo($_GPC['openid']);
+        if( empty($member_info) )
+        {
+            app_error(AppError::$UserNotFound);
+        }
+        $data['id'] = $member_info['id'];
+        $data['openid'] = $member_info['openid'];
+        $data['nickname'] = $member_info['nickname'];
+        $data['mobile'] = $member_info['mobile'];
+        $data['createtime'] = date('Y-m-d',$member_info['createtime']);
+        $level = m("member")->agentlevel($_W["openid"]);
+        $data['levelname'] = $level['levelname'];
+        $data['levelid'] = $level['levelid'];
+        $agentcount = pdo_fetchcolumn("SELECT COUNT(*) FROM " . tablename("ewei_shop_member") . " WHERE agentid=:agentid  limit 1", $params = array( ":agentid" => $member_info['id']) );
+        $data['agentcount'] = $agentcount;
+        app_json($data);
+    }
+
 }
 ?>

@@ -54,7 +54,6 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$credit1 || !$credit3){
             show_json(0,"余额获取失败");
         }
-
         show_json(1,['credit1'=>$credit1,'credit3'=>$credit3]);
     }
 
@@ -65,6 +64,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         global $_W;
+
         if(!$_GPC['rebate'] || !$_GPC['merchid'] || !$_GPC['money'] || !$_GPC['cate'] || !$_GPC['openid']){
             show_json(0,"请完善参数信息");
         }
@@ -148,12 +148,12 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
-
         //获取参数
         $money = $_GPC['money'];
         $fee = $_GPC['deduct'];
         $cate = $_GPC['cate'];
         $id = $_GPC['id'];
+
 
         if(!$money || !$fee || !$cate || !$_GPC['merchid']){
             show_json(0,"请完善参数信息");
@@ -197,7 +197,6 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function edit()
     {
-
         global $_GPC;
         if(!$_GPC['id']) show_json(0,"参数信息不完整");
         $data = pdo_fetch('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where id = "'.$_GPC['id'].'"');
@@ -218,18 +217,19 @@ class Index_EweiShopV2Page extends AppMobilePage
     public function getset()
     {
         global $_GPC;
-
         $page = $_GPC['page']?intval($_GPC['page']):1;
         $pageSize = 8;
         $spage = ($page-1)*$pageSize;
         if(!$_GPC['merchid'] || !$_GPC['cate']){
             show_json(0,"参数不完整");
         }
+
         $total = pdo_count('ewei_shop_deduct_setting',['merchid'=>$_GPC['merchid'],'cate'=>$_GPC['cate']]);
         $list = pdo_fetchall('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid and cate=:cate order by money asc LIMIT '.$spage.','.$pageSize,array(':merchid'=>$_GPC['merchid'],':cate'=>$_GPC['cate']));
         if(!$list){
             show_json(0,"暂无信息");
         }
+
         show_json(1,['list'=>$list,'pageSize'=>$pageSize,'total'=>$total,'page'=>$page]);
 
     }
@@ -253,7 +253,6 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         $money = $_GPC['money'];
         $openid = $_GPC['openid'];
-
         //查用户的卡路里和折扣宝的信息
         $member = pdo_fetch('select credit1,credit3 from '.tablename('ewei_shop_member').'where openid=:openid and uniacid=:uniacid',array(':openid'=>$openid,':uniacid'=>$_W['uniacid']));
         //判断要转换的卡路里和用户的卡路里的多少
