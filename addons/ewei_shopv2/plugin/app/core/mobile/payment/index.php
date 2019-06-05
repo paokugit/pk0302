@@ -103,7 +103,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             'uniacid'=>$_W['uniacid'],
             'openid'=>$_GPC['openid'],
             'type'=>2,
-            'logno'=>$order,
+            'logno'=>$order_sn,
             'title'=>'扫商家付款码支付',
             'createtime'=>time(),
             'status'=>0,
@@ -178,7 +178,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             'uniacid'=>$_W['uniacid'],
             'openid'=>$_GPC['openid'],
             'type'=>2,
-            'logno'=>$order,
+            'logno'=>$order_sn,
             'title'=>'扫商家付款码支付',
             'createtime'=>time(),
             'status'=>0,
@@ -194,7 +194,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }elseif ($_GPC['cate'] == 2){
             $credit3 = $member['credit3'] - $_GPC['rebate'];
         }
-        pdo_update('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1'=>$credit1,'credit3'=>$credit3]);
+        pdo_update('ewei_shop_member',['credit1'=>$credit1,'credit3'=>$credit3],['openid'=>$_GPC['openid']]);
         //商家收款日志
         $mch_add = [
             'uniacid'=>$_W['uniacid'],
@@ -236,7 +236,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         ];
         pdo_insert('ewei_shop_member_log',$add2);
         $payinfo = array( "openid" => substr($_GPC['openid'],7), "title" => "商家商户收款码收款", "tid" => $order_sn, "fee" =>$_GPC["money"] );
-        $res = $this->model->wxpay($payinfo, 14);
+        $res = $this->model->wxpay($payinfo, 30);
         if(!is_error($res)){
             show_json(1,$res);
         }
@@ -508,7 +508,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC['openid'];
         $type = $_GPC['type'];
         if(!$openid || !$type){
-            show_json(0,"用户信息错误");
+            show_json(0,"参数信息不完善");
         }
         $page = max(1,$_GPC['page']);
         $pageSize = 8;
