@@ -303,7 +303,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     public function member_info(){
         global $_W;
         global $_GPC;
-        $member_info = m('member')->getInfo($_GPC['openid']);
+        $member_info = m('member')->getInfo($_GPC['fansopenid']);
         if( empty($member_info) )
         {
             app_error(AppError::$UserNotFound);
@@ -313,12 +313,37 @@ class Index_EweiShopV2Page extends AppMobilePage
         $data['nickname'] = $member_info['nickname'];
         $data['mobile'] = $member_info['mobile'];
         $data['createtime'] = date('Y-m-d',$member_info['createtime']);
-        $level = m("member")->agentlevel($_W["openid"]);
+        $level = m("member")->agentlevel($_GPC["fansopenid"]);
         $data['levelname'] = $level['levelname'];
         $data['levelid'] = $level['levelid'];
+        $data['avatar'] = $member_info['avatar'];
         $agentcount = pdo_fetchcolumn("SELECT COUNT(*) FROM " . tablename("ewei_shop_member") . " WHERE agentid=:agentid  limit 1", $params = array( ":agentid" => $member_info['id']) );
         $data['agentcount'] = $agentcount;
         app_json($data);
+    }
+
+
+
+    /**
+     *
+     * 判断是否可购买会员
+     * @param $openid
+     * @author lihanwne@paokucoin.com
+     */
+    public function canby_agent(){
+        global $_GPC;
+        if(!$_GPC['openid'] || !$_GPC['goodsid']) app_error(3,'数据错误');
+        $openid = $_GPC['openid'];
+        if($_GPC['goodsid']==3) $agentlevel=1;
+        if($_GPC['goodsid']==4) $agentlevel=2;
+        if($_GPC['goodsid']==7) $agentlevel=5;
+        $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid  limit 1", array(  ":openid" => $openid ));
+        if(!$memberInfo) app_error(1,'会员信息不存在');
+        if($memberInfo['agenttime']){
+            $hasday = (time()-$memberInfo['agenttime'])/(3600*24*20);
+            if($hasday>20 && $agentlevel!=$memberInfo['agentlevel']) app_json(0,'允许购买');
+        }
+        app_error(2,'同一会员级别20天内不可重复购买');
     }
 
 }
