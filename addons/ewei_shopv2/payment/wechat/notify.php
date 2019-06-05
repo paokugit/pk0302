@@ -181,6 +181,12 @@ class EweiShopWechatPay
 																				{
 																					$this->membercard();
 																				}
+																				else
+																				{
+                                                                                    if($this->type == "30"){
+                                                                                        $this->shopCode();
+                                                                                    }
+                                                                                }
 																			}
 																		}
 																	}
@@ -897,9 +903,19 @@ class EweiShopWechatPay
      */
 	public function shopCode()
     {
+        $bb = [
+            'log'=>"123456",
+            'createtime'=>date('Y-m-d H:i:s',time()),
+        ];
+        pdo_insert('log',$bb);
         $input = file_get_contents('php://input');
         $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
         $data = json_decode(json_encode($obj), true);
+        $aa = [
+            'log'=>$data['out_trade_no'],
+            'createtime'=>date('Y-m-d H:i:s',time()),
+        ];
+        pdo_insert('log',$aa);
         file_put_contents("../addons/ewei_shopv2/payment/wechat/pay.txt",$data);
         if (!$data) {
             exit("FAIL");
@@ -945,22 +961,23 @@ class EweiShopWechatPay
                     $add = array_merge($add2,$data);
                 }
                 pdo_insert('mc_credits_record',$add);
+                //支付成功的话 给用户扣除的卡路里  和 折扣宝
+                if($cate == 1){
+                    $credit1 = $member['credit1'] - ($order['goodsprice'] - $order['price']);
+                }elseif($cate == 2){
+                    $credit3 = $member['credit3'] - ($order['goodsprice'] - $order['price']);
+                }
+                pdo_update('ewei_shop_member',['credit3'=>$credit3,'credit1'=>$credit1],['openid'=>$order['openid']]);
                 pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();
             }
         }else{
-            //失败的话 给用户加进扣除的卡路里  和 折扣宝
-            if($cate == 1){
-                $credit1 = $member['credit1'] + ($order['goodsprice'] - $order['price']);
-            }elseif($cate == 2){
-                $credit3 = $member['credit3'] + ($order['goodsprice'] - $order['price']);
-            }
             //如果支付失败  修改订单  用户日志  和 商户收款日志为失败状态
             pdo_update('ewei_shop_order',['status'=>-1],['ordersn'=>$ordersn]);
             pdo_update('ewei_shop_member_log',['status'=>-1],['logno'=>$ordersn]);
             pdo_update('ewei_shop_merch_log',['status'=>-1],['ordersn'=>$ordersn]);
-            pdo_update('ewei_shop_member',['credit3'=>$credit3,'credit1'=>$credit1],['openid'=>$order['openid']]);
+
         }
     }
 

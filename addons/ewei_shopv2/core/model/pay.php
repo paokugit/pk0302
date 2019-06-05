@@ -56,7 +56,7 @@ class Pay_EweiShopV2Model
 			return error(-3, strval($result['err_code']) . ': ' . strval($result['err_code_des']));
 		}
 		if($result['return_code'] == "SUCCESS" && $result['result_code'] == "SUCCESS"){
-			pdo_update('ewei_shop_order',['wxapp_prepay_id'=>$result['prepay_id']],['ordersn'=>$data['out_order']]);
+			pdo_update('ewei_shop_order',['wxapp_prepay_id'=>$result['prepay_id']],['ordersn'=>$params['out_trade_no']]);
 			$array = array(
 				'appId' => $result['appid'],
 				'package' => 'prepay_id='.$result['prepay_id'],
