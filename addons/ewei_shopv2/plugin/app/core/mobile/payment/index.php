@@ -271,12 +271,12 @@ class Index_EweiShopV2Page extends AppMobilePage
             $time = date('Y-m-d',$start);
             $end = $start + 86400;
             $list[$time]['list'] = pdo_fetchall('select id,openid,price,createtime from '.tablename('ewei_shop_order').' where createtime between "'.$start.'" and "'.$end.'" and status = 3 and merchid = "'.$mch_id.'" ');
-            $list[$time]['count'] = count($list[$time]);
-            $money = array_column($list[$time],'price');
+            $list[$time]['count'] = count($list[$time]['list']);
+            $money = array_column($list[$time]['list'],'price');
             $list[$time]['total'] = round(array_sum($money),2);
-            foreach ($list[$time] as $key=>$item){
-                $list[$time][$key]['createtime'] = date('H:i:s',$item['createtime']);
-                $list[$time][$key]['nickname'] = pdo_getcolumn('ewei_shop_member',['openid'=>$item['openid']],'nickname');
+            foreach ($list[$time]['list'] as $key=>$item){
+                $list[$time]['list'][$key]['createtime'] = date('H:i:s',$item['createtime']);
+                $list[$time]['list'][$key]['nickname'] = pdo_getcolumn('ewei_shop_member',['openid'=>$item['openid']],'nickname');
             }
             $total+=$list[$time]['count'];
         }
