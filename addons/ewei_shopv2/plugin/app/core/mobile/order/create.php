@@ -3001,8 +3001,9 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$order["paytype"] = 0;
 		$order["deductprice"] = $deductmoney;
 		//抵扣宝
+		if (!empty($_GPC["discount"])){
 		$order["discount_price"]=$discount;
-		
+		}
 		$order["deductcredit"] = $deductcredit;
 		$order["deductcredit2"] = $deductcredit2;
 		$order["deductenough"] = $deductenough;
