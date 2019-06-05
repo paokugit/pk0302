@@ -461,33 +461,34 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit3');
         $fields = "id,num,createtime,remark,openid";
+        //收入(也就是充值)  只有 后台充值和卡路里转换两种方式  和商家没关系
         $income = pdo_fetchall(' select '.$fields.' from '.tablename('mc_credits_record').' where credittype = "credit3" and num > 0 and openid = "'.$openid.'"');
+        //支出  只有扫码折扣付支出   和商家有关 所以在回调时  加入merchid
         $pay = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype = "credit3" and num < 0 and openid = "'.$openid.'"');
         foreach ($income as $key=>$item){
             $income[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
         }
         foreach ($pay as $key=>$item){
-            $income[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
+            $pay[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
         }
         show_json(1,['credit3'=>$credit3,'income'=>$income,'pay'=>$pay]);
     }
 
     /**
-     * 收款明细 详情
+     * 扫码付款明细 详情
      */
     public function detail(){
         global $_GPC;
         $id = $_GPC['id'];
-        if(!$id) show_json(0,"请完善参数");
-        $list = pdo_fetch('select openid,price,createtime,merchid from '.tablename('ewei_shop_order').' where id = "'.$id.'"');
-        foreach ($list as $key=>$item){
-            $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
-            $list[$key]['merch_name'] = pdo_getcolumn('ewei_shop_merch_user',['merchid'=>$_GPC['merchid']],'merchname');
-        }
-        if(!$list){
+        $openid = $_GPC['openid'];
+        if(!$id || !$openid) show_json(0,"请完善参数");
+        $data = pdo_fetch('select openid,num,createtime,merchid from '.tablename('mc_credits_record').' where id = "'.$id.'" and openid  = "'.$openid.'"');
+        $data['createtime'] = date('Y-m-d H:i:s',$data['createtime']);
+        $data['merch_name'] = pdo_getcolumn('ewei_shop_merch_user',['id'=>$data['merchid']],'merchname');
+        if(!$data){
             show_json(0,"暂无信息");
         }
-        show_json(1,$list);
+        show_json(1,$data);
     }
 }
 ?>
