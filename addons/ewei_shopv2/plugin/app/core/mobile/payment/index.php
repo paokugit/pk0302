@@ -119,6 +119,18 @@ class Index_EweiShopV2Page extends AppMobilePage
             $credit3 = $member['credit3'] - $_GPC['rebate'];
         }
         pdo_update('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1'=>$credit1,'credit3'=>$credit3]);
+        //商家收款日志
+        $mch_add = [
+            'uniacid'=>$_W['uniacid'],
+            'openid'=>$_GPC['openid'],
+            'money'=>$_GPC['money'],
+            'cate'=>$_GPC['cate'],
+            'ordersn'=>$order_sn,
+            'merchid'=>$_GPC['merchid'],
+            'createtime'=>time(),
+            'status'=>0,
+        ];
+        pdo_insert('ewei_shop_merch_log',$mch_add);
         show_json(1,$res);
     }
     
@@ -183,6 +195,18 @@ class Index_EweiShopV2Page extends AppMobilePage
             $credit3 = $member['credit3'] - $_GPC['rebate'];
         }
         pdo_update('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1'=>$credit1,'credit3'=>$credit3]);
+        //商家收款日志
+        $mch_add = [
+            'uniacid'=>$_W['uniacid'],
+            'openid'=>$_GPC['openid'],
+            'money'=>$_GPC['money'],
+            'cate'=>$_GPC['cate'],
+            'ordersn'=>$order_sn,
+            'merchid'=>$_GPC['merchid'],
+            'createtime'=>time(),
+            'status'=>0,
+        ];
+        pdo_insert('ewei_shop_merch_log',$mch_add);
         show_json(1,$res);
     }
 
@@ -451,9 +475,9 @@ class Index_EweiShopV2Page extends AppMobilePage
     }
 
     /**
-     * 折扣宝的收支记录
+     * 折扣宝的收支记录  之前的
      */
-    public function rebateRecord()
+    public function rebate_record()
     {
         global $_GPC;
         $openid = $_GPC['openid'];
@@ -473,6 +497,36 @@ class Index_EweiShopV2Page extends AppMobilePage
             $pay[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
         }
         show_json(1,['credit3'=>$credit3,'income'=>$income,'pay'=>$pay]);
+    }
+
+    /**
+     * 折扣宝的收支记录
+     */
+    public function rebateRecord()
+    {
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        $type = $_GPC['type'];
+        if(!$openid || !$type){
+            show_json(0,"用户信息错误");
+        }
+        $page = max(1,$_GPC['page']);
+        $pageSize = 8;
+        $psize = ($page-1)*$pageSize;
+        $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit3');
+        $fields = "id,num,createtime,remark,openid";
+        if($type == 1){
+            //$condition = 'and credittype = "credit3" and openid = "'.$openid.'" and num > 0';
+            $condition = ' and num > 0';
+        }elseif ($type == 2){
+            $condition = ' and num < 0';
+        }
+        $list = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype ="credit3" and openid = "'.$openid.'" '.$condition  .' LIMIT '.$psize .','.$pageSize);
+        $total = pdo_fetchcolumn('select count(*) from '.tablename('mc_credits_record').' where credittype = "credit3" and openid = "'.$openid.'" '.$condition);
+        foreach ($list as $key=>$item){
+            $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
+        }
+        show_json(1,['credit3'=>$credit3,'list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'type'=>$type]);
     }
 
     /**
