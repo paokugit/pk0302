@@ -251,7 +251,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $mch_id = $_GPC['merchid'];
-        if(!$mch_id || !$_GPC['openid'] || !$_GPC['cate']){
+        if(!$mch_id || !$_GPC['cate']){
             show_json(0,"请完善参数信息");
         }
         //计算这个店铺成交的第一个订单的日期
