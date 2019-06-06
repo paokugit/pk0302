@@ -964,10 +964,11 @@ class EweiShopWechatPay
                 //支付成功的话 给用户扣除的卡路里  和 折扣宝
                 if($cate == 1){
                     $credit1 = $member['credit1'] - ($order['goodsprice'] - $order['price']);
+                    pdo_update('ewei_shop_member',['credit1'=>$credit1],['openid'=>$order['openid']]);
                 }elseif($cate == 2){
                     $credit3 = $member['credit3'] - ($order['goodsprice'] - $order['price']);
+                    pdo_update('ewei_shop_member',['credit3'=>$credit3],['openid'=>$order['openid']]);
                 }
-                pdo_update('ewei_shop_member',['credit3'=>$credit3,'credit1'=>$credit1],['openid'=>$order['openid']]);
                 pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();
