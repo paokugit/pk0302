@@ -80,21 +80,24 @@ class Index_EweiShopV2Page extends AppMobilePage
             'createtime'=>time(),
             'merchid'=>$_GPC['merchid'],
             'ismerch'=>1,
+            'type'=>1
         ];
         //加入订单记录
         $order = pdo_insert('ewei_shop_order',$add);
         //微信支付的参数
-        $data = [
-            'random'=>random(32),
-            'body'=>'商家商户收款码收款',
-            'ip'=>CLIENT_IP,
-            'money'=>$_GPC['money'],
-            'url'=>$_W['siteroot'].'addons/ewei_shopv2/payment/wchat/notify/shopCode',   //回调地址
-            'openid'=>substr($_GPC['openid'],7),
-            'out_order'=>$order_sn,     //订单号
-        ];
-        //请求微信的支付接口    返回的是唤醒支付的参数
-        $res = m('pay')->pay($data);
+//        $data = [
+//            'random'=>random(32),
+//            'body'=>'商家商户收款码收款',
+//            'ip'=>CLIENT_IP,
+//            'money'=>$_GPC['money'],
+//            'url'=>$_W['siteroot'].'addons/ewei_shopv2/payment/wchat/notify/shopCode',   //回调地址
+//            'openid'=>substr($_GPC['openid'],7),
+//            'out_order'=>$order_sn,     //订单号
+//        ];
+//        //请求微信的支付接口    返回的是唤醒支付的参数
+//        $res = m('pay')->pay($data);
+        $payinfo = array( "openid" => substr($_GPC['openid'],7), "title" => "商家商户收款码收款", "tid" => $order_sn, "fee" =>$_GPC["money"] );
+        $res = $this->model->wxpay($payinfo, 30);
         if(is_error($res)){
             show_json(0,$res);
         }
@@ -111,14 +114,14 @@ class Index_EweiShopV2Page extends AppMobilePage
             'rechargetype'=>'wxscan',
         ];
         pdo_insert('ewei_shop_member_log',$add2);
-        //获得用户的卡路里  和  折扣宝
-        $member = pdo_get('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1','credit3']);
-        if($_GPC['cate'] == 1){
-            $credit1 = $member['credit1'] - $_GPC['rebate'];
-        }elseif ($_GPC['cate'] == 2){
-            $credit3 = $member['credit3'] - $_GPC['rebate'];
-        }
-        pdo_update('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1'=>$credit1,'credit3'=>$credit3]);
+//        //获得用户的卡路里  和  折扣宝
+//        $member = pdo_get('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1','credit3']);
+//        if($_GPC['cate'] == 1){
+//            $credit1 = $member['credit1'] - $_GPC['rebate'];
+//        }elseif ($_GPC['cate'] == 2){
+//            $credit3 = $member['credit3'] - $_GPC['rebate'];
+//        }
+//        pdo_update('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1'=>$credit1,'credit3'=>$credit3]);
         //商家收款日志
         $mch_add = [
             'uniacid'=>$_W['uniacid'],
@@ -155,21 +158,10 @@ class Index_EweiShopV2Page extends AppMobilePage
             'createtime'=>time(),
             'merchid'=>$_GPC['merchid'],
             'ismerch'=>1,
+            'type'=>1,
         ];
         //加入订单记录
         $order = pdo_insert('ewei_shop_order',$add);
-//        //微信支付的参数
-//        $data = [
-//            'random'=>random(32),
-//            'body'=>'商家商户收款码收款',
-//            'ip'=>CLIENT_IP,
-//            'money'=>$_GPC['money'],
-//            'url'=>$_W['siteroot'].'addons/ewei_shopv2/payment/wchat/notify/shopCode',   //回调地址
-//            'openid'=>substr($_GPC['openid'],7),
-//            'out_order'=>$order_sn,     //订单号
-//        ];
-//        //请求微信的支付接口    返回的是唤醒支付的参数
-//        $res = m('pay')->pay($data);
         $payinfo = array( "openid" => substr($_GPC['openid'],7), "title" => "商家商户收款码收款", "tid" => $order_sn, "fee" =>$_GPC["money"] );
         $res = $this->model->wxpay($payinfo, 30);
         if(is_error($res)){
@@ -188,15 +180,6 @@ class Index_EweiShopV2Page extends AppMobilePage
             'rechargetype'=>'wxscan',
         ];
         pdo_insert('ewei_shop_member_log',$add2);
-        //获得用户的卡路里  和  折扣宝
-//        $member = pdo_get('ewei_shop_member',['openid'=>$_GPC['openid']],['credit1','credit3']);
-//        //先减去他用的折扣宝
-//        if($_GPC['cate'] == 1){
-//            $credit1 = $member['credit1'] - $_GPC['rebate'];
-//        }elseif ($_GPC['cate'] == 2){
-//            $credit3 = $member['credit3'] - $_GPC['rebate'];
-//        }
-//        pdo_update('ewei_shop_member',['credit1'=>$credit1,'credit3'=>$credit3],['openid'=>$_GPC['openid']]);
         //商家收款日志
         $mch_add = [
             'uniacid'=>$_W['uniacid'],

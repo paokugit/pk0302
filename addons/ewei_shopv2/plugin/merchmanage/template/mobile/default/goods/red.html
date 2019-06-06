@@ -396,8 +396,14 @@
     $('.save').click(function () {
         var request = GetRequest("id")
         var goods_id = request.id?request.id:"";
-        var huodonghead = $('.input_text').val();//活动标题
-        var huodongintroduce = $('.activity_introduction_text').val()//活动介绍
+        var huodonghead = $('.input_text').val();   //活动标题
+        if(huodonghead == ""){
+            alert("活动标题不能为空");return;
+        }
+        var huodongintroduce = $('.activity_introduction_text').val();   //活动介绍
+        if(huodongintroduce == ""){
+            alert("活动介绍不能为空");return;
+        }
         var thumbs = [];
         $("#thumbs li").each(function () {
             var filename = $.trim($(this).data('filename'));
@@ -411,21 +417,34 @@
         }
         //邮费
         var youfei = $('#uu').val()
-        // $('.come_button').val()//背景音乐
         var music_document = document.getElementsByClassName("come_button");
         var haha = $(music_document).attr("data-id")
-        // console.log(haha);
         var music =haha
         // 商品数量
         var total = $('#kucun').val();
+        if(total == ""){
+            alert("商品库存不能为空");return;
+        }
         // 时间
         var end_time = $('#date_date').val();
+        if(end_time == ""){
+            alert("活动结束时间不能为空");return;
+        }
         //订单金额
         var marketprice = $('#jine').val();
+        if(marketprice == ""){
+            alert("订单金额不能为空");return;
+        }
         // 一级红包
         var commission1_pay = $('#yiji').val();
+        if(commission1_pay == ""){
+            alert("用户分享一级红包不能为空");return;
+        }
         // 二级红包
         var commission2_pay = $('#erji').val();
+        if(commission2_pay == ""){
+            alert("用户分享二级红包不能为空");return;
+        }
         var pro_type = ""
         var obj = document.getElementById("img_img_id")
         if (obj.getAttribute("src") == "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png") {
@@ -439,15 +458,26 @@
         } else {
             pro_type = 3
         }
-        // alert(pro_type)
         // 主办方
         var main = $('#zhubanfang').val();
+        if(main == ""){
+            alert("主办方不能为空");return;
+        }
         // 负责人
         var principle = $('#fuzeren').val();
+        if(principle == ""){
+            alert("负责人不能为空");return;
+        }
         // 客服
         var tel = $('#kefu').val();
+        if(tel == ""){
+            alert("客服电话不能为空");return;
+        }
         // 门店地址
         var address = $('.address_text_text').val()
+        if(address == ""){
+            alert("门店地址不能为空");return;
+        }
         $.ajax({
             type: 'POST',
             url: '{php echo mobileUrl("merchmanage.goods.show.addgoods")}',
@@ -482,8 +512,14 @@
     $('.saveandpublish').click(function () {
         var request = GetRequest("id")
         var goods_id = request.id?request.id:"";
-        var huodonghead = $('.input_text').val();//活动标题
-        var huodongintroduce = $('.activity_introduction_text').val(); //活动介绍
+        var huodonghead = $('.input_text').val();   //活动标题
+        if(huodonghead == ""){
+            alert("活动标题不能为空");return;
+        }
+        var huodongintroduce = $('.activity_introduction_text').val();   //活动介绍
+        if(huodongintroduce == ""){
+            alert("活动介绍不能为空");return;
+        }
         var thumbs = [];
         $("#thumbs li").each(function () {
             var filename = $.trim($(this).data('filename'));
@@ -499,18 +535,32 @@
         var youfei = $('#uu').val()
         var music_document = document.getElementsByClassName("come_button");
         var haha = $(music_document).attr("data-id")
-        // console.log(haha);
         var music =haha
         // 商品数量
         var total = $('#kucun').val();
+        if(total == ""){
+            alert("商品库存不能为空");return;
+        }
         // 时间
         var end_time = $('#date_date').val();
+        if(end_time == ""){
+            alert("活动结束时间不能为空");return;
+        }
         //订单金额
         var marketprice = $('#jine').val();
+        if(marketprice == ""){
+            alert("订单金额不能为空");return;
+        }
         // 一级红包
         var commission1_pay = $('#yiji').val();
+        if(commission1_pay == ""){
+            alert("用户分享一级红包不能为空");return;
+        }
         // 二级红包
         var commission2_pay = $('#erji').val();
+        if(commission2_pay == ""){
+            alert("用户分享二级红包不能为空");return;
+        }
         var pro_type = ""
         var obj = document.getElementById("img_img_id")
         if (obj.getAttribute("src") == "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png") {
@@ -524,15 +574,26 @@
         } else {
             pro_type = 3
         }
-        // alert(pro_type)
         // 主办方
         var main = $('#zhubanfang').val();
+        if(main == ""){
+            alert("主办方不能为空");return;
+        }
         // 负责人
         var principle = $('#fuzeren').val();
+        if(principle == ""){
+            alert("负责人不能为空");return;
+        }
         // 客服
         var tel = $('#kefu').val();
+        if(tel == ""){
+            alert("客服电话不能为空");return;
+        }
         // 门店地址
         var address = $('.address_text_text').val()
+        if(address == ""){
+            alert("门店地址不能为空");return;
+        }
         $.ajax({
             type: 'POST',
             url: '{php echo mobileUrl("merchmanage.goods.show.addgoods")}',
@@ -624,6 +685,7 @@
             $(cc[i]).removeClass("header_select")
         }
         var dd = $(this).parent().children("audio").attr("id")
+		alert(dd);
         var voice = document.getElementById(dd);
         if (typeof ($(this).attr("header_select")) == "undefined") {
             $(this).addClass('header_select')
@@ -640,8 +702,14 @@
 
     //预览
     $('.preview').click(function () {
-        var huodonghead = $('.input_text').val();//活动标题
-        var huodongintroduce = $('.activity_introduction_text').val(); //活动介绍
+        var huodonghead = $('.input_text').val();   //活动标题
+        if(huodonghead == ""){
+            alert("活动标题不能为空");return;
+        }
+        var huodongintroduce = $('.activity_introduction_text').val();   //活动介绍
+        if(huodongintroduce == ""){
+            alert("活动介绍不能为空");return;
+        }
         var thumbs = [];
         $("#thumbs li").each(function () {
             var filename = $.trim($(this).data('filename'));
@@ -657,18 +725,32 @@
         var youfei = $('#uu').val()
         var music_document = document.getElementsByClassName("come_button");
         var haha = $(music_document).attr("data-id")
-        // console.log(haha);
         var music =haha
         // 商品数量
         var total = $('#kucun').val();
+        if(total == ""){
+            alert("商品库存不能为空");return;
+        }
         // 时间
         var end_time = $('#date_date').val();
+        if(end_time == ""){
+            alert("活动结束时间不能为空");return;
+        }
         //订单金额
         var marketprice = $('#jine').val();
+        if(marketprice == ""){
+            alert("订单金额不能为空");return;
+        }
         // 一级红包
         var commission1_pay = $('#yiji').val();
+        if(commission1_pay == ""){
+            alert("用户分享一级红包不能为空");return;
+        }
         // 二级红包
         var commission2_pay = $('#erji').val();
+        if(commission2_pay == ""){
+            alert("用户分享二级红包不能为空");return;
+        }
         var pro_type = ""
         var obj = document.getElementById("img_img_id")
         if (obj.getAttribute("src") == "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png") {
@@ -682,15 +764,26 @@
         } else {
             pro_type = 3
         }
-        // alert(pro_type)
         // 主办方
         var main = $('#zhubanfang').val();
+        if(main == ""){
+            alert("主办方不能为空");return;
+        }
         // 负责人
         var principle = $('#fuzeren').val();
+        if(principle == ""){
+            alert("负责人不能为空");return;
+        }
         // 客服
         var tel = $('#kefu').val();
+        if(tel == ""){
+            alert("客服电话不能为空");return;
+        }
         // 门店地址
         var address = $('.address_text_text').val()
+        if(address == ""){
+            alert("门店地址不能为空");return;
+        }
         $.ajax({
             type: 'POST',
             url: '{php echo mobileUrl("merchmanage.goods.show.preview")}',

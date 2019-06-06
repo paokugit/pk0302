@@ -13,7 +13,7 @@
 <body>
     <div class="body_box">
         <!-- header -->
-        <div class="header">红包引流</div>
+		<!--<div class="header">红包引流</div>-->
         <!-- header -->
         <!-- content -->
         <div class="content">
@@ -257,7 +257,7 @@
                 location.href = "{php echo mobileUrl('merchmanage/goods/show/red')}&id="+id;
             });
             $('.orderbtn').click(function () {
-                location.href = "{php echo mobileUrl('merchmanage/goods/show/red')}&id="+id;
+                location.href = "{php echo mobileUrl('merchmanage/order')}&status=1";
             })
             $(".sharebtn").click(function () {
                 $('#warning').css('display', 'block')
@@ -265,6 +265,9 @@
             $("#warning").click(function(){
                 $('#warning').css('display', 'none')
             });
+            $('.sharebtn-ding').click(function () {
+                location.href="{php echo mobileUrl('merchmanage/order')}&status=1";
+            })
         }
     });
     $('.footer').click(function () {
