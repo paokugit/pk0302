@@ -936,7 +936,7 @@ class EweiShopWechatPay
                 $data = [
                     'openid'=>$order['openid'],
                     'uniacid'=>$order['uniacid'],
-                    'num'=>-$order['money'],
+                    'num'=>-($order['goodsprice']-$order['price']),
                     'createtime'=>time(),
                     'module'=>"ewei_shopv2",
                     'merchid'=>$order['merchid'],

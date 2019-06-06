@@ -80,7 +80,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         if(isset($_GPC['id'])){
             //查询goods部分字段
             $fields = "title,description,total,marketprice,thumb,thumb_url,commission1_pay,commission2_pay";
-            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>31]);
+            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>$_W['merchmanage']['merchid']]);
             $item1['thumb_url'] = unserialize($item1['thumb_url']);
             array_unshift($item1['thumb_url'],$item1['thumb']);
             //查询红包引流的全部字段
@@ -111,13 +111,13 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         }
         $data = [
             'title'=>$_GPC['title'],
-            'description'=>$_GPC['title'],
+            'description'=>$_GPC['desc'],
             'merchid'=>$_W['merchmanage']['merchid'],
             'uniacid'=>$_W['uniacid'],
             'total'=>$_GPC['total'],
             'marketprice'=>$_GPC['marketprice'],
-            'commission1_pay'=>$_GPC['marketprice'],   //一级分销固定金额
-            'commission2_pay'=>$_GPC['marketprice'],   //二级分销固定金额
+            'commission1_pay'=>$_GPC['commission1_pay'],   //一级分销固定金额
+            'commission2_pay'=>$_GPC['commission2_pay'],   //二级分销固定金额
         ];
         $add = [
             'music'=>$_GPC['music'],                    //背景音乐
@@ -152,6 +152,16 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             pdo_insert('ewei_shop_goods_bribe_expert',$add);
         }
         show_json(1);
+    }
+
+    /**
+     * 添加红包引流图片
+     */
+    public function thumb()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_W;
+        global $_GPC;
     }
 
     /**
@@ -259,17 +269,17 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         $end = pdo_fetchall('select g.title as gtitle,g.description,marketprice,g.total,g.thumb,g.thumb_url,
             g.commission1_pay,commission2_pay,g.createtime,g.forwardcount,b.*,m.title from '. tablename('ewei_shop_goods').
             'g join'.tablename('ewei_shop_goods_bribe_expert'). ('b on b.goods_id=g.id').' join'.
-            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and end_time < "'.time().'"');
+            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and end_time < "'.time().'" and g.merchid = "'.$_W['merchmanage']['merchid'].'"');
         //end_time  大于  当前时间  进行中  isdraft  = 1
         $ing = pdo_fetchall('select g.title as gtitle,g.description,marketprice,g.total,g.thumb,g.thumb_url,
             g.commission1_pay,commission2_pay,g.createtime,g.forwardcount,b.*,m.title from '. tablename('ewei_shop_goods').
             'g join'.tablename('ewei_shop_goods_bribe_expert'). ('b on b.goods_id=g.id').' join'.
-            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and `end_time` > "'.time().'"');
+            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and `end_time` > "'.time().'" and g.merchid = "'.$_W['merchmanage']['merchid'].'"');
         //  isdraft  = 0  草稿箱
         $draft = pdo_fetchall('select g.title as gtitle,g.description,marketprice,g.total,g.thumb,g.thumb_url,
             g.commission1_pay,commission2_pay,g.createtime,b.*,m.title from '. tablename('ewei_shop_goods').
             'g join'.tablename('ewei_shop_goods_bribe_expert'). ('b on b.goods_id=g.id').' join'.
-            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 0');
+            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 0 and g.merchid = "'.$_W['merchmanage']['merchid'].'"');
         //计算参与人数和交易订单数
         $ing = m('goods')->count($ing);
         $end = m('goods')->count($end);

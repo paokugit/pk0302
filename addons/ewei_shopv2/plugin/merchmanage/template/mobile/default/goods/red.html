@@ -625,6 +625,7 @@
     })
     //点击音乐在原有界面进行加载
     $('.come_button').click(function () {
+        $('.all_box').css('display','none')
         $('.background_music_div').css('display', 'block')
         var str1 = ""
         var arr = ""
@@ -644,9 +645,9 @@
                         '</span>' +
                         '</div>' +
                         '<div class="music_img">' +
-                        '<audio class="audios" id="voice" controls="controls" loop="false" hidden="true" src="' + item.music + '">' +
+                        '<audio class="audios" id="voice' + i + '" controls="controls" loop="false" hidden="true" src="' + item.music + '">' +
                         '</audio>' +
-                        '<img class="img_img" data_title="' + item.title + '" src="../addons/ewei_shopv2/plugin/merchmanage/static/img/start@2x.png">' +
+                        '<img class="img_img" id="img_id' + i + '" data_title="' + item.title + '" src="../addons/ewei_shopv2/plugin/merchmanage/static/img/start@2x.png">' +
                         '</div>' +
                         '<div class="select">' +
                         '<input class="select_text" data_title="' + item.title + '" id="' + item.id + '" type="button" name="sub" value="选择">' +
@@ -664,6 +665,7 @@
         arr = $(this).attr("data_title")
         music_background = $(this).attr("id")
         // console.log(music_background);
+        $('.all_box').css('display','block')
         $('.background_music_div').css('display', 'none')
         $('.come_button').val(arr)
         $('.come_button').attr("data-id",music_background);
@@ -685,7 +687,6 @@
             $(cc[i]).removeClass("header_select")
         }
         var dd = $(this).parent().children("audio").attr("id")
-		alert(dd);
         var voice = document.getElementById(dd);
         if (typeof ($(this).attr("header_select")) == "undefined") {
             $(this).addClass('header_select')
