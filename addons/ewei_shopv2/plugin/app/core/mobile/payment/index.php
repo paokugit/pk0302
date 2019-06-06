@@ -523,12 +523,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         }elseif ($type == 2){
             $condition = ' and num < 0';
         }
-        $list = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype ="credit3" and openid = "'.$openid.'" '.$condition  .' LIMIT '.$psize .','.$pageSize);
+        $list = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype ="credit3" and openid = "'.$openid.'" '.$condition  .' order by createtime desc LIMIT '.$psize .','.$pageSize);
         $total = pdo_fetchcolumn('select count(*) from '.tablename('mc_credits_record').' where credittype = "credit3" and openid = "'.$openid.'" '.$condition);
         foreach ($list as $key=>$item){
             $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             if(mb_substr($item['remark'],0,2) == "跑库"){
-                $item['remark'] = "商城订单";
+                $list[$key]['remark'] = "商城订单";
             }
         }
         show_json(1,['credit3'=>$credit3,'list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'type'=>$type]);
