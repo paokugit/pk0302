@@ -461,6 +461,7 @@ if (!class_exists("AppModel")) {
                                                 $i = 1;
                                                 ++$k;
                                             }
+
                                         }
                                         $item['data_temp'] = $data_temp;
                                         unset($swiperpage, $data_temp, $k, $i);
@@ -482,6 +483,9 @@ if (!class_exists("AppModel")) {
                                             $item['params']['showicon'] == 0;
                                         }
                                     }
+//                                    if( isset($child["deduct"]) ){
+//                                        $item['data'][$childid]["showprice"] = round($child["price"]-$child["deduct"],2);
+//                                    }
                                     if (($item['params']['saleout'] == 0) && !(empty($_W['shopset']['shop']['saleout']))) {
                                         $item['params']['saleout'] = tomedia($_W['shopset']['shop']['saleout']);
                                         if (empty($item['params']['saleout'])) {
