@@ -111,13 +111,13 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         }
         $data = [
             'title'=>$_GPC['title'],
-            'description'=>$_GPC['desc'],
+            'description'=>$_GPC['title'],
             'merchid'=>$_W['merchmanage']['merchid'],
             'uniacid'=>$_W['uniacid'],
             'total'=>$_GPC['total'],
             'marketprice'=>$_GPC['marketprice'],
-            'commission1_pay'=>$_GPC['commission1_pay'],   //一级分销固定金额
-            'commission2_pay'=>$_GPC['commission2_pay'],   //二级分销固定金额
+            'commission1_pay'=>$_GPC['marketprice'],   //一级分销固定金额
+            'commission2_pay'=>$_GPC['marketprice'],   //二级分销固定金额
         ];
         $add = [
             'music'=>$_GPC['music'],                    //背景音乐
@@ -152,16 +152,6 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             pdo_insert('ewei_shop_goods_bribe_expert',$add);
         }
         show_json(1);
-    }
-
-    /**
-     * 添加红包引流图片
-     */
-    public function thumb()
-    {
-        header('Access-Control-Allow-Origin:*');
-        global $_W;
-        global $_GPC;
     }
 
     /**
