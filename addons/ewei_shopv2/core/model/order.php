@@ -206,7 +206,7 @@ class Order_EweiShopV2Model
 						    if (!empty($merch_user["wxopenid"])){
 						        //获取商品信息
 						        $goods=pdo_fetchall("select * from ".tablename("ewei_shop_order_goods")." where orderid=:orderid",array(':orderid'=>$order["id"]));
-						        $goos_name="";
+						        $goods_name="";
 						        foreach ($goods as $g){
 						            $good=pdo_fetch("select * from ".tablename("ewei_shop_goods")." where id=:good_id",array(':good_id'=>$g["goodsid"]));
 						            if (empty($goos_name)){
