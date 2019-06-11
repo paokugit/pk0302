@@ -205,7 +205,8 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
     /**
      * 测试
      */
-    public function ceshi(){
+    public function ceshi()
+    {
         global $_W;
         global $_GPC;
         list(, $payment) = m('common')->public_build();
@@ -213,15 +214,21 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         {
             return $payment;
         }
+        if(!$_GPC['order_sn']){
+            show_json(0,"请完善参数信息");
+        }
         //查找订单状态
-        $query = pdo_fetch('select * from '.tablename('ewei_shop_goods_red_log').' where order_sn="'.$_GPC['order_sn'].'"');
+        $query = pdo_fetch('select * from '.tablename('ewei_shop_goods_redlog').' where order_sn="'.$_GPC['order_sn'].'"');
+        if($query['status'] == 0){
+            show_json(0,"该订单未支付成功");
+        }
         if($query['status'] == 2){
-            show_json(0,'该订单已处理');
+            show_json(0,'该订单奖励已发放');
         }
         $params = [
-            'desc'=>'测试提现备注',
+            'desc'=>'订单提成奖励',
             'order_sn'=>$query['order_sn'],
-            'user_name'=>'郝成程',
+            //'user_name'=>"郝成程",
             'fee'=>$query['money'],
             'openid'=>$query['openid'],
         ];
@@ -231,29 +238,35 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             pdo_begin();
             try{
                 //更新订单状态
-                pdo_update('ewei_shop_goods_red_log',['status'=>2],['order_sn'=>$params['order_sn']]);
+                pdo_update('ewei_shop_goods_redlog',['status'=>2],['order_sn'=>$params['order_sn']]);
                 $openid = 'sns_wa_'.$params['openid'];
-                $credit = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit2');
-                $credit2 = bcmul($credit,$params['fee'],2);
+                //$credit = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit2');
+                //提现成功后 减去她的余额
+               // $credit2 = bcmul($credit,$params['fee'],2);
                 //更新用户余额
-                pdo_update('ewei_shop_member',['credit2'=>$credit2],['openid'=>$openid]);
-                //添加操作日志
+                //pdo_update('ewei_shop_member',['credit2'=>$credit2],['openid'=>$openid]);
+                //添加用户操作日志
                 $logno = "RW".date(YmdHis).random(6,true);
                 $data = [
                     'uniacid'=>$_W['uniacid'],
                     'type'=>1,
                     'openid'=>$openid,
-                    'title'=>'会员提现',
+                    'title'=>'订单提成奖励到零钱',
                     'logno'=>$logno,
                     'status'=>1,
                     'createtime'=>time(),
                     'money'=>$params['fee'],
+                    'rechargetype'=>'reward',
+                    'realmoney'=>$params['fee'],
                 ];
                 pdo_insert('ewei_shop_member_log',$data);
                 pdo_commit();
+                show_json(1,"订单红包奖励已发放");
             }catch (Exception $exception){
                 pdo_rollback();
             }
+        }else{
+            show_json(0,'订单红包奖励发放失败');
         }
     }
 

@@ -83,8 +83,9 @@ class User_EweiShopV2Model
 		global $_W;
 		//获取微信商户配置
 		$payment = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_payment") . " WHERE uniacid=:uniacid AND id=:id", array( ":uniacid" => $_W["uniacid"], ":id" => 1));
+		$wxpay = m('common')->getSysset('app');   //用来获得小程序的APPID
 		$wechat = array(
-			"sub_appid" => (!empty($payment["sub_appid"]) ? trim($payment["sub_appid"]) : ""),
+			"sub_appid" => (!empty($wxpay["appid"]) ? trim($wxpay["appid"]) : ""),
 			"sub_mch_id" => trim($payment["sub_mch_id"]),
 			"apikey" => trim($payment["apikey"]),
 		);
@@ -95,8 +96,9 @@ class User_EweiShopV2Model
 		$package["nonce_str"] = random(32);    //随机字符串
 		$package["desc"] = trim($params["desc"]);    //备注
 		$package["device_info"] = "ewei_shopv2";      //设备号
-		$package["check_name"] = "FORCE_CHECK";    //校验用户姓名选项
-		$package["re_user_name"] = trim($params["user_name"]);    //校验用户姓名  传的姓名和微信实名认证的姓名进行校验
+		//$package["check_name"] = "FORCE_CHECK";    //校验用户姓名选项
+		$package["check_name"] = "NO_CHECK";    //校验用户姓名选项  NO_CHECK 不校验姓名
+		//$package["re_user_name"] = trim($params["user_name"]);    //校验用户姓名  传的姓名和微信实名认证的姓名进行校验
 		$package["partner_trade_no"] = trim($params["order_sn"]);    //商户订单号
 		$package["amount"] = $params["fee"] * 100;   //金额
 		$package["spbill_create_ip"] = CLIENT_IP;     //IP地址
