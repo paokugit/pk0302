@@ -400,5 +400,43 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             show_json(0);
         }
     }
+
+    /**
+     * 给上级发放红包奖励
+     * 测试1   
+     */
+    public function ceshi1()
+    {
+        $order_sn = "RD20190520100911344638";
+        //查找订单状态
+        $query = pdo_fetchall('select * from '.tablename('ewei_shop_goods_redlog').' where order_sn="'.$order_sn.'"');
+        foreach ($query as $item){
+            if($item['status'] == 0){
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包记录支付状态未支付",'createtime'=>date("Y-m-d H:i:s",time())]);
+                continue;
+            }
+            if($item['status'] == 2){
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包记录发放状态已发放",'createtime'=>date("Y-m-d H:i:s",time())]);
+                continue;
+            }
+            $salt = pdo_getcolumn("mc_mapping_fans",["openid"=>$item['openid']],'salt');
+            //因为这两个红包记录的订单是一样的   所以 加上 这个人公众号粉丝表的salt  因为这个是随机生成
+            $ordersn = $item['order_sn'].$salt;
+            $params = [
+                'desc'=>'订单提成奖励',
+                'order_sn'=>$ordersn,
+                'fee'=>$item['money'],
+                'openid'=>$item['openid'],
+            ];
+            //请求微信发送支付
+            $res = m('user')->get_transfers($params);
+            if($res['return_code'] == "SUCCESS" && $res['result_code'] == "SUCCESS"){
+                pdo_update('ewei_shop_goods_redlog',['status'=>2],['order_sn'=>$order_sn,'level'=>$item['level']]);
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包奖励发放成功",'createtime'=>date("Y-m-d H:i:s",time())]);
+            }else{
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包奖励发放失败,错误代码".$res['err_code']."错误代码描述".$res['err_code_des'],'createtime'=>date("Y-m-d H:i:s",time())]);
+            }
+        }
+    }
 }
 ?>
