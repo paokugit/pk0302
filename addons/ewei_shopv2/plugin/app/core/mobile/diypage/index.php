@@ -68,7 +68,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 			$result['phonecolor'] = ((empty($_W['shopset']['app']['phonecolor']) ? '#ff5555' : $_W['shopset']['app']['phonecolor']));
 			$result['phonenumber'] = ((empty($_W['shopset']['app']['phonenumber']) ? '#ff5555' : $_W['shopset']['app']['phonenumber']));
 		}
-		$result['banner'] = pdo_fetchall('select * from '.tablename('ewei_shop_adsense').' where uniacid="'.$_W['uniacid'].'" and type=2');
+		$result['banner'] = pdo_fetchall('select * from '.tablename('ewei_shop_adsense').' where uniacid="'.$_W['uniacid'].'" and type=2 order by sort desc');
 		app_json($result);
 	}
 	public function main2() 
