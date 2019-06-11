@@ -429,7 +429,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
                 'openid'=>$item['openid'],
             ];
             //请求微信发送支付
-            $res = m('user')->get_transfers($params);
+            $res = m('user')->get_transfers($params,1);
             if($res['return_code'] == "SUCCESS" && $res['result_code'] == "SUCCESS"){
                 pdo_update('ewei_shop_goods_redlog',['status'=>2],['order_sn'=>$order_sn,'level'=>$item['level']]);
                 pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包奖励发放成功",'createtime'=>date("Y-m-d H:i:s",time())]);
