@@ -49,7 +49,17 @@
                 <span class='help-block'>仅支持小程序链接</span>
             </div>
         </div>
-         
+    <div class="form-group">
+        <label class="col-lg control-label must">页面</label>
+        <div class="col-sm-9 col-xs-12 ">
+            {ife 'shop.adsense' $item}
+            <input type="radio"  name="type" class="form-control" value="1" {if $item[type] == 1}checked="checked"{/if} style="display: inline-block"/><span style="margin-left: 2%;">首页</span>
+            <input type="radio"  name="type" class="form-control" value="2" {if $item[type] == 2}checked="checked"{/if} style="display: inline-block;margin-left: 20%"/><span style="margin-left: 2%">我的</span>
+            {else}
+            <div class='form-control-static'>{$item['url']}</div>
+            {/if}
+        </div>
+    </div>
         
         <div class="form-group">
             <label class="col-lg control-label">图片</label>

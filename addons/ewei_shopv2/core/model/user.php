@@ -86,7 +86,7 @@ class User_EweiShopV2Model
 		$payment = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_payment") . " WHERE uniacid=:uniacid AND id=:id", array( ":uniacid" => $_W["uniacid"], ":id" => 1));
 		$wxpay = m('common')->getSysset('app');   //用来获得小程序的APPID
 		$package = array( );
-		//商户账号appid
+		//商户账号appid   1  是公众号  2  是小程序
 		if($type == 1){
 			$package["mch_appid"] = !empty($payment["sub_appid"]) ? trim($payment["sub_appid"]) : "";
 		}else{

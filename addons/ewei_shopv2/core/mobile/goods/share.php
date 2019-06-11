@@ -381,6 +381,7 @@ class Share_EweiShopV2Page extends MobilePage
                 continue;
             }
             $salt = pdo_getcolumn("mc_mapping_fans",["openid"=>$item['openid']],'salt');
+            //因为这两个红包记录的订单是一样的   所以 加上 这个人公众号粉丝表的salt  因为这个是随机生成
             $ordersn = $item['order_sn'].$salt;
             $params = [
                 'desc'=>'订单提成奖励',
