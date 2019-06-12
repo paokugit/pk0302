@@ -212,6 +212,18 @@ class Index_EweiShopV2Page extends AppMobilePage
             $result["endtime"] = $level['endtime'];
         }
         $result["levelinfo"] = $this->level_info($level['levelid']);
+        $result['banner'] = pdo_fetchall('select * from '.tablename('ewei_shop_adsense').' where uniacid="'.$_W['uniacid'].'" and type=2 order by sort desc');
+        foreach ($result['banner'] as $key=>$item){
+            $result['banner'][$key]['thumb'] = tomedia($item['thumb']);
+        }
+        //累计余额收入
+        $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where openid=:openid and type=3 and status = 1";
+        $comeparams = array(':openid' => $_W['openid']);
+        $data['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
+        //累计余额收入
+        $comesql = "select ifnull(sum(num),0) from ".tablename('mc_credits_record')." where openid=:openid and credittype=:credit and num > 0";
+        $comeparams = array(':openid' => $_W['openid'],':credit'=>'credit1');
+        $data['calorie_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
 		app_json($result);
 	}
 
