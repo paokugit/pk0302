@@ -20,7 +20,7 @@
         <div class="content">
             <div class="imgBox">
                 <div class="activity-intro">本活动由跑库发起</div>
-                <div class="playmusic"><img src="http://paokucoin.com/img/backgroup/start@2x.png" alt=""></div>
+                <div class="playmusic"><audio hidden autoplay="autoplay" controls="controls" src="" id="music"></audio><img class="header_select" src="http://paokucoin.com/img/backgroup/start@2x.png" alt=""></div>
                 <ul class="imglist"></ul>
                 <!-- 活动说明 -->
                 <!-- <div class="activity-ex">
@@ -232,7 +232,7 @@
 <script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/js/LAreaData2.js"></script>
 <script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/js/LArea.js"></script>
 <script src="http://res2.wx.qq.com/open/js/jweixin-1.4.0.js "></script>
-<!-- <script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script> -->
+<script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script>
 <script type="text/javascript">
     var str1 = ''
     var str2 = ''
@@ -271,6 +271,7 @@
                         '</li>'
                     $(".imglist").html(str1)
                 });
+                $('.playmusic audio').attr('src',data.result.val.music_src);
                 var atime = data.result.val.end_time
                 var result = Number(atime) - timestamp
                 $(function () {
@@ -343,4 +344,15 @@
     function showDiv() {
         $(myDiv).fadeIn();
     }
+
+    $('.playmusic img').click(function () {
+        var audio = document.getElementById('music');
+        if(audio.paused){
+            $(this).addClass('header_select')
+            audio.play();
+        }else{
+            $(this).removeClass('header_select')
+            audio.pause();
+        }
+    })
 </script>

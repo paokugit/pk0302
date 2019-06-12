@@ -395,6 +395,8 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         $key = md5($uniacid.$merchid.$str);
         if($key == $post_key){
             $value = m('cache')->get($key);
+            $music = pdo_getcolumn('ewei_shop_music',['id'=>$value['music']],'music');
+            $value['music_src'] = tomedia($music);
             show_json(1,['val'=>$value]);
         }else{
             show_json(0);
