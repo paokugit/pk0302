@@ -219,11 +219,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         //累计余额收入
         $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where openid=:openid and type=3 and status = 1";
         $comeparams = array(':openid' => $_W['openid']);
-        $data['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
+        $result['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
         //累计余额收入
         $comesql = "select ifnull(sum(num),0) from ".tablename('mc_credits_record')." where openid=:openid and credittype=:credit and num > 0";
         $comeparams = array(':openid' => $_W['openid'],':credit'=>'credit1');
-        $data['calorie_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
+        $result['calorie_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
 		app_json($result);
 	}
 
