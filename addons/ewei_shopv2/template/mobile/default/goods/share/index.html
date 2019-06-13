@@ -28,7 +28,7 @@
         <!-- content -->
         <div class="content">
             <div class="imgBox">
-                <div class="activity-intro">本活动由跑库发起</div>
+                <div class="activity-intro">本活动由<span>跑库</span>发起</div>
                 <div class="playmusic"><audio hidden autoplay="autoplay" controls="controls" src="" id="music"></audio><img class="header_select" src="http://paokucoin.com/img/backgroup/start@2x.png" alt=""></div>
                 <ul class="imglist"></ul>
                 
@@ -273,7 +273,9 @@
                 $(".packetcount-first").html(data.result.commission1_pay)
                 $(".packetcount-second").html(data.result.commission2_pay)
                 $(".people-count").html(data.result.order.count)
-                $(".kefu-name").html(data.result.other.main)
+                $('.activity-intro span').html(data.result.other.main)
+				$('.kefu-title').html(data.result.other.main)
+                $(".kefu-name").html(data.result.other.principal)
                 $(".kefu-phone").html(data.result.other.tel)
                 $(".kefu-address-text").html(data.result.other.address)
                 $.each(data.result.thumb_url, function (i, item) {

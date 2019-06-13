@@ -19,7 +19,7 @@
         <!-- content -->
         <div class="content">
             <div class="imgBox">
-                <div class="activity-intro">本活动由跑库发起</div>
+                <div class="activity-intro">本活动由<span>跑库</span>发起</div>
                 <div class="playmusic"><audio hidden autoplay="autoplay" controls="controls" src="" id="music"></audio><img class="header_select" src="http://paokucoin.com/img/backgroup/start@2x.png" alt=""></div>
                 <ul class="imglist"></ul>
                 <!-- 活动说明 -->
@@ -33,7 +33,7 @@
             </div>
             <div class="part-box">
                 <div class="part-box-top">
-                    <div class="part-tit">已有<span class="part-num">58</span>人参与</div>
+                    <div class="part-tit">已有<span class="part-num">0</span>人参与</div>
                     <div class="part-countdown">
                         <div class="countdown-img">
                             <img src="http://paokucoin.com/img/backgroup/bg01@2x.png" alt="">
@@ -208,7 +208,7 @@
                     <p class="kefu-title">跑库</p>
                     <div class="kefu-name-box">
                         <div class="kefu-name-tit">负责人：</div>
-                        <div class="kefu-name">candy</div>
+                        <div class="kefu-name"></div>
                     </div>
                     <div class="kefu-phone-box">
                         <img class="phoneImg" src="http://paokucoin.com/img/backgroup/boda@2x.png" alt="">
@@ -261,7 +261,9 @@
                 $(".packetcount-first").html(data.result.val.commission1_pay)
                 $(".packetcount-second").html(data.result.val.commission2_pay)
                 $(".people-count").html(0)
-                $(".kefu-name").html(data.result.val.main)
+				$('.activity-intro span').html(data.result.val.main)
+				$('.kefu-title').html(data.result.val.main)
+                $(".kefu-name").html(data.result.val.principal)
                 $(".kefu-phone").html(data.result.val.tel)
                 $(".kefu-address-text").html(data.result.val.address)
                 $.each(data.result.val.thumb, function (i, item) {
