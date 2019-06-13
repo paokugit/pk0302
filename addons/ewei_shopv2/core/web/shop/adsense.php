@@ -44,7 +44,7 @@ class Adsense_EweiShopV2Page extends WebPage{
         $id = intval($_GPC['id']);
         
         if ($_W['ispost']) {
-            $data = array('uniacid' => $_W['uniacid'], 'title' => trim($_GPC['title']), 'url' => trim($_GPC['url']), 'sort' =>$_GPC['sort'], 'thumb' => save_media($_GPC['thumb']));
+            $data = array('uniacid' => $_W['uniacid'], 'title' => trim($_GPC['title']), 'url' => trim($_GPC['url']), 'sort' =>$_GPC['sort'], 'thumb' => save_media($_GPC['thumb']),'type'=>$_GPC['type']);
             $data["create_time"]=time();
             
             if (!empty($id)) {

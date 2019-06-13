@@ -38,6 +38,9 @@ class Index_EweiShopV2Page extends AppMobilePage
 		$merchdata = $this->merchData();
 		extract($merchdata);
 		$condition .= " and merchshow=0 ";
+		//hcc  加正则验证  验证ordersn订单号   不是以SC开头
+		//$condition .= " and ordersn NOT REGEXP '^SC'";
+		$condition .= " and type = 0";
 		if( $show_status != "" ) 
 		{
 			$show_status = intval($show_status);

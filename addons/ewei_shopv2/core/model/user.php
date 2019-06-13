@@ -74,29 +74,32 @@ class User_EweiShopV2Model
 	}
 
 	/**
-	 * 微信小程序 提现到零钱
+	 * 企业付款到零钱
 	 * @param array $params
+	 * @param int $type   1 公众号  2 小程序
 	 * @return array|false|mixed|resource
 	 */
-	public function get_transfers($params = [])
+	public function get_transfers($params = [],$type = 1)
 	{
 		global $_W;
 		//获取微信商户配置
 		$payment = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_payment") . " WHERE uniacid=:uniacid AND id=:id", array( ":uniacid" => $_W["uniacid"], ":id" => 1));
-		$wechat = array(
-			"sub_appid" => (!empty($payment["sub_appid"]) ? trim($payment["sub_appid"]) : ""),
-			"sub_mch_id" => trim($payment["sub_mch_id"]),
-			"apikey" => trim($payment["apikey"]),
-		);
+		$wxpay = m('common')->getSysset('app');   //用来获得小程序的APPID
 		$package = array( );
-		$package["mch_appid"] = trim($wechat["sub_appid"]);   //商户账号appid
-		$package["mchid"] = trim($wechat["sub_mch_id"]);   //商户号
-		$package["openid"] = (empty($params["openid"]) ? trim($_W["openid"]) : trim($params["openid"]));  //用户openid
+		//商户账号appid   1  是公众号  2  是小程序
+		if($type == 1){
+			$package["mch_appid"] = !empty($payment["sub_appid"]) ? trim($payment["sub_appid"]) : "";
+		}else{
+			$package["mch_appid"] = !empty($wxpay["appid"]) ? trim($wxpay["appid"]) : "";
+		}
+		$package["mchid"] = trim($payment["sub_mch_id"]);   //商户号
+		$package["openid"] = empty($params["openid"]) ? trim($_W["openid"]) : trim($params["openid"]);  //用户openid
 		$package["nonce_str"] = random(32);    //随机字符串
 		$package["desc"] = trim($params["desc"]);    //备注
 		$package["device_info"] = "ewei_shopv2";      //设备号
-		$package["check_name"] = "FORCE_CHECK";    //校验用户姓名选项
-		$package["re_user_name"] = trim($params["user_name"]);    //校验用户姓名  传的姓名和微信实名认证的姓名进行校验
+		//$package["check_name"] = "FORCE_CHECK";    //校验用户姓名选项
+		$package["check_name"] = "NO_CHECK";    //校验用户姓名选项  NO_CHECK 不校验姓名
+		//$package["re_user_name"] = trim($params["user_name"]);    //校验用户姓名  传的姓名和微信实名认证的姓名进行校验
 		$package["partner_trade_no"] = trim($params["order_sn"]);    //商户订单号
 		$package["amount"] = $params["fee"] * 100;   //金额
 		$package["spbill_create_ip"] = CLIENT_IP;     //IP地址
@@ -110,7 +113,7 @@ class User_EweiShopV2Model
 			}
 			$string1 .= (string) $key . "=" . $v . "&";
 		}
-		$string1 .= "key=" . $wechat["apikey"];
+		$string1 .= "key=" . $payment["apikey"];
 		$package["sign"] = strtoupper(md5(trim($string1)));    //签名
 		$dat = array2xml($package);
 		$response = ihttp_request("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", $dat);

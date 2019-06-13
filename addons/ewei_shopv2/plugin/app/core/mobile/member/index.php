@@ -24,11 +24,11 @@ class Index_EweiShopV2Page extends AppMobilePage
 		$merch_data = m("common")->getPluginset("merch");
 		if( $merch_plugin && $merch_data["is_openmerch"] ) 
 		{
-			$statics = array( "order_0" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and status=0  and uniacid=:uniacid limit 1", $params), "order_1" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and status=1 and refundid=0 and uniacid=:uniacid limit 1", $params), "order_2" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and status=2 and refundid=0 and uniacid=:uniacid limit 1", $params), "order_4" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and refundstate=1 and uniacid=:uniacid limit 1", $params), "cart" => pdo_fetchcolumn("select ifnull(sum(total),0) from " . tablename("ewei_shop_member_cart") . " where uniacid=:uniacid and openid=:openid and deleted=0 ", $params), "favorite" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_member_favorite") . " where uniacid=:uniacid and openid=:openid and deleted=0 ", $params) );
+			$statics = array( "order_0" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and status=0  and uniacid=:uniacid and type = 0 limit 1", $params), "order_1" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and status=1 and refundid=0 and uniacid=:uniacid and type = 0 limit 1", $params), "order_2" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and status=2 and refundid=0 and uniacid=:uniacid and type = 0 limit 1", $params), "order_4" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and refundstate=1 and uniacid=:uniacid and type = 0 limit 1", $params), "cart" => pdo_fetchcolumn("select ifnull(sum(total),0) from " . tablename("ewei_shop_member_cart") . " where uniacid=:uniacid and openid=:openid and deleted=0 ", $params), "favorite" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_member_favorite") . " where uniacid=:uniacid and openid=:openid and deleted=0 ", $params) );
 		}
 		else 
 		{
-			$statics = array( "order_0" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and status=0  and uniacid=:uniacid and isparent=0 limit 1", $params), "order_1" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and status=1 and refundid=0 and uniacid=:uniacid and isparent=0 limit 1", $params), "order_2" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and status=2 and refundid=0 and uniacid=:uniacid and isparent=0 limit 1", $params), "order_4" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and refundstate=1 and uniacid=:uniacid and isparent=0 limit 1", $params), "cart" => pdo_fetchcolumn("select ifnull(sum(total),0) from " . tablename("ewei_shop_member_cart") . " where uniacid=:uniacid and openid=:openid and deleted=0 and selected = 1", $params), "favorite" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_member_favorite") . " where uniacid=:uniacid and openid=:openid and deleted=0 and `type`=0", $params) );
+			$statics = array( "order_0" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and status=0  and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "order_1" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and status=1 and refundid=0 and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "order_2" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and status=2 and refundid=0 and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "order_4" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and refundstate=1 and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "cart" => pdo_fetchcolumn("select ifnull(sum(total),0) from " . tablename("ewei_shop_member_cart") . " where uniacid=:uniacid and openid=:openid and deleted=0 and selected = 1", $params), "favorite" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_member_favorite") . " where uniacid=:uniacid and openid=:openid and deleted=0 and `type`=0", $params) );
 		}
 		$hascoupon = false;
 		$hascouponcenter = false;
@@ -169,7 +169,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 		{
 			$usemembercard = false;
 		}
-		$result = array( "id" => $member["id"], "avatar" => $member["avatar"], "nickname" => $member["nickname"], "moneytext" => $_W["shopset"]["trade"]["moneytext"], "credittext" => $_W["shopset"]["trade"]["credittext"], "credit1" => $member["credit1"], "credit2" => $member["credit2"], "open_recharge" => (empty($_W["shopset"]["trade"]["closerecharge"]) ? 1 : 0), "open_creditshop" => intval($open_creditshop), "open_withdraw" => intval($_W["shopset"]["trade"]["withdraw"]), "logtext" => ($_W["shopset"]["trade"]["withdraw"] == 1 ? $_W["shopset"]["trade"]["moneytext"] . "明细" : "充值记录"), "levelurl" => ($_W["shopset"]["shop"]["levelurl"] == NULL ? "" : $_W["shopset"]["shop"]["levelurl"]), "levelname" => (empty($level["id"]) ? (empty($_W["shopset"]["shop"]["levelname"]) ? "普通会员" : $_W["shopset"]["shop"]["levelname"]) : $level["levelname"]), "statics" => $statics, "isblack" => $member["isblack"], "haveverifygoods" => $haveverifygoods, "verifygoods" => $verifygoods, "hascoupon" => $hascoupon, "hasFullback" => $hasFullback, "fullbacktext" => m("sale")->getFullBackText(), "coupon_text" => $coupon_text, "hascouponcenter" => $hascouponcenter, "couponcenter_text" => $couponcenter_text, "usemembercard" => $usemembercard, "hasmembercard" => $hasmembercard, "hasbuycardnum" => $hasbuycardnum, "allcardnum" => $allcardnum, "hasabonus" => $hasabonus, "abonus_text" => $abonus_text, "commission" => $commission, "commission_text" => $commission_text, "commission_url" => $commission_url, "hasqa" => $hasqa, "qa_text" => $qa_text, "hassign" => $hassign, "sign_text" => $sign_text, "sign_url_domain" => $sign_url_domain, "sign_url_params" => $sign_url_params, "hasrank" => intval($_W["shopset"]["rank"]["status"]) == 1, "rank_text" => "卡路里排行", "hasorderrank" => intval($_W["shopset"]["rank"]["order_status"]) == 1, "orderrank_text" => "消费排行", "copyright" => (!empty($copyright) && !empty($copyright["copyright"]) ? $copyright["copyright"] : ""), "customer" => intval($_W["shopset"]["app"]["customer"]), "phone" => intval($_W["shopset"]["app"]["phone"]) );
+		$result = array( "id" => $member["id"], "avatar" => $member["avatar"], "nickname" => $member["nickname"], "moneytext" => $_W["shopset"]["trade"]["moneytext"], "credittext" => $_W["shopset"]["trade"]["credittext"], "credit1" => $member["credit1"], "credit2" => $member["credit2"],"credit3" => $member["credit3"], "open_recharge" => (empty($_W["shopset"]["trade"]["closerecharge"]) ? 1 : 0), "open_creditshop" => intval($open_creditshop), "open_withdraw" => intval($_W["shopset"]["trade"]["withdraw"]), "logtext" => ($_W["shopset"]["trade"]["withdraw"] == 1 ? $_W["shopset"]["trade"]["moneytext"] . "明细" : "充值记录"), "levelurl" => ($_W["shopset"]["shop"]["levelurl"] == NULL ? "" : $_W["shopset"]["shop"]["levelurl"]), "levelname" => (empty($level["id"]) ? (empty($_W["shopset"]["shop"]["levelname"]) ? "普通会员" : $_W["shopset"]["shop"]["levelname"]) : $level["levelname"]), "statics" => $statics, "isblack" => $member["isblack"], "haveverifygoods" => $haveverifygoods, "verifygoods" => $verifygoods, "hascoupon" => $hascoupon, "hasFullback" => $hasFullback, "fullbacktext" => m("sale")->getFullBackText(), "coupon_text" => $coupon_text, "hascouponcenter" => $hascouponcenter, "couponcenter_text" => $couponcenter_text, "usemembercard" => $usemembercard, "hasmembercard" => $hasmembercard, "hasbuycardnum" => $hasbuycardnum, "allcardnum" => $allcardnum, "hasabonus" => $hasabonus, "abonus_text" => $abonus_text, "commission" => $commission, "commission_text" => $commission_text, "commission_url" => $commission_url, "hasqa" => $hasqa, "qa_text" => $qa_text, "hassign" => $hassign, "sign_text" => $sign_text, "sign_url_domain" => $sign_url_domain, "sign_url_params" => $sign_url_params, "hasrank" => intval($_W["shopset"]["rank"]["status"]) == 1, "rank_text" => "卡路里排行", "hasorderrank" => intval($_W["shopset"]["rank"]["order_status"]) == 1, "orderrank_text" => "消费排行", "copyright" => (!empty($copyright) && !empty($copyright["copyright"]) ? $copyright["copyright"] : ""), "customer" => intval($_W["shopset"]["app"]["customer"]), "phone" => intval($_W["shopset"]["app"]["phone"]) );
 		if( !empty($result["customer"]) ) 
 		{
 			$result["customercolor"] = (empty($_W["shopset"]["app"]["customercolor"]) ? "#ff55555" : $_W["shopset"]["app"]["customercolor"]);
@@ -212,6 +212,18 @@ class Index_EweiShopV2Page extends AppMobilePage
             $result["endtime"] = $level['endtime'];
         }
         $result["levelinfo"] = $this->level_info($level['levelid']);
+        $result['banner'] = pdo_fetchall('select * from '.tablename('ewei_shop_adsense').' where uniacid="'.$_W['uniacid'].'" and type=2 order by sort desc');
+        foreach ($result['banner'] as $key=>$item){
+            $result['banner'][$key]['thumb'] = tomedia($item['thumb']);
+        }
+        //累计余额收入
+        $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where openid=:openid and type=3 and status = 1";
+        $comeparams = array(':openid' => $_W['openid']);
+        $result['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
+        //累计余额收入
+        $comesql = "select ifnull(sum(num),0) from ".tablename('mc_credits_record')." where openid=:openid and credittype=:credit and num > 0";
+        $comeparams = array(':openid' => $_W['openid'],':credit'=>'credit1');
+        $result['calorie_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
 		app_json($result);
 	}
 
@@ -303,7 +315,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     public function member_info(){
         global $_W;
         global $_GPC;
-        $member_info = m('member')->getInfo($_GPC['openid']);
+        $member_info = m('member')->getInfo($_GPC['fansopenid']);
         if( empty($member_info) )
         {
             app_error(AppError::$UserNotFound);
@@ -313,12 +325,37 @@ class Index_EweiShopV2Page extends AppMobilePage
         $data['nickname'] = $member_info['nickname'];
         $data['mobile'] = $member_info['mobile'];
         $data['createtime'] = date('Y-m-d',$member_info['createtime']);
-        $level = m("member")->agentlevel($_W["openid"]);
+        $level = m("member")->agentlevel($_GPC["fansopenid"]);
         $data['levelname'] = $level['levelname'];
         $data['levelid'] = $level['levelid'];
+        $data['avatar'] = $member_info['avatar'];
         $agentcount = pdo_fetchcolumn("SELECT COUNT(*) FROM " . tablename("ewei_shop_member") . " WHERE agentid=:agentid  limit 1", $params = array( ":agentid" => $member_info['id']) );
         $data['agentcount'] = $agentcount;
         app_json($data);
+    }
+
+
+
+    /**
+     *
+     * 判断是否可购买会员
+     * @param $openid
+     * @author lihanwne@paokucoin.com
+     */
+    public function canby_agent(){
+        global $_GPC;
+        if(!$_GPC['openid'] || !$_GPC['goodsid']) app_error(3,'数据错误');
+        $openid = $_GPC['openid'];
+        if($_GPC['goodsid']==3) $agentlevel=1;
+        if($_GPC['goodsid']==4) $agentlevel=2;
+        if($_GPC['goodsid']==7) $agentlevel=5;
+        $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid  limit 1", array(  ":openid" => $openid ));
+        if(!$memberInfo) app_error(1,'会员信息不存在');
+        if($memberInfo['agenttime']){
+            $hasday = (time()-$memberInfo['agenttime'])/(3600*24*20);
+            if($hasday>20 && $agentlevel!=$memberInfo['agentlevel']) app_json(0,'允许购买');
+        }
+        app_error(2,'同一会员级别20天内不可重复购买');
     }
 
 }

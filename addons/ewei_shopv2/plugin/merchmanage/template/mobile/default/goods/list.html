@@ -13,7 +13,7 @@
 <body>
     <div class="body_box">
         <!-- header -->
-        <div class="header">红包引流</div>
+		<!--<div class="header">红包引流</div>-->
         <!-- header -->
         <!-- content -->
         <div class="content">
@@ -171,7 +171,7 @@
                    // "<button class='editbtn' data-id='"+item.goods_id+"'>编辑</button>" +
                     "</div>" +
                     "<div class='item-sharebox'>" +
-                    "<button class='sharebtn'>分享</button>" +
+                    "<button class='sharebtn' data='"+item.goods_id+"'>分享</button>" +
                     "</div>" +
                     "</div>" +
                     "</li>"
@@ -257,14 +257,18 @@
                 location.href = "{php echo mobileUrl('merchmanage/goods/show/red')}&id="+id;
             });
             $('.orderbtn').click(function () {
-                location.href = "{php echo mobileUrl('merchmanage/goods/show/red')}&id="+id;
+                location.href = "{php echo mobileUrl('merchmanage/order')}&status=1";
             })
             $(".sharebtn").click(function () {
-                $('#warning').css('display', 'block')
+				var id = $(this).attr('data');
+				location.href="{php echo mobileUrl('goods.share.index')}&goods_id="+id;
             });
             $("#warning").click(function(){
                 $('#warning').css('display', 'none')
             });
+            $('.sharebtn-ding').click(function () {
+                location.href="{php echo mobileUrl('merchmanage/order')}&status=1";
+            })
         }
     });
     $('.footer').click(function () {

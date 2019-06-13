@@ -442,7 +442,11 @@ if (!class_exists("AppModel")) {
                                 }
                                 unset($child);
                             } else if ($item['id'] == 'goods') {
-                                if (!(empty($item['data']))) {
+                               if (!(empty($item['data']))) {
+                                    $args = array( "pagesize" =>50, "page" => 1,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
+                                    $item['data'] = array();
+                                    $item['data'] = m('goods')->getList($args);
+                                    $item['data'] = $this->getGoodsList($item['data']);
                                     if (!(empty($item['params']['goodsscroll']))) {
                                         $swiperpage = 1;
                                         if ($item['style']['liststyle'] == 'block') {
@@ -453,6 +457,9 @@ if (!class_exists("AppModel")) {
                                         $data_temp = array();
                                         $k = 0;
                                         $i = 1;
+                                        $args = array( "pagesize" =>50, "page" => 1,"deduct_type"=>2,"from" => "miniprogram" );
+                                        $item['data'] = array();
+                                        $item['data'] = m('goods')->getList($args);
                                         foreach ($item['data'] as $childid => $child) {
                                             $data_temp[$k][] = $child;
                                             if ($i < $swiperpage) {
@@ -461,6 +468,7 @@ if (!class_exists("AppModel")) {
                                                 $i = 1;
                                                 ++$k;
                                             }
+
                                         }
                                         $item['data_temp'] = $data_temp;
                                         unset($swiperpage, $data_temp, $k, $i);
@@ -482,6 +490,9 @@ if (!class_exists("AppModel")) {
                                             $item['params']['showicon'] == 0;
                                         }
                                     }
+//                                    if( isset($child["deduct"]) ){
+//                                        $item['data'][$childid]["showprice"] = round($child["price"]-$child["deduct"],2);
+//                                    }
                                     if (($item['params']['saleout'] == 0) && !(empty($_W['shopset']['shop']['saleout']))) {
                                         $item['params']['saleout'] = tomedia($_W['shopset']['shop']['saleout']);
                                         if (empty($item['params']['saleout'])) {
@@ -490,6 +501,7 @@ if (!class_exists("AppModel")) {
                                     } else if (($item['params']['saleout'] == 1) && empty($item['params']['saleout'])) {
                                         $item['params']['saleout'] = tomedia('../addons/ewei_shopv2/plugin/diypage/static/images/default/saleout-' . $item['style']['saleoutstyle'] . '.png');
                                     }
+
                                 } else {
                                     unset($page['data']['items'][$itemid]);
                                 }
@@ -531,6 +543,29 @@ if (!class_exists("AppModel")) {
                 }
             }
             return $page;
+        }
+
+        public function getGoodsList($goodsList){
+            $newGoodsList = array();
+            foreach ($goodsList['list'] as $key=>$goods){
+                $newGoodsList[$key]['gid'] = $goods['id'];
+                $newGoodsList[$key]['deduct'] = $goods['deduct'];
+                $newGoodsList[$key]['deduct_type'] = $goods['deduct_type'];
+                $newGoodsList[$key]['title'] = $goods['title'];
+                $newGoodsList[$key]['subtitle'] = $goods['subtitle'];
+                $newGoodsList[$key]['price'] = $goods['minprice'];
+                $newGoodsList[$key]['productprice'] = $goods['productprice'];
+                $newGoodsList[$key]['thumb'] = $goods['thumb'];
+                $newGoodsList[$key]['total'] = $goods['total'];
+                $newGoodsList[$key]['ctype'] = $goods['type'];
+                $newGoodsList[$key]['sales'] = $goods['sales'];
+                $newGoodsList[$key]['video'] = $goods['video'];
+                $newGoodsList[$key]['seecommission'] = $goods['seecommission'];
+                $newGoodsList[$key]['cansee'] = $goods['cansee'];
+                $newGoodsList[$key]['seetitle'] = $goods['seetitle'];
+                $newGoodsList[$key]['bargain'] = $goods['bargain'];
+            }
+            return $newGoodsList;
         }
 
         public function calculate($str = NULL, $pagetype = false)

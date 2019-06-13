@@ -8,7 +8,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 {
 	public function main() 
 	{
-		global $_W;
+	    global $_W;
 		global $_GPC;
 		$pageid = intval($_GPC['id']);
 		if (empty($pageid)) 
@@ -70,6 +70,22 @@ class Index_EweiShopV2Page extends AppMobilePage
 		}
 		app_json($result);
 	}
+
+	/*
+	 * 个人中心  服务
+	 */
+	public function icon()
+    {
+        global $_GPC;
+        $pageid = $_GPC['type'];
+        if($pageid == ""){
+            show_json(0,"请完善参数信息");
+        }
+        $page = $this->model->getPage($pageid, true);
+        $result = array_merge($page['data']['items']['M1555495474800']['data'],$page['data']['items']['M1546575533950']['data'],$page['data']['items']['M1519885061238']['data'],$page['data']['items']['M1546505622439']['data']);
+        show_json(1,$result);
+    }
+
 	public function main2() 
 	{
 		global $_W;

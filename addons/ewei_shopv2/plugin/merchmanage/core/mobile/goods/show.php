@@ -80,7 +80,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         if(isset($_GPC['id'])){
             //查询goods部分字段
             $fields = "title,description,total,marketprice,thumb,thumb_url,commission1_pay,commission2_pay";
-            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>31]);
+            $item1 = pdo_fetch(' SELECT ' .$fields. ' FROM '. tablename('ewei_shop_goods') . ' where id=:id and  merchid=:merchid and uniacid=:uniacid',[':id'=>$_GPC['id'],':uniacid'=>$_W['uniacid'],':merchid'=>$_W['merchmanage']['merchid']]);
             $item1['thumb_url'] = unserialize($item1['thumb_url']);
             array_unshift($item1['thumb_url'],$item1['thumb']);
             //查询红包引流的全部字段
@@ -205,7 +205,8 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
     /**
      * 测试
      */
-    public function ceshi(){
+    public function ceshi()
+    {
         global $_W;
         global $_GPC;
         list(, $payment) = m('common')->public_build();
@@ -213,15 +214,21 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         {
             return $payment;
         }
+        if(!$_GPC['order_sn']){
+            show_json(0,"请完善参数信息");
+        }
         //查找订单状态
-        $query = pdo_fetch('select * from '.tablename('ewei_shop_goods_red_log').' where order_sn="'.$_GPC['order_sn'].'"');
+        $query = pdo_fetch('select * from '.tablename('ewei_shop_goods_redlog').' where order_sn="'.$_GPC['order_sn'].'"');
+        if($query['status'] == 0){
+            show_json(0,"该订单未支付成功");
+        }
         if($query['status'] == 2){
-            show_json(0,'该订单已处理');
+            show_json(0,'该订单奖励已发放');
         }
         $params = [
-            'desc'=>'测试提现备注',
+            'desc'=>'订单提成奖励',
             'order_sn'=>$query['order_sn'],
-            'user_name'=>'郝成程',
+            //'user_name'=>"郝成程",
             'fee'=>$query['money'],
             'openid'=>$query['openid'],
         ];
@@ -231,29 +238,35 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             pdo_begin();
             try{
                 //更新订单状态
-                pdo_update('ewei_shop_goods_red_log',['status'=>2],['order_sn'=>$params['order_sn']]);
+                pdo_update('ewei_shop_goods_redlog',['status'=>2],['order_sn'=>$params['order_sn']]);
                 $openid = 'sns_wa_'.$params['openid'];
-                $credit = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit2');
-                $credit2 = bcmul($credit,$params['fee'],2);
+                //$credit = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit2');
+                //提现成功后 减去她的余额
+               // $credit2 = bcmul($credit,$params['fee'],2);
                 //更新用户余额
-                pdo_update('ewei_shop_member',['credit2'=>$credit2],['openid'=>$openid]);
-                //添加操作日志
+                //pdo_update('ewei_shop_member',['credit2'=>$credit2],['openid'=>$openid]);
+                //添加用户操作日志
                 $logno = "RW".date(YmdHis).random(6,true);
                 $data = [
                     'uniacid'=>$_W['uniacid'],
                     'type'=>1,
                     'openid'=>$openid,
-                    'title'=>'会员提现',
+                    'title'=>'订单提成奖励到零钱',
                     'logno'=>$logno,
                     'status'=>1,
                     'createtime'=>time(),
                     'money'=>$params['fee'],
+                    'rechargetype'=>'reward',
+                    'realmoney'=>$params['fee'],
                 ];
                 pdo_insert('ewei_shop_member_log',$data);
                 pdo_commit();
+                show_json(1,"订单红包奖励已发放");
             }catch (Exception $exception){
                 pdo_rollback();
             }
+        }else{
+            show_json(0,'订单红包奖励发放失败');
         }
     }
 
@@ -269,17 +282,17 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         $end = pdo_fetchall('select g.title as gtitle,g.description,marketprice,g.total,g.thumb,g.thumb_url,
             g.commission1_pay,commission2_pay,g.createtime,g.forwardcount,b.*,m.title from '. tablename('ewei_shop_goods').
             'g join'.tablename('ewei_shop_goods_bribe_expert'). ('b on b.goods_id=g.id').' join'.
-            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and end_time < "'.time().'"');
+            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and end_time < "'.time().'" and g.merchid = "'.$_W['merchmanage']['merchid'].'"');
         //end_time  大于  当前时间  进行中  isdraft  = 1
         $ing = pdo_fetchall('select g.title as gtitle,g.description,marketprice,g.total,g.thumb,g.thumb_url,
             g.commission1_pay,commission2_pay,g.createtime,g.forwardcount,b.*,m.title from '. tablename('ewei_shop_goods').
             'g join'.tablename('ewei_shop_goods_bribe_expert'). ('b on b.goods_id=g.id').' join'.
-            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and `end_time` > "'.time().'"');
+            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and `end_time` > "'.time().'" and g.merchid = "'.$_W['merchmanage']['merchid'].'"');
         //  isdraft  = 0  草稿箱
         $draft = pdo_fetchall('select g.title as gtitle,g.description,marketprice,g.total,g.thumb,g.thumb_url,
             g.commission1_pay,commission2_pay,g.createtime,b.*,m.title from '. tablename('ewei_shop_goods').
             'g join'.tablename('ewei_shop_goods_bribe_expert'). ('b on b.goods_id=g.id').' join'.
-            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 0');
+            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 0 and g.merchid = "'.$_W['merchmanage']['merchid'].'"');
         //计算参与人数和交易订单数
         $ing = m('goods')->count($ing);
         $end = m('goods')->count($end);
@@ -382,9 +395,49 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         $key = md5($uniacid.$merchid.$str);
         if($key == $post_key){
             $value = m('cache')->get($key);
+            $music = pdo_getcolumn('ewei_shop_music',['id'=>$value['music']],'music');
+            $value['music_src'] = tomedia($music);
             show_json(1,['val'=>$value]);
         }else{
             show_json(0);
+        }
+    }
+
+    /**
+     * 给上级发放红包奖励
+     * 测试1   
+     */
+    public function ceshi1()
+    {
+        $order_sn = "RD20190520100911344638";
+        //查找订单状态
+        $query = pdo_fetchall('select * from '.tablename('ewei_shop_goods_redlog').' where order_sn="'.$order_sn.'"');
+        foreach ($query as $item){
+            if($item['status'] == 0){
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包记录支付状态未支付",'createtime'=>date("Y-m-d H:i:s",time())]);
+                continue;
+            }
+            if($item['status'] == 2){
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包记录发放状态已发放",'createtime'=>date("Y-m-d H:i:s",time())]);
+                continue;
+            }
+            $salt = pdo_getcolumn("mc_mapping_fans",["openid"=>$item['openid']],'salt');
+            //因为这两个红包记录的订单是一样的   所以 加上 这个人公众号粉丝表的salt  因为这个是随机生成
+            $ordersn = $item['order_sn'].$salt;
+            $params = [
+                'desc'=>'订单提成奖励',
+                'order_sn'=>$ordersn,
+                'fee'=>$item['money'],
+                'openid'=>$item['openid'],
+            ];
+            //请求微信发送支付
+            $res = m('user')->get_transfers($params,1);
+            if($res['return_code'] == "SUCCESS" && $res['result_code'] == "SUCCESS"){
+                pdo_update('ewei_shop_goods_redlog',['status'=>2],['order_sn'=>$order_sn,'level'=>$item['level']]);
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包奖励发放成功",'createtime'=>date("Y-m-d H:i:s",time())]);
+            }else{
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包奖励发放失败,错误代码".$res['err_code']."错误代码描述".$res['err_code_des'],'createtime'=>date("Y-m-d H:i:s",time())]);
+            }
         }
     }
 }

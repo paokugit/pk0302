@@ -18,7 +18,26 @@
 
 .img01 {
     width: 100%;
-    height: 300px
+    height: auto;
+}
+
+.header_select{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    -webkit-animation:rotateImg 5s linear infinite;
+    /* border: 1px solid #ccc; */
+    vertical-align: middle;
+}
+
+@keyframes rotateImg {
+    0% {transform : rotate(0deg);}
+    100% {transform : rotate(360deg);}
+}
+
+@-webkit-keyframes rotateImg {
+    0%{-webkit-transform : rotate(0deg);}
+    100%{-webkit-transform : rotate(360deg);}
 }
 
 .activity-intro {

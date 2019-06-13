@@ -69,6 +69,9 @@
                             {ifp 'finance.recharge.credit2'}
                             <li {if $type=='credit2'}class="active"{/if}><a data-toggle="tab" href="#tab-2"  data-rechargetype="credit2" aria-expanded="false"> 充值余额</a></li>
                             {/if}
+                            {ifp 'finance.recharge.credit3'}
+                            <li {if $type=='credit3'}class="active"{/if}><a data-toggle="tab" href="#tab-3"  data-rechargetype="credit3" aria-expanded="false"> 充值折扣宝</a></li>
+                            {/if}
 
                         </ul>
                         <div class="tab-content ">
@@ -91,8 +94,16 @@
                                         <div class="form-control-static">{$profile['credit2']}</div>
                                     </div>
                                 </div>
+                            </div>
+                            <div id="tab-3" class="tab-pane {if $type=='credit3'}active{/if}">
 
-
+                                <div class="form-group"></div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">当前折扣宝</label>
+                                    <div class="col-sm-9 col-xs-12">
+                                        <div class="form-control-static">{$profile['credit3']}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -107,7 +118,7 @@
                             <input type='radio' name='changetype' value='1' /> 减少
                         </label>
                         <label class='radio-inline'>
-                            <input type='radio' name='changetype' value='2' /> 最终<span class='name'>{if $type=='credit1'}卡路里{else}余额{/if}</span>
+                            <input type='radio' name='changetype' value='2' /> 最终<span class='name'>{if $type=='credit1'}卡路里{elseif $type=="credit2"}余额{elseif $type="credit3" }折扣宝{/if}</span>
                         </label>
                     </div>
                 </div>
@@ -128,7 +139,7 @@
                 </div>
 
             </div> <div class="modal-footer">
-            <button class="btn btn-primary btn-submit" type="submit">确认充值{if $type=='credit1'}卡路里{else}余额{/if}</button>
+            <button class="btn btn-primary btn-submit" type="submit">确认充值{if $type=='credit1'}卡路里{elseif $type == 'credit2'}余额{elseif $type='credit3'}折扣宝{/if}</button>
             <button data-dismiss="modal" class="btn btn-default" type="button">取消</button>
         </div>
         </div>
@@ -142,9 +153,12 @@
             if(type=='credit1') {
                 $('.name').html('卡路里');
                 $(".btn-submit").text('确认充值卡路里');
-            }else{
+            }else if(type == 'credit2'){
                 $('.name').html('余额');
                 $(".btn-submit").text('确认充值余额');
+            }else if(type == 'credit3'){
+                $('.name').html('折扣宝');
+                $(".btn-submit").text('确认充值折扣宝');
             }
             $(':hidden[name=type]').val( type) ;
         });

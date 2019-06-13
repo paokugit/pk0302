@@ -323,10 +323,14 @@ class Share_EweiShopV2Page extends MobilePage
                pdo_update("ewei_shop_order",array("status"=>1),array("ordersn"=>$ordersn));
                 //更新红包
                 pdo_update("ewei_shop_goods_redlog",array("status"=>1),array("order_sn"=>$ordersn));
-               
+
+                //上级红包发放
+                $this->addMoney($ordersn);
+
                 $order_goods=pdo_get("ewei_shop_order_goods",array("orderid"=>$order["id"]));
                 $good=pdo_get("ewei_shop_goods",array("id"=>$order_goods["goodsid"]));
                 $order_price=$order["price"]+$order["commission1_pay"]+$order["commission2_pay"];
+
                 //消息发送
                   //获取购买者信息
                   if ($order["openid"]){
@@ -358,7 +362,44 @@ class Share_EweiShopV2Page extends MobilePage
               include $this->template();
         
     }
-    
+
+    /**
+     * 给上级发放红包奖励
+     * @param $order_sn
+     */
+    public function addMoney($order_sn)
+    {
+        //查找订单状态
+        $query = pdo_fetchall('select * from '.tablename('ewei_shop_goods_redlog').' where order_sn="'.$order_sn.'"');
+        foreach ($query as $item){
+            if($item['status'] == 0){
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包记录支付状态未支付",'createtime'=>date("Y-m-d H:i:s",time())]);
+                continue;
+            }
+            if($item['status'] == 2){
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包记录发放状态已发放",'createtime'=>date("Y-m-d H:i:s",time())]);
+                continue;
+            }
+            $salt = pdo_getcolumn("mc_mapping_fans",["openid"=>$item['openid']],'salt');
+            //因为这两个红包记录的订单是一样的   所以 加上 这个人公众号粉丝表的salt  因为这个是随机生成
+            $ordersn = $item['order_sn'].$salt;
+            $params = [
+                'desc'=>'订单提成奖励',
+                'order_sn'=>$ordersn,
+                'fee'=>$item['money'],
+                'openid'=>$item['openid'],
+            ];
+            //请求微信发送支付
+            $res = m('user')->get_transfers($params,1);
+            if($res['return_code'] == "SUCCESS" && $res['result_code'] == "SUCCESS"){
+                pdo_update('ewei_shop_goods_redlog',['status'=>2],['order_sn'=>$order_sn,'level'=>$item['level']]);
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包奖励发放成功",'createtime'=>date("Y-m-d H:i:s",time())]);
+            }else{
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包奖励发放失败,错误代码".$res['err_code']."错误代码描述".$res['err_code_des'],'createtime'=>date("Y-m-d H:i:s",time())]);
+            }
+        }
+    }
+
     //充值--微信支付
     public function order_wx(){
         header('Access-Control-Allow-Origin:*');

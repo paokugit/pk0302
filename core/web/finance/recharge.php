@@ -10,7 +10,6 @@ class Recharge_EweiShopV2Page extends WebPage
 		global $_W;
 		global $_GPC;
 		$type = trim($_GPC['type']);
-
 		if (!cv('finance.recharge.' . $type)) {
 			$this->message('你没有相应的权限查看');
 		}
@@ -19,7 +18,7 @@ class Recharge_EweiShopV2Page extends WebPage
 		$profile = m('member')->getMember($id, true);
 
 		if ($_W['ispost']) {
-			$typestr = $type == 'credit1' ? '卡路里' : '余额';
+			$typestr = $type == 'credit1' ? '卡路里' :$type=='credit2' ? '余额' : '折扣宝';
 			$num = floatval($_GPC['num']);
 			$remark = trim($_GPC['remark']);
 
