@@ -115,6 +115,9 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		unset($row);
 		//总推荐
 		//$allcount = m('member')->allAgentCount($member['id']);
+
+		$agentcount = pdo_fetch("select * from " . tablename("ewei_shop_member_agentcount") . " where openid=:openid limit 1", array( ":openid" => $member['openid'] ));
+
 		if($member['agentid']==1){
 			$frommember = '跑库';
 		}elseif($member['agentid']==0){
@@ -124,7 +127,7 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 			$frommember = $fromMemberInfo['nickname'];
 		}
 
-		app_json(array('list' => $list, 'total' => $total_level,'frommember'=>$frommember, 'pagesize' => $psize));
+		app_json(array('list' => $list, 'total' => $total_level,'frommember'=>$frommember, 'pagesize' => $psize,'agentcount' => $agentcount));
 	}
 
 	public function getagentcount($openid){

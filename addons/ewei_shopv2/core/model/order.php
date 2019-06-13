@@ -484,8 +484,12 @@ class Order_EweiShopV2Model
 	            //推荐人信息
                 $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$order['agentid']));
                 if($agentmemberInfo){
-                    m('member')->setagent(array('agentopenid'=>$agentmemberInfo["openid"],'openid'=>$openid));
+                    m('member')->setagent(array('agentopenid'=>$agentmemberInfo["openid"],'openid'=>$openid,'goodsid'=>$val['goodsid']));
                 }
+            }
+            $memberInfo = pdo_get('ewei_shop_member', array('openid' =>$order['openid']));
+	        if($memberInfo['agentid']>0){
+                m('member')->memberAgentCount($val['goodsid'],$memberInfo['agentid']);
             }
         }
 	}
