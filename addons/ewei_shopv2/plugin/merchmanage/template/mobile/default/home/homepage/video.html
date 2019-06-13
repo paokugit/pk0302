@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+ <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+    <title>商家视频</title>
+</head>
+<body>
+
+    <form action="{php echo mobileUrl('merchmanage/home/homepage/cs')}" method="post" enctype="multipart/form-data">
+     
+       <input type="file" id="fileId" name="file" value="请上传视频" style="width:100%"/>
+       
+       <button  class="login-button">保存</button>
+    
+    </form>
+    
+    
+     <input type="file" name="file" id="file" onchange="fileUpload()" style="display:none">
+     <input type="button"  onclick="select_file()" value="上传">
+ 
+</body>
+
+<script>
+
+function select_file(){
+    $("#file").trigger("click");
+}
+
+function fileUpload(){
+    var formData = new FormData();
+    formData.append('file', $('#file')[0].files[0]);
+    $.ajax({
+                url : '{php echo mobileUrl('merchmanage/home/homepage/upload_video')}',//这里写你的url
+                type : 'POST',
+                data : formData,
+                contentType: false,// 当有文件要上传时，此项是必须的，否则后台无法识别文件流的起始位置
+                processData: false,// 是否序列化data属性，默认true(注意：false时type必须是post)
+                dataType: 'json',//这里是返回类型，一般是json,text等
+                clearForm: true,//提交后是否清空表单数据
+                success: function(data) {   //提交成功后自动执行的处理函数，参数data就是服务器返回的数据。
+                	console.log(data);
+                    console.log(data.status);
+                    var video=data.message;
+                    var img=data.img;
+                    if(data.status==0){
+                    	//添加数据库
+                    	$.ajax({
+                    		url:'{php echo mobileUrl('merchmanage/home/homepage/video')}',
+                    		type:'post',
+                    		data:{video:video,img:img},
+                    		dataType: 'json',
+                    		success:function(res){
+                    			console.log(res);
+                    			if(res.status==0){
+                    				alert('成功');
+                    			}else{
+                    				alert('失败');
+                    			}
+                    		}
+                    		
+                    	})
+                    	alert('上传成功');
+                    }else{
+                    	alert(data.message);
+                    }
+                }
+            });
+}
+
+
+</script>
+</html>

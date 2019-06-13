@@ -121,7 +121,12 @@ if ($_W['ispost']) {
 	$data['tcates'] = implode(',', $tcates);
 	$data['content'] = m('common')->html_images($_GPC['content']);
 	$data['buycontent'] = m('common')->html_images($_GPC['buycontent']);
+	//fbb 折扣宝
+	if (empty($_GPC['deduct_type'])){
+	    $data['deduct_type']=1;
+	}else{
     $data['deduct_type'] = $_GPC['deduct_type'];
+	}
 	if (p('commission')) {
 		$cset = p('commission')->getSet();
 		if (!empty($cset['level']) && $merch_user['commissionchecked'] == 1) {

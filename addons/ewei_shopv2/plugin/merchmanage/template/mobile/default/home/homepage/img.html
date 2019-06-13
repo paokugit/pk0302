@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta name="viewport"
+        content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+    <title>商家图片集</title>
+    <style>
+.login-button { /* 按钮美化 */
+	width: 100%; /* 宽度 */
+	height: 40px; /* 高度 */
+	border-width: 0px; /* 边框宽度 */
+	border-radius: 3px; /* 边框半径 */
+	background: #1E90FF; /* 背景颜色 */
+	cursor: pointer; /* 鼠标移入按钮范围时出现手势 */
+	outline: none; /* 不显示轮廓线 */
+	font-family: Microsoft YaHei; /* 设置字体 */
+	color: white; /* 字体颜色 */
+	font-size: 17px; /* 字体大小 */
+}
+.login-button:hover { /* 鼠标移入按钮范围时改变颜色 */
+	background: #5599FF;
+}
+
+    </style>
+</head>
+<link rel="stylesheet" type="text/css" href="../addons/ewei_shopv2/static/js/dist/foxui/css/foxui.css">
+
+<body>
+ <form method="post" action="{php echo mobileUrl('merchmanage/home/homepage/img')}">
+    <div class="all_box fui-page fui-page-current">
+        <!-- 活动标题 -->
+        
+        <div class="fui-cell-group all_img">
+            <div class="fui-cell borderb noactive">
+                <div class="fui-cell-info">
+                    <ul class="fui-images" id="thumbs">
+                        {loop $piclist $picitem}
+                        <li style="background-image:url({php echo tomedia($picitem)})" class="image" data-filename="{$picitem}">
+                            <span class="image-remove">×</span>
+                            <input type="hidden" value="{php echo $picitem}" name="images[]">
+                        </li>
+                        {/loop}
+                    </ul>
+                    <div class="fui-uploader" data-count="{php echo count($piclist)}" data-max="10" data-name="images[]" {if count($piclist)>=10}style="display: none;"{/if}>
+                        <input type="file" name='imgFile0[]' id='imgFile0' multiple="" accept="image/*" >
+                    </div>
+                </div>
+            </div>
+            <div class="fui-title"></div>
+        </div>
+       
+      
+
+     
+    <button  class="login-button">保存</button>
+    </div>
+   </form> 
+</body>
+
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery-1.11.3.min(1).js"></script>
+<script src="{php echo EWEI_SHOPV2_LOCAL}static/js/require.js"></script>
+<script src="{php echo EWEI_SHOPV2_LOCAL}static/js/myconfig-app.js"></script>
+<script language="javascript">require(['core'],function(modal){modal.init({siteUrl: "{$_W['siteroot']}",baseUrl: "{php echo mobileUrl('ROUTES')}"})});</script>
+<script type="text/javascript">
+
+    require(['core', '../addons/ewei_shopv2/plugin/merchmanage/static/js/sortable.js'],function(core,Sortable){
+        new Sortable(thumbs, {draggable: 'li'})
+        $('.fui-uploader').uploader({
+            uploadUrl: core.getUrl('util/uploader'),
+            removeUrl: core.getUrl('util/uploader/remove')
+        });
+    })
+
+  
+</script>
