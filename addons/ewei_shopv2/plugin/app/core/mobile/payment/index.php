@@ -449,12 +449,18 @@ class Index_EweiShopV2Page extends AppMobilePage
             $list = pdo_fetch('select * from '.tablename('ewei_shop_deduct_setting').' where money<="'.$_GPC['money'].'" and cate = "'.$_GPC['cate'].'" and deduct <="'.$credit3.'"  and merchid = "'.$_GPC['merchid'].'" order by money desc');
         }
         //查下这个商家这个类型的  折扣信息
-        $array = pdo_fetchall('select * from '.tablename('ewei_shop_deduct_setting').' where cate = "'.$_GPC['cate'].'" and merchid = "'.$_GPC['merchid'].'"');
+        $array = pdo_fetchall('select * from '.tablename('ewei_shop_deduct_setting').' where cate = "'.$_GPC['cate'].'" and merchid = "'.$_GPC['merchid'].'" order by money asc');
+        //如果商家折扣信息数量小于等于0  等于说没有折扣信息
         if(count($array) <= 0){
             show_json(-1,'暂无折扣信息');
         }
+        //折扣信息数大于0  且  最小的折扣信息money大于你输入的money 则  暂无符合的折扣信息  无所谓list有没有东西
+        if(count($array) > 0 && $array[0]['money'] > $_GPC['money']){
+            show_json(2,"暂无符合的折扣优惠");
+        }
+        //到这个时候 应该是  折扣信息数大于0  且 输入的金额大于最小金额  但是  list不存在数据
         if(!$list){
-            show_json(0,"暂无信息");
+            show_json(0,"余额不足");
         }
         show_json(1,['list'=>$list]);
     }

@@ -171,7 +171,7 @@
                    // "<button class='editbtn' data-id='"+item.goods_id+"'>编辑</button>" +
                     "</div>" +
                     "<div class='item-sharebox'>" +
-                    "<button class='sharebtn'>分享</button>" +
+                    "<button class='sharebtn' data='"+item.goods_id+"'>分享</button>" +
                     "</div>" +
                     "</div>" +
                     "</li>"
@@ -260,7 +260,8 @@
                 location.href = "{php echo mobileUrl('merchmanage/order')}&status=1";
             })
             $(".sharebtn").click(function () {
-                $('#warning').css('display', 'block')
+				var id = $(this).attr('data');
+				location.href="{php echo mobileUrl('goods.share.index')}&goods_id="+id;
             });
             $("#warning").click(function(){
                 $('#warning').css('display', 'none')

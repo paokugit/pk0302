@@ -52,7 +52,8 @@
                         <th style="width: 180px;">标题</th>
                         <th style="width: 180px;">图片</th>
                         <th>链接</th>
-                       
+                        <th>页面</th>
+
                         <th style="width: 65px;">操作</th>
                     </tr>
                 </thead>
@@ -72,7 +73,8 @@
                              <img src="{php echo tomedia($row['thumb'])}" style='width:150px;border:1px solid #ccc;padding:1px'/>
                             </td>
                             <td>{$row['url']}</td>
-                           
+                            <td>{ifp $row['type'] == 1}首页{else}我的{/if}</td>
+
                             <td style="text-align:left;">
                                 {ifp 'shop.adsense.view|shop.adsense.edit'}
                                     <a href="{php echo webUrl('shop/adsense/edit', array('id' => $row['id']))}" class="btn btn-op btn-operation" >
