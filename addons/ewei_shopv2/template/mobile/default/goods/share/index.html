@@ -29,13 +29,13 @@
         <div class="content">
             <div class="imgBox">
                 <div class="activity-intro">本活动由跑库发起</div>
-                <div class="playmusic"><img src="http://paokucoin.com/img/backgroup/start@2x.png" alt=""></div>
+                <div class="playmusic"><audio hidden autoplay="autoplay" controls="controls" src="" id="music"></audio><img class="header_select" src="http://paokucoin.com/img/backgroup/start@2x.png" alt=""></div>
                 <ul class="imglist"></ul>
                 
             </div>
             <div class="part-box">
                 <div class="part-box-top">
-                    <div class="part-tit">已有<span class="part-num">58</span>人参与</div>
+                    <div class="part-tit">已有<span class="part-num">0</span>人参与</div>
                     <div class="part-countdown">
                         <div class="countdown-img">
                             <img src="http://paokucoin.com/img/backgroup/bg01@2x.png" alt="">
@@ -213,9 +213,9 @@
                         <div class="kefu-name">candy</div>
                     </div>
                     <div class="kefu-phone-box">
-                        <img class="phoneImg" src="http://paokucoin.com/img/backgroup/boda@2x.png" alt="">
+                        <img class="phoneImg" src="http://paokucoin.com/img/backgroup/boda@2x.png" alt="" tel="">
                         <div class="kefu-phone-tit">客服电话：</div>
-                        <div class="kefu-phone">18236962763</div>
+                        <div class="kefu-phone"></div>
                     </div>
                     <div class="kefu-address-box">
                      <div class="kefu-address-head">店面地址：</div>
@@ -244,10 +244,8 @@
     var province = ''
     var city = ''
     var district = ''
-   // console.log(type)
     $(window).load(function () {
         var timestamp = parseInt(new Date().getTime() / 1000);
-      //  console.log(timestamp)
         $.ajax({
             type: 'POST',
             url:'{php echo mobileUrl("goods/share/good")}',
@@ -257,7 +255,7 @@
             },
             dataType: "json",
             success: function (data) {
-             //   console.log(data)
+               console.log(data)
              //   console.log(data.result.other.pro_type)
                 var protype = data.result.other.pro_type
                 sessionStorage.setItem("proType", protype)
@@ -285,11 +283,11 @@
                         '</li>'
                     $(".imglist").html(str1)
                 });
+				$('.playmusic audio').attr('src',data.result.other.music);
+				var  phone = data.result.other.tel;
+				$('.phoneImg').attr('tel',phone);
                 var atime = data.result.other.end_time
-              //  console.log(Number(atime))
-
                 var result = Number(atime) - timestamp
-             //   console.log(result)
                 $(function () {
                     var interval = setInterval(sub, 1000); //定时器 调度对象
                     /*封装减1秒的函数*/
@@ -344,10 +342,8 @@
                         '</li>'
                     $(".record-list").html(str3)
                 });
-                
-                
+
                 var url = window.location.href;
-                
                 $.ajax({
                     type: 'POST',
                     url:'{php echo mobileUrl("goods/share/share_url")}',
@@ -361,7 +357,6 @@
                         var time = data.result.timestamp
                         var nonce = data.result.nonceStr
                         var sig = data.result.signature
-
                         wx.config({
                             debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
                             appId: appid, // 必填，公众号的唯一标识
@@ -374,20 +369,14 @@
                     }
                 });
 
-                
-                 
                 wx.ready(function () {
-
                     var shareUrl = '{php echo $url}';
-
                     wx.onMenuShareTimeline({
                     	  title: protitle,
                           desc: desc,
                           link: shareUrl,
                           imgUrl: prothumb,
                         success: function () {
-                        	
-                        	
                             // 用户确认分享后执行的回调函数
                           //   alert('分享到朋友圈成功');
                             $.ajax({
@@ -395,9 +384,8 @@
                              //   url: 'http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.share_back',
                                 url:'{php echo mobileUrl("goods/share/share_back")}',
                                 data: {
-                                    "openid": {php echo $openid},
-                                    "good_id":{php echo $good_id}
-                                    
+                                    "openid": '{php echo $openid}',
+                                    "good_id":'{php echo $good_id}'
                                 },
                                 dataType: "json",
                                 success: function (data) {
@@ -405,15 +393,12 @@
                                  // alert(data)
                                 }
                             })
-
-                            
                         },
                         cancel: function () {
                             // 用户取消分享后执行的回调函数
                             alert('你没有分享到朋友圈');
                         }
                     });
-
 
                     wx.onMenuShareAppMessage({
                         title: protitle,
@@ -424,14 +409,13 @@
                             // 不要尝试在trigger中使用ajax异步请求修改本次分享的内容，因为客户端分享操作是一个同步操作，这时候使用ajax的回包会还没有返回
                         },
                         success: function (res) {
-                          //  alert('分享给朋友成功');
                             $.ajax({
                                 type: 'POST',
                                 url: '{php echo mobileUrl("goods/share/share_back")}',
                                 
                                 data: {
-                                	 "openid": {php echo $openid},
-                                     "good_id":{php echo $good_id}
+                                	 "openid": '{php echo $openid}',
+                                     "good_id":'{php echo $good_id}'
                                 },
                                 dataType: "json",
                                 success: function (data) {
@@ -449,23 +433,15 @@
                 });
             }
         })
-        
-        
-        
-       
-        
     })
     $("#demo1").bind("input propertychange", function (event) {
         var addressVal = $("#demo1").val().split(",")
-     //   console.log(addressVal)
         province = addressVal[0]
         city = addressVal[1]
         district = addressVal[2]
-     //   console.log(province)
     });
     // 立即抢购点击事件
     $(".buybtn").click(function () {
-      //  console.log(type)
         // 实物物流产品
         if (type == 1) {
             $("#postproduct").css('display', 'block');
@@ -477,11 +453,9 @@
     })
     // 快递产品的确认点击事件
     $(".postfirmbtn").click(function () {
-       // console.log(province, city, district)
         var postname = $("#postnameipt").val()
         var postphone = $("#postphoneipt").val()
         var postdetail = $("#postdetailipt").val()
-      //  console.log(postname, postphone, postdetail)
         $.ajax({
             type: 'POST',
            // url: 'http://192.168.1.10/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order',
@@ -502,8 +476,6 @@
             success: function (data) {
               //  console.log(data)
                 var postorder = data.result.ordersn
-               // sessionStorage.setItem("orderNum", ordernum)
-              //  location.href = './order.html?order=' + postorder
                 location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order_wx&order_sn='+postorder;
 		         
             }
@@ -513,7 +485,6 @@
     $(".realfirmbtn").click(function () {
         var realname = $("#realnameipt").val()
         var realphone = $("#realphoneipt").val()
-       // console.log(realname, realphone)
         $.ajax({
             type: 'POST',
           //  url: 'http://192.168.1.10/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order',
@@ -530,32 +501,46 @@
             success: function (data) {
               //  console.log(data)
                 var realorder = data.result.ordersn
-                // sessionStorage.setItem("orderNum", ordernum)
-               // location.href = './order.html?order=' + realorder
                 location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order_wx&order_sn='+realorder;
 		          
             }
         })
     })
 
-
-    // var ordernumber = sessionStorage.getItem("orderNum")
     // 快递产品的取消点击事件
     $(".postcancelbtn").click(function () {
         $("#postproduct").css('display', 'none');
     })
+
     // 实物自取产品的取消点击事件
     $(".realcancelbtn").click(function () {
         $("#realproduct").css('display', 'none');
     })
+
     // 分享订单的点击事件
     $(".footer-order").click(function () {
     	var good_id={php echo $good_id};
         location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.shareorder&good_id='+good_id;
     })
+
+    $('.playmusic img').click(function () {
+        var audio = document.getElementById('music');
+        if(audio.paused){
+            $(this).addClass('header_select')
+            audio.play();
+        }else{
+            $(this).removeClass('header_select')
+            audio.pause();
+        }
+    })
+
+    $('.phoneImg').click(function () {
+        var phone = $('.phoneImg').attr('tel');
+        location.href="tel:"+phone;
+    })
+
     // 点击空白区域二维码隐藏事件
     var myDiv = $(".service-mask");
-
     $(".footer-service").click(function (event) {
         showDiv(); //调用显示DIV方法
         $(".service-mask").one("click", function () { //对document绑定一个影藏Div方法
@@ -563,6 +548,7 @@
         });
         event.stopPropagation(); //阻止事件向上冒泡
     });
+
     $(myDiv).click(function (event) {
         event.stopPropagation(); //阻止事件向上冒泡
     });
@@ -594,9 +580,6 @@
         'type': 2,
         'data': [provs_data, citys_data, dists_data]
     });
-    // console.log($("#demo1").val())
-
-
 
     $(function () {
         var url = window.location.href;
@@ -630,17 +613,13 @@
         })
 
         wx.ready(function () {
-
             var shareUrl = '{php echo $url}';
-
             wx.onMenuShareTimeline({
                 title: goodtitle,
                 desc: desc,
                 link: shareUrl,
                 imgUrl:  goodimg,
                 success: function () {
-                	
-                	
                     // 用户确认分享后执行的回调函数
                      alert('分享到朋友圈成功');
                     $.ajax({
@@ -648,24 +627,20 @@
                      //   url: 'http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.share_back',
                         url:'{php echo mobileUrl("goods/share/share_back")}',
                         data: {
-                            "openid": {php echo $openid},
-                            "good_id":{php echo $good_id}
-                            
+                            "openid": '{php echo $openid}',
+                            "good_id":'{php echo $good_id}'
                         },
                         dataType: "json",
                         success: function (data) {
                             console.log(data)
                         }
                     })
-
-                    
                 },
                 cancel: function () {
                     // 用户取消分享后执行的回调函数
                     alert('你没有分享到朋友圈');
                 }
             });
-
 
             wx.onMenuShareAppMessage({
                 title: goodtitle,
@@ -676,14 +651,12 @@
                     // 不要尝试在trigger中使用ajax异步请求修改本次分享的内容，因为客户端分享操作是一个同步操作，这时候使用ajax的回包会还没有返回
                 },
                 success: function (res) {
-                  //  alert('分享给朋友成功');
                     $.ajax({
                         type: 'POST',
                         url: '{php echo mobileUrl("goods/share/share_back")}',
-                        
                         data: {
-                        	 "openid": {php echo $openid},
-                             "good_id":{php echo $good_id}
+                        	 "openid": '{php echo $openid}',
+                             "good_id":'{php echo $good_id}'
                         },
                         dataType: "json",
                         success: function (data) {
