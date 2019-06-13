@@ -179,7 +179,7 @@ class Goods_EweiShopV2Model
 			$condition .= ' and ifnull(showlevels,\'\')=\'\' ';
 			$condition .= ' and   ifnull(showgroups,\'\')=\'\' ';
 		}
-		$condition .= ' and type <> 99 ';
+		$condition .= ' and type <> 99 and isred = 0';
 		$total = '';
 		$officsql = '';
 		if (p('offic')) 

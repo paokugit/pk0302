@@ -101,7 +101,7 @@
             <!-- part-box结束 -->
             <!-- 购买记录-开始 -->
             <div class="buy-record">
-                <div class="record-tit">购买记录<span class="people-count">888</span>人</div>
+                <div class="record-tit">购买记录<span class="people-count">0</span>人</div>
                 <ul class="record-list"></ul>
             </div>
             <!-- 购买记录-结束 -->
@@ -218,13 +218,24 @@
                         <div class="kefu-phone"></div>
                     </div>
                     <div class="kefu-address-box">
-                     <div class="kefu-address-head">店面地址：</div>
-                   <div class="kefu-address-text"></div>
-                </div>
+                     <div class="kefu-address-head xinxi_li_head_text">店面地址：</div>
+                   	 <div class="kefu-address-text" title=""></div>
+                	</div>
             </div>
         </div>
     </div>
+    </div>
     <!-- 联系客服 -->
+	<div id="warning">
+        <div class="mask-con">
+            <div class="mask-img">
+                <img src="http://paokucoin.com/img/backgroup/sharetc@2x.png">
+            </div>
+        </div>
+    </div>
+	<div class="mask" style="display:none">
+		<div class="textcc"></div>
+	</div>
 </body>
 
 </html>
@@ -233,6 +244,7 @@
 
 <!-- <script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script> -->
 <script type="text/javascript">
+    var share_openid = '{php echo $share_openid1}';
     var str1 = ''
     var str2 = ''
     var str3 = ''
@@ -245,6 +257,9 @@
     var city = ''
     var district = ''
     $(window).load(function () {
+		if(share_openid != ''){
+			$("#warning").css('display','none');
+		}
         var timestamp = parseInt(new Date().getTime() / 1000);
         $.ajax({
             type: 'POST',
@@ -265,7 +280,9 @@
                  sessionStorage.setItem("prothumb", prothumb)
                   var desc=data.result.description
                  sessionStorage.setItem("desc", desc)
-                $(".part-num").html(data.result.red.count)
+				//$(".part-num").html(data.result.red.count)
+				//参与人数 不应该是购买人数  而不是红包记录人数
+                $(".part-num").html(data.result.order.count)
                 $(".read-num").html(data.result.viewcount)
                 $(".forward-num").html(data.result.forwardcount)
                 $(".getmoney-num").html(data.result.red.myred.money)
@@ -277,7 +294,8 @@
 				$('.kefu-title').html(data.result.other.main)
                 $(".kefu-name").html(data.result.other.principal)
                 $(".kefu-phone").html(data.result.other.tel)
-                $(".kefu-address-text").html(data.result.other.address)
+                $(".kefu-address-text").html(data.result.other.address.substr(0,18)+'...')
+				$(".kefu-address-text").attr('title',data.result.other.address)
                 $.each(data.result.thumb_url, function (i, item) {
                     // console.log(item)
                     str1 += '<li class="img-item"><img class="img01" src=' + item +
@@ -453,6 +471,18 @@
             $("#realproduct").css('display', 'block');
         }
     })
+	
+	$(".kefu-address-box").click(function(){
+		var title = $('.kefu-address-text').attr('title')
+		console.log(title);
+		$(".service-mask").css('display','none');
+		$(".mask").css('display','block')
+		$(".textcc").html(title)
+	})
+	$(".mask").click(function(){
+		$(this).css('display','none');
+		$(".js_cut_str").css('display','block')
+	})
     // 快递产品的确认点击事件
     $(".postfirmbtn").click(function () {
         var postname = $("#postnameipt").val()
@@ -540,6 +570,9 @@
         var phone = $('.phoneImg').attr('tel');
         location.href="tel:"+phone;
     })
+	$("#warning").click(function(){
+		$("#warning").hide();
+	})
 
     // 点击空白区域二维码隐藏事件
     var myDiv = $(".service-mask");

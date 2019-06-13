@@ -118,6 +118,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
             'marketprice'=>$_GPC['marketprice'],
             'commission1_pay'=>$_GPC['commission1_pay'],   //一级分销固定金额
             'commission2_pay'=>$_GPC['commission2_pay'],   //二级分销固定金额
+	    'isred'=>1,
         ];
         $add = [
             'music'=>$_GPC['music'],                    //背景音乐
@@ -139,7 +140,7 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
                 $thumb_url[] = trim($th);
             }
             $data['thumb'] = save_media($thumb_url[0]);
-            unset($thumb_url[0]);
+            //unset($thumb_url[0]);
             $data['thumb_url'] = serialize(m('common')->array_images($thumb_url));
         }
         if($_GPC['id']!=""){
@@ -282,17 +283,17 @@ class Show_EweiShopV2Page extends MerchmanageMobilePage
         $end = pdo_fetchall('select g.title as gtitle,g.description,marketprice,g.total,g.thumb,g.thumb_url,
             g.commission1_pay,commission2_pay,g.createtime,g.forwardcount,b.*,m.title from '. tablename('ewei_shop_goods').
             'g join'.tablename('ewei_shop_goods_bribe_expert'). ('b on b.goods_id=g.id').' join'.
-            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and end_time < "'.time().'" and g.merchid = "'.$_W['merchmanage']['merchid'].'"');
+            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and end_time < "'.time().'" and g.merchid = "'.$_W['merchmanage']['merchid'].'" order by g.createtime desc');
         //end_time  大于  当前时间  进行中  isdraft  = 1
         $ing = pdo_fetchall('select g.title as gtitle,g.description,marketprice,g.total,g.thumb,g.thumb_url,
             g.commission1_pay,commission2_pay,g.createtime,g.forwardcount,b.*,m.title from '. tablename('ewei_shop_goods').
             'g join'.tablename('ewei_shop_goods_bribe_expert'). ('b on b.goods_id=g.id').' join'.
-            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and `end_time` > "'.time().'" and g.merchid = "'.$_W['merchmanage']['merchid'].'"');
+            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 1 and `end_time` > "'.time().'" and g.merchid = "'.$_W['merchmanage']['merchid'].'" order by g.createtime desc');
         //  isdraft  = 0  草稿箱
         $draft = pdo_fetchall('select g.title as gtitle,g.description,marketprice,g.total,g.thumb,g.thumb_url,
             g.commission1_pay,commission2_pay,g.createtime,b.*,m.title from '. tablename('ewei_shop_goods').
             'g join'.tablename('ewei_shop_goods_bribe_expert'). ('b on b.goods_id=g.id').' join'.
-            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 0 and g.merchid = "'.$_W['merchmanage']['merchid'].'"');
+            tablename('ewei_shop_music').('m on m.id=b.music').' where isdraft= 0 and g.merchid = "'.$_W['merchmanage']['merchid'].'" order by g.createtime desc');
         //计算参与人数和交易订单数
         $ing = m('goods')->count($ing);
         $end = m('goods')->count($end);
