@@ -1,0 +1,191 @@
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+form,
+fieldset,
+legend,
+input,
+textarea,
+p,
+blockquote,
+th,
+td,
+hr,
+button,
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  margin: 0;
+  padding: 0;
+}
+html {
+  background: #f8f8f8;
+  height: 100%;
+}
+
+a {
+  text-decoration: none;
+}
+
+li {
+  list-style: none;
+}
+
+i {
+  font-style: normal;
+}
+input {
+  background: none;
+  outline: none;
+  border: none;
+}
+input:focus {
+  border: none;
+}
+.all_box{
+    width: 100%;
+    height: 100%;
+    /* display: none; */
+}
+.list_box{
+    width: 100%;
+    height: 100%;
+}
+.list_ul{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.list_li{
+    width: 96%;
+    height: 365px;
+    /* background: #0f0; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px
+}
+.head_yin {
+    height: 26px;
+    width: 100%;
+    background: #c4c1c1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .head_span {
+    font-size: 14px;
+    color: #fff;
+  }
+.voucher_div {
+    width: 100%;
+    height: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pingzheng_img {
+    width: 96%;
+    height: 350px;
+    position: relative;
+  }
+  .voucher_img {
+    width: 100%;
+    height: 350px;
+  }
+  .xinxi {
+    width: 94%;
+    height: 270px;
+    position: absolute;
+    margin-left: 8px;
+    margin-top: 10px;
+  }
+  .xinxi_ul {
+    width: 100%;
+    height: 270px;
+  }
+  .xinxi_li {
+    width: 100%;
+    height: 30px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .xinxi_li_head {
+    width: auto;
+    height: 30px;
+    display: flex;
+    align-items: center;
+  }
+  .xinxi_li_head_text {
+    width: 85px;
+    font-size: 16px;
+    color: #666666;
+  }
+  .xili_li_content {
+    width: auto;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    margin-right: 14px;
+  }
+  .xinxi_li_content_text {
+    font-size: 16px;
+    color: #333333;
+  }
+  .signboard{
+    font-size: 16px;
+    color: #333333;
+  }
+  .mask{
+    width: 100%;
+    height: 100%;
+    /* position: relative; */
+    display: none;
+}
+.img_tavailable{
+    width: 100%;
+    height: 350px;
+    /* position: absolute;
+    top: 200rpx;
+    left: 40%; */
+    /* background: #00f; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.img_img{
+    width: 100px;
+    height: 100px;
+}
+.no_tavailable{
+    margin-top: 30px;
+    font-size: 18px;
+    color: #5c5656
+}

@@ -643,17 +643,24 @@ class Share_EweiShopV2Page extends MobilePage
        
    }
 
-
     /**
-     * 我的凭证列表
+     * 我的凭证列表页面
+     */
+    public function prooflist()
+    {
+        include $this->template('goods/share/listvoucher');
+    }
+    /**
+     * 我的凭证列表接口
      */
     public function proof_list()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_W;
-        global $_GPC;
-        $openid = $_GPC['openid'];
+        $openid = $_W['openid'];
         if($openid == ""){
-            show_json(0,'用户openid不能为空');
+            $resault= mc_oauth_account_userinfo();
+            $openid=$resault["openid"];
         }
         $fields = 'price,createtime,id,commission1_pay,commission2_pay,addressid,carrier';
         $list = pdo_fetchall('select '.$fields.' from '.tablename('ewei_shop_order').' where openid = "'.$openid.'" and uniacid="'.$_W['uniacid'].'" and status > 1');

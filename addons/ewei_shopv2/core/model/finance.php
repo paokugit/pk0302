@@ -166,7 +166,8 @@ class Finance_EweiShopV2Model
 		}
 		libxml_disable_entity_loader(true);
 		$arr = json_decode(json_encode(simplexml_load_string($resp["content"], "SimpleXMLElement", LIBXML_NOCDATA)), true);
-		if( $arr["return_code"] == "SUCCESS" && $arr["result_code"] == "SUCCESS" ) 
+        	pdo_insert('log',['log'=>json_encode($arr),'createtime'=>date('Y-m-d H:i:s',time())]);
+		if( $arr["return_code"] == "SUCCESS" && $arr["result_code"] == "SUCCESS" )
 		{
 			return true;
 		}
