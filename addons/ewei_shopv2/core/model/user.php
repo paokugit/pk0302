@@ -116,7 +116,25 @@ class User_EweiShopV2Model
 		$string1 .= "key=" . $payment["apikey"];
 		$package["sign"] = strtoupper(md5(trim($string1)));    //签名
 		$dat = array2xml($package);
-		$response = ihttp_request("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", $dat);
+		$extras = [];
+		$certfile = IA_ROOT . "/addons/ewei_shopv2/cert/" . random(128);
+		file_put_contents($certfile, $certs["cert"]);
+		$keyfile = IA_ROOT . "/addons/ewei_shopv2/cert/" . random(128);
+		file_put_contents($keyfile, $certs["key"]);
+		$extras["CURLOPT_SSLCERT"] = $certfile;
+		$extras["CURLOPT_SSLKEY"] = $keyfile;
+		if( !empty($certs["root"]) )
+		{
+			$rootfile = IA_ROOT . "/addons/ewei_shopv2/cert/" . random(128);
+			file_put_contents($rootfile, $certs["root"]);
+			$extras["CURLOPT_CAINFO"] = $rootfile;
+		}
+		//$response = ihttp_request("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers", $dat);
+		$url = "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers";
+		$response = ihttp_request($url, $dat, $extras);
+		@unlink($certfile);
+		@unlink($keyfile);
+		@unlink($rootfile);
 		if( is_error($response) )
 		{
 			return $response;
