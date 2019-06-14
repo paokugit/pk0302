@@ -904,7 +904,7 @@ input:focus {
     position: fixed;
     top:0;
     left: 0;
-    display: none
+    display: none;
     z-index:1000
 }
 .textcc{
