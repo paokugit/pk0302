@@ -52,17 +52,19 @@
                         var order_sn='{php echo $order_sn}';
                         //消息推送
                         $.ajax({
-                        	type:'post',
+                        	type:'POST',
                         	url:'{php echo mobileUrl("goods/share/msg")}',
-                        	data:{order_sn:order_sn},
-                        	dataType: 'json',
+                        	data:{"order_sn":order_sn},
+                        	dataType: "json",
                         	success:function(res){
                         		console.log(res);
+                        		//alert(res);
+                        		 location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order_wxback&order_sn='+order_sn;
+               		          
                         	}
                         	
                         });
-    		          location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order_wxback&order_sn='+order_sn;
-    		            
+    		           
     		      }else{
     		    	  
     		    	  $("#warning").show().delay(1000).hide(300);
