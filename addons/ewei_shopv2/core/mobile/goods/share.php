@@ -642,4 +642,49 @@ class Share_EweiShopV2Page extends MobilePage
        }
        
    }
+
+
+    /**
+     * 我的凭证列表
+     */
+    public function proof_list()
+    {
+        global $_W;
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        if($openid == ""){
+            show_json(0,'用户openid不能为空');
+        }
+        $fields = 'price,createtime,id,commission1_pay,commission2_pay,addressid,carrier';
+        $list = pdo_fetchall('select '.$fields.' from '.tablename('ewei_shop_order').' where openid = "'.$openid.'" and uniacid="'.$_W['uniacid'].'" and status > 1');
+        foreach ($list as $key=>$item){
+            $goods_id = pdo_getcolumn('ewei_shop_order_goods',['orderid'=>$item['id']],'goodsid');
+            $goods = pdo_get('ewei_shop_goods',['id'=>$goods_id]);
+            if($goods['isred'] !=1){
+                unset($list[$key]);
+            }
+            if ($item["addressid"]!=0){
+                $addr = pdo_get("ewei_shop_member_address",array("id"=>$item["addressid"]));
+                $list[$key]["realname"] = $addr["realname"];
+                $list[$key]["mobile"] = $addr["mobile"];
+            }else{
+                $carrier = iunserializer($item["carrier"]);
+                $list[$key]["realname"] = $carrier["carrier_realname"];
+                $list[$key]["mobile"] = $carrier["carrier_mobile"];
+            }
+            $list[$key]['price'] = $item["price"]+$item["commission1_pay"]+$item["commission2_pay"];
+            $list[$key]["title"] = $goods["title"];
+            $list[$key]["createtime"] = date("Y-m-d H:i:s",$item["createtime"]);
+            //获取商家信息
+            $shop = pdo_get("ewei_shop_merch_user",array("id"=>$goods["merchid"]));
+            $list[$key]["shop_name"] = $shop["merchname"];
+            $list[$key]["shop_mobile"] = $shop["mobile"];
+            $list[$key]["shop_address"] = $shop["address"];
+        }
+        if(count($list) == 0){
+            show_json(0,'暂无信息');
+        }else{
+            show_json(1,['list'=>$list]);
+        }
+    }
 }
