@@ -444,11 +444,11 @@ if (!class_exists("AppModel")) {
                             } else if ($item['id'] == 'goods') {
                                if (!(empty($item['data']))) {
                                    if($select==2){//最新的
-                                       $args = array( "pagesize" =>100, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
+                                       $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
                                    }elseif($select==1){//销量
-                                       $args = array( "pagesize" =>100, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
+                                       $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
                                    }else{//价格
-                                       $args = array( "pagesize" =>100, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
+                                       $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
 
                                    }
                                     $item['data'] = array();
@@ -468,11 +468,11 @@ if (!class_exists("AppModel")) {
                                         $k = 0;
                                         $i = 1;
                                        if($select==2){//最新的
-                                           $args = array( "pagesize" =>100, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
+                                           $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
                                        }elseif($select==1){//销量
-                                           $args = array( "pagesize" =>100, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
+                                           $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
                                        }else{//价格
-                                           $args = array( "pagesize" =>100, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
+                                           $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
 
                                        }
                                         $item['data'] = array();

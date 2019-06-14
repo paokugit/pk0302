@@ -345,8 +345,9 @@ class Share_EweiShopV2Page extends MobilePage
         global $_GPC;
         global $_W;
         $ordersn=$_GPC["order_sn"];
+//         var_dump($ordersn);
         $order=pdo_get("ewei_shop_order",array("ordersn"=>$ordersn));
-        
+//         var_dump($order);
         $order_goods=pdo_get("ewei_shop_order_goods",array("orderid"=>$order["id"]));
         $good=pdo_get("ewei_shop_goods",array("id"=>$order_goods["goodsid"]));
         $order_price=$order["price"]+$order["commission1_pay"]+$order["commission2_pay"];
@@ -362,7 +363,8 @@ class Share_EweiShopV2Page extends MobilePage
             $postdata["keyword2"]=array("value"=>$order["ordersn"],"color"=>"#173177");
             $postdata["keyword3"]=array("value"=>$order_price."元","color"=>"#173177");
             $postdata["keyword4"]=array("value"=>$good["title"],"color"=>"#173177");
-            m("message")->sendTplNotice($order["openid"],"rPnwJBoYeGcLumJ7iIymhepzgO9dH4pB2YyGBRUITxc",$postdata);
+            $r=m("message")->sendTplNotice($order["openid"],"rPnwJBoYeGcLumJ7iIymhepzgO9dH4pB2YyGBRUITxc",$postdata);
+         //   var_dump($r);
             $res["user"]="success";
         }
         //获取商家信息
@@ -376,8 +378,9 @@ class Share_EweiShopV2Page extends MobilePage
                 $postdata["keyword4"]=array("value"=>date("Y-m-d H:i:s"),"color"=>"#173177");
                 $postdata["keyword5"]=array("value"=>$order["ordersn"],"color"=>"#173177");
                 $postdata["remark"]=array("value"=>"您的商品已被购买，请及时处理","color"=>"#173177");
-                m("message")->sendTplNotice($merch["openid"],"Bs28K29IdrVDfmF8w9iNEY0IqkrNL8GxIESVov_YMVc",$postdata);
-                $res["merch"]="success";
+               $rs= m("message")->sendTplNotice($merch["openid"],"Bs28K29IdrVDfmF8w9iNEY0IqkrNL8GxIESVov_YMVc",$postdata);
+            //   var_dump($rs);
+               $res["merch"]="success";
             }
             
         }

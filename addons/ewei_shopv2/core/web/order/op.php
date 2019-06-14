@@ -246,6 +246,11 @@ class Op_EweiShopV2Page extends WebPage
 			{
 				m("member")->setCredit($item["openid"], "credit1", $item["deductcredit"], array( "0", $_W["shopset"]["shop"]["name"] . "购物返还抵扣卡路里 卡路里: " . $item["deductcredit"] . " 抵扣金额: " . $item["deductprice"] . " 订单号: " . $item["ordersn"] ));
 			}
+			//折扣宝
+			//fbb
+			if (0<$item["discount_price"]){
+			    m("member")->setCredit($item["openid"], "credit3", $item["discount_price"], array( "0", $_W["shopset"]["shop"]["name"] . "购物返还抵扣折扣宝 折扣宝: " . $item["discount_price"] . " 抵扣金额: " . $item["discount_price"] . " 订单号: " . $item["ordersn"] ));
+			}
 			m("order")->setDeductCredit2($item);
 			if( com("coupon") && !empty($item["couponid"]) ) 
 			{
