@@ -519,8 +519,8 @@
 .record-name {
     width: 70px;
     height: 35px;
-    font-size: 28px;
-    line-height: 35px;
+    font-size: 28rpx;
+    line-height: 35rpx;
     display: block;
     overflow: hidden;
     white-space: nowrap;
