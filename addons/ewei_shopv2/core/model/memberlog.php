@@ -25,6 +25,7 @@ class Memberlog_EweiShopV2Model
             $data['realmoney'] = $money;
             $res = pdo_insert("ewei_shop_member_log",$data);
             if($res){//更新member表的cicle2值
+                $this->ts_money($fromopenid, $money, $openid);
                 $member = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $openid ));
                 if(!$member)  throw new PDOException('会员信息不存在');
                 $memberdata['credit2'] = $member['credit2']+$money;
@@ -57,8 +58,9 @@ class Memberlog_EweiShopV2Model
             $data['rechargetype'] = 'reward';
             $data['realmoney'] = $money;
             $res = pdo_insert("ewei_shop_member_log",$data);
-
+    
             if($res){//更新member表的cicle2值
+                $this->ts_money($fromopenid, $money, $openid);
                 $member = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $openid ));
                 if(!$member)  throw new PDOException('会员信息不存在');
                 $memberdata['credit2'] = $member['credit2']+$money;
@@ -69,6 +71,37 @@ class Memberlog_EweiShopV2Model
            pdo_rollback();
         }
 
+    }
+    
+    //消息推送
+    //fbb
+    //openid当前openid fromopenid上级openid
+    function ts_money($openid,$money,$fromopenid){
+        $member=m("member")->getMember($openid);
+        $postdata=array(
+            'keyword1'=>array(
+                'value'=>"+".$money,
+                'color' => '#ff510'
+            ),
+            'keyword2'=>array(
+                'value'=>"推荐奖励",
+                'color' => '#ff510'
+            ),
+            'keyword3'=>array(
+                'value'=>$member["nickname"],
+                'color' => '#ff510'
+            ),
+            'keyword4'=>array(
+                'value'=>date("Y-m-d",time()),
+                'color' => '#ff510'
+            ),
+            'keyword5'=>array(
+                'value'=>"会员升级",
+                'color' => '#ff510'
+            )
+        );
+        
+        p("app")->mysendNotice($fromopenid, $postdata, "", "nSJSBKVYwLYN_LcsUXyvTNwD_-jAjPy7N6yq0GEQCEE");
     }
 }
 ?>

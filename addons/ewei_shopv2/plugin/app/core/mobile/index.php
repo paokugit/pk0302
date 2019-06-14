@@ -1,5 +1,7 @@
 <?php
 
+use function Qiniu\json_decode;
+
 if (!defined("IN_IA")) {
     exit("Access Denied");
 }
@@ -618,4 +620,6 @@ function wxmessage($openid,$sign_days){
    p("app")->mysendNotice($openid, $postdata, "", "BJtaHWXzIvH3j6NfAO56TPnULBeZyYJhX2h9XoYSs6g");
     return true;
 }
+
+
 ?>
