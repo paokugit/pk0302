@@ -24,6 +24,9 @@ class Share_EweiShopV2Page extends MobilePage
       }
       //获取二级分享者
       $share_openid2=$_GPC["share_openid2"];
+      if ($share_openid2==$openid){
+          $share_openid2="";
+      }
       //添加查看记录
       $good_id=$_GPC["good_id"];
       
@@ -331,42 +334,56 @@ class Share_EweiShopV2Page extends MobilePage
                 //上级红包发放
                 $this->addMoney($ordersn);
 
-                $order_goods=pdo_get("ewei_shop_order_goods",array("orderid"=>$order["id"]));
-                $good=pdo_get("ewei_shop_goods",array("id"=>$order_goods["goodsid"]));
-                $order_price=$order["price"]+$order["commission1_pay"]+$order["commission2_pay"];
-
-                //消息发送
-                  //获取购买者信息
-                  if ($order["openid"]){
-                  $member=pdo_get("mc_mapping_fans",array("openid"=>$order["openid"]));
-                   
-                  $postdata["first"]=array("value"=>"您的订单已支付成功","color"=>"#173177");
-                  $postdata["keyword1"]=array("value"=>$member["nickname"],"color"=>"#173177");
-                  $postdata["keyword2"]=array("value"=>$order["ordersn"],"color"=>"#173177");
-                  $postdata["keyword3"]=array("value"=>$order_price."元","color"=>"#173177");
-                  $postdata["keyword4"]=array("value"=>$good["title"],"color"=>"#173177");
-                  m("message")->sendTplNotice($order["openid"],"rPnwJBoYeGcLumJ7iIymhepzgO9dH4pB2YyGBRUITxc",$postdata);
-                  
-                  }
-                  //获取商家信息
-                  if ($order["merchid"]){
-                  $merch=pdo_get("ewei_shop_merch_user",array("id"=>$order["merchid"]));
-                  if ($merch["openid"]){
-                  $postdata["first"]=array("value"=>"您的商品已被购买","color"=>"#173177");
-                  $postdata["keyword1"]=array("value"=>$merch["merchname"],"color"=>"#173177");
-                  $postdata["keyword2"]=array("value"=>$order_price."元","color"=>"#173177");
-                  $postdata["keyword3"]=array("value"=>"0元","color"=>"#173177");
-                  $postdata["keyword4"]=array("value"=>date("Y-m-d H:i:s"),"color"=>"#173177");
-                  $postdata["keyword5"]=array("value"=>$order["ordersn"],"color"=>"#173177");
-                  $postdata["remark"]=array("value"=>"您的商品已被购买，请及时处理","color"=>"#173177");
-                  m("message")->sendTplNotice($merch["openid"],"Bs28K29IdrVDfmF8w9iNEY0IqkrNL8GxIESVov_YMVc",$postdata);
-                  }
-                  
-                  }
+                
               include $this->template();
         
     }
-
+    /**
+     * 消息推送
+     */
+    public function msg(){
+        global $_GPC;
+        global $_W;
+        $ordersn=$_GPC["order_sn"];
+        $order=pdo_get("ewei_shop_order",array("ordersn"=>$ordersn));
+        
+        $order_goods=pdo_get("ewei_shop_order_goods",array("orderid"=>$order["id"]));
+        $good=pdo_get("ewei_shop_goods",array("id"=>$order_goods["goodsid"]));
+        $order_price=$order["price"]+$order["commission1_pay"]+$order["commission2_pay"];
+        
+        $res=array();
+        //消息发送
+        //获取购买者信息
+        if ($order["openid"]){
+            $member=pdo_get("mc_mapping_fans",array("openid"=>$order["openid"]));
+            
+            $postdata["first"]=array("value"=>"您的订单已支付成功","color"=>"#173177");
+            $postdata["keyword1"]=array("value"=>$member["nickname"],"color"=>"#173177");
+            $postdata["keyword2"]=array("value"=>$order["ordersn"],"color"=>"#173177");
+            $postdata["keyword3"]=array("value"=>$order_price."元","color"=>"#173177");
+            $postdata["keyword4"]=array("value"=>$good["title"],"color"=>"#173177");
+            m("message")->sendTplNotice($order["openid"],"rPnwJBoYeGcLumJ7iIymhepzgO9dH4pB2YyGBRUITxc",$postdata);
+            $res["user"]="success";
+        }
+        //获取商家信息
+        if ($order["merchid"]){
+            $merch=pdo_get("ewei_shop_merch_user",array("id"=>$order["merchid"]));
+            if ($merch["openid"]){
+                $postdata["first"]=array("value"=>"您的商品已被购买","color"=>"#173177");
+                $postdata["keyword1"]=array("value"=>$merch["merchname"],"color"=>"#173177");
+                $postdata["keyword2"]=array("value"=>$order_price."元","color"=>"#173177");
+                $postdata["keyword3"]=array("value"=>"0元","color"=>"#173177");
+                $postdata["keyword4"]=array("value"=>date("Y-m-d H:i:s"),"color"=>"#173177");
+                $postdata["keyword5"]=array("value"=>$order["ordersn"],"color"=>"#173177");
+                $postdata["remark"]=array("value"=>"您的商品已被购买，请及时处理","color"=>"#173177");
+                m("message")->sendTplNotice($merch["openid"],"Bs28K29IdrVDfmF8w9iNEY0IqkrNL8GxIESVov_YMVc",$postdata);
+                $res["merch"]="success";
+            }
+            
+        }
+        echo json_encode($res);    
+    }
+    
     /**
      * 给上级发放红包奖励
      * @param $order_sn

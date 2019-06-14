@@ -51,6 +51,17 @@
     		      if(res.err_msg == "get_brand_wcpay_request:ok" ){
     		      
                         var order_sn='{php echo $order_sn}';
+                        //消息推送
+                        $.ajax({
+                        	type:'post',
+                        	url:'{php echo mobileUrl("goods/share/msg")}',
+                        	data:{order_sn:order_sn},
+                        	dataType: 'json',
+                        	success:function(res){
+                        		console.log(res);
+                        	}
+                        	
+                        });
     		          location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order_wxback&order_sn='+order_sn;
     		            
     		      }else{
