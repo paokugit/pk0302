@@ -19,6 +19,9 @@ class Share_EweiShopV2Page extends MobilePage
        
       //获取上级openid
       $share_openid1=$_GPC["share_openid1"];
+      if ($share_openid1==$openid){
+          $share_openid1="";
+      }
       //获取二级分享者
       $share_openid2=$_GPC["share_openid2"];
       //添加查看记录
@@ -108,7 +111,7 @@ class Share_EweiShopV2Page extends MobilePage
         }
         $good["red"]["myred"]=$my;
         //获取订单记录
-        $sql="select o.openid,o.price,o.createtime,o.dispatchtype,o.isvirtual,o.carrier,o.addressid from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and (o.status=1 or o.status=2 or o.status=3) ORDER BY o.createtime DESC ";
+        $sql="select o.openid,o.price,o.commission1_pay,o.commission2_pay,o.createtime,o.dispatchtype,o.isvirtual,o.carrier,o.addressid from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and (o.status=1 or o.status=2 or o.status=3) ORDER BY o.createtime DESC ";
         $good["order"]=pdo_fetch("select count(*) as count from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and (o.status=1 or o.status=2 or o.status=3) ORDER BY o.createtime DESC ",array(":goodid"=>$good_id));
         $good["order"]["log"]=pdo_fetchall($sql,array(":goodid"=>$good_id));
         foreach ($good["order"]["log"] as $k=>$v){
@@ -117,7 +120,7 @@ class Share_EweiShopV2Page extends MobilePage
              $good["order"]["log"][$k]["nickname"]=$mc_member["nickname"];
              $good["order"]["log"][$k]["avatar"]=$mc_member["avatar"];
              $good["order"]["log"][$k]["createtime"]=date("Y-m-d H:i:s",$v["createtime"]);
-             $good["order"]["log"][$k]["price"]=$good["order"]["log"][$k]["price"]+$good["order"]["log"][$k]["commission1_pay"]+$good["order"]["log"][$k]["commission2_pay"];
+             $good["order"]["log"][$k]["price"]=$v["price"]+$v["commission1_pay"]+$v["commission2_pay"];
              //获取电话号码
              if ($v["dispatchtype"]==1||$v["isvirtual"]==1){
                  $carrier=iunserializer($v["carrier"]);
@@ -148,7 +151,7 @@ class Share_EweiShopV2Page extends MobilePage
         if ($good["other"]["end_time"]<time()){
             show_json(0,"该活动结束");
         }
-        $openid=$_W["openid"];
+//         $openid=$_W["openid"];
         if (empty($openid)){
             $openid=$_GPC["openid"];
         }
@@ -163,6 +166,7 @@ class Share_EweiShopV2Page extends MobilePage
         //获取分享的人
         if ($_GPC["share_openid1"]==$openid){
             $data["share_openid1"]=$_GPC["share_openid2"];
+            $data["share_openid2"]="";
         }else{
         $data["share_openid1"]=$_GPC["share_openid1"];
         $data["share_openid2"]=$_GPC["share_openid2"];
@@ -293,8 +297,8 @@ class Share_EweiShopV2Page extends MobilePage
         $order_good=pdo_get("ewei_shop_order_goods",array("orderid"=>$order["id"]));
         $good=pdo_get("ewei_shop_goods",array("id"=>$order_good["goodsid"]));
         $list["title"]=$good["title"];
-        $list["paytime"]=date("Y-m-d H:i:s",$order["paytime"]);
-        $list["price"]=$order["price"];
+        $list["paytime"]=date("Y-m-d H:i:s",$order["createtime"]);
+        $list["price"]=$order["price"]+$order["commission1_pay"]+$order["commission2_pay"];
         if ($order["addressid"]!=0){
             $addr=pdo_get("ewei_shop_member_address",array("id"=>$order["addressid"]));
             $list["realname"]=$addr["realname"];
