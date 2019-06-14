@@ -116,6 +116,9 @@ class User_EweiShopV2Model
 		$string1 .= "key=" . $payment["apikey"];
 		$package["sign"] = strtoupper(md5(trim($string1)));    //签名
 		$dat = array2xml($package);
+		$sec = m("common")->getSec();
+		$sec = iunserializer($sec["sec"]);
+		$certs = array( "cert" => $sec["wxapp_cert"], "key" => $sec["wxapp_key"], "root" => $sec["wxapp_root"] );
 		$extras = [];
 		$certfile = IA_ROOT . "/addons/ewei_shopv2/cert/" . random(128);
 		file_put_contents($certfile, $certs["cert"]);
