@@ -22,7 +22,10 @@ class Index_EweiShopV2Page extends AppMobilePage
 		if ($_GPC['type']=='huodong'){
             $pageid=2;
         }
-		$page = $this->model->getPage($pageid, true);
+		$page = $_GPC['page']?intval($_GPC['page']):1;
+        $select = $_GPC['select']?intval($_GPC['select']):0;
+
+		$page = $this->model->getPage($pageid, true,$page,$select);
 		if ($page === 'default')
 		{
 			app_json(array('diypage' => false));
