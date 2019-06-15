@@ -265,9 +265,15 @@
     <div class="region-goods-left col-sm-2">
         商品属性
     </div>
+
+
+
     <div class="region-goods-right col-sm-10">
-    <div class="form-group dispatch_info" {if ($item['type'] == 2 || $item['type'] == 3)}style="display: none;"{/if}>
-    <label class="col-sm-2 control-label">运费设置</label>
+      
+   
+
+        <div class="form-group dispatch_info" {if ($item['type'] == 2 || $item['type'] == 3)}style="display: none;"{/if}>
+        <label class="col-sm-2 control-label">运费设置</label>
     <div class="col-sm-6 col-xs-6" style='padding-left:0'>
         {ife 'goods' $item}
         <div class="input-group">
@@ -385,3 +391,15 @@
         $('.multi-img-details').sortable();
     })
 </script>
+
+
+
+{if empty($new_area)}
+
+{template 'shop/selectareas'}
+
+{else}
+
+{template 'shop/selectareasNew'}
+
+{/if}

@@ -342,6 +342,12 @@ class Refund_EweiShopV2Page extends WebPage
 				if ($item["deductprice"]>0){
 				    m('member')->setCredit($item['openid'], 'credit1', $item["deductprice"], array(0, $shopset['name'] . '购物返还抵扣卡路里 卡路里' . $item["deductprice"] . '订单号: ' . $item['ordersn']));
 				}
+				
+				//折扣宝修改
+				if ($order["discount_price"]>0){
+				    m('member')->setCredit($item['openid'], 'credit3', $order["discount_price"], array(0, $shopset['name'] . '购物返还抵扣折扣宝 折扣宝' . $order["discount_price"] . '订单号: ' . $item['ordersn']));
+				}
+				
 				$change_refund['reply'] = '';
 				$change_refund['status'] = 1;
 				$change_refund['refundtype'] = $refundtype;

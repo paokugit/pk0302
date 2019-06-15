@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>活动结束</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/end.css">
+
+<body>
+    <div class="all_div">
+        <div class="div_null"></div>
+        <div class="end_text_div">
+            <span class="end_text_text">亲，来晚了，活动已结束！</span>
+        </div>
+        <div class="end_img_div">
+            <img src="../addons/ewei_shopv2/plugin/merchmanage/static/img/pic1@2x.png" class="end_img_img">
+        </div>
+        <!-- 介绍 -->
+        <div class="text_text_text">
+            <div class="text_text_dd">
+                <ul class="text_text_ul">
+                    <li class="text_text_li">
+                        <div class="text_text_li_head">
+                            <span class="text_text_li_text">商家名称：</span>
+                        </div>
+                        <div class="text_text_li_text_text">
+                            <span class="text_text_li_text_span">跑库</span>
+                        </div>
+                    </li>
+                    <li class="text_text_li">
+                        <div class="text_text_li_head">
+                            <span class="text_text_li_text">客服电话：</span>
+                        </div>
+                        <div class="text_text_li_text_text">
+                            <span class="text_text_li_text_span_red">010-88888888</span>
+                        </div>
+                    </li>
+                    <li class="text_text_li">
+                        <div class="text_text_li_head">
+                            <span class="text_text_li_text">商户地址：</span>
+                        </div>
+                        <div class="text_text_li_text_text">
+                            <span class="text_text_li_text_span">河南省郑州市金水区环球大厦c座</span>
+                        </div>
+                    </li>
+                    <li class="text_text_li">
+                        <div class="text_text_li_head">
+                            <span class="text_text_li_text_xuzhi">购买须知：</span>
+                        </div>
+                        <!-- <div class="text_text_li_text_text">
+                                <span class="text_text_li_text_span">跑库</span>
+                            </div> -->
+                    </li>
+                    <li class="text_text_text_li_aa">
+                        <p>1、购买成功凭手机号或订单通知联系商家；</p>
+                        <p>2、本活动由商家提供，承诺真实有效。</p>
+                        <p>投诉电话：010-88888888（周一至周六 9：00-19：00）</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="fenxiangdingdan">
+            <div class="redfenxiang">
+                <span class="hh">我的分享订单</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $.ajax({
+            type: 'POST',
+            //url: 'http://192.168.1.10/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.good',
+            url: '{php echo mobileUrl("goods.share.good")}',
+            data: {
+                post: "post",
+            },
+            dataType: "json",
+            success:function(data){
+                console.log(data);
+            }
+            })
+    })
+
+</script>

@@ -1,0 +1,79 @@
+{template '_header'}
+
+<meta charset="utf-8" />
+
+<div class="page-header">
+
+    当前位置：<span class="text-primary">商家主页视频设置</span>
+
+</div>
+
+<div class="page-content">
+
+      <div>
+    <video src="{$video}" controls="controls" style="width:400px;height:300px;margin-left:25%" id="video">
+             您的浏览器不支持 video 标签。
+     </video>
+     </div>
+     <div style="margin-top:20px;margin-left:35%;">
+     <input type="file" name="file" id="file" onchange="fileUpload()" style="display:none">
+     <input type="button"  onclick="select_file()" value="上传"  style="background: #44abf7 !important; border-color: #44abf7 !important;color: #fff !important;width:150px;height:30px;">
+     </div>
+</div>
+
+
+<script>
+
+function select_file(){
+    $("#file").trigger("click");
+}
+
+function fileUpload(){
+    var formData = new FormData();
+    formData.append('file', $('#file')[0].files[0]);
+    $.ajax({
+                url : "{$submitUrl}",//这里写你的url
+                type : 'POST',
+                data : formData,
+                contentType: false,// 当有文件要上传时，此项是必须的，否则后台无法识别文件流的起始位置
+                processData: false,// 是否序列化data属性，默认true(注意：false时type必须是post)
+                dataType: 'json',//这里是返回类型，一般是json,text等
+                clearForm: true,//提交后是否清空表单数据
+                success: function(data) {   //提交成功后自动执行的处理函数，参数data就是服务器返回的数据。
+                	console.log(data);
+                    console.log(data.status);
+                    var video=data.message;
+                    var img=data.img;
+                    if(data.status==0){
+                    	//添加数据库
+                    	$.ajax({
+                    		url:"{$update}",
+                    		type:'post',
+                    		data:{video:video,img:img},
+                    		dataType: 'json',
+                    		success:function(res){
+                    			console.log(res);
+                    			if(res.status==0){
+                    				var _videoPlay = document.getElementById("video");
+                    				 
+                    				_videoPlay.src = res.message;
+                    				  _videoPlay.play();
+                    				
+                    				alert('成功');
+                    			}else{
+                    				alert('失败');
+                    			}
+                    		}
+                    		
+                    	})
+                    	//alert('上传成功');
+                    }else{
+                    	alert(data.message);
+                    }
+                }
+            });
+}
+
+
+</script>
+{template '_footer'}     

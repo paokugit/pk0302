@@ -195,7 +195,7 @@ class User_EweiShopV2Page extends PluginWebPage
                 }
 
                 $usercount = pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_merch_account") . " where " . $where . " limit 1", $params);
-                if (0 < $usercount) {
+                if (0 < $usercount ) {
                     show_json(0, "账户名 " . $username . " 已经存在!");
                 }
 

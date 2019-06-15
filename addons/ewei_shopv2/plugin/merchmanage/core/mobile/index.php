@@ -206,33 +206,6 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 	}
 
 
-    public function getshopcode($width = 430){
-        global $_W;
-        $merchid = $_W['uniaccount']['merchid']?$_W['merchid']:0;
-        $path = IA_ROOT . "/addons/ewei_shopv2/data/storecode/";
-        if( !is_dir($path) )
-        {
-            load()->func("file");
-            mkdirs($path);
-        }
-        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "id" => $merchid,'width'=>$width)));
-        $filename = $md5 . ".png";
-        $filepath = $path . $filename;
-        if( is_file($filepath) )
-        {
-            return $_W["siteroot"] . "addons/ewei_shopv2/data/storecode/".$filename . "?v=1.0";
-        }
-        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&id=".$merchid."&fromid=".$merchid, "page" => 'pages/changce/merch/detail',"width"=>$width));
-        if( !is_error($qrcode) )
-        {
-            $qrcode = imagecreatefromstring($qrcode);
-        }
-        imagepng($qrcode, $filepath);
-        imagedestroy($qrcode);
-        $a =  $_W["siteroot"] . "addons/ewei_shopv2/data/storecode/".$filename . "?v=1.0";
-        var_dump($a);
-    }
-
     /**
      * 店主后台 客户接口
      */
@@ -244,14 +217,14 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
         //$data = pdo_fetchall('select h.*,g.merchid from '.tablename('ewei_shop_member_history').' h join '.tablename('ewei_shop_goods').(' g on g.id = h.goodsid where g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=>$_W['merchmanage']['merchid'],':uniacid'=>$_W['uniacid']));
         //$data = pdo_fetchall('select DISTINCT h.openid,g.merchid from '.tablename('ewei_shop_member_history').' h join '.tablename('ewei_shop_goods').(' g on g.id = h.goodsid where g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=>$_W['merchmanage']['merchid'],':uniacid'=>$_W['uniacid']));
         $data = pdo_fetchall('select DISTINCT h.openid,g.merchid,h.uniacid from '.tablename('ewei_shop_member_history').' h RIGHT JOIN '.tablename('ewei_shop_goods').(' g ON g.id = h.goodsid WHERE g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=> 31,':uniacid'=>$_W['uniacid']));
-        $paid = 0;
+	$paid = 0;
         foreach ($data as $key=>$item){
             $user = pdo_get('ewei_shop_member',array('openid'=>$item['openid']),['mobile','nickname','avatar']);
             $data[$key]['mobile'] = $user['mobile']?$user['mobile']:'暂时没有获得';
             $data[$key]['nickname'] = $user['nickname'];
             $data[$key]['avatar'] = $user['avatar'];
-            $count= pdo_fetch('select count(1) as count,sum(price) as sum from '.tablename('ewei_shop_order').' where merchid=:merchid and openid=:openid and status=:status',array(':merchid'=>31,':status'=>3,':openid'=>$item['openid']));
-            $data[$key]['count'] = $count['count'];
+	    $count= pdo_fetch('select count(1) as count,sum(price) as sum from '.tablename('ewei_shop_order').' where merchid=:merchid and openid=:openid and status=:status',array(':merchid'=>$_W['merchmanage']['merchid'],':status'=>3,':openid'=>$item['openid']));
+            $data[$key]['count'] = $count['count']?:0;
             $data[$key]['sum'] = $count['sum']?:0;
             if($count['count'] > 0){
                 $paid++;
@@ -260,6 +233,72 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
         $fans = count($data);
         show_json(1,['fans'=>$fans,'paid'=>$paid,'list'=>$data]);
     }
+
+
+
+    /**
+     * 获取店铺二维码
+     */
+    public function getshopposter()
+    {
+        global $_GPC;
+        global $_W;
+        set_time_limit(0);
+        @ini_set("memory_limit", "256M");
+        $merchid = $_W['merchmanage']['merchid'];
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/shopcode/";
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"],"id" => $merchid)));
+        $filename = $md5 . ".png";
+        $filepath = $path . $filename;
+        if( is_file($filepath) )
+        {
+            $imgurl = $_W["siteroot"] . "addons/ewei_shopv2/data/shopcode/".$filename;
+            //app_json(array( "url" => $imgurl ));
+            return $imgurl;
+        }
+        $target = imagecreatetruecolor(1118, 1534);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+
+        //邀请微信扫码下单
+        $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_MEDIUM.TTF";
+        if( !is_file($font) )
+        {
+            $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
+        }
+        //店铺名称
+        $shopset = pdo_fetch('select * from '.tablename('ewei_shop_merch_user').' where id ="'.$merchid.'"');
+
+        $merchname = imagecolorallocate($target, 51, 51, 51);
+        imagettftext($target, 98, 0, 200, 218, $merchname, $font,mb_substr($shopset['merchname'],0,6,"UTF-8") );
+
+        $red = imagecolorallocate($target, 51, 51, 51);
+        imagettftext($target, 58, 0, 309, 372, $red, $font,'邀请微信扫码下单' );
+        //小程序码
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&id=".$merchid."&fromid=".$merchid, "page" => 'pages/changce/merch/detail',"width"=>1118));
+        if( !is_error($qrcode) )
+        {
+            $qrcode = imagecreatefromstring($qrcode);
+            imagecopyresized($target, $qrcode, 255, 507, 0, 0, 608, 608, imagesx($qrcode), imagesy($qrcode));
+        }
+        imagepng($target, $filepath);
+        imagedestroy($target);
+
+        $imgurl =  $_W["siteroot"] . "addons/ewei_shopv2/data/shopcode/".$filename . "?v=1.0";
+        //app_json(array( "url" => $imgurl ));
+        return $imgurl;
+    }
+
+    public function shoppostercode(){
+        $imgurl = $this->getshopposter();
+        include $this->template();
+    }
+
 }
 
 

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>客户管理</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/kehu.css">
+
+<body>
+    <div class="all-box">
+        <!-- 头部 -->
+        <div class="fufeiandfensi">
+            <div class="fufei">
+                <div class="fufei-text">付费用户</div>
+                <div class="fufei-num">0</div>
+            </div>
+            <div class="fensi">
+                <div class="fensi-text">粉丝用户</div>
+                <div class="fensi-num">0</div>
+            </div>
+        </div>
+        <div class="none-div">
+            
+        </div>
+        <!-- 列表 -->
+        <div class="liebiao-all">
+            <div class="liebiao-div">
+                <ul class="liebiao-ul">
+
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var str = ""
+    var str2 = ""
+    var str3 = ""
+    $(function () {
+        $.ajax({
+            type: 'POST',
+            url: '{php echo mobileUrl("merchmanage.index.getclient")}',
+            //url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.index.getclient',
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                if (data.result.fans == 0 && data.result.paid == 0) {
+                    $(".fensi-num").html(0);
+                    $(".fufei-num").html(0);
+                    str3 += "<div class='none-div-img'>"+
+                    "<img class='none-img' src='http://paokucoin.com/img/backgroup/zanwuneirong@2x.png'>"+
+                    "<div class='none-div-text'>没有更多数据</div>"+
+                    "</div>"
+                    $(".none-div").html(str3)
+                } else {
+                    // console.log(data);
+                    $('.fufei-num').html(data.result.paid);
+                    $('.fensi-num').html(data.result.fans);
+                    $.each(data.result.list, function (i, item) {
+                        // console.log(item);
+                        str += "<li class='libiao-li'>" +
+                            "<div class='liebiao-head'>" +
+                            "<img class='img-head' src='" + item.avatar + "'>" +
+                            "</div>" +
+                            "<div class='mingziandtel'>" +
+                            "<div class='name'>" + item.nickname + "</div>" +
+                            "<div class='tel'>" + item.mobile + "</div>" +
+                            "</div>" +
+                            "<div class='dingdanandnum'>" +
+                            "<div class='dingdan-num'>" + item.count + "</div>" +
+                            "<div class='dingdan-text'>订单</div>" +
+                            "</div>" +
+                            "<div class='xiaofeiandnum'>" +
+                            "<div class='xiaofei-num'>" + item.sum + "</div>" +
+                            "<div class='xiaofei-text'>消费</div>" +
+                            "</div>" +
+                            "</li>"
+                        $(".liebiao-div").html(str)
+                    })
+                }
+            }
+        })
+    })
+</script>

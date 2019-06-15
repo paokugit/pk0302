@@ -62,7 +62,11 @@ class Credit_EweiShopV2Page extends WebPage
 					$table1 = "select log.id,log.num,log.createtime,log.remark,log.credittype,m.id as mid,m.openid, m.realname,m.nickname,m.avatar, m.mobile, m.weixin,u.username,g.groupname,l.levelname  from " . tablename("mc_credits_record") . " log " . " left join " . tablename("users") . " u on  log.operator=u.uid and log.operator<>0 and log.operator<>log.uid" . " left join " . tablename("ewei_shop_member") . " m on m.uid=log.uid" . " left join " . tablename("ewei_shop_member_group") . " g on m.groupid=g.id" . " left join " . tablename("ewei_shop_member_level") . " l on m.level =l.id" . " where 1 " . $condition;
 					$table2 = "select log.id,log.money,log.createtime,log.remark,'credit2' as credittype,m.id as mid,m.openid, m.realname,m.nickname,m.avatar, m.mobile, m.weixin,log.rechargetype as username,g.groupname,l.levelname from " . tablename("ewei_shop_member_log") . "as log " . " inner join " . tablename("ewei_shop_member") . " m on m.openid=log.openid" . " left join " . tablename("ewei_shop_member_group") . " g on m.groupid=g.id" . " left join " . tablename("ewei_shop_member_level") . " l on m.level =l.id" . " where m.uid=0 and log.status=1 " . $condition1;
 					$sql = "select * from (" . $table1 . " UNION ALL " . $table2 . ") as main order by createtime desc";
-				}
+				}elseif($type == "credit3" ){
+                    $table1 = "select log.id,log.num,log.createtime,log.remark,log.credittype,m.id as mid,m.openid, m.realname,m.nickname,m.avatar, m.mobile, m.weixin,u.username,g.groupname,l.levelname from " . tablename("mc_credits_record") . " log " . " left join " . tablename("users") . " u on  log.operator=u.uid and log.operator<>0 and log.operator<>log.uid" . " left join " . tablename("ewei_shop_member") . " m on m.uid=log.uid" . " left join " . tablename("ewei_shop_member_group") . " g on m.groupid=g.id" . " left join " . tablename("ewei_shop_member_level") . " l on m.level =l.id" . " where 1 " . $condition . " and log.uid<>0";
+                    $table2 = "select log.id,log.num,log.createtime,log.remark,log.credittype,m.id as mid,m.openid, m.realname,m.nickname,m.avatar, m.mobile, m.weixin,u.username,g.groupname,l.levelname  from " . tablename("ewei_shop_member_credit_record") . " log " . " left join " . tablename("users") . " u on  log.operator=u.uid and log.operator<>0 and log.operator<>log.uid" . " left join " . tablename("ewei_shop_member") . " m on m.openid=log.openid" . " left join " . tablename("ewei_shop_member_group") . " g on m.groupid=g.id" . " left join " . tablename("ewei_shop_member_level") . " l on m.level =l.id" . " where 1 " . $condition . " and log.uid=0";
+                    $sql = "select * from (" . $table1 . " UNION ALL " . $table2 . ") as main order by createtime desc";
+                }
 			}
 		}
 		else 
@@ -111,7 +115,9 @@ class Credit_EweiShopV2Page extends WebPage
 			if( $_GPC["type"] == 1 ) 
 			{
 				plog("finance.credit.credit1.export", "导出卡路里明细");
-			}
+			}elseif ($_GPC["type"] == 3){
+                plog("finance.credit.credit3.export", "导出折扣宝明细");
+            }
 			else 
 			{
 				plog("finance.credit.credit2.export", "导出余额明细");
@@ -158,11 +164,16 @@ class Credit_EweiShopV2Page extends WebPage
 		}
 		else 
 		{
-			if( $type == "credit2" ) 
+			if( $type == "credit2" )
 			{
 				$allcount = pdo_fetch("select count(*) as ccc from (" . $table1 . " UNION ALL " . $table2 . ") as main order by createtime desc limit 1", $params);
 				$total = $allcount["ccc"];
 			}
+            if( $type == "credit3" )
+            {
+                $allcount = pdo_fetch("select count(*) as ccc from (" . $table1 . " UNION ALL " . $table2 . ") as main order by createtime desc limit 1", $params);
+                $total = $allcount["ccc"];
+            }
 		}
 		$pager = pagination2($total, $pindex, $psize);
 		$groups = m("member")->getGroups();
@@ -177,5 +188,9 @@ class Credit_EweiShopV2Page extends WebPage
 	{
 		$this->main("credit2");
 	}
+    public function credit3()
+    {
+        $this->main("credit3");
+    }
 }
 ?>

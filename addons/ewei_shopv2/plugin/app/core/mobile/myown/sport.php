@@ -571,8 +571,14 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                     if (!empty($parent)){
                         //                     $cd=$this->prize();
                         //                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+                       
+                        //判断今日推荐奖励是否达到50名·
+                        $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
+                        $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
+                        $count=pdo_fetchcolumn("select count(*) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:beginToday and createtime<=:endToday and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit1",":beginToday"=>$beginToday,":endToday"=>$endToday,':remark'=>"推荐新用户获取"));
+                        if ($count<50){
                         m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
-                        
+                        }
                         
                     }
                 }
@@ -586,8 +592,14 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                     if (!empty($parent)){
                         //                     $cd=$this->prize();
                         //                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
-                        m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
-                        
+                       
+                        //判断今日推荐奖励是否达到50名·
+                        $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
+                        $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
+                        $count=pdo_fetchcolumn("select count(*) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:beginToday and createtime<=:endToday and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit1",":beginToday"=>$beginToday,":endToday"=>$endToday,':remark'=>"推荐新用户获取"));
+                        if ($count<50){
+                            m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
+                        }
                         
                     }
                 }

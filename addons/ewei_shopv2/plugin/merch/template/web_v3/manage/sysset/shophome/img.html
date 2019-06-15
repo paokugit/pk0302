@@ -1,0 +1,60 @@
+{template '_header'}
+
+<meta charset="utf-8" />
+
+<div class="page-header">
+
+    当前位置：<span class="text-primary">商家主页图片设置</span>
+
+</div>
+
+<div class="page-content">
+
+    <form action="" method="post" class="form-horizontal form-validate" enctype="multipart/form-data" >
+
+       
+         <div class="form-group">
+        <label class="col-sm-2 control-label must">店铺图片</label>
+        <div class="col-sm-9 col-xs-12 gimgs">
+            {ife 'goods' $item}
+            {php echo tpl_form_field_multi_image2('thumbs',$piclist,array('dest_dir'=>'merch/'.$_W['merchid']))}
+           
+            {else}
+            {loop $piclist $p}
+            <a href='{php echo tomedia($p)}' target='_blank'>
+                <img src="{php echo tomedia($p)}" style='height:100px;border:1px solid #ccc;padding:1px;float:left;margin-right:5px;' />
+            </a>
+            {/loop}
+            {/if}
+        </div>
+    </div>
+
+
+
+      
+
+            <div class="form-group">
+
+                    <label class="col-lg control-label"></label>
+
+                    <div class="col-sm-9 col-xs-12">
+
+                           {ifp 'sysset.shop.edit'}
+
+                            <input type="submit" value="提交" class="btn btn-primary"  />
+
+                          {/if}
+
+                     </div>
+
+            </div>
+
+	 
+
+ 
+
+    </form>
+
+</div>
+
+{template '_footer'}     

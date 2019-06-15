@@ -128,13 +128,13 @@ class List_EweiShopV2Page extends WebPage
 			$row["ordermoney"] = pdo_fetchcolumn("select sum(price) from " . tablename("ewei_shop_order") . " where uniacid=:uniacid and openid=:openid and status=3", array( ":uniacid" => $_W["uniacid"], ":openid" => $row["openid"] ));
 			$row["credit1"] = m("member")->getCredit($row["openid"], "credit1");
 			$row["credit2"] = m("member")->getCredit($row["openid"], "credit2");
-			//获取推荐人数和直推人数
-            $ztcount = pdo_fetchcolumn("select count(*) from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $row['id']));
-            $row["ztcount"] = $ztcount?$ztcount:0;
-            //总推荐
-            //$row["alltcount"] = m('member')->allAgentCount($row['id']);
 
-		}
+            $agentinfo = pdo_fetch("select * from " . tablename("ewei_shop_member_agentcount") . " where openid=:openid limit 1", array( ":openid" => $row['openid']));
+            $row['agentallcount'] = $agentinfo['agentallcount'];
+            $row['agentcount'] = $agentinfo['agentcount'];
+            $row['shopkeeperallcount'] = $agentinfo['shopkeeperallcount'];
+            $row['shopkeepercount'] = $agentinfo['shopkeepercount'];
+        }
 		unset($row);
 		if( $_GPC["export"] == "1" ) 
 		{
@@ -194,7 +194,7 @@ class List_EweiShopV2Page extends WebPage
 		$levels = m("member")->getLevels();
 		$set = m("common")->getSysset();
 		$default_levelname = (empty($set["shop"]["levelname"]) ? "普通等级" : $set["shop"]["levelname"]);
-		include($this->template());
+        include($this->template());
 	}
 
 
@@ -977,5 +977,15 @@ class List_EweiShopV2Page extends WebPage
 		}
 		include($this->template());
 	}
+
+	public function fansinfo(){
+        global $_W;
+        global $_GPC;
+        $openid = $_GPC["openid"];
+        $agentinfo = pdo_fetch("select * from " . tablename("ewei_shop_member_agentcount") . " where openid=:openid limit 1", array( ":openid" => $openid));
+        $data['agentinfo'] = $agentinfo;
+        include($this->template());
+    }
+
 }
 ?>

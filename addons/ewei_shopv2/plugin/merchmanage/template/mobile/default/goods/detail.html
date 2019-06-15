@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>详情</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/css/LArea.css">
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/common.css">
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/detail.css">
+
+<body>
+    <div class="body_box">
+        <!-- header -->
+        <!--<div class="header">商品名字</div>-->
+        <!-- header -->
+        <!-- content -->
+        <div class="content">
+            <div class="imgBox">
+                <div class="activity-intro">本活动由<span>跑库</span>发起</div>
+                <div class="playmusic"><audio hidden autoplay="autoplay" controls="controls" src="" id="music"></audio><img class="header_select" src="http://paokucoin.com/img/backgroup/start@2x.png" alt=""></div>
+                <ul class="imglist"></ul>
+                <!-- 活动说明 -->
+                <!-- <div class="activity-ex">
+                    <p class="ex-tit">活动说明</p>
+                    <span class="headline">1、本活动为促销活动，支付后概不退款;</span>
+                    <span class="headline">2、本活动所有商品、礼品概不兑换现金</span>
+                    <span class="headline">3、无任何附加费用，活动真实有效;</span>
+                    <span class="headline">4、本活动不支持快递按,请到店自取</span>
+                </div> -->
+            </div>
+            <div class="part-box">
+                <div class="part-box-top">
+                    <div class="part-tit">已有<span class="part-num">0</span>人参与</div>
+                    <div class="part-countdown">
+                        <div class="countdown-img">
+                            <img src="http://paokucoin.com/img/backgroup/bg01@2x.png" alt="">
+                        </div>
+                        <div class="countdown-text">
+                            <div class="countdown-text-absolute">
+                                <p class="countdown-tit">距活动结束</p>
+                                <div class="countdown-con">
+                                    <span class="countdown-day"></span>天<span class="countdown-hour"></span>时<span
+                                        class="countdown-minute"></span>分<span class="countdown-seconds"></span>秒
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="part-other">
+                        <div class="read-box">浏览<span class="read-num"></span>人</div>
+                        <div class="forward-box">转发<span class="forward-num"></span>人</div>
+                    </div>
+                </div>
+                <div class="ranklist">
+                    <img src="http://paokucoin.com/img/backgroup/hongbaopaihang@2x.png" alt="">
+                </div>
+                <div class="ranklist-other">
+                    <div class="getmoney-box">您已获得<span class="getmoney-num"></span>元</div>
+                    <div class="rank-box">排行第<span class="rank-num"></span>名</div>
+                </div>
+                <!-- 红包排行榜 -->
+                <div class="rank-list-box">
+                    <div class="rank-title-box">
+                        <div class="list-left">
+                            <div class="paiming">排名</div>
+                            <div class="kehu">客户</div>
+                        </div>
+                        <div class="list-right">获得红包</div>
+                    </div>
+                    <div class="rank-list">
+                        <ul class="rankList"></ul>
+                    </div>
+                </div>
+                <!-- 红包排行榜 -->
+                <!-- 万元现金红包大派送 -->
+                <div class="packet-send">
+                    <div class="send-img">
+                        <img src="http://paokucoin.com/img/backgroup/hongbao03@2x.png" alt="">
+                    </div>
+                    <div class="send-text">
+                        <div class="send-text-relative">
+                            <div class="send-con">
+                                <div class="send-con-text">1、将本链接转发给您的朋友A,只要A抢购，您即可获得<i
+                                        class="packetcount-first"></i>元现金红包，一秒到账微信零钱！</div>
+                                <div class="send-con-text">2、你的朋友A再次分享给他的朋友B，只要B抢购，你还能再得<i
+                                        class="packetcount-second"></i>元现金红包！</div>
+                                <div class="send-con-text">3、红包不设上限,只要您的人脉够广,万元红包任性赚...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 抢购流程 -->
+                <div class="process-box">
+                    <img src="http://paokucoin.com/img/backgroup/liucheng@2x.png" alt="">
+                </div>
+            </div>
+            <!-- part-box结束 -->
+            <!-- 购买记录-开始 -->
+            <div class="buy-record">
+                <div class="record-tit">购买记录<span class="people-count">888</span>人</div>
+                <ul class="record-list"></ul>
+            </div>
+            <!-- 购买记录-结束 -->
+            <div class="activity-state">本活动由跑库一键拓客营销神器技术支持</div>
+
+            <div id="remainTime" style="font-size:20px;font-weight:800;color:#FF9900"></div>
+        </div>
+        <!-- content -->
+        <!-- footer -->
+        <div class="detail-footer">
+            <div class="footer-left">
+                <div class="footer-service">
+                    <div class="serviceimg">
+                        <img src="http://paokucoin.com/img/backgroup/phone@2x.png" alt="">
+                    </div>
+                    <div class="kefu">客服</div>
+                </div>
+                <div class="footer-order">
+                    <div class="orderimg">
+                        <img src="http://paokucoin.com/img/backgroup/wechat@2x.png" alt="">
+                    </div>
+                    <div class="kefu">分享订单</div>
+                </div>
+            </div>
+            <div class="footer-right">
+                <button class="buybtn">立即抢购</button>
+            </div>
+        </div>
+        <!-- footer -->
+    </div>
+    <!-- 实物自取产品弹窗 -->
+    <div id="realproduct">
+        <div class="realproduct-relative">
+            <div class="realproduct-text">
+                <div class="real-title">填写购买人信息</div>
+                <div class="real-subtit">支付成功后，商家会主动联系您，请放心支付！</div>
+                <div class="info-name-box">
+                    <div class="info-name-tit">购买人</div>
+                    <div class="info-name">
+                        <input id="realnameipt" type="text" placeholder="收件人姓名">
+                    </div>
+                </div>
+                <div class="info-phone-box">
+                    <div class="info-phone-tit">联系电话</div>
+                    <div class="info-phone">
+                        <input id="realphoneipt" type="text" placeholder="常用电话号码">
+                    </div>
+                </div>
+                <div class="realproduct-other">请仔细确认手机号是否正确</div>
+                <div class="handle-box">
+                    <button class="realcancelbtn">取消</button>
+                    <button class="realfirmbtn">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 实物自取产品弹窗 -->
+    <!-- 快递产品 -->
+    <div id="postproduct">
+        <div class="postproduct-relative">
+            <div class="postproduct-text">
+                <div class="post-title">填写收货信息</div>
+                <div class="post-subtit">提交前确认信息是否正确,如有疑问,及时联系客服！</div>
+                <div class="info-name-box">
+                    <div class="info-name-tit">收件人</div>
+                    <div class="info-name">
+                        <input id="postnameipt" type="text" placeholder="收件人姓名">
+                    </div>
+                </div>
+                <div class="info-phone-box">
+                    <div class="info-phone-tit">联系电话</div>
+                    <div class="info-phone">
+                        <input id="postphoneipt" type="text" placeholder="常用手机号码">
+                    </div>
+                </div>
+                <div class="info-address-box">
+                    <div class="info-phone-tit">所在地区</div>
+                    <div class="info-phone">
+                        <!-- <input id="postaddipt" type="text" placeholder="选择所在地区"> -->
+                        <input id="demo1" type="text" readonly="" placeholder="城市选择特效" value="" />
+                        <input id="value1" type="hidden" value="20,234,504" />
+                    </div>
+                </div>
+                <div class="info-detailaddress">
+                    <div class="info-phone-tit">详细地址</div>
+                    <div class="info-phone">
+                        <input id="postdetailipt" type="text" placeholder="街道、楼牌号等">
+                    </div>
+                </div>
+                <div class="handle-box">
+                    <button class="postcancelbtn">取消</button>
+                    <button class="postfirmbtn">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 快递产品 -->
+    <!-- 联系客服 -->
+    <div class="service-mask">
+        <div class="service-relative">
+            <!-- <div class="service-img-position"> -->
+            <img class="kefu-img" src="http://paokucoin.com/img/backgroup/kefupic@2x.png" alt="">
+            <!-- </div> -->
+            <div class="kefu-con">
+                <div class="kefu-text-box">
+                    <p class="kefu-title">跑库</p>
+                    <div class="kefu-name-box">
+                        <div class="kefu-name-tit">负责人：</div>
+                        <div class="kefu-name"></div>
+                    </div>
+                    <div class="kefu-phone-box">
+                        <img class="phoneImg" src="http://paokucoin.com/img/backgroup/boda@2x.png" alt="">
+                        <div class="kefu-phone-tit">客服电话：</div>
+                        <div class="kefu-phone"></div>
+                    </div>
+                    <div class="kefu-address-box">
+                        <div class="kefu-address-head">店面地址：</div>
+                        <div class="kefu-address-text"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 联系客服 -->
+</body>
+
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery-1.11.3.min(1).js"></script>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/js/LAreaData1.js"></script>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/js/LAreaData2.js"></script>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/js/LArea.js"></script>
+<script src="http://res2.wx.qq.com/open/js/jweixin-1.4.0.js "></script>
+<script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var str1 = ''
+    var str2 = ''
+    var str3 = ''
+    var type = sessionStorage.getItem("proType")
+    var goodtitle=sessionStorage.getItem("protitle")
+    $(window).load(function () {
+        var timestamp = parseInt(new Date().getTime() / 1000);
+        var key = sessionStorage.getItem("key");
+        var str = sessionStorage.getItem("str");
+        $.ajax({
+            type: 'POST',
+            url: '{php echo mobileUrl("merchmanage.goods.show.getpre")}',
+            data: {
+                "post_key": key,
+                "str": str
+            },
+            dataType: "json",
+            success: function (data) {
+                var protitle=data.result.val.title
+                var prothumb=data.result.val.thumb[0]
+                var prodesc=data.result.val.desc
+                $(".part-num").html(0)
+                $(".read-num").html(0)
+                $(".forward-num").html(0)
+                $(".packetcount-first").html(data.result.val.commission1_pay)
+                $(".packetcount-second").html(data.result.val.commission2_pay)
+                $(".people-count").html(0)
+				$('.activity-intro span').html(data.result.val.main)
+				$('.kefu-title').html(data.result.val.main)
+                $(".kefu-name").html(data.result.val.principal)
+                $(".kefu-phone").html(data.result.val.tel)
+                $(".kefu-address-text").html(data.result.val.address)
+                $.each(data.result.val.thumb, function (i, item) {
+                    console.log(item)
+                    str1 += '<li class="img-item"><img class="img01" src=' + item +
+                        ' alt="">' +
+                        '</li>'
+                    $(".imglist").html(str1)
+                });
+                $('.playmusic audio').attr('src',data.result.val.music_src);
+                var atime = data.result.val.end_time
+                var result = Number(atime) - timestamp
+                $(function () {
+                    var interval = setInterval(sub, 1000); //定时器 调度对象
+                    /*封装减1秒的函数*/
+                    function sub() {
+                        if (result > 1) {
+                            result = result - 1;
+                            var second = Math.floor(result % 60); // 计算秒 ，取余  
+                            var minute = Math.floor((result / 60) %
+                                60); //计算分 ，换算有多少分，取余，余出多少秒
+                            var hour = Math.floor((result / 3600) %
+                                24); //计算小时，换算有多少小时，取余，24小时制除以24，余出多少小时
+                            var day = Math.floor(result / (3600 * 24)); //计算天 ，换算有多少天
+                            $(".countdown-day").html(day)
+                            $(".countdown-hour").html(hour)
+                            $(".countdown-minute").html(minute)
+                            $(".countdown-seconds").html(second)
+                        } else {
+                            // alert("倒计时结束！");
+                            window.clearInterval(interval); //这里可以添加倒计时结束后需要执行的事件 
+                            location.href = '{php echo mobileUrl("merchmanage/goods/show/end")}'
+                        }
+                    };
+                });
+                $.each(data.result.red.log, function (i, item) {
+                    var I = i + 1
+                    str2 += '<li class="rank-item">' +
+                        '<div class="rank-item-left">' +
+                        '<div class="item-num">' + I + '</div>' +
+                        '<div class="item-info">' +
+                        '<img class="item-avatar" src=' + item.avatar + ' alt="">' +
+                        '<div class="item-name">' + item.nickname + '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="rank-item-right">' + item.m + '元' + '</div>' +
+                        '</li>'
+                    $(".rankList").html(str2)
+                });
+                $.each(data.result.order.log, function (i, item) {
+                    str3 += '<li class="record-item">' +
+                        '<div class="record-img">' + '<img src=' + item.avatar +
+                        ' alt="">' + '</div>' +
+                        '<div class="record-info">' +
+                        '<span class="record-name">' + item.nickname + '</span>' +
+                        '<span class="record-phone">' + item.mobile + '</span>' +
+                        '</div>' +
+                        '<div class="record-other">' +
+                        '<span class="pay-money">' + '已支付' + '￥' + item.price + '元' +
+                        '</span>' +
+                        '<span class="pay-time">' + item.createtime + '</span>' +
+                        '</div>' +
+                        '</li>'
+                    $(".record-list").html(str3)
+                });
+            }
+        })
+    })
+    // 点击空白区域二维码隐藏事件
+    var myDiv = $(".service-mask");
+
+    $(".footer-service").click(function (event) {
+        showDiv(); //调用显示DIV方法
+        $(".service-mask").one("click", function () { //对document绑定一个影藏Div方法
+            $(myDiv).hide();
+        });
+        event.stopPropagation(); //阻止事件向上冒泡
+    });
+
+    function showDiv() {
+        $(myDiv).fadeIn();
+    }
+
+    $('.playmusic img').click(function () {
+        var audio = document.getElementById('music');
+        if(audio.paused){
+            $(this).addClass('header_select')
+            audio.play();
+        }else{
+            $(this).removeClass('header_select')
+            audio.pause();
+        }
+    })
+</script>

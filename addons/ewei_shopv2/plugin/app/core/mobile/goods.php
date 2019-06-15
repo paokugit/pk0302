@@ -47,6 +47,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 				{
                     if ($_GPC['cate']==4){
                         if(in_array($item['id'],array(3,4,5,7))){
+                            $goods_list[$index]['memberthumb'] = $goods_list[$index]['thumb'];
                             $goods_list[$index]['thumb'] = $this->levelurlup($item['id']);
                         }
                         $goods_list[$index]['salesreal'] = $goods_list[$index]['sales'] = $goods_list[$index]['salesreal']*2;

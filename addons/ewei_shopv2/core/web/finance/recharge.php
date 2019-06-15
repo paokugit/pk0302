@@ -19,7 +19,7 @@ class Recharge_EweiShopV2Page extends WebPage
 		$profile = m('member')->getMember($id, true);
 
 		if ($_W['ispost']) {
-			$typestr = $type == 'credit1' ? '卡路里' : '余额';
+			$typestr = $type == 'credit1' ? '卡路里' :$type=='credit2' ? '余额' : '折扣宝';
 			$num = floatval($_GPC['num']);
 			$remark = trim($_GPC['remark']);
 

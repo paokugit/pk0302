@@ -265,18 +265,18 @@ class Coupon_EweiShopV2ComModel extends ComModel
 					{
 						$p = 1;
 					}
-					if( $row["limitgoodcatetype"] == 1 ) 
+					if( $row["limitgoodcatetype"] == 1 )
 					{
 						$result = array_intersect($cates, $limitcateids);
-						if( 0 < count($result) ) 
+						if( 0 < count($result)  && $result[0]!='')
 						{
 							$p = 1;
 						}
 					}
-					if( $row["limitgoodtype"] == 1 ) 
+					if( $row["limitgoodtype"] == 1 )
 					{
 						$isin = in_array($good["id"], $limitgoodids);
-						if( $isin ) 
+						if( $isin )
 						{
 							$p = 1;
 						}

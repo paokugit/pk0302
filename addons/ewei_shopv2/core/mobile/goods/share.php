@@ -11,18 +11,28 @@ class Share_EweiShopV2Page extends MobilePage
        
        $openid=$_W["openid"];
        if (empty($_W["openid"])){
-//           $resault= mc_oauth_account_userinfo();
-//            $openid=$resault["openid"];
-             $openid="oQmU56Lf1GeIkpqsLStPq5Qktm9I";
+          $resault= mc_oauth_account_userinfo();
+            $openid=$resault["openid"];
+        //    $openid="oQmU56Lf1GeIkpqsLStPq5Qktm9I";
        }
 
        
       //获取上级openid
       $share_openid1=$_GPC["share_openid1"];
+      if ($share_openid1==$openid){
+          $share_openid1="";
+      }
       //获取二级分享者
       $share_openid2=$_GPC["share_openid2"];
+      if ($share_openid2==$openid){
+          $share_openid2="";
+      }
       //添加查看记录
       $good_id=$_GPC["good_id"];
+      
+//       $good_id=451;
+      
+      
       $good=pdo_get("ewei_shop_goods",array("id"=>$good_id));
       if (pdo_update("ewei_shop_goods",array("viewcount"=>$good["viewcount"]+1),array("id"=>$good_id))){
           //添加记录
@@ -33,18 +43,24 @@ class Share_EweiShopV2Page extends MobilePage
           pdo_insert("ewei_shop_goods_redview",$log);
       }
       
-      
-      //商品id
-      $good_id=$_GPC["good_id"];
-      $good_id=451;
-      $good=pdo_get("ewei_shop_goods",array("id"=>$good_id));
-      
-      
+      //获取商品是否截止
+      $other=pdo_get("ewei_shop_goods_bribe_expert",array("goods_id"=>$good_id));
+      if ($other["end_time"]<=time()){
+          header('location: ' . mobileUrl("goods/share/end")."&good_id=".$good_id);
+      }
+     
        //分享url
        if (empty($share_openid1)){
        $url="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.index&good_id=".$good_id."&share_openid1=".$openid;
-       }else{
+       }elseif ($share_openid1==$openid){
+           if ($share_openid2){
+           $url="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.index&good_id=".$good_id."&share_openid1=".$openid."&share_openid2=".$share_openid2;
+           }else{
+               $url="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.index&good_id=".$good_id."&share_openid1=".$openid;
+           }
+        }else{
            $url="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.index&good_id=".$good_id."&share_openid1=".$openid."&share_openid2=".$share_openid1;
+           
        }
        include $this->template();
     }
@@ -67,9 +83,9 @@ class Share_EweiShopV2Page extends MobilePage
         }
         //获取商品其他信息
         $good["other"]=pdo_get("ewei_shop_goods_bribe_expert",array("goods_id"=>$good_id));
-        if ($good["other"]["end_time"]<time()){
-            show_json(0,"该活动结束");
-        }
+//         if ($good["other"]["end_time"]<time()){
+//             show_json(0,"该活动结束");
+//         }
         $good["thumb_url"]=set_medias(iunserializer($good["thumb_url"]));
         //获取音乐
         $music=pdo_get("ewei_shop_music",array("id"=>$good["other"]["music"]));
@@ -78,7 +94,7 @@ class Share_EweiShopV2Page extends MobilePage
         //获取红包记录
         $resalut=pdo_fetchall("select openid,sum(money) as m from ".tablename("ewei_shop_goods_redlog")." where goodid=:goodid and status=1 group by openid order by m desc",array(":goodid"=>$good_id));
         $my=array();
-        
+        $i=0;
         foreach ($resalut as $k=>$v){
             $mc_fans=pdo_get("mc_mapping_fans",array("openid"=>$v["openid"]));
             $mc_member=pdo_get("mc_members",array("uid"=>$mc_fans["uid"]));
@@ -98,8 +114,8 @@ class Share_EweiShopV2Page extends MobilePage
         }
         $good["red"]["myred"]=$my;
         //获取订单记录
-        $sql="select o.openid,o.price,o.createtime,o.dispatchtype,o.isvirtual,o.carrier,o.addressid from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and o.status=1 ORDER BY o.createtime DESC ";
-        $good["order"]=pdo_fetch("select count(*) as count from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and o.status=1 ORDER BY o.createtime DESC ",array(":goodid"=>$good_id));
+        $sql="select o.openid,o.price,o.commission1_pay,o.commission2_pay,o.createtime,o.dispatchtype,o.isvirtual,o.carrier,o.addressid from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and (o.status=1 or o.status=2 or o.status=3) ORDER BY o.createtime DESC ";
+        $good["order"]=pdo_fetch("select count(*) as count from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and (o.status=1 or o.status=2 or o.status=3) ORDER BY o.createtime DESC ",array(":goodid"=>$good_id));
         $good["order"]["log"]=pdo_fetchall($sql,array(":goodid"=>$good_id));
         foreach ($good["order"]["log"] as $k=>$v){
              $mc_fans=pdo_get("mc_mapping_fans",array("openid"=>$v["openid"]));
@@ -107,7 +123,7 @@ class Share_EweiShopV2Page extends MobilePage
              $good["order"]["log"][$k]["nickname"]=$mc_member["nickname"];
              $good["order"]["log"][$k]["avatar"]=$mc_member["avatar"];
              $good["order"]["log"][$k]["createtime"]=date("Y-m-d H:i:s",$v["createtime"]);
-             $good["order"]["log"][$k]["price"]=$good["order"]["log"][$k]["price"]+$good["order"]["log"][$k]["commission1_pay"]+$good["order"]["log"][$k]["commission2_pay"];
+             $good["order"]["log"][$k]["price"]=$v["price"]+$v["commission1_pay"]+$v["commission2_pay"];
              //获取电话号码
              if ($v["dispatchtype"]==1||$v["isvirtual"]==1){
                  $carrier=iunserializer($v["carrier"]);
@@ -138,7 +154,7 @@ class Share_EweiShopV2Page extends MobilePage
         if ($good["other"]["end_time"]<time()){
             show_json(0,"该活动结束");
         }
-        $openid=$_W["openid"];
+//         $openid=$_W["openid"];
         if (empty($openid)){
             $openid=$_GPC["openid"];
         }
@@ -151,17 +167,22 @@ class Share_EweiShopV2Page extends MobilePage
         $data["merchid"]=$good["merchid"];
         
         //获取分享的人
+        if ($_GPC["share_openid1"]==$openid){
+            $data["share_openid1"]=$_GPC["share_openid2"];
+            $data["share_openid2"]="";
+        }else{
         $data["share_openid1"]=$_GPC["share_openid1"];
         $data["share_openid2"]=$_GPC["share_openid2"];
+        }
         
         if ($good["other"]["pro_type"]==1){
             //物流
             $data["price"]=$good["marketprice"]+$good["other"]["express_price"];
-            if (!empty($_GPC["share_openid1"])){
+            if (!empty($data["share_openid1"])){
                 $data["price"]=$data["price"]-$good["commission1_pay"];
                 $data["commission1_pay"]=$good["commission1_pay"];
             }
-            if (!empty($_GPC["share_openid2"])){
+            if (!empty($data["share_openid2"])){
                 $data["price"]=$data["price"]-$good["commission2_pay"];
                 $data["commission2_pay"]=$good["commission2_pay"];
             }
@@ -279,8 +300,8 @@ class Share_EweiShopV2Page extends MobilePage
         $order_good=pdo_get("ewei_shop_order_goods",array("orderid"=>$order["id"]));
         $good=pdo_get("ewei_shop_goods",array("id"=>$order_good["goodsid"]));
         $list["title"]=$good["title"];
-        $list["paytime"]=date("Y-m-d H:i:s",$order["paytime"]);
-        $list["price"]=$order["price"];
+        $list["paytime"]=date("Y-m-d H:i:s",$order["createtime"]);
+        $list["price"]=$order["price"]+$order["commission1_pay"]+$order["commission2_pay"];
         if ($order["addressid"]!=0){
             $addr=pdo_get("ewei_shop_member_address",array("id"=>$order["addressid"]));
             $list["realname"]=$addr["realname"];
@@ -309,42 +330,100 @@ class Share_EweiShopV2Page extends MobilePage
                pdo_update("ewei_shop_order",array("status"=>1),array("ordersn"=>$ordersn));
                 //更新红包
                 pdo_update("ewei_shop_goods_redlog",array("status"=>1),array("order_sn"=>$ordersn));
-               
-                $order_goods=pdo_get("ewei_shop_order_goods",array("orderid"=>$order["id"]));
-                $good=pdo_get("ewei_shop_goods",array("id"=>$order_goods["goodsid"]));
-                $order_price=$order["price"]+$order["commission1_pay"]+$order["commission2_pay"];
-                //消息发送
-                  //获取购买者信息
-                  if ($order["openid"]){
-                  $member=pdo_get("mc_mapping_fans",array("openid"=>$order["openid"]));
-                   
-                  $postdata["first"]=array("value"=>"您的订单已支付成功","color"=>"#173177");
-                  $postdata["keyword1"]=array("value"=>$member["nickname"],"color"=>"#173177");
-                  $postdata["keyword2"]=array("value"=>$order["ordersn"],"color"=>"#173177");
-                  $postdata["keyword3"]=array("value"=>$order_price."元","color"=>"#173177");
-                  $postdata["keyword4"]=array("value"=>$good["title"],"color"=>"#173177");
-                  m("message")->sendTplNotice($order["openid"],"rPnwJBoYeGcLumJ7iIymhepzgO9dH4pB2YyGBRUITxc",$postdata);
-                  
-                  }
-                  //获取商家信息
-                  if ($order["merchid"]){
-                  $merch=pdo_get("ewei_shop_merch_user",array("id"=>$order["merchid"]));
-                  if ($merch["openid"]){
-                  $postdata["first"]=array("value"=>"您的商品已被购买","color"=>"#173177");
-                  $postdata["keyword1"]=array("value"=>$merch["merchname"],"color"=>"#173177");
-                  $postdata["keyword2"]=array("value"=>$order_price."元","color"=>"#173177");
-                  $postdata["keyword3"]=array("value"=>"0元","color"=>"#173177");
-                  $postdata["keyword4"]=array("value"=>date("Y-m-d H:i:s"),"color"=>"#173177");
-                  $postdata["keyword5"]=array("value"=>$order["ordersn"],"color"=>"#173177");
-                  $postdata["remark"]=array("value"=>"您的商品已被购买，请及时处理","color"=>"#173177");
-                  m("message")->sendTplNotice($merch["openid"],"Bs28K29IdrVDfmF8w9iNEY0IqkrNL8GxIESVov_YMVc",$postdata);
-                  }
-                  
-                  }
+
+                //上级红包发放
+                $this->addMoney($ordersn);
+
+                
               include $this->template();
         
     }
+    /**
+     * 消息推送
+     */
+    public function msg(){
+        global $_GPC;
+        global $_W;
+        $ordersn=$_GPC["order_sn"];
+//         var_dump($ordersn);
+        $order=pdo_get("ewei_shop_order",array("ordersn"=>$ordersn));
+//         var_dump($order);
+        $order_goods=pdo_get("ewei_shop_order_goods",array("orderid"=>$order["id"]));
+        $good=pdo_get("ewei_shop_goods",array("id"=>$order_goods["goodsid"]));
+        $order_price=$order["price"]+$order["commission1_pay"]+$order["commission2_pay"];
+        
+        $res=array();
+        //消息发送
+        //获取购买者信息
+        if ($order["openid"]){
+            $member=pdo_get("mc_mapping_fans",array("openid"=>$order["openid"]));
+            
+            $postdata["first"]=array("value"=>"您的订单已支付成功","color"=>"#173177");
+            $postdata["keyword1"]=array("value"=>$member["nickname"],"color"=>"#173177");
+            $postdata["keyword2"]=array("value"=>$order["ordersn"],"color"=>"#173177");
+            $postdata["keyword3"]=array("value"=>$order_price."元","color"=>"#173177");
+            $postdata["keyword4"]=array("value"=>$good["title"],"color"=>"#173177");
+            $r=m("message")->sendTplNotice($order["openid"],"rPnwJBoYeGcLumJ7iIymhepzgO9dH4pB2YyGBRUITxc",$postdata);
+         //   var_dump($r);
+            $res["user"]="success";
+        }
+        //获取商家信息
+        if ($order["merchid"]){
+            $merch=pdo_get("ewei_shop_merch_user",array("id"=>$order["merchid"]));
+            if ($merch["openid"]){
+                $postdata["first"]=array("value"=>"您的商品已被购买","color"=>"#173177");
+                $postdata["keyword1"]=array("value"=>$merch["merchname"],"color"=>"#173177");
+                $postdata["keyword2"]=array("value"=>$order_price."元","color"=>"#173177");
+                $postdata["keyword3"]=array("value"=>"0元","color"=>"#173177");
+                $postdata["keyword4"]=array("value"=>date("Y-m-d H:i:s"),"color"=>"#173177");
+                $postdata["keyword5"]=array("value"=>$order["ordersn"],"color"=>"#173177");
+                $postdata["remark"]=array("value"=>"您的商品已被购买，请及时处理","color"=>"#173177");
+               $rs= m("message")->sendTplNotice($merch["openid"],"Bs28K29IdrVDfmF8w9iNEY0IqkrNL8GxIESVov_YMVc",$postdata);
+            //   var_dump($rs);
+               $res["merch"]="success";
+            }
+            
+        }
+        echo json_encode($res);    
+    }
     
+    /**
+     * 给上级发放红包奖励
+     * @param $order_sn
+     */
+    public function addMoney($order_sn)
+    {
+        //查找订单状态
+        $query = pdo_fetchall('select * from '.tablename('ewei_shop_goods_redlog').' where order_sn="'.$order_sn.'"');
+        foreach ($query as $item){
+            if($item['status'] == 0){
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包记录支付状态未支付",'createtime'=>date("Y-m-d H:i:s",time())]);
+                continue;
+            }
+            if($item['status'] == 2){
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包记录发放状态已发放",'createtime'=>date("Y-m-d H:i:s",time())]);
+                continue;
+            }
+            $salt = pdo_getcolumn("mc_mapping_fans",["openid"=>$item['openid']],'salt');
+            //因为这两个红包记录的订单是一样的   所以 加上 这个人公众号粉丝表的salt  因为这个是随机生成
+            $ordersn = $item['order_sn'].$salt;
+            $params = [
+                'desc'=>'订单提成奖励',
+                'order_sn'=>$ordersn,
+                'fee'=>$item['money'],
+                'openid'=>$item['openid'],
+            ];
+            //请求微信发送支付
+            $res = m('user')->get_transfers($params,1);
+            if($res['return_code'] == "SUCCESS" && $res['result_code'] == "SUCCESS"){
+                pdo_update('ewei_shop_goods_redlog',['status'=>2],['order_sn'=>$order_sn,'level'=>$item['level']]);
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包奖励发放成功",'createtime'=>date("Y-m-d H:i:s",time())]);
+            }else{
+                pdo_insert('log',['log'=>"订单号为".$item['order_sn']."红包等级为".$item['level']."的红包奖励发放失败,错误代码".$res['err_code']."错误代码描述".$res['err_code_des'],'createtime'=>date("Y-m-d H:i:s",time())]);
+            }
+        }
+    }
+
     //充值--微信支付
     public function order_wx(){
         header('Access-Control-Allow-Origin:*');
@@ -353,13 +432,12 @@ class Share_EweiShopV2Page extends MobilePage
         
         $openid=$_W["openid"];
         if (empty($openid)){
-            $result = mc_oauth_userinfo();
-            $openid=$result["openid"];
+           $result = mc_oauth_userinfo();
+           $openid=$result["openid"];
+           
+          //  $openid="oQmU56Lf1GeIkpqsLStPq5Qktm9I";
         }
         
-        if (empty($openid)){
-            $openid=$_GPC["openid"];
-        }
         $order_sn=$_GPC["order_sn"];
         $log=pdo_get("ewei_shop_order",array('ordersn'=>$order_sn));
         
@@ -379,7 +457,7 @@ class Share_EweiShopV2Page extends MobilePage
        
         $wechat = m("common")->fwechat_child_build($params, $options, 0);
         
-       var_dump($wechat);die;
+   //    var_dump($wechat);die;
         include $this->template();
     }
     
@@ -390,10 +468,7 @@ class Share_EweiShopV2Page extends MobilePage
         global $_W;
         global $_GPC;
          $url = trim($_GPC['url']);
-//        var_dump("11");
-//         show_json(1,"111");
         $account_api = WeAccount::create($_W['acid']);
-//         var_dump($account_api);
         $jssdkconfig = $account_api->getJssdkConfig($url);
         show_json(1, $jssdkconfig);
     }
@@ -481,6 +556,15 @@ class Share_EweiShopV2Page extends MobilePage
    public function end(){
        global $_W;
        global $_GPC;
+       
+       $openid=$_W["openid"];
+       if (empty($_W["openid"])){
+                     $resault= mc_oauth_account_userinfo();
+                      $openid=$resault["openid"];
+          // $openid="oQmU56Lf1GeIkpqsLStPq5Qktm9I";
+       }
+       
+       
        $good_id=$_GPC["good_id"];
        include $this->template();
    }
@@ -491,15 +575,15 @@ class Share_EweiShopV2Page extends MobilePage
        $good_id=$_GPC["good_id"];
        $openid=$_W["openid"];
        if (empty($_W["openid"])){
-           //           $resault= mc_oauth_account_userinfo();
-           //            $openid=$resault["openid"];
-           $openid="oQmU56Lf1GeIkpqsLStPq5Qktm9I";
+                 $resault= mc_oauth_account_userinfo();
+                 $openid=$resault["openid"];
+        //   $openid="oQmU56Lf1GeIkpqsLStPq5Qktm9I";
        }
        include $this->template();
    }
    //测试
    public function cs(){
-         var_dump(phpinfo());
+    
 //        var_dump(mobileUrl("goods/share/order_wx")."&id=11");
 //        var_dump(mobileUrl("goods/share/order_wx",array("ordersn"=>11)));
 //        $sql="select o.openid,o.price,o.createtime from " . tablename("ewei_shop_order") . " o"  . " left join " . tablename("ewei_shop_order_goods") . " m on m.orderid=o.id where m.goodsid=:goodid and o.status=1 ORDER BY o.createtime DESC ";
@@ -511,5 +595,106 @@ class Share_EweiShopV2Page extends MobilePage
 //        $postdata["first"]=array("value"=>"跑库订单提醒","color"=>"#173177");
 //         $postdata["keyword1"]=array("value"=>"星月","color"=>"#173177");
 //        var_dump(m("message")->sendTplNotice("oQmU56Lf1GeIkpqsLStPq5Qktm9I","rPnwJBoYeGcLumJ7iIymhepzgO9dH4pB2YyGBRUITxc",$postdata));
+
+       
+       $merch_user=pdo_fetch("select * from ".tablename("ewei_shop_merch_user")." where id=:id",array(':id'=>3));
+   
+       if (!empty($merch_user["wxopenid"])){
+           //获取商品信息
+           $goods=pdo_fetchall("select * from ".tablename("ewei_shop_order_goods")." where orderid=:orderid",array(':orderid'=>3724));
+           $goos_name="";
+           foreach ($goods as $g){
+               $good=pdo_fetch("select * from ".tablename("ewei_shop_goods")." where id=:good_id",array(':good_id'=>$g["goodsid"]));
+               if (empty($goos_name)){
+                   $goods_name=$good["title"];
+               }else{
+                   $goods_name=$goods_name.",".$good["title"];
+               }
+           }
+           $postdata=array(
+               'keyword1'=>array(
+                   'value'=>$merch_user["merchname"],
+                   'color' => '#ff510'
+               ),
+               'keyword2'=>array(
+                   'value'=>$order["ordersn"],
+                   'color' => '#ff510'
+               ),
+               'keyword3'=>array(
+                   'value'=>$goods_name,
+                   'color' => '#ff510'
+               ),
+               'keyword4'=>array(
+                   'value'=>$order["goodsprice"],
+                   'color' => '#ff510'
+               ),
+               'keyword5'=>array(
+                   'value'=>$order["price"],
+                   'color' => '#ff510'
+               ),
+               'keyword6'=>array(
+                   'value'=>"用户已下单，请登录商家后台及时对订单处理",
+                   'color' => '#ff510'
+               )
+               
+           );
+           $r=p("app")->mysendNotice($merch_user["wxopenid"], $postdata, "", "si0GH6bbqNTByQrSRhxRl06CKUSKz473JrbdHwBSbts");
+           var_dump($r);
+       }else{
+           var_dump("11");
+       }
+       
    }
+
+    /**
+     * 我的凭证列表页面
+     */
+    public function prooflist()
+    {
+        include $this->template('goods/share/listvoucher');
+    }
+    /**
+     * 我的凭证列表接口
+     */
+    public function proof_list()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_W;
+        $openid = $_W['openid'];
+        if($openid == ""){
+            $resault= mc_oauth_account_userinfo();
+            $openid=$resault["openid"];
+        }
+        $fields = 'price,createtime,id,commission1_pay,commission2_pay,addressid,carrier';
+        $list = pdo_fetchall('select '.$fields.' from '.tablename('ewei_shop_order').' where openid = "'.$openid.'" and uniacid="'.$_W['uniacid'].'" and status > 1');
+        foreach ($list as $key=>$item){
+            $goods_id = pdo_getcolumn('ewei_shop_order_goods',['orderid'=>$item['id']],'goodsid');
+            $goods = pdo_get('ewei_shop_goods',['id'=>$goods_id]);
+            if($goods['isred'] !=1){
+                unset($list[$key]);
+            }
+            if ($item["addressid"]!=0){
+                $addr = pdo_get("ewei_shop_member_address",array("id"=>$item["addressid"]));
+                $list[$key]["realname"] = $addr["realname"];
+                $list[$key]["mobile"] = $addr["mobile"];
+            }else{
+                $carrier = iunserializer($item["carrier"]);
+                $list[$key]["realname"] = $carrier["carrier_realname"];
+                $list[$key]["mobile"] = $carrier["carrier_mobile"];
+            }
+            $list[$key]['price'] = $item["price"]+$item["commission1_pay"]+$item["commission2_pay"];
+            $list[$key]["title"] = $goods["title"];
+            $list[$key]["createtime"] = date("Y-m-d H:i:s",$item["createtime"]);
+            //获取商家信息
+            $shop = pdo_get("ewei_shop_merch_user",array("id"=>$goods["merchid"]));
+            $list[$key]["shop_name"] = $shop["merchname"];
+            $list[$key]["shop_mobile"] = $shop["mobile"];
+            $list[$key]["shop_address"] = $shop["address"];
+        }
+        if(count($list) == 0){
+            show_json(0,'暂无信息');
+        }else{
+            show_json(1,['list'=>$list]);
+        }
+    }
 }

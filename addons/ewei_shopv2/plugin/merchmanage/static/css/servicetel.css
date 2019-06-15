@@ -1,0 +1,282 @@
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+form,
+fieldset,
+legend,
+input,
+textarea,
+p,
+blockquote,
+th,
+td,
+hr,
+button,
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  margin: 0;
+  padding: 0;
+}
+html {
+  background: #f1f1f1;
+  height: 100%;
+}
+a {
+  text-decoration: none;
+}
+li {
+  list-style: none;
+}
+i {
+  font-style: normal;
+}
+input {
+  background: none;
+  outline: none;
+  border: 0;
+}
+.all_box {
+  width: 100%;
+  height: auto;
+  top: -10px;
+  /* background: rgb(233, 126, 153); */
+}
+.black_top {
+  width: 100%;
+  height: 20px;
+  background: rgb(153, 150, 153);
+  /* text-align: center; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.3;
+}
+.black_top_text {
+  font-size: 10px;
+  color: #646262;
+}
+.music_img {
+  width: 100%;
+  height: 60px;
+  /* background: #ff0; */
+}
+.music_img_img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  position: absolute;
+  right: 10px;
+  margin-top: 13px;
+}
+.sponsor_img {
+  width: 100%;
+  height: 500px;
+  /* background: #0f0; */
+  position: relative;
+}
+.imgtext {
+  width: 100%;
+  height: 200px;
+  margin: auto;
+  position: absolute;
+  /* background: #fff; */
+  top: 80px;
+}
+.head_pk {
+  width: 100%;
+  height: 50px;
+  /* background: #ff0; */
+  margin-top: 13%;
+  text-align: center;
+}
+.head_pk_text {
+  font-size: 25px;
+  color: #fff;
+}
+.takecharge {
+  width: 100%;
+  height: 100px;
+  /* background: #ff0; */
+  position: relative;
+}
+.phone {
+  width: 30px;
+  height: 30px;
+  /* background: #00f; */
+  position: absolute;
+  right: 18%;
+  bottom: 50%;
+}
+.phone_img {
+  width: 30px;
+  height: 30px;
+}
+.take_charge_ul {
+  width: 100%;
+  height: 100px;
+  /* background: #646262; */
+}
+.take_charge_li {
+  width: 100%;
+  height: 30px;
+  /* background: #ff0; */
+  display: flex;
+  align-items: center;
+}
+.take_charge_div {
+  width: 23%;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  margin-left: 18%;
+}
+.take_charge_ren {
+  font-size: 17px;
+  color: #fff;
+}
+.take_charge_input {
+  height: 30px;
+  width: 150px;
+  display: flex;
+  align-items: center;
+}
+.take_charge_input_text {
+  width: 120px;
+  font-size: 17px;
+  color: #fff;
+  /* background: #0f0; */
+}
+.sponsor_img_img {
+  width: 86%;
+  height: 450px;
+  padding: 0 7%;
+}
+.bottom {
+  position: absolute;
+  background: #fff;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-content: center;
+}
+.service_img_text {
+  width: 60px;
+  height: 60px;
+  /* background: #ff0; */
+  margin-left: 10%;
+}
+.service_img {
+  width: 30px;
+  height: 30px;
+  /* background: #f00; */
+  margin-top: 5px;
+}
+.service_img_img {
+  width: 30px;
+  height: 30px;
+  /* background: #f00; */
+}
+.service_text {
+  width: 40px;
+  height: 15px;
+  /* background: #f1f1f1 */
+}
+.service_text_span {
+  font-size: 15px;
+  color: #333;
+}
+.shareorder_img_text {
+  width: 80px;
+  height: 60px;
+  /* background: #ff0; */
+}
+.shareorder_img {
+  width: 30px;
+  height: 30px;
+  margin-top: 5px;
+  /* background: #f00; */
+  margin-left: 20px;
+}
+.shareorder_img_img {
+  width: 30px;
+  height: 30px;
+}
+.shareorder_text {
+  width: 80px;
+  height: 22px;
+  /* background: #f1f1f1; */
+  text-align: center;
+}
+.shareorder_text_span {
+  font-size: 15px;
+  color: #333;
+}
+.snappedupimmediately {
+  width: 53%;
+  height: 60px;
+  background: #0f0;
+}
+.snappedupimmediately_div {
+  width: 100%;
+  height: 60px;
+  background: #f00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.snappedupimmediately_text {
+  font-size: 18px;
+  color: #fff;
+}
+.header_select {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  position: absolute;
+  right: 10px;
+  margin-top: 13px;
+  border-radius: 50%;
+  -webkit-animation: rotateImg 5s linear infinite;
+  /* border: 1px solid #ccc; */
+  vertical-align: middle;
+}
+@keyframes rotateImg {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes rotateImg {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}

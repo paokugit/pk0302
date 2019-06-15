@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>列表凭证</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/static/goodshare/listvoucher.css">
+<link rel="stylesheet" href="../addons/ewei_shopv2/static/goodshare/common.css">
+<body>
+    <div class="all_box">
+        <div class="list_box">
+            <ul class="list_ul">
+
+            </ul>
+        </div>
+    </div>
+    <div class="mask">
+        <div class="img_tavailable">
+            <img class="img_img" src="http://paokucoin.com/img/backgroup/notavailable.png" alt="">
+            <div class="no_tavailable">暂无购买记录</div>
+        </div>
+        <div class="footer">返回购买</div>
+    </div>
+</body>
+</html>
+<script src="../addons/ewei_shopv2/static/goodshare/jquery.min.js"></script>
+<script type="text/javascript">
+    var str1 = ""
+    var str2 = ""
+    $(function () {
+        $.ajax({
+            type: 'post',
+            url: '{php echo mobileUrl("goods.share.proof_list")}',
+            data: {
+                "openid": '{php echo $openid}',
+            },
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                if (data.status == '0') {
+                    $('.all_box').css('display','none')
+                    $('.mask').css('display','block')
+                }else{
+                $.each(data.result.list, function (i, item) {
+                    str1 += '<li class="list_li">' +
+                        '<div class="voucher_div">' +
+                        '<div class="pingzheng_img">' +
+                        '<img src="http://paokucoin.com/img/backgroup/pingzheng@2x.png" class="voucher_img">' +
+                        '</div>' +
+                        '<div class="xinxi">' +
+                        '<ul class="xinxi_ul">' +
+                        '<li class="xinxi_li">' +
+                        '<div class="xinxi_li_head">' +
+                        '<span class="xinxi_li_head_text">活动名称</span>' +
+                        '</div>' +
+                        '<div class="xili_li_content">' +
+                        '<span class="xinxi_li_content_text mingcheng">' + item.title +
+                        '</span>' +
+                        '</div>' +
+                        '</li>' +
+                        '<li class="xinxi_li">' +
+                        '<div class="xinxi_li_head">' +
+                        '<span class="xinxi_li_head_text">购买时间</span>' +
+                        '</div>' +
+                        '<div class="xili_li_content">' +
+                        '<span class="xinxi_li_content_text goumaishijian">' + item.createtime +
+                        '</span>' +
+                        '</div>' +
+                        '</li>' +
+                        '<li class="xinxi_li">' +
+                        '<div class="xinxi_li_head">' +
+                        '<span class="xinxi_li_head_text">支付金额</span>' +
+                        '</div>' +
+                        '<div class="xili_li_content">' +
+                        '<span class="signboard">￥</span>' +
+                        '<span class="xinxi_li_content_text jine">' + item.price +
+                        '</span>' +
+                        '</div>' +
+                        '</li>' +
+                        '<li class="xinxi_li">' +
+                        '<div class="xinxi_li_head">' +
+                        '<span class="xinxi_li_head_text">购买人</span>' +
+                        '</div>' +
+                        '<div class="xili_li_content">' +
+                        '<span class="xinxi_li_content_text goumairen">' + item.realname +
+                        '</span>' +
+                        '</div>' +
+                        '</li>' +
+                        '<li class="xinxi_li">' +
+                        '<div class="xinxi_li_head">' +
+                        '<span class="xinxi_li_head_text">手机号码</span>' +
+                        '</div><div class="xili_li_content">' +
+                        '<span class="xinxi_li_content_text tel">' + item.mobile +
+                        '</span>' +
+                        '</div>' +
+                        '</li>' +
+                        '<li class="xinxi_li"><div class="xinxi_li_head"><span class="xinxi_li_head_text">商家名称</span></div><div class="xili_li_content">' +
+                        '<span class="xinxi_li_content_text shangjiamingcheng">' + item.shop_name +
+                        '</span></div></li>' +
+                        '<li class="xinxi_li"><div class="xinxi_li_head"><span class="xinxi_li_head_text">商家电话</span></div><div class="xili_li_content">' +
+                        '<span class="xinxi_li_content_text shangjiadianhua">' + item.shop_mobile +
+                        '</span></div></li>' +
+                        '<li class="xinxi_li"><div class="xinxi_li_head"><span class="xinxi_li_head_text">商家地址</span></div></li>' +
+                        '<li class="xinxi_li"><div class="xinxi_li_head_adress">' +
+                        '<span class="xinxi_li_content_text shangjiadizhi">' + item.shop_address +
+                        '</span></div></li>' +
+                        '</ul></div></div></li>'
+                    $('.list_box').html(str1)
+                })
+            }
+            }
+        })
+    })
+    
+    $(".footer").click(function(){
+        //应该是返回活动界面
+        //界面的链接
+        // location.href = ''
+    })
+</script>

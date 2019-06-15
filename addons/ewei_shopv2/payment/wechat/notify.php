@@ -181,6 +181,12 @@ class EweiShopWechatPay
 																				{
 																					$this->membercard();
 																				}
+																				else
+																				{
+                                                                                    if($this->type == "30"){
+                                                                                        $this->shopCode();
+                                                                                    }
+                                                                                }
 																			}
 																		}
 																	}
@@ -897,8 +903,105 @@ class EweiShopWechatPay
      */
 	public function shopCode()
     {
-        global $_W;
-        global $_GPC;
+        $input = file_get_contents('php://input');
+        $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $data = json_decode(json_encode($obj), true);
+        $aa = [
+            'log'=>json_encode($obj),
+            'createtime'=>date('Y-m-d H:i:s',time()),
+        ];
+        pdo_insert('log',$aa);
+        file_put_contents("../addons/ewei_shopv2/payment/wechat/pay.txt",$data);
+        if (!$data) {
+            exit("FAIL");
+        }
+        $res = $this->check_sign($data);
+        if (!$res) {
+            exit("FAIL");
+        }
+        $ordersn = $data['out_trade_no'];  //获得订单信息
+        //如果失败  先获得分类  cate  == 1  卡路里   cate == 2  折扣宝
+        $cate = substr($ordersn,2,1);
+        //用ordersn订单号 查订单信息
+        $order = pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
+        //从order里面获得openID 查用户的卡路里和折扣宝余额
+        $member = pdo_fetch('select credit1,credit3 from '.tablename('ewei_shop_member').'where openid = "'.$order['openid'].'"');
+        if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
+            pdo_begin();
+            try {
+                //如果成功  修改订单的status 状态 和 用户日志   还有商户收款日志的  状态为成功
+                pdo_update('ewei_shop_order',['status'=>3,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
+                pdo_update('ewei_shop_merch_log',['status'=>1],['ordersn'=>$ordersn]);
+                pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn]);
+                $data = [
+                    'openid'=>$order['openid'],
+                    'uniacid'=>$order['uniacid'],
+                    'num'=>-($order['goodsprice']-$order['price']),
+                    'createtime'=>time(),
+                    'module'=>"ewei_shopv2",
+                    'merchid'=>$order['merchid'],
+                ];
+                file_put_contents('../addons/ewei_shopv2/payment/wechat/pay1.txt',$data);
+                if($cate == 1){
+                    $add1 = [
+                       'remark'=>"卡路里付款",
+                       'credittype'=>"credit1",
+                    ];
+                    $add = array_merge($add1,$data);
+                }elseif ($cate == 2){
+                    $add2 = [
+                        'remark'=>"折扣宝付款",
+                        'credittype'=>"credit3",
+                    ];
+                    $add = array_merge($add2,$data);
+                }
+                pdo_insert('mc_credits_record',$add);
+                //支付成功的话 给用户扣除的卡路里  和 折扣宝
+                if($cate == 1){
+                    $credit1 = $member['credit1'] - ($order['goodsprice'] - $order['price']);
+                    pdo_update('ewei_shop_member',['credit1'=>$credit1],['openid'=>$order['openid']]);
+                }elseif($cate == 2){
+                    $credit3 = $member['credit3'] - ($order['goodsprice'] - $order['price']);
+                    pdo_update('ewei_shop_member',['credit3'=>$credit3],['openid'=>$order['openid']]);
+                }
+                pdo_commit();
+            }catch(Exception $exception){
+                pdo_rollback();
+            }
+        }else{
+            //如果支付失败  修改订单  用户日志  和 商户收款日志为失败状态
+            pdo_update('ewei_shop_order',['status'=>-1],['ordersn'=>$ordersn]);
+            pdo_update('ewei_shop_member_log',['status'=>-1],['logno'=>$ordersn]);
+            pdo_update('ewei_shop_merch_log',['status'=>-1],['ordersn'=>$ordersn]);
+
+        }
+    }
+
+    /**
+     * 验签
+     * @param $arr
+     * @return bool
+     */
+    public function check_sign($arr)
+    {
+        $sign = $arr['sign'];
+        unset($arr['sign']);
+        $config = pdo_getcolumn('ewei_shop_payment',['id'=>1],'apikey');
+        $skey = $config;
+        ksort($arr, SORT_STRING);
+        $stringA = '';
+        foreach ($arr as $key => $val) {
+            if ($val != null) {
+                $stringA .= $key . '=' . $val . '&';
+            }
+        }
+        $stringA .= 'key=' . $skey;
+        $check_sign = strtoupper(MD5($stringA));
+        if ($sign != $check_sign) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 ?>

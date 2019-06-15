@@ -2114,9 +2114,10 @@ if( !class_exists("CommissionModel") )
 			            }
 			            
 			            m('member')->setCredit($openid, 'credit1', $credit, $info);
-                        //wxmessage($openid);
 			        }
-			        $commission=pdo_fetch("select * from ".table("ewei_shop_commission_level")." where id=:id",array(':id'=>$goods["agentlevel"]));
+			        //fbb
+			        //升级提醒
+			        $commission=pdo_fetch("select * from ".tablename("ewei_shop_commission_level")." where id=:id",array(':id'=>$goods["agentlevel"]));
 			        $postdata=array(
 			            'keyword1'=>array(
 			                'value'=>$commission["levelname"],
@@ -2138,8 +2139,10 @@ if( !class_exists("CommissionModel") )
 
 			        p("app")->mysendNotice($order["openid"], $postdata, $order["id"], "2nQmrU1YkfMK0EWEO4v0QmL89Xpx1v3DqZk-LMsnd80");
                 
-			    
-			        if( !empty($member["agentid"]) )
+			        //fbb推荐提醒
+			        $this->wmessage($openid);
+			        
+			    /*    if( !empty($member["agentid"]) )
 			        {
 			            $parent = m("member")->getMember($member["agentid"]);
 			            //判断上级是否是店主
@@ -2168,7 +2171,9 @@ if( !class_exists("CommissionModel") )
 			                
 			            }
 			           
-			        }
+			        }*/
+			        
+			        
 			    }
             }
             $this->orderFinishTask($order, ($set["selfbuy"] ? true : false), $member);
@@ -3869,7 +3874,7 @@ if( !class_exists("CommissionModel") )
 
         //卡路里奖励到账提醒
         //bopenid为被推荐人的
-       public function wxmessage($bopenid){
+       public function wmessage($bopenid){
             //获取推荐人的用户信息
             $bmember = m("member")->getMember($bopenid);//被推荐人的
             if(!$bmember['agentid']) return false;
@@ -3887,7 +3892,7 @@ if( !class_exists("CommissionModel") )
                     'color' => '#ff510'
                 ),//被推荐人
                 'keyword2'=>array(
-                    'value'=>$tmember["nickname"],
+                    'value'=>$bmember["nickname"],
                     'color' => '#ff510'
                 ),//级别
                 'keyword3'=>array(

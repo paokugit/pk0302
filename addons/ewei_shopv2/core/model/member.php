@@ -313,32 +313,33 @@ class Member_EweiShopV2Model
 		}
 		pdo_insert("mc_credits_record", $log_data);
 		$member_log_table_flag = pdo_tableexists("ewei_shop_member_credit_record");
-		if( $member_log_table_flag ) 
-		{
-			$log_data["openid"] = $openid;
-			$open_redis = function_exists("redis") && !is_error(redis());
-			if( $open_redis ) 
-			{
-				$redis_key = (string) $_W["uniacid"] . "_member_redit_" . $openid;
-				$redis = redis();
-				if( !is_error($redis) ) 
-				{
-					if( $redis->setnx($redis_key, time()) ) 
-					{
-						pdo_insert("ewei_shop_member_credit_record", $log_data);
-						$redis->expireAt($redis_key, time() + 1);
-					}
-					else 
-					{
-						if( $redis->get($redis_key) + 1 < time() ) 
-						{
-							pdo_insert("ewei_shop_member_credit_record", $log_data);
-							$redis->del($redis_key);
-						}
-					}
-				}
-			}
-		}
+		pdo_insert("ewei_shop_member_credit_record", $log_data);
+// 		if( $member_log_table_flag ) 
+// 		{
+// 			$log_data["openid"] = $openid;
+// 			$open_redis = function_exists("redis") && !is_error(redis());
+// 			if( $open_redis ) 
+// 			{
+// 				$redis_key = (string) $_W["uniacid"] . "_member_redit_" . $openid;
+// 				$redis = redis();
+// 				if( !is_error($redis) ) 
+// 				{
+// 					if( $redis->setnx($redis_key, time()) ) 
+// 					{
+// 						pdo_insert("ewei_shop_member_credit_record", $log_data);
+// 						$redis->expireAt($redis_key, time() + 1);
+// 					}
+// 					else 
+// 					{
+// 						if( $redis->get($redis_key) + 1 < time() ) 
+// 						{
+// 							pdo_insert("ewei_shop_member_credit_record", $log_data);
+// 							$redis->del($redis_key);
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
 		if( p("task") ) 
 		{
 			if( $credittype == "credit1" ) 
@@ -781,7 +782,7 @@ class Member_EweiShopV2Model
 	}
 	public function getCalculateMoney($money, $set_array) 
 	{
-		$charge = $set_array["charge"];
+		$charge = $set_array["charge"]?$set_array["charge"]:3;
 		$begin = $set_array["begin"];
 		$end = $set_array["end"];
 		$array = array( );
@@ -1353,6 +1354,63 @@ class Member_EweiShopV2Model
             pdo_update("ewei_shop_member",$data,$where);
             $this->bindFromMerch($info['openid'],$data['agentid']);
         }
+        if(isset($agentinfo['id'])){
+            if(isset($info['goodsid'])){
+                $goodsid=$info['goodsid'];
+            }else{
+                $goodsid=0;
+            }
+            $this->memberAgentCount($goodsid,$agentinfo['id']);
+        }
+    }
+
+    /**
+     * 推荐会员数据埋点
+     * @param $data
+     */
+    public function memberAgentCount($goodsid=0,$agentid){
+        $agentInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where id=:id limit 1", array(":id" => $agentid ));
+        if(!$agentInfo) return false;
+        $agentCountInfo = pdo_fetch("select * from " . tablename("ewei_shop_member_agentcount") . " where openid=:openid limit 1", array(":openid" => $agentInfo['openid']));
+        if(!$agentCountInfo){//添加记录
+            $data['openid'] =  $agentInfo['openid'];
+            if($agentid==0 || $agentid==''){
+                $data['agentcount'] = 1;
+                $data['agentallcount'] = 1;
+            }
+            if($goodsid==7){
+                $data['shopkeepercount'] = 1;
+                $data['shopkeeperallcount'] = 1;
+            }
+            if($goodsid==4){
+                $data['starshinecount'] = 1;
+                $data['starshineallcount'] = 1;
+            }
+            if($goodsid==3){
+                $data['healthycount'] = 1;
+                $data['healthyallcount'] = 1;
+            }
+            pdo_insert('ewei_shop_member_agentcount',$data);
+        }else{//更新数据
+            if($agentid==0 || $agentid==''){
+                $data['agentcount'] = $agentCountInfo['agentcount']+1;
+                $data['agentallcount'] = $agentCountInfo['agentallcount']+1;
+            }
+            if($goodsid==7){
+                $data['shopkeepercount'] = $agentCountInfo['shopkeepercount']+1;
+                $data['shopkeeperallcount'] = $agentCountInfo['shopkeeperallcount']+1;
+            }
+            if($goodsid==4){
+                $data['starshinecount'] = $agentCountInfo['starshinecount']+1;
+                $data['starshineallcount'] = $agentCountInfo['starshineallcount']+1;
+            }
+            if($goodsid==3){
+                $data['healthycount'] = $agentCountInfo['healthycount']+1;
+                $data['healthyallcount'] = $agentCountInfo['healthyallcount']+1;
+            }
+           pdo_update('ewei_shop_member_agentcount',$data,array('openid'=>$agentInfo['openid']));
+        }
+        return true;
     }
 
 
@@ -1377,8 +1435,8 @@ class Member_EweiShopV2Model
      * @param $id
      * @return int
      */
-    public function allAgentCount($id){
-        $res = $this->getBottomUsers($id);
+    public function allAgentCount($id,$agentlevel=0){
+        $res = $this->getBottomUsers($id,'',$agentlevel);
         if(!$res) return 0;
         $idlist = explode(",", $res);
         return count($idlist)-1;
@@ -1387,17 +1445,31 @@ class Member_EweiShopV2Model
     /**
      * 查找一个粉丝下的所以粉丝
      */
-    public function getBottomUsers($id,$uids=''){
-        $userList = pdo_fetchall("select * from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $id));
-        if(!$userList) return false;
-        foreach ($userList as $key=>$value){
-            $uids .= $value['id'].',';
-            $user = pdo_fetchall("select * from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $value['id']));
-            if($user){
-                $uids = $this->getBottomUsers($value['id'],$uids);
+    public function getBottomUsers($id,$uids='',$agentlevel=0){
+        if($agentlevel==0){
+            $userList = pdo_fetchall("select * from" . tablename("ewei_shop_member") ."where agentid=:agentid ",array( ":agentid" => $id));
+            if(!$userList) return false;
+            foreach ($userList as $key=>$value){
+                $uids .= $value['id'].',';
+                $user = pdo_fetchall("select * from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $value['id']));
+                if($user){
+                    $uids = $this->getBottomUsers($value['id'],$uids,0);
+                }
             }
+            return $uids;
+        }else{
+            $userList = pdo_fetchall("select * from" . tablename("ewei_shop_member") ."where agentid=:agentid and agentlevel=:agentlevel",array( ":agentid" => $id,":agentlevel"=>$agentlevel));
+            if(!$userList) return false;
+            foreach ($userList as $key=>$value){
+                $uids .= $value['id'].',';
+                $user = pdo_fetchall("select * from" . tablename("ewei_shop_member") ."where agentid=:agentid and agentlevel=:agentlevel",array( ":agentid" => $value['id'],":agentlevel"=>$agentlevel));
+                if($user){
+                    $uids = $this->getBottomUsers($value['id'],$uids,$agentlevel);
+                }
+            }
+            return $uids;
         }
-        return $uids;
+
 
     }
 

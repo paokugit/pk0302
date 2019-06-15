@@ -202,13 +202,13 @@ class Order_EweiShopV2Model
 						m("notice")->sendOrderMessage($order["id"]);
 						//购买成功--商家消息
 						if ($order["merchid"]!=0){
-						    $merch_user=pdo_fetch("select * from ".table("ewei_shop_merch_user")." where id=:id",array(':id'=>$order["merchid"]));
+						    $merch_user=pdo_fetch("select * from ".tablename("ewei_shop_merch_user")." where id=:id",array(':id'=>$order["merchid"]));
 						    if (!empty($merch_user["wxopenid"])){
 						        //获取商品信息
-						        $goods=pdo_fetchall("select * from ".table("ewei_shop_order_goods")." where orderid=:orderid",array(':orderid'=>$order["id"]));
-						        $goos_name="";
+						        $goods=pdo_fetchall("select * from ".tablename("ewei_shop_order_goods")." where orderid=:orderid",array(':orderid'=>$order["id"]));
+						        $goods_name="";
 						        foreach ($goods as $g){
-						            $good=pdo_fetch("select * from ".table("ewei_shop_goods")." where id=:good_id",array(':good_id'=>$g["goodsid"]));
+						            $good=pdo_fetch("select * from ".tablename("ewei_shop_goods")." where id=:good_id",array(':good_id'=>$g["goodsid"]));
 						            if (empty($goos_name)){
 						                $goods_name=$good["title"];
 						            }else{
@@ -484,8 +484,12 @@ class Order_EweiShopV2Model
 	            //推荐人信息
                 $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$order['agentid']));
                 if($agentmemberInfo){
-                    m('member')->setagent(array('agentopenid'=>$agentmemberInfo["openid"],'openid'=>$openid));
+                    m('member')->setagent(array('agentopenid'=>$agentmemberInfo["openid"],'openid'=>$openid,'goodsid'=>$val['goodsid']));
                 }
+            }
+            $memberInfo = pdo_get('ewei_shop_member', array('openid' =>$order['openid']));
+	        if($memberInfo['agentid']>0){
+                m('member')->memberAgentCount($val['goodsid'],$memberInfo['agentid']);
             }
         }
 	}

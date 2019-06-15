@@ -17,6 +17,7 @@ class Index_EweiShopV2Page extends MerchWebPage
 	{
 		global $_W;
 		global $_GPC;
+// 		var_dump(explode(".", $GLOBALS['_W']['routes']));
 		$item = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where id=:id and uniacid=:uniacid limit 1', array(':id' => $_W['uniaccount']['merchid'], ':uniacid' => $_W['uniacid']));
 		if (empty($item) || empty($item['accoutntime'])) {
 			$accounttime = strtotime('+365 day');
@@ -69,7 +70,7 @@ class Index_EweiShopV2Page extends MerchWebPage
 				}
 			}
 
-			$data = array('uniacid' => $_W['uniacid'], 'merchname' => trim($_GPC['merchname']), 'salecate' => trim($_GPC['salecate']), 'realname' => trim($_GPC['realname']), 'mobile' => trim($_GPC['mobile']), 'desc' => trim($_GPC['desc1']), 'address' => trim($_GPC['address']), 'tel' => trim($_GPC['tel']), 'lng' => $_GPC['map']['lng'], 'lat' => $_GPC['map']['lat'], 'logo' => save_media($_GPC['logo']));
+			$data = array('uniacid' => $_W['uniacid'], 'merchname' => trim($_GPC['merchname']), 'salecate' => trim($_GPC['salecate']), 'realname' => trim($_GPC['realname']), 'mobile' => trim($_GPC['mobile']), 'desc' => trim($_GPC['desc1']), 'address' => trim($_GPC['address']), 'tel' => trim($_GPC['tel']), 'lng' => $_GPC['map']['lng'], 'lat' => $_GPC['map']['lat'], 'logo' => save_media($_GPC['logo']),'wxsignal'=>trim($_GPC["wxsignal"]),'main_business'=>trim($_GPC["main_business"]));
 
 			if ($diyform_flag) {
 				$data['diyformdata'] = iserializer($fdata);

@@ -1,0 +1,184 @@
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+form,
+fieldset,
+legend,
+input,
+textarea,
+p,
+blockquote,
+th,
+td,
+hr,
+button,
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  margin: 0;
+  padding: 0;
+}
+html {
+  background: #ffffff;
+  height: 100%;
+}
+
+a {
+  text-decoration: none;
+}
+
+li {
+  list-style: none;
+}
+
+i {
+  font-style: normal;
+}
+input {
+  background: none;
+  outline: none;
+  border: none;
+}
+input:focus {
+  border: none;
+}
+.all_div {
+  width: 100%;
+  height: 100%;
+}
+.div_null{
+    width: 100%;
+    height: 50px;
+    /* background: #0f0; */
+}
+.end_text_div{
+    width: 100%;
+    height: 80px;
+    /* background: #f00; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.end_text_text{
+    font-size: 22px;
+    color: #333333;
+}
+.end_img_div{
+    width: 100%;
+    height: 200px;
+    /* background: #0f0; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.end_img_img{
+    width: 80%;
+    height: 140px;
+}
+.text_text_text{
+    width: 100%;
+    height: 220px;
+    /* background: #f00; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.text_text_dd{
+    width: 96%;
+    height: 220px;
+    background: #fff;
+    border:1px dashed #666666;
+}
+.text_text_ul{
+    width: 100%;
+    height: 220px;
+}
+.text_text_li{
+    width: 96%;
+    height: 30px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+}
+.text_text_li_head{
+    width: auto;
+    height: 30px;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+}
+.text_text_li_text{
+    font-size: 16px;
+    color: #666666;
+}
+.text_text_li_text_text{
+    width: auto;
+    height: 30px;
+    display: flex;
+    align-items: center;
+}
+.text_text_li_text_span{
+    font-size: 16px;
+    color: #666666;
+}
+.text_text_li_text_span_red{
+    font-size: 16px;
+    color: #f00;
+}
+.text_text_li_text_xuzhi{
+    font-size: 16px;
+    color: #666666;
+}
+.text_text_text_li_aa{
+    width: 96%;
+    height: auto;
+    margin-left: 10px;
+}
+p{
+ font-size: 16px;
+ color: #666666   
+}
+.fenxiangdingdan{
+    width: 100%;
+    height: 100px;
+    /* background: #0f0; */
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.redfenxiang{
+    width: 300px;
+    height: 44px;
+    background: red;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.hh{
+    font-size: 16px;
+    color: #fff;
+}

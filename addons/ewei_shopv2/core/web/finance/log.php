@@ -416,6 +416,7 @@ class Log_EweiShopV2Page extends WebPage
 		{
 			$result = m("finance")->pay($log["openid"], 1, $realmoney * 100, $log["logno"], $desc);
 		}
+        pdo_insert('log',['log'=>$result,'createtime'=>date('Y-m-d H:i:s',time())]);
 		if( is_error($result) ) 
 		{
 			show_json(0, array( "message" => $result["message"] ));
@@ -424,6 +425,7 @@ class Log_EweiShopV2Page extends WebPage
 		m("notice")->sendMemberLogMessage($log["id"]);
 		$member = m("member")->getMember($log["openid"]);
 		plog("finance.log.wechat", "余额提现 ID: " . $log["id"] . " 方式: 微信 提现金额: " . $log["money"] . " ,到账金额: " . $realmoney . " ,手续费金额 : " . $log["deductionmoney"] . "<br/>会员信息:  ID: " . $member["id"] . " / " . $member["openid"] . "/" . $member["nickname"] . "/" . $member["realname"] . "/" . $member["mobile"]);
+		pdo_insert('log',['log'=>"余额提现 ID: " . $log["id"] . " 方式: 微信 提现金额: " . $log["money"] . " ,到账金额: " . $realmoney ,'createtime'=>date('Y-m-d H:i:s',time())]);
 		show_json(1);
 	}
 	public function alipay() 

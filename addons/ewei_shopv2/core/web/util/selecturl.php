@@ -20,7 +20,7 @@ class Selecturl_EweiShopV2Page extends WebPage
 		global $_W;
 		global $_GPC;
 		$syscate = m("common")->getSysset("category");
-		if( isset($_GPC["type"]) && !empty($_GPC["type"]) ) 
+		if( isset($_GPC["type"]) && !empty($_GPC["type"]) )
 		{
 			$type = $_GPC["type"];
 		}
@@ -58,7 +58,7 @@ class Selecturl_EweiShopV2Page extends WebPage
 			}
 		}
 		$platform = $this->platform;
-		if( p("quick") ) 
+		if( p("quick") )
 		{
 			if( $platform == "wxapp" ) 
 			{
@@ -70,20 +70,29 @@ class Selecturl_EweiShopV2Page extends WebPage
 			}
 		}
 		$full = $this->full;
-		if( $platform == "wxapp" && !empty($this->defaultUrl) && strexists($this->defaultUrl, "/pages/web/index") ) 
+		if( $platform == "wxapp" && !empty($this->defaultUrl) && strexists($this->defaultUrl, "/pages/web/index") )
 		{
 			$defaultUrl = urldecode($this->defaultUrl);
 			$defaultUrl = str_replace("/pages/web/index?url=https://", "", $defaultUrl);
 		}
-		$allUrls = array( array( "name" => "商城页面", "list" => array( array( "name" => "商城首页", "url" => mobileUrl(NULL, NULL, $full), "url_wxapp" => "/pages/index/index" ), array( "name" => "分类导航", "url" => mobileUrl("shop/category", NULL, $full), "url_wxapp" => "/pages/shop/caregory/index" ), array( "name" => "全部商品", "url" => mobileUrl("goods", NULL, $full), "url_wxapp" => "/pages/goods/index/index" ), array( "name" => "公告页面", "url" => mobileUrl("shop/notice", NULL, $full), "url_wxapp" => "/pages/shop/notice/index/index" ), array( "name" => "购物车", "url" => mobileUrl("member/cart", NULL, $full), "url_wxapp" => "/pages/member/cart/index" ) ) ), array( "name" => "商品属性", "list" => array( array( "name" => "推荐商品", "url" => mobileUrl("goods", array( "isrecommand" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?isrecommand=1" ), array( "name" => "新品上市", "url" => mobileUrl("goods", array( "isnew" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?isnew=1" ), array( "name" => "热卖商品", "url" => mobileUrl("goods", array( "ishot" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?ishot=1" ), array( "name" => "促销商品", "url" => mobileUrl("goods", array( "isdiscount" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?isdiscount=1" ), array( "name" => "卖家包邮", "url" => mobileUrl("goods", array( "issendfree" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?issendfree=1" ), array( "name" => "限时抢购", "url" => mobileUrl("goods", array( "istime" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?istime=1" ) ) ), array( "name" => "会员中心", "list" => array(
+		$allUrls = array(
+		    array( "name" => "商城页面", "list" => array( array( "name" => "商城首页", "url" => mobileUrl(NULL, NULL, $full), "url_wxapp" => "/pages/index/index" ), array( "name" => "分类导航", "url" => mobileUrl("shop/category", NULL, $full), "url_wxapp" => "/pages/shop/caregory/index" ), array( "name" => "全部商品", "url" => mobileUrl("goods", NULL, $full), "url_wxapp" => "/pages/goods/index/index" ), array( "name" => "公告页面", "url" => mobileUrl("shop/notice", NULL, $full), "url_wxapp" => "/pages/shop/notice/index/index" ), array( "name" => "购物车", "url" => mobileUrl("member/cart", NULL, $full), "url_wxapp" => "/pages/member/cart/index" ) ) ),
+            array(
+                "name" => "折扣宝",
+                "list" => array(
+                    array( "name" => "卡路里充足折扣宝", "url" => mobileUrl(NULL, NULL, $full), "url_wxapp" => "/pages/discount/zkbrechange/zkbrechange" ),
+                )
+            ),
+            array( "name" => "商品属性", "list" => array( array( "name" => "推荐商品", "url" => mobileUrl("goods", array( "isrecommand" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?isrecommand=1" ), array( "name" => "新品上市", "url" => mobileUrl("goods", array( "isnew" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?isnew=1" ), array( "name" => "热卖商品", "url" => mobileUrl("goods", array( "ishot" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?ishot=1" ), array( "name" => "促销商品", "url" => mobileUrl("goods", array( "isdiscount" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?isdiscount=1" ), array( "name" => "卖家包邮", "url" => mobileUrl("goods", array( "issendfree" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?issendfree=1" ), array( "name" => "限时抢购", "url" => mobileUrl("goods", array( "istime" => 1 ), $full), "url_wxapp" => "/pages/goods/index/index?istime=1" ) ) ), array( "name" => "会员中心", "list" => array(
 		    array( "name" => "会员中心", "url" => mobileUrl("member", NULL, $full), "url_wxapp" => "/pages/member/index/index" ),
             array( "name" => "我的粉丝", "url" => mobileUrl("member", NULL, $full), "url_wxapp" => "/pages/commission/down/index" ),
             array( "name" => "店主专享", "url" => mobileUrl(NUlL, NULL, $full), "url_wxapp" => "/pages/changce/merch/detail?id=10" ),
             array( "name" => "商家推荐码", "url" => mobileUrl(NUlL, NULL, $full), "url_wxapp" => "/pages/member/recommend/recommend" ),
             array( "name" => "卡路里明细", "url" => mobileUrl("member", NULL, $full), "url_wxapp" => "/pages/member/log/bushu" ),
             array( "name" => "我的订单(全部)", "url" => mobileUrl("order", NULL, $full), "url_wxapp" => "/pages/order/index" ),
-            array( "name" => "待付款订单", "url" => mobileUrl("order", array( "status" => 0 ), $full), "url_wxapp" => "/pages/order/index?status=0" ), array( "name" => "待发货订单", "url" => mobileUrl("order", array( "status" => 1 ), $full), "url_wxapp" => "/pages/order/index?status=1" ), array( "name" => "待收货订单", "url" => mobileUrl("order", array( "status" => 2 ), $full), "url_wxapp" => "/pages/order/index?status=2" ), array( "name" => "退换货订单", "url" => mobileUrl("order", array( "status" => 4 ), $full), "url_wxapp" => "/pages/order/index?status=4" ), array( "name" => "已完成订单", "url" => mobileUrl("order", array( "status" => 3 ), $full), "url_wxapp" => "/pages/order/index?status=3" ), array( "name" => "我的收藏", "url" => mobileUrl("member/favorite", array( ), $full), "url_wxapp" => "/pages/member/favorite/index" ), array( "name" => "我的足迹", "url" => mobileUrl("member/history", array( ), $full), "url_wxapp" => "/pages/member/history/index" ), array( "name" => "会员充值", "url" => mobileUrl("member/recharge", array( ), $full), "url_wxapp" => "/pages/member/recharge/index" ), array( "name" => "余额明细", "url" => mobileUrl("member/log", array( ), $full), "url_wxapp" => "/pages/member/log/index" ), array( "name" => "余额提现", "url" => mobileUrl("member/withdraw", array( ), $full), "url_wxapp" => "/pages/member/withdraw/index" ), array( "name" => "我的资料", "url" => mobileUrl("member/info", array( ), $full), "url_wxapp" => "/pages/member/info/index" ), array( "name" => "卡路里排行", "url" => mobileUrl("member/rank", array( ), $full), "url_wxapp" => "" ), array( "name" => "消费排行", "url" => mobileUrl("member/rank/order_rank", array( ), $full), "url_wxapp" => "" ), 16 => array( "name" => "收货地址管理", "url" => mobileUrl("member/address", array( ), $full), "url_wxapp" => "/pages/member/address/index" ), 18 => array( "name" => "我的全返", "url" => mobileUrl("member/fullback", array( ), $full), "url_wxapp" => "" ), 19 => array( "name" => "记次时商品", "url" => mobileUrl("verifygoods", array( ), $full), "url_wxapp" => "" ) ) ) );
-		if( $platform ) 
+            array( "name" => "待付款订单", "url" => mobileUrl("order", array( "status" => 0 ), $full), "url_wxapp" => "/pages/order/index?status=0" ), array( "name" => "待发货订单", "url" => mobileUrl("order", array( "status" => 1 ), $full), "url_wxapp" => "/pages/order/index?status=1" ), array( "name" => "待收货订单", "url" => mobileUrl("order", array( "status" => 2 ), $full), "url_wxapp" => "/pages/order/index?status=2" ), array( "name" => "退换货订单", "url" => mobileUrl("order", array( "status" => 4 ), $full), "url_wxapp" => "/pages/order/index?status=4" ), array( "name" => "已完成订单", "url" => mobileUrl("order", array( "status" => 3 ), $full), "url_wxapp" => "/pages/order/index?status=3" ), array( "name" => "我的收藏", "url" => mobileUrl("member/favorite", array( ), $full), "url_wxapp" => "/pages/member/favorite/index" ), array( "name" => "我的足迹", "url" => mobileUrl("member/history", array( ), $full), "url_wxapp" => "/pages/member/history/index" ), array( "name" => "会员充值", "url" => mobileUrl("member/recharge", array( ), $full), "url_wxapp" => "/pages/member/recharge/index" ), array( "name" => "余额明细", "url" => mobileUrl("member/log", array( ), $full), "url_wxapp" => "/pages/member/log/index" ), array( "name" => "余额提现", "url" => mobileUrl("member/withdraw", array( ), $full), "url_wxapp" => "/pages/member/withdraw/index" ), array( "name" => "我的资料", "url" => mobileUrl("member/info", array( ), $full), "url_wxapp" => "/pages/member/info/index" ), array( "name" => "卡路里排行", "url" => mobileUrl("member/rank", array( ), $full), "url_wxapp" => "" ), array( "name" => "消费排行", "url" => mobileUrl("member/rank/order_rank", array( ), $full), "url_wxapp" => "" ), 16 => array( "name" => "收货地址管理", "url" => mobileUrl("member/address", array( ), $full), "url_wxapp" => "/pages/member/address/index" ), 18 => array( "name" => "我的全返", "url" => mobileUrl("member/fullback", array( ), $full), "url_wxapp" => "" ), 19 => array( "name" => "记次时商品", "url" => mobileUrl("verifygoods", array( ), $full), "url_wxapp" => "" ), ))
+        );
+		if( $platform )
 		{
 			if( cv("creditshop") && p("creditshop") ) 
 			{
@@ -112,33 +121,33 @@ class Selecturl_EweiShopV2Page extends WebPage
 				$allUrls[0]["list"][] = array( "name" => "拼团首页", "url" => mobileUrl("", NULL, $full), "url_wxapp" => "/pages/transfer/groups/index" );
 			}
 		}
-		if( p("cycelbuy") ) 
+		if( p("cycelbuy") )
 		{
 			$allUrls[2]["list"][] = array( "name" => "周期购订单列表", "url" => mobileUrl("cycelbuy/order/list", array( ), $full), "url_wxapp" => "/pages/order/cycle/order" );
 		}
-		if( p("membercard") ) 
+		if( p("membercard") )
 		{
 			$allUrls[2]["list"][] = array( "name" => "会员卡中心", "url" => mobileUrl("membercard/index", array( ), $full), "url_wxapp" => "/pages/member/membercard/index" );
 		}
-		if( p("dividend") && !$platform ) 
+		if( p("dividend") && !$platform )
 		{
 			$allUrls[0]["list"][] = array( "name" => "分红中心", "url" => mobileUrl("dividend", array( ), $full), "url_wxapp" => "/pages/order/cycle/order" );
 		}
-		if( p("exchange") && !$platform ) 
-		{
-			$allUrls[0]["list"][] = array( "name" => "兑换中心", "url" => mobileUrl("exchange", array( "codetype" => 1, "all" => 1 ), $full), "url_wxapp" => "" );
-		}
-		if( p("abonus") && !$platform ) 
+//		if( p("exchange") && !$platform )
+//		{
+//		    var_dump(3.1);
+//			$allUrls[0]["list"][] = array( "name" => "兑换中心", "url" => mobileUrl("exchange", array( "codetype" => 1, "all" => 1 ), $full), "url_wxapp" => "" );
+//		    var_dump(3.2);
+//		}
+		if( p("abonus") && !$platform )
 		{
 			$allUrls[0]["list"][] = array( "name" => "区域代理", "url" => mobileUrl("abonus", $full), "url_wxapp" => "" );
 		}
-		
 		$allUrls[0]["list"][] = array( "name" => "店铺街", "url" => mobileUrl("", NULL, $full), "url_wxapp" => "/pages/changce/merch/index" );
 		$allUrls[0]["list"][] = array( "name" => "多商户入住", "url" => mobileUrl("", NULL, $full), "url_wxapp" => "/pages/changce/merch/apply" );
         $allUrls[0]['list'][] = array('name' => '文章营销', 'url' => mobileUrl('', NULL, $full), 'url_wxapp' => '/pages/changce/article/list');
-        $allUrls[0]['list'][] = array('name' => '签到首页', 'url' => mobileUrl('', NULL, $full), 'url_wxapp' => '/pages/changce/sign/index');		
-		
-		if( $platform ) 
+        $allUrls[0]['list'][] = array('name' => '签到首页', 'url' => mobileUrl('', NULL, $full), 'url_wxapp' => '/pages/changce/sign/index');
+		if( $platform )
 		{
 			$customs = pdo_fetchall("select id,`name` from " . tablename("ewei_shop_wxapp_page") . " where uniacid = :uniacid and `type` = 20 and status = 1 ", array( ":uniacid" => $_W["uniacid"] ));
 			if( !empty($customs) && $platform != "wxapp_tabbar" ) 
@@ -171,7 +180,7 @@ class Selecturl_EweiShopV2Page extends WebPage
 				$addUrl["list"] = $urllist;
 				array_push($allUrls, $addUrl);
 			}
-			unset($allUrls[2]["list"][13]);
+            unset($allUrls[2]["list"][13]);
 			unset($allUrls[2]["list"][14]);
 			unset($allUrls[2]["list"][15]);
 			unset($allUrls[2]["list"][18]);

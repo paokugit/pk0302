@@ -169,12 +169,16 @@ define(['core', 'tpl'], function (core, tpl) {
             var lng = $.trim($("#lng").val());
             var lat = $.trim($("#lat").val());
             var detail_addr=$.trim($("#detail_addr").val());
+            //微信号 主营业务
+            var main_business= $.trim($("#main_business").val());
+            var wxsignal= $.trim($("#wxsignal").val());
+            
             if (shopname == '') {
                 FoxUI.toast.show("请填写商户名称");
                 return
             }
             modal.stop = true;
-            var obj = {shoplogo: shoplogo, shopname: shopname, shopdesc: shopdesc,realname:realname,mobile:mobile,address:address,lng:lng,lat:lat,detail_addr:detail_addr};
+            var obj = {shoplogo: shoplogo, shopname: shopname, shopdesc: shopdesc,realname:realname,mobile:mobile,address:address,lng:lng,lat:lat,detail_addr:detail_addr,wxsignal:wxsignal,main_business:main_business};
             core.json('merchmanage/shop', obj, function (json) {
                 if (json.status == 1) {
                     FoxUI.toast.show("保存成功")

@@ -1752,4 +1752,24 @@ class Common_EweiShopV2Model
 		pdo_delete("core_attachment", array( "uniacid" => $_W["uniacid"], "id" => $media["id"] ));
 		return true;
 	}
+
+    public function html_images_a($detail = "", $enforceQiniu = false)
+    {
+        $detail = htmlspecialchars_decode($detail);
+        preg_match_all("/<img.*?src=[\\\\'| \\\"](.*?(?:[\\.gif|\\.jpg|\\.png|\\.jpeg]?))[\\\\'|\\\"].*?[\\/]?>/", $detail, $imgs);
+        $images = array( );
+        if( isset($imgs[1]) )
+        {
+            foreach( $imgs[1] as $img )
+            {
+                $im = array( "old" => $img, "new" => save_media($img, $enforceQiniu) );
+                $images[] = $im;
+            }
+        }
+        foreach( $images as $img )
+        {
+            $detail = str_replace($img["old"], 'http://'.$_SERVER['SERVER_NAME'].'/attachment/'.$img["new"], $detail);
+        }
+        return $detail;
+    }
 }

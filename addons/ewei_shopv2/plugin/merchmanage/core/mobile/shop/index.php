@@ -43,6 +43,8 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 			if ($_GPC["lng"]){
 			    $data["lng"]=$_GPC["lng"];
 			}
+			$data["wxsignal"]=$_GPC["wxsignal"];
+			$data["main_business"]=$_GPC["main_business"];
 			#更新
 			pdo_update('ewei_shop_merch_user',$data,array('id'=>$merchid));
 			show_json(1);

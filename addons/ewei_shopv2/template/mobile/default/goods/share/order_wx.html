@@ -9,27 +9,26 @@
 <script src="../addons/ewei_shopv2/static/js/jquery.min.js"></script>
 <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/Home01.css">
 <script src="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/jquery-1.11.3.min.js"></script>
-<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/reward/payment.css">
+<link rel="stylesheet" href="../addons/ewei_shopv2/static/goodshare/pay.css">
 <body>
-    <div class="payment_box">
-        <!-- header -->
-       
-        <!-- header -->
-        <!-- content -->
-        <div class="payment_content">
-            <div class="payment_center">
-                <div class="paymentCon">
-                    <div class="order_amount">￥{php echo $log["money"]}元</div>
-                    <div class="btn_box"><button id="paybtn" onclick="callpay();">立即支付</button></div>
-                </div>
+<div class="all_box">
+    <div class="head_box">
+        <div class="order_text">订单总金额</div>
+        <div class="money_box">
+            <div class="money_num">
+                <span class="signboard">￥</span>
+                <span class="num">{php echo  $params["fee"]}</span>
             </div>
         </div>
-        <!-- content -->
-        <!-- 错误提示 -->
-    <div id="warning">
-            <div class="mask-text"></div>
-        </div>
     </div>
+    <div class="clickpay">
+        <div class="green_div"  id="paybtn" onclick="callpay();">立即支付</div>
+    </div>
+</div>
+<div id="warning">
+    <div class="mask-text"></div>
+</div>
+</div>
 </body>
 
 
@@ -51,8 +50,21 @@
     		      if(res.err_msg == "get_brand_wcpay_request:ok" ){
     		      
                         var order_sn='{php echo $order_sn}';
-    		          location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order_wxback&order_sn='+order_sn;
-    		            
+                        //消息推送
+                        $.ajax({
+                        	type:'POST',
+                        	url:'{php echo mobileUrl("goods/share/msg")}',
+                        	data:{"order_sn":order_sn},
+                        	dataType: "json",
+                        	success:function(res){
+                        		console.log(res);
+                        		//alert(res);
+                        		 location.href='./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=goods.share.order_wxback&order_sn='+order_sn;
+               		          
+                        	}
+                        	
+                        });
+    		           
     		      }else{
     		    	  
     		    	  $("#warning").show().delay(1000).hide(300);

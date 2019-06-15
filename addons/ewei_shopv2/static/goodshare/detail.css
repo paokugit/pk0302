@@ -16,9 +16,62 @@
     height: auto
 }
 
+.xinxi_li_head_text{
+     width: 50%;
+     font-size: 16px;
+}
+
+.kefu-address-text{
+     width:100%;
+}
+
+#warning {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: rgba(0, 0, 0, 0.4);
+}
+.mask-con {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+.mask-img {
+    width: 203px;
+    height: 143px;
+    position: absolute;
+    right: 5px;
+    top: 50px;
+}
+.mask-img img {
+    width: 100%;
+}
+
 .img01 {
     width: 100%;
-    height: 300px
+    height: auto
+}
+
+.header_select{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    -webkit-animation:rotateImg 5s linear infinite;
+    /* border: 1px solid #ccc; */
+    vertical-align: middle;
+}
+
+@keyframes rotateImg {
+    0% {transform : rotate(0deg);}
+    100% {transform : rotate(360deg);}
+}
+
+@-webkit-keyframes rotateImg {
+    0%{-webkit-transform : rotate(0deg);}
+    100%{-webkit-transform : rotate(360deg);}
 }
 
 .activity-intro {
@@ -842,5 +895,19 @@ input:focus {
     font-size: 17px;
     display: flex;
     /* align-items: center; */
+}
 
+.mask{
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    position: fixed;
+    top:0;
+    left: 0;
+    display: none;
+    z-index:1000
+}
+.textcc{
+    margin-top: 60%;
+    text-align:center
 }

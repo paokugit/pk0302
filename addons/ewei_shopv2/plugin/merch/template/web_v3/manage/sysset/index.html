@@ -51,7 +51,7 @@
                 <div class="form-control-static">{$item['realname']}</div>
                 {/if}
             </div>
-        </div>
+        </div>                  <div class="form-group">            <label class="col-lg control-label must">微信号</label>            <div class="col-sm-8">                {ifp 'sysset.shop.edit'}                <input type="text" class="form-control" name="wxsignal" value="{$item['wxsignal']}" data-rule-required="true"/>                {else}                <div class="form-control-static">{$item['wxsignal']}</div>                {/if}            </div>        </div>        
         <div class="form-group">
             <label class="col-lg control-label must">联系电话</label>
             <div class="col-sm-8">
@@ -73,7 +73,7 @@
                 {/if}
             </div>
         </div>
-
+        <div class="form-group">            <label class="col-lg control-label">店铺主营业务</label>            <div class="col-sm-8">                {ifp 'sysset.shop.edit'}                <textarea name="main_business" class="form-control">{$item['main_business']}</textarea>                {else}                <div class="form-control-static">{$item['main_business']}</div>                {/if}            </div>        </div>
         <div class="form-group">
             <label class="col-lg control-label">商户地址</label>
             <div class="col-sm-9 col-xs-12">
