@@ -424,7 +424,9 @@ class Index_EweiShopV2Page extends AppMobilePage
             ];
             $record = pdo_insert('mc_credits_record',$data);
             $record = pdo_insert('mc_credits_record',$add);
-            if(!$record){
+            $member_record = pdo_insert('ewei_shop_member_credit_record',$data);
+            $member_record = pdo_insert('ewei_shop_member_credit_record',$add);
+            if(!$record || !$member_record){
                 show_json(0,"加入记录失败");
             }
             show_json(1,"转账成功");
