@@ -398,7 +398,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }else{
             //计算转换后的用户的卡路里和折扣宝的余额
             $credit1 = $member['credit1'] - $money;
-            $credit3 = $member['credit3'] + $money;
+            $credit3 = $member['credit3'] + $money*2;
             //更新用户的卡路里和折扣宝的余额
             $update = pdo_update('ewei_shop_member',['credit1'=>$credit1,'credit3'=>$credit3],['openid'=>$openid]);
             if(!$update){
@@ -417,14 +417,16 @@ class Index_EweiShopV2Page extends AppMobilePage
                 'openid'=>$openid,
                 'uniacid'=>$_W['uniacid'],
                 'credittype'=>'credit3',
-                'num'=>$money,
+                'num'=>$money*2,
                 'createtime'=>time(),
                 'remark'=>"卡路里转换折扣宝",
                 'module'=>"ewei_shopv2",
             ];
             $record = pdo_insert('mc_credits_record',$data);
             $record = pdo_insert('mc_credits_record',$add);
-            if(!$record){
+            $member_record = pdo_insert('ewei_shop_member_credit_record',$data);
+            $member_record = pdo_insert('ewei_shop_member_credit_record',$add);
+            if(!$record || !$member_record){
                 show_json(0,"加入记录失败");
             }
             show_json(1,"转账成功");

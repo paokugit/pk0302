@@ -941,7 +941,6 @@ class EweiShopWechatPay
                     'module'=>"ewei_shopv2",
                     'merchid'=>$order['merchid'],
                 ];
-                file_put_contents('../addons/ewei_shopv2/payment/wechat/pay1.txt',$data);
                 if($cate == 1){
                     $add1 = [
                        'remark'=>"卡路里付款",
@@ -956,6 +955,7 @@ class EweiShopWechatPay
                     $add = array_merge($add2,$data);
                 }
                 pdo_insert('mc_credits_record',$add);
+                pdo_insert('ewei_shop_member_credit_record',$add);
                 //支付成功的话 给用户扣除的卡路里  和 折扣宝
                 if($cate == 1){
                     $credit1 = $member['credit1'] - ($order['goodsprice'] - $order['price']);
