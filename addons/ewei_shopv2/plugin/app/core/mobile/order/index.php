@@ -995,7 +995,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 		$status = "";
 		if( !empty($expresslist) ) 
 		{
-			if( strexists($expresslist[0]["step"], "已签收") ) 
+			if( strexists($expresslist[0]["step"], "签收") )
 			{
 				$status = "已签收";
 			}
