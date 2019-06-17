@@ -9,6 +9,7 @@ class Util_EweiShopV2Model
 		$express = $express == 'TTKD' ? 'tiantian' : $express;
 		$express = $express == 'jjwl' ? 'jiajiwuliu' : $express;
 		$express = $express == 'zhongtiekuaiyun' ? 'ztky' : $express;
+		$express = $express == 'debangwuliu' ? 'debangkuaidi' : $express;
 		load()->func('communication');
 		if (!empty($express_set['isopen']) && !empty($express_set['apikey'])) {
 			if (!empty($express_set['cache']) && 0 < $express_set['cache']) {
@@ -18,7 +19,6 @@ class Util_EweiShopV2Model
 					return iunserializer($cache['datas']);
 				}
 			}
-
 			if ($express_set['isopen'] == 1) {
 				$url = 'http://api.kuaidi100.com/api?id=' . $express_set['apikey'] . '&com=' . $express . '&nu=' . $expresssn;
 				$params = array();
