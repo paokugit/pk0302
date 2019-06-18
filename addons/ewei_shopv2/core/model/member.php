@@ -1508,7 +1508,7 @@ class Member_EweiShopV2Model
         try{
             pdo_update('ewei_shop_member',['credit3'=>$credit],['openid'=>$openid]);
             $res = pdo_insert('mc_credits_record',$data);
-            $res = pdo_insert('ewei_shop_member_credit_record',$data);
+            pdo_insert('ewei_shop_member_credit_record',$data);
             pdo_commit();
         }catch(Exception $exception){
             pdo_rollback();
