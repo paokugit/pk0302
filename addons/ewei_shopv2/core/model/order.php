@@ -478,6 +478,8 @@ class Order_EweiShopV2Model
             //店主开通店铺
 	        if($val['goodsid']=='7'){
 	            $this->openstore($order['id']);
+	            //给购买人赠送990卡路里
+	            m('member')->shop_reward($openid,5,7);
             }
 
 	        if($order['agentid']){//会员关系绑定@lihanwen
