@@ -1,0 +1,109 @@
+{template '_header'}
+
+<div class="page-header">
+    当前位置：<span class="text-primary">幸运抽奖</span>
+</div>
+<style>
+    .game{
+        margin-top: 6px;
+        width: 100%;
+        height: 36px;
+    }
+    .game .form-control{
+        width: 32%;
+        margin-left: 3%;
+        float: left
+    }
+    .game .add{
+        float: left;
+        line-height: 28px;
+        font-size: 15px;
+        margin-left: 3%;
+        border: 1px solid #44b525;
+        width: 48px;
+        height: 28px;
+        text-align: center;
+        border-radius: 66px;
+        background: #44b525;
+    }
+    .game .delete{
+        float: left;
+        line-height: 28px;
+        font-size: 15px;
+        margin-left: 3%;
+        border: 1px solid #44b525;
+        width: 48px;
+        height: 28px;
+        text-align: center;
+        border-radius: 66px;
+        background: #44b525;
+    }
+</style>
+<div class="page-content">
+    <div class="alert alert-primary">
+        <p>提示：设计幸运抽奖的奖项，奖励和获奖比例</p>
+    </div>
+    <label style="margin-left: 55px;width: 100px;text-align: center">奖项等级</label>
+    <label style="margin-left: 68px;width: 100px;text-align: center">奖励奖品</label>
+    <label style="margin-left: 130px;width: 100px;text-align: center">奖励比例</label>
+    <label style="margin-left: 76px;width: 100px;text-align: center">操&nbsp;&nbsp;作</label>
+    <form action="" method="post" class="form-horizontal form-validate" enctype="multipart/form-data">
+        <div class="game">
+            <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(一)</label>
+            <div class="col-sm-9 col-xs-12">
+                <input type="text" name="reward{$key}" class="form-control" value="">
+                <input type="text" name="rate4" class="form-control" value="">
+            </div>
+        </div>
+        <div class="game">
+            <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(二)</label>
+            <div class="col-sm-9 col-xs-12">
+                <input type="text" name="reward{$key}" class="form-control" value="">
+                <input type="text" name="rate{$key}" class="form-control" value="">
+            </div>
+        </div>
+        <div class="game">
+            <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(三)</label>
+            <div class="col-sm-9 col-xs-12">
+                <input type="text" name="reward{$key}" class="form-control" value="">
+                <input type="text" name="rate{$key}" class="form-control" value="">
+            </div>
+        </div>
+        <div class="game">
+            <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(四)</label>
+            <div class="col-sm-9 col-xs-12">
+                <input type="text" name="reward{$key}" class="form-control" value="">
+                <input type="text" name="rate{$key}" class="form-control" value="">
+                <span class="add">添加</span>
+                <span class="delete">删除</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg control-label"></label>
+            <div class="col-sm-9 col-xs-12">
+                <input type="submit" value="提交" class="btn btn-primary" style="margin-top: 36px;margin-left: 16px"/>
+            </div>
+        </div>
+    </form>
+</div>
+{template '_footer'}     
+
+<script>
+    $('.add').click(function () {
+        $(this).next().remove();
+        $(this).parent().parent().after('<div class="game"> ' +
+                                            '<label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(5)</label> ' +
+                                            '<div class="col-sm-9 col-xs-12"> ' +
+                                                '<input type="text" name="reward5" class="form-control" value=""> ' +
+                                                '<input type="text" name="rate5" class="form-control" value=""> ' +
+                                                '<span class="add">添加</span> ' +
+                                                '<span class="delete">删除</span> ' +
+                                            '</div> ' +
+                                        '</div>');
+        $(this).remove();
+    });
+    $('.delete').click(function () {
+		alert(111);
+        $(this).parent().parent().remove();
+    })
+</script>

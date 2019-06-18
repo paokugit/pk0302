@@ -258,11 +258,10 @@
     var str1 = ''
     var str2 = ''
     var str3 = ''
-    var type = sessionStorage.getItem("proType")
+	var type = sessionStorage.getItem("proType")
     var goodtitle=sessionStorage.getItem("protitle")
     var goodimg=sessionStorage.getItem("prothumb")
-    console.log(goodimg)
-     var desc=sessionStorage.getItem("desc")
+    var desc=sessionStorage.getItem("desc")
     var province = ''
     var city = ''
     var district = ''
@@ -473,6 +472,8 @@
     // 立即抢购点击事件
     $(".buybtn").click(function () {
         // 实物物流产品
+		var type = sessionStorage.getItem("proType")
+		//alert(type);
         if (type == 1) {
             $("#postproduct").css('display', 'block');
             $("#realproduct").css('display', 'none');

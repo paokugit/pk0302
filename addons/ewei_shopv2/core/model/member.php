@@ -1500,7 +1500,7 @@ class Member_EweiShopV2Model
             'module'=>'ewei_shopv2',
             'num'=>2000,
             'createtime'=>time(),
-            'remark'=>'购买智能员工，成为店主，奖励折扣宝2000',
+            'remark'=>'智能员工(店主)',
             'openid'=>$openid,
         ];
         $credit = bcadd($user['credit3'],2000,2);

@@ -327,7 +327,7 @@ class Share_EweiShopV2Page extends MobilePage
         $ordersn=$_GPC["order_sn"];
         $order=pdo_get("ewei_shop_order",array("ordersn"=>$ordersn));
        
-               pdo_update("ewei_shop_order",array("status"=>1),array("ordersn"=>$ordersn));
+               pdo_update("ewei_shop_order",array("status"=>1,'paytype'=>21),array("ordersn"=>$ordersn));
                 //更新红包
                 pdo_update("ewei_shop_goods_redlog",array("status"=>1),array("order_sn"=>$ordersn));
 
