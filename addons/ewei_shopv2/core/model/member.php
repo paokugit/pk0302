@@ -1480,7 +1480,7 @@ class Member_EweiShopV2Model
      * @param $goods_id
      * @return bool|string
      */
-    public function shop_reward($openid="",$level="",$goods_id="")
+    public function shop_reward($openid="",$level="")
     {
         global $_W;
         if($level != 5){
@@ -1490,10 +1490,10 @@ class Member_EweiShopV2Model
         if(!$user){
             return "该用户不存在";
         }
-        $order = pdo_fetchall('select * from '.tablename('ewei_shop_order').'o join'.tablename('ewei_shop_order_goods').'og on o.id=og.orderid'.' where o.openid="'.$openid.'" and goodsid="'.$goods_id.'" and status=3');
-        if($order){
-            return "该会员已购买过智能员工礼包（店主）";
-        }
+//        $order = pdo_fetchall('select * from '.tablename('ewei_shop_order').'o join'.tablename('ewei_shop_order_goods').'og on o.id=og.orderid'.' where o.openid="'.$openid.'" and goodsid="'.$goods_id.'" and status=3');
+//        if($order){
+//            return "该会员已购买过智能员工礼包（店主）";
+//        }
         $data = [
             'uniacid'=>$_W['uniacid'],
             'creditype'=>'credit3',
