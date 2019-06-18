@@ -1498,12 +1498,12 @@ class Member_EweiShopV2Model
             'uniacid'=>$_W['uniacid'],
             'credittype'=>'credit3',
             'module'=>'ewei_shopv2',
-            'num'=>990,
+            'num'=>2000,
             'createtime'=>time(),
-            'remark'=>'购买智能员工，成为店主，奖励折扣宝990',
+            'remark'=>'购买智能员工，成为店主，奖励折扣宝2000',
             'openid'=>$openid,
         ];
-        $credit = bcadd($user['credit3'],990,2);
+        $credit = bcadd($user['credit3'],2000,2);
         pdo_begin();
         try{
             pdo_update('ewei_shop_member',['credit3'=>$credit],['openid'=>$openid]);
