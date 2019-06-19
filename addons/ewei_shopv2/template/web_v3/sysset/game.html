@@ -48,36 +48,30 @@
     <label style="margin-left: 130px;width: 100px;text-align: center">奖励比例</label>
     <label style="margin-left: 76px;width: 100px;text-align: center">操&nbsp;&nbsp;作</label>
     <form action="" method="post" class="form-horizontal form-validate" enctype="multipart/form-data">
-        <div class="game">
-            <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(一)</label>
-            <div class="col-sm-9 col-xs-12">
-                <input type="text" name="reward{$key}" class="form-control" value="">
-                <input type="text" name="rate4" class="form-control" value="">
+        {if count($data) == 0}
+            <div class="game">
+                <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(1)</label>
+                <div class="col-sm-9 col-xs-12">
+                    <input type="text" name="1[reward1]" class="form-control" value="">
+                    <input type="text" name="1[rate1]" class="form-control" value="">
+                    <span class="add" onclick="add(1)">添加</span>
+                    <span class="delete" onclick="del(1)">删除</span>
+                </div>
             </div>
-        </div>
-        <div class="game">
-            <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(二)</label>
-            <div class="col-sm-9 col-xs-12">
-                <input type="text" name="reward{$key}" class="form-control" value="">
-                <input type="text" name="rate{$key}" class="form-control" value="">
+        {/if}
+        {loop $data $key=>$item}
+            <div class="game">
+                <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;({php echo $key+1})</label>
+                <div class="col-sm-9 col-xs-12">
+                    <input type="text" name="{php echo $key+1}[reward{php echo $key+1}]" class="form-control" value="{php echo $item['reward']}">
+                    <input type="text" name="{php echo $key+1}[rate{php echo $key+1}]" class="form-control" value="{php echo $item['rate']}">
+                    {if $key+1 == count($data)}
+                        <span class="add" onclick="add({php echo $key+1})">添加</span>
+                        <span class="delete" onclick="del({php echo $key+1})">删除</span>
+                    {/if}
+                </div>
             </div>
-        </div>
-        <div class="game">
-            <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(三)</label>
-            <div class="col-sm-9 col-xs-12">
-                <input type="text" name="reward{$key}" class="form-control" value="">
-                <input type="text" name="rate{$key}" class="form-control" value="">
-            </div>
-        </div>
-        <div class="game">
-            <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(四)</label>
-            <div class="col-sm-9 col-xs-12">
-                <input type="text" name="reward{$key}" class="form-control" value="">
-                <input type="text" name="rate{$key}" class="form-control" value="">
-                <span class="add">添加</span>
-                <span class="delete">删除</span>
-            </div>
-        </div>
+        {/loop}
         <div class="form-group">
             <label class="col-lg control-label"></label>
             <div class="col-sm-9 col-xs-12">
@@ -89,21 +83,38 @@
 {template '_footer'}     
 
 <script>
-    $('.add').click(function () {
-        $(this).next().remove();
-        $(this).parent().parent().after('<div class="game"> ' +
-                                            '<label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(5)</label> ' +
+   // $('#add').click(function () {
+   //
+   // });
+    function add(num) {
+        if(num >= 9){
+            alert("最多9条奖励奖品");return;
+        }
+        num+=1
+        var add = $(".add");
+        $(".delete").remove();
+        $(".add").parent().parent().after('<div class="game"> ' +
+                                            '<label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;('+num+')</label> ' +
                                             '<div class="col-sm-9 col-xs-12"> ' +
-                                                '<input type="text" name="reward5" class="form-control" value=""> ' +
-                                                '<input type="text" name="rate5" class="form-control" value=""> ' +
-                                                '<span class="add">添加</span> ' +
-                                                '<span class="delete">删除</span> ' +
+                                                '<input type="text" name="'+num+'[reward'+num+']" class="form-control" value=""> ' +
+                                                '<input type="text" name="'+num+'[rate'+num+']" class="form-control" value=""> ' +
+                                                '<span class="add" onclick="add('+num+')">添加</span> ' +
+                                                '<span class="delete" onclick="del('+num+')">删除</span> ' +
                                             '</div> ' +
                                         '</div>');
-        $(this).remove();
-    });
-    $('.delete').click(function () {
-		alert(111);
-        $(this).parent().parent().remove();
-    })
+        add.remove();
+    }
+    //$('#delete').onlick(function () {
+   //
+   // })
+   function del(num){
+        if(num == 1){
+            alert("最少保留一条奖励");return;
+        }
+        var del = $('.delete');
+        num-=1;
+        $(".delete").parent().parent().prev().find("input:eq(1)").after('<span class="add" onclick="add('+num+')">添加</span> ' +
+                                                                        '<span class="delete" onclick="del('+num+')">删除</span> ');
+        del.parent().parent().remove();
+    }
 </script>
