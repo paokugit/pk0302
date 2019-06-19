@@ -1130,7 +1130,9 @@ class Member_EweiShopV2Model
                 //加速期间
                 $ratio=$level["duihuan"];
                 
-            }else{
+            }else{ 
+                
+                /**
                 // var_dump("11");
                 //获取最新下级
                 if ($member["agentlevel"]==5){
@@ -1187,6 +1189,10 @@ class Member_EweiShopV2Model
                     }
                     
                 }
+                **/
+                
+                $ratio=10;
+                
             }
             
         }else{
@@ -1194,7 +1200,8 @@ class Member_EweiShopV2Model
             $day=date("Y-m-d",time());
             $create_day=date("Y-m-d",$member["createtime"]);
             $subordinate = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_member') . ' WHERE agentid=:agentid and agentlevel>:agentlevel order by agentlevel_time desc', array(':agentid' => $member["id"],':agentlevel'=>0));
-            if (!empty($subordinate)){
+           
+         /**   if (!empty($subordinate)){
                 $count_days=$this->count_days($day, $subordinate["agentlevel_time"]);
                 $round=number_format($count_days/20,2);
                 if ($round>=0&&$round<=1){
@@ -1222,6 +1229,8 @@ class Member_EweiShopV2Model
                     $ratio=number_format(5*0.1,2);
                 }
             }
+            **/
+            $ratio=10;
         }
         return $ratio;
         

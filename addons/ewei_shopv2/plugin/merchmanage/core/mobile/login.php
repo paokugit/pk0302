@@ -150,6 +150,9 @@ class Login_EweiShopV2Page extends MerchmanageMobilePage
 	    }
 	    $user=pdo_get("ewei_shop_merch_account",array('merchid'=>$account["id"]));
 	    $pwd=md5($pwd.$user['salt']);
+	    if ($pwd==$user["pwd"]){
+	        show_json(0,"修改密码不可与原密码一致");
+	    }
 	    if (pdo_update("ewei_shop_merch_account",array("pwd"=>$pwd),array('id'=>$user["id"]))){
 	        show_json(1,"修改成功");
 	    }else{

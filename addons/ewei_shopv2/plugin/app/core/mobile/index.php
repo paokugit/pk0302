@@ -378,7 +378,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             
             if (empty($member['agentlevel'])) {
                // $bushu = 5;
-                $subscription_ratio=5;
+                $subscription_ratio=0.5;
                 $exchange=0.5/1500;
                 $exchange_step=m("member")->exchange_step($openid);
                 $bushu=ceil($exchange_step*1500/0.5);
