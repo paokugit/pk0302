@@ -253,6 +253,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 //                 $vv['currency'] =1;
 //             }
             
+            if ($i<3){
             if ($vv["type"]!=2){
                 //步数小于今日步数
                 if ($step_number<$bushu){
@@ -291,6 +292,8 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $r[$i]["currency"]=1;
                 $r[$i]["type"]=$vv["type"];
                 $i=$i+1; 
+            }
+            
             }
             
         }
