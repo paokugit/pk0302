@@ -1482,5 +1482,51 @@ class Member_EweiShopV2Model
 
     }
 
+    /**
+     * 购买店主 送990折扣宝
+     * @param $openid
+     * @param $level
+     * @param $goods_id
+     * @return bool|string
+     */
+    public function shop_reward($openid="",$level="")
+    {
+        global $_W;
+        if($level != 5){
+            return "购买等级不正确";
+        }
+        $user = pdo_get('ewei_shop_member',['openid'=>$openid]);
+        if(!$user){
+            return "该用户不存在";
+        }
+//        $order = pdo_fetchall('select * from '.tablename('ewei_shop_order').'o join'.tablename('ewei_shop_order_goods').'og on o.id=og.orderid'.' where o.openid="'.$openid.'" and goodsid="'.$goods_id.'" and status=3');
+//        if($order){
+//            return "该会员已购买过智能员工礼包（店主）";
+//        }
+        $data = [
+            'uniacid'=>$_W['uniacid'],
+            'credittype'=>'credit3',
+            'module'=>'ewei_shopv2',
+            'num'=>2000,
+            'createtime'=>time(),
+            'remark'=>'智能员工(店主)',
+            'openid'=>$openid,
+        ];
+        $credit = bcadd($user['credit3'],2000,2);
+        pdo_begin();
+        try{
+            pdo_update('ewei_shop_member',['credit3'=>$credit],['openid'=>$openid]);
+            $res = pdo_insert('mc_credits_record',$data);
+            pdo_insert('ewei_shop_member_credit_record',$data);
+            pdo_commit();
+        }catch(Exception $exception){
+            pdo_rollback();
+        }
+        if(!is_error($res)){
+            return true;
+        }else{
+            return $res;
+        }
+    }
 }
 ?>

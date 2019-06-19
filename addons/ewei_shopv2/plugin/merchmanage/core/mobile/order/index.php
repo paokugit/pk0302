@@ -578,7 +578,6 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 
 		}
 
-
 		if (!(empty($list))) {
 			$diy_title_data = array();
 			$diy_data = array();

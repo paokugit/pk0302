@@ -6,77 +6,83 @@ if (!(defined('IN_IA')))
 require EWEI_SHOPV2_PLUGIN . 'app/core/page_mobile.php';
 class Index_EweiShopV2Page extends AppMobilePage 
 {
-	public function main() 
-	{
-	    global $_W;
-		global $_GPC;
-		$pageid = intval($_GPC['id']);
-		if (empty($pageid)) 
-		{
-			$pageid = trim($_GPC['type']);
-		}
-		if (empty($pageid))
-		{
-			app_error(AppError::$PageNotFound);
-		}
-		if ($_GPC['type']=='huodong'){
+	public function main()
+    {
+        global $_W;
+        global $_GPC;
+        $pageid = intval($_GPC['id']);
+        if (empty($pageid))
+        {
+            $pageid = trim($_GPC['type']);
+        }
+        if (empty($pageid))
+        {
+            app_error(AppError::$PageNotFound);
+        }
+        if ($_GPC['type']=='huodong'){
             $pageid=2;
         }
-		$page = $_GPC['page']?intval($_GPC['page']):1;
+        $page = $_GPC['page']?intval($_GPC['page']):1;
         $select = $_GPC['select']?intval($_GPC['select']):0;
 
-		$page = $this->model->getPage($pageid, true,$page,$select);
-		if ($page === 'default')
-		{
-			app_json(array('diypage' => false));
-		}
-		if (empty($page) || empty($page['data'])) 
-		{
-			app_error(AppError::$PageNotFound);
-		}
-		$startadv = array();
-		if (is_array($page['data']['page']) && !(empty($page['data']['page']['diyadv']))) 
-		{
-			$startadvitem = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_wxapp_startadv') . ' WHERE id=:id AND uniacid=:uniacid', array(':id' => intval($page['data']['page']['diyadv']), ':uniacid' => $_W['uniacid']));
-			if (!(empty($startadvitem)) && !(empty($startadvitem['data']))) 
-			{
-				$startadv = base64_decode($startadvitem['data']);
-				$startadv = json_decode($startadv, true);
-				$startadv['status'] = intval($startadvitem['status']);
-				if (!(empty($startadv['data']))) 
-				{
-					foreach ($startadv['data'] as $itemid => &$item ) 
-					{
-						$item['imgurl'] = tomedia($item['imgurl']);
-					}
-					unset($itemid, $item);
-				}
-				if (is_array($startadv['params'])) 
-				{
-					$startadv['params']['style'] = 'small-bot';
-				}
-				if (is_array($startadv['style'])) 
-				{
-					$startadv['style']['opacity'] = '0.6';
-				}
-			}
-		}
-		$result = array('diypage' => $page['data'], 'startadv' => $startadv, 'customer' => intval($_W['shopset']['app']['customer']), 'phone' => intval($_W['shopset']['app']['phone']));
-		if (!(empty($result['customer']))) 
-		{
-			$result['customercolor'] = ((empty($_W['shopset']['app']['customercolor']) ? '#ff5555' : $_W['shopset']['app']['customercolor']));
-		}
-		if (!(empty($result['phone']))) 
-		{
-			$result['phonecolor'] = ((empty($_W['shopset']['app']['phonecolor']) ? '#ff5555' : $_W['shopset']['app']['phonecolor']));
-			$result['phonenumber'] = ((empty($_W['shopset']['app']['phonenumber']) ? '#ff5555' : $_W['shopset']['app']['phonenumber']));
-		}
-		app_json($result);
-	}
+        //  $zktpage = m("cache")->getString("zkbpage");
+        // if($zktpage){
+        //     $page = $zktpage;
+        // }else{
+        $page = $this->model->getPage($pageid, true,$page,$select);
+        //m('cache')->set('zkbpage', $page);
+        //  }
+        if ($page === 'default')
+        {
+            app_json(array('diypage' => false));
+        }
+        if (empty($page) || empty($page['data']))
+        {
+            app_error(AppError::$PageNotFound);
+        }
+        $startadv = array();
+        if (is_array($page['data']['page']) && !(empty($page['data']['page']['diyadv'])))
+        {
+            $startadvitem = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_wxapp_startadv') . ' WHERE id=:id AND uniacid=:uniacid', array(':id' => intval($page['data']['page']['diyadv']), ':uniacid' => $_W['uniacid']));
+            if (!(empty($startadvitem)) && !(empty($startadvitem['data'])))
+            {
+                $startadv = base64_decode($startadvitem['data']);
+                $startadv = json_decode($startadv, true);
+                $startadv['status'] = intval($startadvitem['status']);
+                if (!(empty($startadv['data'])))
+                {
+                    foreach ($startadv['data'] as $itemid => &$item )
+                    {
+                        $item['imgurl'] = tomedia($item['imgurl']);
+                    }
+                    unset($itemid, $item);
+                }
+                if (is_array($startadv['params']))
+                {
+                    $startadv['params']['style'] = 'small-bot';
+                }
+                if (is_array($startadv['style']))
+                {
+                    $startadv['style']['opacity'] = '0.6';
+                }
+            }
+        }
+        $result = array('diypage' => $page['data'], 'startadv' => $startadv, 'customer' => intval($_W['shopset']['app']['customer']), 'phone' => intval($_W['shopset']['app']['phone']));
+        if (!(empty($result['customer'])))
+        {
+            $result['customercolor'] = ((empty($_W['shopset']['app']['customercolor']) ? '#ff5555' : $_W['shopset']['app']['customercolor']));
+        }
+        if (!(empty($result['phone'])))
+        {
+            $result['phonecolor'] = ((empty($_W['shopset']['app']['phonecolor']) ? '#ff5555' : $_W['shopset']['app']['phonecolor']));
+            $result['phonenumber'] = ((empty($_W['shopset']['app']['phonenumber']) ? '#ff5555' : $_W['shopset']['app']['phonenumber']));
+        }
+        app_json($result);
+    }
 
-	/*
-	 * 个人中心  服务
-	 */
+    /*
+     * 个人中心  服务
+     */
 	public function icon()
     {
         global $_GPC;
@@ -414,5 +420,22 @@ class Index_EweiShopV2Page extends AppMobilePage
 		$level = pdo_fetch('select * from ' . tablename('ewei_shop_commission_level') . ' where uniacid=:uniacid and id=:id limit 1', array(':uniacid' => $_W['uniacid'], ':id' => $member['agentlevel']));
 		return $level;
 	}
+
+    /**
+     * 获取折扣宝商品列表
+     */
+	public function getgoodslist(){
+        global $_GPC;
+        $page = $_GPC['page']?$_GPC['page']:0;
+        $select = $_GPC['select']?$_GPC['select']:0;
+	    $zktgoodslist = m("cache")->getString("zktgoodslist".$page.$select);
+	    if($zktgoodslist){
+            app_json(array('goods' => $zktgoodslist));
+        }else{
+            $res = $this->model->zktGoodsList($select,$page);
+            m('cache')->set('zktgoodslist'.$page.$select, $res);
+            app_json(array('goods' => $res));
+        }
+    }
 }
 ?>

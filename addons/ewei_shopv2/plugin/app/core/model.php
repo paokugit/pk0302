@@ -444,11 +444,11 @@ if (!class_exists("AppModel")) {
                             } else if ($item['id'] == 'goods') {
                                if (!(empty($item['data']))) {
                                    if($select==2){//最新的
-                                       $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
+                                       $args = array( "pagesize" =>150, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
                                    }elseif($select==1){//销量
-                                       $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
+                                       $args = array( "pagesize" =>150, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
                                    }else{//价格
-                                       $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
+                                       $args = array( "pagesize" =>150, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
 
                                    }
                                     $item['data'] = array();
@@ -468,11 +468,11 @@ if (!class_exists("AppModel")) {
                                         $k = 0;
                                         $i = 1;
                                        if($select==2){//最新的
-                                           $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
+                                           $args = array( "pagesize" =>150, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
                                        }elseif($select==1){//销量
-                                           $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
+                                           $args = array( "pagesize" =>150, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
                                        }else{//价格
-                                           $args = array( "pagesize" =>140, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
+                                           $args = array( "pagesize" =>150, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
 
                                        }
                                         $item['data'] = array();
@@ -565,6 +565,24 @@ if (!class_exists("AppModel")) {
             return $page;
         }
 
+
+
+        public function zktGoodsList($select,$pagess){
+                if($select==2){//最新的
+                    $args = array( "pagesize" =>20, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
+                }elseif($select==1){//销量
+                    $args = array( "pagesize" =>20, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
+                }else{//价格
+                    $args = array( "pagesize" =>20, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
+                }
+                $item['data'] = array();
+                $item['data'] = m('goods')->getList($args);
+                $item['total'] = $item['data']['total'];
+                $item['pagesize'] = 20;
+                $item['data'] = $this->getGoodsList($item['data']);
+                return $item;
+        }
+
         public function getGoodsList($goodsList){
             $newGoodsList = array();
             foreach ($goodsList['list'] as $key=>$goods){
@@ -584,6 +602,8 @@ if (!class_exists("AppModel")) {
                 $newGoodsList[$key]['cansee'] = $goods['cansee'];
                 $newGoodsList[$key]['seetitle'] = $goods['seetitle'];
                 $newGoodsList[$key]['bargain'] = $goods['bargain'];
+                $newGoodsList[$key]['showprice'] = round($goods['minprice']-$goods['deduct'],2);
+                $newGoodsList[$key]['issendfree'] = $goods['issendfree'];
             }
             return $newGoodsList;
         }

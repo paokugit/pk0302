@@ -984,8 +984,8 @@ class Index_EweiShopV2Page extends AppMobilePage
 		{
 			$condition = " and og.sendtype = " . $sendtype;
 		}
-		$goods = pdo_fetchall("select og.goodsid,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,og.optionname as optiontitle,g.isverify,og.expresssn,og.express,\r\n            og.sendtype,og.expresscom,og.sendtime,g.storeids from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:orderid " . $condition . " and og.uniacid=:uniacid ", array( ":uniacid" => $uniacid, ":orderid" => $orderid ));
-		if( 0 < $sendtype ) 
+		$goods = pdo_fetchall("select og.goodsid,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,og.optionname as optiontitle,g.isverify,o.expresssn,o.express,\r\n            og.sendtype,o.expresscom,og.sendtime,g.storeids from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " ."left join".tablename('ewei_shop_order').'o on o.id=og.orderid'. " where og.orderid=:orderid " . $condition . " and og.uniacid=:uniacid ", array( ":uniacid" => $uniacid, ":orderid" => $orderid ));
+		if( 0 < $sendtype )
 		{
 			$order["express"] = $goods[0]["express"];
 			$order["expresssn"] = $goods[0]["expresssn"];
@@ -995,7 +995,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 		$status = "";
 		if( !empty($expresslist) ) 
 		{
-			if( strexists($expresslist[0]["step"], "已签收") ) 
+			if( strexists($expresslist[0]["step"], "签收") )
 			{
 				$status = "已签收";
 			}

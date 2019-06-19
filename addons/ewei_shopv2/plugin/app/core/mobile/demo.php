@@ -39,13 +39,14 @@ class Demo_EweiShopV2Page extends AppMobilePage
 
     public function getall($page)
     {
-        $limit = $page*10;
-        $memberList = pdo_fetchall("select * from " . tablename("ewei_shop_member"). " limit ". $limit.",10");
+        $limit = $page*1000;
+        $memberList = pdo_fetchall("select * from " . tablename("ewei_shop_member"). " limit ". $limit.",1000");
         foreach ($memberList as $key=>$row){
             $data = array();
             $data["openid"] = $row['openid'];
             //获取推荐人数和直推人数
             $ztcount = $this->getAgent($row['id'],0);
+           // var_dump($ztcount);die();
             $data["agentcount"] = $ztcount['count'];
             $data["agentallcount"] = $ztcount['allcount'];
             //店主
@@ -73,13 +74,29 @@ class Demo_EweiShopV2Page extends AppMobilePage
     }
 
     public function getAgent($id,$agentlevel){
-        $ztcount = pdo_fetchcolumn("select count(*) from" . tablename("ewei_shop_member") ."where agentid=:agentid and agentlevel=:agentlevel",array( ":agentid" => $id,":agentlevel"=>$agentlevel));
+        if($agentlevel>0){
+            $ztcount = pdo_fetchcolumn("select count(*) from" . tablename("ewei_shop_member") ."where agentid=:agentid and agentlevel=:agentlevel",array( ":agentid" => $id,":agentlevel"=>$agentlevel));
+        }else{
+            $ztcount = pdo_fetchcolumn("select count(*) from" . tablename("ewei_shop_member") ."where agentid=:agentid",array( ":agentid" => $id));
+        }
         $data["count"] = $ztcount?$ztcount:0;
         //总推荐
         $data["allcount"] = m('member')->allAgentCount($id,$agentlevel);
         return $data;
     }
 
+    public function aa(){
+        $res = m('member')->getBottomUsers(150,'',0);
+        $idlist = explode(",", $res);
+        var_dump(count($idlist));
+    }
+
+
+    public function bb(){
+        $url  = 'log.txt';
+        $dir_name = dirname($url);
+        var_dump($dir_name);
+    }
 
 
 

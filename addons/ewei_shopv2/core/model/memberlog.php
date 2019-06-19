@@ -8,11 +8,15 @@ class Memberlog_EweiShopV2Model
      * 推荐会员奖励
      * @param $memberid
      * @param $money
+     * $fromopenid 被推荐人
+     * $openid 推荐人
      */
 	function rewardMember($openid,$money,$fromopenid){
 	    try{
 	        pdo_begin();
-            $data['logno'] = 'RC'.$fromopenid.$openid.$money;
+            $frommember = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $fromopenid ));
+            if(!$frommember) return false;
+            $data['logno'] = 'RC'.$fromopenid.$openid.$money.$frommember['agentlevel'];
             $haslog = pdo_fetch("select * from " . tablename("ewei_shop_member_log") . " where logno=:logno limit 1", array( ":logno" => $data['logno']));
             if($haslog) return true;
             $data['openid'] = $openid;
@@ -45,7 +49,9 @@ class Memberlog_EweiShopV2Model
      */
     function rewardShowOwnerMember($openid,$money,$fromopenid){
         try{
-            $data['logno'] = 'RC'.$fromopenid.$openid.$money;
+            $frommember = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $fromopenid ));
+            if(!$frommember) return false;
+            $data['logno'] = 'RC'.$fromopenid.$openid.$money.$frommember['agentlevel'];
             $haslog = pdo_fetch("select * from " . tablename("ewei_shop_member_log") . " where logno=:logno limit 1", array( ":logno" => $data['logno']));
             if($haslog) return true;
             pdo_begin();
