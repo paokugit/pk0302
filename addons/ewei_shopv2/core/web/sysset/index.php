@@ -1041,6 +1041,21 @@ class Index_EweiShopV2Page extends WebPage
      */
     public function game()
     {
+        global $_W;
+        global $_GPC;
+        $data = pdo_fetchall('select * from '.tablename('ewei_shop_game').' where uniacid="'.$_W['uniacid'].'"');
+        if( $_W["ispost"] )
+        {
+            ca("sysset.game.edit");
+            $data = $_GPC;
+            foreach ($data as $key=>$val){
+                if(is_array($val)){
+                    continue;
+                }
+                unset($data[$key]);
+            }
+            show_json(1);
+        }
         include $this->template('sysset/game');
     }
 }
