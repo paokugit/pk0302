@@ -42,13 +42,19 @@
 <div class="page-content">
     <div class="alert alert-primary">
         <p>提示：设计幸运抽奖的奖项，奖励和获奖比例</p>
+        <div class="col-lg pull-right" style="margin-top:-28px;text-align: right" >
+            {ifp 'sysset.game'}
+                <input type="hidden" name="game_id" value="{$data['id']}">
+                <input type="checkbox" class="js-switch" name="status" value="{$data['status']}" {if $data['status']==1}checked{/if} />
+            {/if}
+        </div>
     </div>
     <label style="margin-left: 55px;width: 100px;text-align: center">奖项等级</label>
     <label style="margin-left: 68px;width: 100px;text-align: center">奖励奖品</label>
     <label style="margin-left: 130px;width: 100px;text-align: center">奖励比例</label>
     <label style="margin-left: 76px;width: 100px;text-align: center">操&nbsp;&nbsp;作</label>
     <form action="" method="post" class="form-horizontal form-validate" enctype="multipart/form-data">
-        {if count($data) == 0}
+        {if count($data['sets']) == 0}
             <div class="game">
                 <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;(1)</label>
                 <div class="col-sm-9 col-xs-12">
@@ -59,13 +65,13 @@
                 </div>
             </div>
         {/if}
-        {loop $data $key=>$item}
+        {loop $data['sets'] $key=>$item}
             <div class="game">
                 <label class="col-lg control-label">奖项&nbsp;&nbsp;&nbsp;({php echo $key+1})</label>
                 <div class="col-sm-9 col-xs-12">
-                    <input type="text" name="{php echo $key+1}[reward{php echo $key+1}]" class="form-control" value="{php echo $item['reward']}">
-                    <input type="text" name="{php echo $key+1}[rate{php echo $key+1}]" class="form-control" value="{php echo $item['rate']}">
-                    {if $key+1 == count($data)}
+                    <input type="text" name="{php echo $key+1}[reward{php echo $key+1}]" class="form-control" value="{php echo $item['reward'.($key+1)]}">
+                    <input type="text" name="{php echo $key+1}[rate{php echo $key+1}]" class="form-control" value="{php echo $item['rate'.($key+1)]}">
+                    {if $key+1 == count($data['sets'])}
                         <span class="add" onclick="add({php echo $key+1})">添加</span>
                         <span class="delete" onclick="del({php echo $key+1})">删除</span>
                     {/if}
@@ -86,6 +92,7 @@
    // $('#add').click(function () {
    //
    // });
+   //点击添加数据
     function add(num) {
         if(num >= 9){
             alert("最多9条奖励奖品");return;
@@ -107,6 +114,7 @@
     //$('#delete').onlick(function () {
    //
    // })
+   //点击删除数据
    function del(num){
         if(num == 1){
             alert("最少保留一条奖励");return;
@@ -117,4 +125,22 @@
                                                                         '<span class="delete" onclick="del('+num+')">删除</span> ');
         del.parent().parent().remove();
     }
+
+    //游戏开关
+    $('.js-switch').click(function () {
+        var open = $(this);
+        var status = open.val() == 1 ? 0 : 1;
+        var id = $("input[name='game_id']").val();
+        $.ajax({
+            type : 'post',
+            dataType : 'json',
+            url : "{php echo webUrl('sysset/game_open')}",
+            data : {id:id,status:status},
+            success:function (data) {
+                if(data.status == 1){
+                    open.val(status);
+                }
+            }
+        })
+    })
 </script>

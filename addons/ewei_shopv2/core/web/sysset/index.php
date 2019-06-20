@@ -1043,20 +1043,53 @@ class Index_EweiShopV2Page extends WebPage
     {
         global $_W;
         global $_GPC;
-        $data = pdo_fetchall('select * from '.tablename('ewei_shop_game').' where uniacid="'.$_W['uniacid'].'"');
+        $data = pdo_fetch('select * from '.tablename('ewei_shop_game').' where uniacid="'.$_W['uniacid'].'"');
+        $data['sets'] = iunserializer($data['sets']);
         if( $_W["ispost"] )
         {
             ca("sysset.game.edit");
-            $data = $_GPC;
-            foreach ($data as $key=>$val){
+            $add = $_GPC;
+            foreach ($add as $key=>$val){
                 if(is_array($val)){
                     continue;
                 }
-                unset($data[$key]);
+                unset($add[$key]);
+            }
+            pdo_begin();
+            try{
+                if(empty($data)){
+                    pdo_insert('ewei_shop_game',['uniacid'=>$_W['uniacid'],'sets'=>iserializer($add),'createtime'=>time()]);
+                }else{
+                    pdo_update('ewei_shop_game',['sets'=>iserializer($add),'updatetime'=>time()],['id'=>$data['id']]);
+                }
+                pdo_commit();
+            }catch (Exception $exception){
+                pdo_rollback();
             }
             show_json(1);
         }
         include $this->template('sysset/game');
+    }
+
+    /*
+     * 转盘开关
+     */
+    public function game_open(){
+        global $_GPC;
+        global $_W;
+        $id = $_GPC['id'];
+        if(pdo_exists('ewei_shop_game',['id'=>$id,'uniacid'=>$_W['uniacid']])){
+            pdo_begin();
+            try{
+                pdo_update('ewei_shop_game',['status'=>$_GPC['status']],['id'=>$id]);
+                pdo_commit();
+            }catch (Exception $exception){
+                pdo_rollback();
+            }
+            show_json(1);
+        }else{
+            show_json(0,'信息错误');
+        }
     }
 }
 ?>
