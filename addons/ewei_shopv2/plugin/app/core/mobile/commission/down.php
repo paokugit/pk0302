@@ -95,14 +95,10 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		}
 
 		foreach ($list as &$row) {
-
-			if ($member['isagent'] && $member['status']) {
 				$info = $this->model->getInfo($row['openid'], array('total'));
 				$row['commission_total'] = $info['commission_total'];//累计佣金
 				$row['agentcount'] = $this->getagentcount($row['openid']);
 				$row['agenttime'] = date('Y-m-d H:i', $row['agenttime']);
-			}
-
 			//获取会员等级
 			$level = m("member")->agentlevel($row['openid']);
 			$row['levelname'] = $level['levelname']?$level['levelname']:'普通会员';
@@ -131,9 +127,10 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 	}
 
 	public function getagentcount($openid){
-		$member = m("member")->getMember($openid);
-		$agentInfo = pdo_fetchall("select id  from " . tablename("ewei_shop_member") . " where  agentid=:agentid", array( ":agentid" => $member["id"] ));
-		return count($agentInfo);
+		$agentCountInfo = pdo_fetch("select * from " . tablename("ewei_shop_member_agentcount") . " where openid=:openid limit 1", array(":openid" => $openid ));
+		if($agentCountInfo) return $agentCountInfo['agentcount'];
+		return 0;
+
 	}
 }
 

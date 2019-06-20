@@ -54,7 +54,7 @@ class Demo_EweiShopV2Page extends AppMobilePage
             $data["shopkeepercount"] = $shopkeeper['count'];
             $data["shopkeeperallcount"] = $shopkeeper['allcount'];
             //星耀
-            $starshine = $this->getAgent($row['id'],3);
+            $starshine = $this->getAgent($row['id'],2);
             $data["starshinecount"] = $starshine['count'];
             $data["starshineallcount"] = $starshine['allcount'];
             //健康
@@ -84,21 +84,6 @@ class Demo_EweiShopV2Page extends AppMobilePage
         $data["allcount"] = m('member')->allAgentCount($id,$agentlevel);
         return $data;
     }
-
-    public function aa(){
-        $res = m('member')->getBottomUsers(150,'',0);
-        $idlist = explode(",", $res);
-        var_dump(count($idlist));
-    }
-
-
-    public function bb(){
-        $url  = 'log.txt';
-        $dir_name = dirname($url);
-        var_dump($dir_name);
-    }
-
-
 
 }
 

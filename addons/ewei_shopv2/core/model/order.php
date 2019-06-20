@@ -418,9 +418,9 @@ class Order_EweiShopV2Model
 			$goodslist = pdo_fetchall("SELECT goodsid FROM " . tablename("ewei_shop_order_goods") . " WHERE orderid = :orderid AND uniacid = :uniacid", array( ":orderid" => $order["id"], ":uniacid" => $order["uniacid"] ));
 
             $this->write_log('===='.$order['status'].'====');
-            if($order['status']==1){
-                $this->reward($goodslist,$order['openid'],$order);//lihanwen 会员推荐返佣金
-            }
+//            if($order['status']==1){
+//                $this->reward($goodslist,$order['openid'],$order);//lihanwen 会员推荐返佣金
+//            }
 			foreach( $goodslist as $item )
 			{
 				p("task")->checkTaskProgress(1, "goods", 0, $order["openid"], $item["goodsid"]);

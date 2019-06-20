@@ -2080,7 +2080,7 @@ if( !class_exists("CommissionModel") )
 			{
 				return NULL;
 			}
-			$order = pdo_fetch("select id,price,openid, ordersn,goodsprice,agentid,finishtime from " . tablename("ewei_shop_order") . " where id=:id and status>=3 and uniacid=:uniacid limit 1", array( ":id" => $orderid, ":uniacid" => $_W["uniacid"] ));
+			$order = pdo_fetch("select id,price,openid, ordersn,goodsprice,agentid,finishtime,status from " . tablename("ewei_shop_order") . " where id=:id and status>=3 and uniacid=:uniacid limit 1", array( ":id" => $orderid, ":uniacid" => $_W["uniacid"] ));
 			if( empty($order) ) 
 			{
 				return NULL;
@@ -2102,7 +2102,6 @@ if( !class_exists("CommissionModel") )
 			    $goods=pdo_get('ewei_shop_goods',array('id'=>$vv['goodsid']));
 			    if ($goods['agentlevel']>$member['agentlevel']){
 			        pdo_update('ewei_shop_member',array('agentlevel'=>$goods['agentlevel'],'agentlevel_time'=>date("Y-m-d",time())),array('id'=>$member['id']));
-			       
 			        //会员卡路里奖励
 			        if ($goods['agentlevel']==1||$goods['agentlevel']==2){
 			            if ($goods['agentlevel']==1){
@@ -2176,6 +2175,13 @@ if( !class_exists("CommissionModel") )
 			        
 			    }
             }
+
+            $goods = pdo_fetchall("select og.goodsid,g.cates,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,og.optionname as optiontitle,g.isverify,g.storeids from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:orderid", array(":orderid" => $orderid ));
+            //lihanwen 会员奖励
+            if($order['status']==3) {
+                $res = m('order')->reward($goods, $openid, $order);
+            }
+
             $this->orderFinishTask($order, ($set["selfbuy"] ? true : false), $member);
 			$time = time();
 			$become_check = intval($set["become_check"]);
@@ -2757,7 +2763,8 @@ if( !class_exists("CommissionModel") )
 				}
 			}
 		}
-		public function upgradeLevelByAgent($openid) 
+
+        public function upgradeLevelByAgent($openid)
 		{
 			global $_W;
 			if( empty($openid) ) 

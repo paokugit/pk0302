@@ -25,13 +25,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $page = $_GPC['page']?intval($_GPC['page']):1;
         $select = $_GPC['select']?intval($_GPC['select']):0;
 
-        //  $zktpage = m("cache")->getString("zkbpage");
-        // if($zktpage){
-        //     $page = $zktpage;
-        // }else{
         $page = $this->model->getPage($pageid, true,$page,$select);
-        //m('cache')->set('zkbpage', $page);
-        //  }
         if ($page === 'default')
         {
             app_json(array('diypage' => false));

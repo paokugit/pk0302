@@ -442,7 +442,7 @@ if (!class_exists("AppModel")) {
                                 }
                                 unset($child);
                             } else if ($item['id'] == 'goods') {
-                               if (!(empty($item['data']))) {
+                               /*if (!(empty($item['data']))) {
                                    if($select==2){//最新的
                                        $args = array( "pagesize" =>150, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
                                    }elseif($select==1){//销量
@@ -468,11 +468,11 @@ if (!class_exists("AppModel")) {
                                         $k = 0;
                                         $i = 1;
                                        if($select==2){//最新的
-                                           $args = array( "pagesize" =>150, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
+                                           $args = array( "pagesize" =>1, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
                                        }elseif($select==1){//销量
-                                           $args = array( "pagesize" =>150, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
+                                           $args = array( "pagesize" =>1, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
                                        }else{//价格
-                                           $args = array( "pagesize" =>150, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
+                                           $args = array( "pagesize" =>1, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
 
                                        }
                                         $item['data'] = array();
@@ -524,7 +524,7 @@ if (!class_exists("AppModel")) {
 
                                 } else {
                                     unset($page['data']['items'][$itemid]);
-                                }
+                                }*/
                             } else if (($item['id'] == 'topmenu') && !(empty($item['style']['showtype']))) {
                                 if (!(empty($item['data']))) {
                                     $swiperpage = ((empty($item['style']['pagenum']) ? 8 : $item['style']['pagenum']));

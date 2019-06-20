@@ -386,9 +386,9 @@ class Pay_EweiShopV2Page extends AppMobilePage
 		$order = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where id=:id and uniacid=:uniacid and openid=:openid limit 1", array( ":id" => $orderid, ":uniacid" => $uniacid, ":openid" => $openid ));
 		$merchid = $order["merchid"];
 		$goods = pdo_fetchall("select og.goodsid,g.cates,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,og.optionname as optiontitle,g.isverify,g.storeids from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:orderid and og.uniacid=:uniacid ", array( ":uniacid" => $uniacid, ":orderid" => $orderid ));
-        if($order['status']==3){
-            m('order')->reward($goods,$order['openid'],$order);//lihanwen 会员推荐返佣金
-        }
+//        if($order['status']==3){
+//            m('order')->reward($goods,$order['openid'],$order);//lihanwen 会员推荐返佣金
+//        }
 
 		$address = false;
 		if( !empty($order["addressid"]) ) 
@@ -567,7 +567,8 @@ class Pay_EweiShopV2Page extends AppMobilePage
 	}
 
 	public function aa(){
-        m('order')->openstore(2441);die();
+        $res = p("commission")->checkOrderFinish('9720');
+        var_dump($res);
     }
 
 }
