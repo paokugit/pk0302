@@ -85,7 +85,7 @@ $("input").bind("input propertychange change",function(event){
                         }
                         else{
                            message=data.result.message
-                            console.log("error")
+                            console.log(message)
                             $("#warning").show().delay(1000).hide(300);
                             $("#warning .mask-text ").text(message);
                         

@@ -74,7 +74,7 @@
                         <span class="xinhuai_head">截止时间</span>
                     </div>
                     <div class="timeipt xinhuai_come">
-                        <input class="xinhuai_text" id="date_date" type="date" name="cc" value="" />
+                        <input class="xinhuai_text" id="date_date" type="date" name="cc" value="{php echo date('Y-m-d',time())}" />
                     </div>
                 </li>
                 <li class="list_xinhuai">
@@ -90,7 +90,7 @@
                         <span class="xinhuai_head">一级红包</span>
                     </div>
                     <div class="xinhuai_come">
-                        <input class="xinhuai_text" type="text" id="yiji" placeholder="用户分享奖励" name="cc" />
+                        <input class="xinhuai_text" type="text" id="yiji" placeholder="分享奖励(>0.3元)" name="cc" />
                     </div>
                 </li>
                 <li class="list_xinhuai">
@@ -98,7 +98,7 @@
                         <span class="xinhuai_head">二级红包</span>
                     </div>
                     <div class="xinhuai_come">
-                        <input class="xinhuai_text" type="text" id="erji" placeholder="分享二级奖励" name="cc" />
+                        <input class="xinhuai_text" type="text" id="erji" placeholder="二级奖励(>0.3元)" name="cc" />
                     </div>
                 </li>
             </ul>
@@ -437,14 +437,18 @@
         }
         // 一级红包
         var commission1_pay = $('#yiji').val();
-        if(commission1_pay == ""){
+         if(commission1_pay == ""){
             alert("用户分享一级红包不能为空");return;
-        }
+        }else if(commission1_pay < 0.3){
+			alert("一级奖励红包不可小于0.3，否用户得不到奖励");return;
+		}
         // 二级红包
         var commission2_pay = $('#erji').val();
         if(commission2_pay == ""){
             alert("用户分享二级红包不能为空");return;
-        }
+        }else if(commission2_pay < 0.3){
+			alert("二级奖励红包不可小于0.3，否用户得不到奖励");return;
+		}
         var pro_type = ""
         var obj = document.getElementById("img_img_id")
         if (obj.getAttribute("src") == "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png") {
@@ -555,12 +559,16 @@
         var commission1_pay = $('#yiji').val();
         if(commission1_pay == ""){
             alert("用户分享一级红包不能为空");return;
-        }
+        }else if(commission1_pay < 0.3){
+			alert("一级奖励红包不可小于0.3，否用户得不到奖励");return;
+		}
         // 二级红包
         var commission2_pay = $('#erji').val();
         if(commission2_pay == ""){
             alert("用户分享二级红包不能为空");return;
-        }
+        }else if(commission2_pay < 0.3){
+			alert("二级奖励红包不可小于0.3，否用户得不到奖励");return;
+		}
         var pro_type = ""
         var obj = document.getElementById("img_img_id")
         if (obj.getAttribute("src") == "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png") {
@@ -744,14 +752,18 @@
         }
         // 一级红包
         var commission1_pay = $('#yiji').val();
-        if(commission1_pay == ""){
+         if(commission1_pay == ""){
             alert("用户分享一级红包不能为空");return;
-        }
+        }else if(commission1_pay < 0.3){
+			alert("一级奖励红包不可小于0.3，否用户得不到奖励");return;
+		}
         // 二级红包
         var commission2_pay = $('#erji').val();
         if(commission2_pay == ""){
             alert("用户分享二级红包不能为空");return;
-        }
+        }else if(commission2_pay < 0.3){
+			alert("二级奖励红包不可小于0.3，否用户得不到奖励");return;
+		}
         var pro_type = ""
         var obj = document.getElementById("img_img_id")
         if (obj.getAttribute("src") == "../addons/ewei_shopv2/plugin/merchmanage/static/img/on@2x.png") {

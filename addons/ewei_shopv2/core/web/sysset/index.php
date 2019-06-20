@@ -119,10 +119,13 @@ class Index_EweiShopV2Page extends WebPage
 																				{
 																					header("location: " . webUrl("sysset/notice_redis"));
 																				}
-																				else 
-																				{
-																					header("location: " . webUrl());
-																				}
+																				else {
+                                                                                    if (cv("sysset.game")) {
+                                                                                        header("location: " . webUrl("sysset/game"));
+                                                                                    } else {
+                                                                                        header("location: " . webUrl());
+                                                                                    }
+                                                                                }
 																			}
 																		}
 																	}
@@ -1032,5 +1035,28 @@ class Index_EweiShopV2Page extends WebPage
 		}
 		include($this->template("sysset/wxpaycert"));
 	}
+
+     /**
+     * 幸运转盘设置
+     */
+    public function game()
+    {
+        global $_W;
+        global $_GPC;
+        $data = pdo_fetchall('select * from '.tablename('ewei_shop_game').' where uniacid="'.$_W['uniacid'].'"');
+        if( $_W["ispost"] )
+        {
+            ca("sysset.game.edit");
+            $data = $_GPC;
+            foreach ($data as $key=>$val){
+                if(is_array($val)){
+                    continue;
+                }
+                unset($data[$key]);
+            }
+            show_json(1);
+        }
+        include $this->template('sysset/game');
+    }
 }
 ?>

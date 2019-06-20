@@ -13,7 +13,8 @@
 
 .img-item {
     width: 100%;
-    height: auto
+    height: auto;
+    //font-size:0
 }
 
 .xinxi_li_head_text{
@@ -52,7 +53,8 @@
 
 .img01 {
     width: 100%;
-    height: auto
+    height: auto;
+    display:block
 }
 
 .header_select{

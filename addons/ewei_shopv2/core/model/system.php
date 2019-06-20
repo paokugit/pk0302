@@ -1104,6 +1104,10 @@ class System_EweiShopV2Model {
                                 "route" => "shop"
                             ) ,
                             array(
+                                "title" => "幸运转盘",
+                                "route" => "game"
+                            ) ,
+                            array(
                                 "title" => "关注及分享",
                                 "route" => "follow"
                             ) ,

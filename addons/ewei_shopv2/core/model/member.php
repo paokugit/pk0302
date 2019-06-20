@@ -1130,7 +1130,9 @@ class Member_EweiShopV2Model
                 //加速期间
                 $ratio=$level["duihuan"];
                 
-            }else{
+            }else{ 
+                
+                /**
                 // var_dump("11");
                 //获取最新下级
                 if ($member["agentlevel"]==5){
@@ -1187,6 +1189,10 @@ class Member_EweiShopV2Model
                     }
                     
                 }
+                **/
+                
+                $ratio=10;
+                
             }
             
         }else{
@@ -1194,7 +1200,8 @@ class Member_EweiShopV2Model
             $day=date("Y-m-d",time());
             $create_day=date("Y-m-d",$member["createtime"]);
             $subordinate = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_member') . ' WHERE agentid=:agentid and agentlevel>:agentlevel order by agentlevel_time desc', array(':agentid' => $member["id"],':agentlevel'=>0));
-            if (!empty($subordinate)){
+           
+         /**   if (!empty($subordinate)){
                 $count_days=$this->count_days($day, $subordinate["agentlevel_time"]);
                 $round=number_format($count_days/20,2);
                 if ($round>=0&&$round<=1){
@@ -1222,6 +1229,8 @@ class Member_EweiShopV2Model
                     $ratio=number_format(5*0.1,2);
                 }
             }
+            **/
+            $ratio=10;
         }
         return $ratio;
         
@@ -1496,18 +1505,19 @@ class Member_EweiShopV2Model
 //        }
         $data = [
             'uniacid'=>$_W['uniacid'],
-            'creditype'=>'credit3',
+            'credittype'=>'credit3',
             'module'=>'ewei_shopv2',
-            'num'=>990,
+            'num'=>2000,
             'createtime'=>time(),
-            'remark'=>'购买智能员工，成为店主，奖励折扣宝990',
+            'remark'=>'智能员工(店主)',
             'openid'=>$openid,
         ];
-        $credit = bcadd($user['credit3'],990,2);
+        $credit = bcadd($user['credit3'],2000,2);
         pdo_begin();
         try{
             pdo_update('ewei_shop_member',['credit3'=>$credit],['openid'=>$openid]);
             $res = pdo_insert('mc_credits_record',$data);
+            pdo_insert('ewei_shop_member_credit_record',$data);
             pdo_commit();
         }catch(Exception $exception){
             pdo_rollback();
