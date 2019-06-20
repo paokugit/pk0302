@@ -11,23 +11,11 @@ class Goods_EweiShopV2Page extends AppMobilePage
 	{
 		global $_GPC;
 		global $_W;
-
-
-
-        $page = $_GPC['page']?$_GPC['page']:0;
+		
+		$page = $_GPC['page']?$_GPC['page']:0;
         $select = $_GPC['select']?$_GPC['select']:0;
-        $goodslist = m("cache")->getString("goodslist".$page.$select);
-        if($goodslist){
-            app_json(array('goods' => $goodslist));
-        }else{
-            $res = $this->model->zktGoodsList($select,$page);
-            m('cache')->set('goodslist'.$page.$select, $res);
-            app_json(array('goods' => $res));
-        }
-
-
-		$couponid = intval($_GPC["couponid"]);
-		if( !empty($couponid) ) 
+        $couponid = intval($_GPC["couponid"]);
+		if( !empty($couponid) )
 		{
 			$this->getlistbyCoupon($couponid);
 		}
