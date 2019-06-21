@@ -49,7 +49,6 @@
             dataType: "json",
             success: function (data) {
                 img.push(data.message)
-                console.log(data)
                 if (data.imgaddr == '' || data.imgaddr == '') {
                     $(".list_img").css('display', 'none')
                     $(".mask").css('display', 'block')
@@ -69,19 +68,16 @@
 
         })
     })
+
     $(".list_img").on("click", ".deleteimg", function () {
         $(this).parent().remove();
         img = document.getElementsByClassName("total_view")
         for (var i = 0; i < img.length; i++) {
             var dd = img[i].getElementsByClassName("imgcc")[0]
-            console.log(dd);
             var bb = dd.getAttribute("data-mesage")
-            console.log(bb);
             img2.push(bb)
         }
-        console.log(img2);
         var str3 = img2.join(",")
-        console.log(str3);
         $.ajax({
             //url: 'http://192.168.3.102/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.home.homepage.imgapi',
             url: '{php echo mobileUrl("merchmanage/home/homepage/imgapi")}',
@@ -92,15 +88,18 @@
                 console.log(res);
                 if (res.status == 0) {
                     console.log('成功');
+                    img2 = [];
                 } else {
                     console.log('失败');
                 }
             }
         })
     })
+
     function select_file() {
         $("#file").trigger("click");
     }
+
     function fileUpload() {
         var formData = new FormData();
         formData.append('file', $('#file')[0].files[0]);
@@ -114,7 +113,6 @@
             dataType: 'json',//这里是返回类型，一般是json,text等
             clearForm: true,//提交后是否清空表单数据
             success: function (data) {   //提交成功后自动执行的处理函数，参数data就是服务器返回的数据。
-                console.log(data);
                 str += '<div class="total_view">' +
                     '<img class="deleteimg" style="width:20px;height:20px;border-radius: 50%;background: #0f0;position: absolute;top:5px;right:5px" src="http://paokucoin.com/img/backgroup/imgdel@2x.png">' +
                     '<img class="imgcc" src="' + data.addr + '" alt="" data-mesage="' + data.message + '">' +
@@ -126,23 +124,19 @@
                 img = document.getElementsByClassName("total_view")
                 for (var i = 0; i < img.length; i++) {
                     var dd = img[i].getElementsByClassName("imgcc")[0]
-                    console.log(dd);
                     var bb = dd.getAttribute("data-mesage")
-                    console.log(bb);
                     img2.push(bb)
                 }
-                console.log(img2);
                 var str3 = img2.join(",")
-                console.log(str3);
                 $.ajax({
                     url: '{php echo mobileUrl("merchmanage/home/homepage/imgapi")}',
                     type: 'post',
                     data: { img: str3, merchid: 4 },
                     dataType: 'json',
                     success: function (res) {
-                        console.log(res);
                         if (res.status == 0) {
                             console.log('成功');
+                            img2=[];
                         } else {
                             console.log('失败');
                         }

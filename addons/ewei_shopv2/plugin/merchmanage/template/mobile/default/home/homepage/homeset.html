@@ -8,7 +8,6 @@
     <title>主页设置</title>
 </head>
 <link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/home/homeset.css">
-
 <body>
     <div class="all_box">
         <div class="list_div">
@@ -61,18 +60,20 @@
     $(".for_text").click(function(){
         $(".mask").css('display','block')
     })
+
     // 遮罩关闭
     $(".affirm").click(function(){
         $(".mask").css('display','none')
         var str1 = document.getElementsByClassName("input_name")[0]
         var str2 = str1.value
-        // console.log(str2)
         $(".import_input").attr("value",str2)
     })
+
     //图片界面
     $(".for_text1").click(function(){
         location.href="{php echo mobileUrl('merchmanage/home/homepage/storeimage')}"
     })
+
     //视频界面
     $(".for_text2").click(function(){
         location.href="{php echo mobileUrl('merchmanage/home/homepage/storevideo')}"

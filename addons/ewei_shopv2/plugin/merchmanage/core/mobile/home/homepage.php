@@ -28,8 +28,8 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     public function video(){
         global $_W;
         global $_GPC;
-//         var_dump(ATTACHMENT_ROOT);
-        $merchid = $_W['merchmanage']['merchid'];
+        //$merchid = $_W['merchmanage']['merchid'];
+        $merchid = $_GPC['merchid'];
          if ($_POST){
              $data["shopvideo"]=$_GPC["video"];
               $data["img"]=$_GPC["img"];
