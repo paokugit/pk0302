@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>店铺图片</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/home/storeimage.css">
+
+<body>
+    <div class="all_box">
+        <div class="head_div">
+            <div class="head_text">请上传店铺门头、室内环境图、其他图等</div>
+            <div class="head_img">
+                <input type="file" name="file" id="file" onchange="fileUpload()" style="display:none">
+                <img onclick="select_file()" src="http://paokucoin.com/img/backgroup/videoadd.png" alt="">
+            </div>
+        </div>
+        <div class="list_img">
+
+        </div>
+        <div class="mask">
+            <div class="none_img">
+                没有相关图片哦
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery-1.11.3.min(1).js"></script>
+<script type="text/javascript">
+    var str = ''
+    var img = []
+    var str2 = ''
+    var img2 = []
+    var str3 = ''
+    $(function () {
+        $.ajax({
+            type: 'post',
+            //url: 'http://192.168.3.102/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.home.homepage.hqimg',
+            url: '{php echo mobileUrl("merchmanage/home/homepage/hqimg")}',
+            data: {
+                merchid: 4,
+            },
+            dataType: "json",
+            success: function (data) {
+                img.push(data.message)
+                console.log(data)
+                if (data.imgaddr == '' || data.imgaddr == '') {
+                    $(".list_img").css('display', 'none')
+                    $(".mask").css('display', 'block')
+                } else {
+                    $(".list_img").css('display', 'block')
+                    $(".mask").css('display', 'none')
+                    $.each(data.imgaddr, function (i, item) {
+                        str += '<div class="total_view">' +
+                            '<img class="deleteimg" style="width:20px;height:20px;border-radius: 50%;background: #0f0;position: absolute;top:5px;right:5px" src="http://paokucoin.com/img/backgroup/imgdel@2x.png">' +
+                            '<img class="imgcc" src="' + item + '" alt="" data-mesage="' + data.message[i] + '">' +
+                            '</div>'
+                        $('.list_img').html(str)
+                    })
+                }
+
+            }
+
+        })
+    })
+    $(".list_img").on("click", ".deleteimg", function () {
+        $(this).parent().remove();
+        img = document.getElementsByClassName("total_view")
+        for (var i = 0; i < img.length; i++) {
+            var dd = img[i].getElementsByClassName("imgcc")[0]
+            console.log(dd);
+            var bb = dd.getAttribute("data-mesage")
+            console.log(bb);
+            img2.push(bb)
+        }
+        console.log(img2);
+        var str3 = img2.join(",")
+        console.log(str3);
+        $.ajax({
+            //url: 'http://192.168.3.102/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.home.homepage.imgapi',
+            url: '{php echo mobileUrl("merchmanage/home/homepage/imgapi")}',
+            type: 'post',
+            data: { img: str3, merchid: 4 },
+            dataType: 'json',
+            success: function (res) {
+                console.log(res);
+                if (res.status == 0) {
+                    console.log('成功');
+                } else {
+                    console.log('失败');
+                }
+            }
+        })
+    })
+    function select_file() {
+        $("#file").trigger("click");
+    }
+    function fileUpload() {
+        var formData = new FormData();
+        formData.append('file', $('#file')[0].files[0]);
+        $.ajax({
+            //url: 'http://192.168.3.102/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.home.homepage.upload_img',//这里写你的url
+            url: '{php echo mobileUrl("merchmanage/home/homepage/upload_img")}',//这里写你的url
+            type: 'POST',
+            data: formData,
+            contentType: false,// 当有文件要上传时，此项是必须的，否则后台无法识别文件流的起始位置
+            processData: false,// 是否序列化data属性，默认true(注意：false时type必须是post)
+            dataType: 'json',//这里是返回类型，一般是json,text等
+            clearForm: true,//提交后是否清空表单数据
+            success: function (data) {   //提交成功后自动执行的处理函数，参数data就是服务器返回的数据。
+                console.log(data);
+                str += '<div class="total_view">' +
+                    '<img class="deleteimg" style="width:20px;height:20px;border-radius: 50%;background: #0f0;position: absolute;top:5px;right:5px" src="http://paokucoin.com/img/backgroup/imgdel@2x.png">' +
+                    '<img class="imgcc" src="' + data.addr + '" alt="" data-mesage="' + data.message + '">' +
+                    '</div>'
+                $('.list_img').html(str)
+                $(".mask").css('display', 'none')
+                $(".list_img").css('display', 'block')
+
+                img = document.getElementsByClassName("total_view")
+                for (var i = 0; i < img.length; i++) {
+                    var dd = img[i].getElementsByClassName("imgcc")[0]
+                    console.log(dd);
+                    var bb = dd.getAttribute("data-mesage")
+                    console.log(bb);
+                    img2.push(bb)
+                }
+                console.log(img2);
+                var str3 = img2.join(",")
+                console.log(str3);
+                $.ajax({
+                    url: '{php echo mobileUrl("merchmanage/home/homepage/imgapi")}',
+                    type: 'post',
+                    data: { img: str3, merchid: 4 },
+                    dataType: 'json',
+                    success: function (res) {
+                        console.log(res);
+                        if (res.status == 0) {
+                            console.log('成功');
+                        } else {
+                            console.log('失败');
+                        }
+                    }
+                })
+            }
+        });
+    }
+    // $(".uploadimg").click(function () {
+    //     img = document.getElementsByClassName("total_view")
+    //     for (var i = 0; i < img.length; i++) {
+    //         var dd = img[i].getElementsByClassName("imgcc")[0]
+    //         console.log(dd);
+    //         var bb = dd.getAttribute("data-mesage")
+    //         console.log(bb);
+    //         img2.push(bb)
+    //     }
+    //     console.log(img2);
+    //     var str3 = img2.join(",")
+    //     console.log(str3);
+    //     $.ajax({
+    //         url: 'http://192.168.3.102/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.home.homepage.imgapi',
+    //         type: 'post',
+    //         data: { img: str3, merchid: 4 },
+    //         dataType: 'json',
+    //         success: function (res) {
+    //             console.log(res);
+    //             if (res.status == 0) {
+    //                 console.log('成功');
+    //             } else {
+    //                 console.log('失败');
+    //             }
+    //         }
+    //     })
+
+    // })
+
+</script>

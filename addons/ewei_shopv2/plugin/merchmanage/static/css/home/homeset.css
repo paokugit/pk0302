@@ -1,0 +1,211 @@
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+form,
+fieldset,
+legend,
+input,
+textarea,
+p,
+blockquote,
+th,
+td,
+hr,
+button,
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  margin: 0;
+  padding: 0;
+}
+html {
+  background: #f2f3f8;
+  height: 100%;
+}
+
+a {
+  text-decoration: none;
+}
+
+li {
+  list-style: none;
+}
+i {
+  font-style: normal;
+}
+input {
+  background: none;
+  outline: none;
+  border: none;
+}
+input:focus {
+  border: none;
+}
+.all_box{
+    width: 100%;
+    height: 100%;
+    /* display: none; */
+}
+.list_div{
+    width: 100%;
+    height: 100%;
+}
+.list_ul{
+    width: 100%;
+    height: 100%;
+}
+.list_li{
+    width: 100%;
+    height: 60px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    border-bottom: 1px solid rgb(243, 243, 243);
+    position: relative;
+}
+.set_weixin{
+    width: 150px;
+    height: 100%;
+    /* margin-left: 20px; */
+    /* background: #00f; */
+    display: flex;
+    align-items: center;
+    left: 20px;
+    position: absolute;
+}
+.for_text{
+    width: 150px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    /* background: #ff0; */
+    position: absolute;
+    right: 20px;
+}
+.for_text1{
+    width: 150px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    /* background: #ff0; */
+    position: absolute;
+    right: 20px;
+}
+.for_text2{
+    width: 150px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    /* background: #ff0; */
+    position: absolute;
+    right: 20px;
+}
+.import_input{
+    width: 150px;
+    height: 60px;
+    /* background: #00f; */
+    text-align: right;
+    font-size: 15px;
+    color: #ccc;
+}
+
+.symbol{
+   position: absolute;
+   margin-left: 138px;
+   /* background: #0f0; */
+   font-size: 18px;
+   color: #ccc;
+}
+.symbol1{
+    position: absolute;
+    margin-left: 138px;
+    /* background: #0f0; */
+    font-size: 18px;
+    color: #ccc;
+ }
+ .mask{
+     width: 100%;
+     height: 100%;
+     position: fixed;
+     top: 0;
+     left: 0;
+     z-index: 1000;
+     background: rgba(0, 0, 0, 0.4);
+     display: none;
+ }
+ .center_height{
+     width: 100%;
+     height: 160px;
+     /* background: #0f0; */
+     margin-top: 130px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+ }
+ .second_level{
+     width: 300px;
+     height: 160px;
+     background: #fff;
+     border-radius: 10px;
+     /* display: flex;
+     flex-direction: column;
+     align-items: center;
+     justify-content: center; */
+ }
+ .set_name{
+     width: 100%;
+     height: 50px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+ }
+ .import_name{
+    width: 100%;
+    height: 40px;
+    /* background: #0f0; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+ }
+ .input_name{
+     width: 250px;
+     height: 40px;
+     font-size: 15px;
+     color: #a0a0a0;
+     background: #f1f1f1;
+     border-radius: 10px;
+ }
+ .affirm{
+     width: 100%;
+     height: 60px;
+     /* background: #00f; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: 17px;
+    color: #008be4;
+ }
+ 

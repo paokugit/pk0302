@@ -155,8 +155,8 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
         
         if (is_file($pt)) {
             var_dump($pt_lj);
-                  }
-        
+        }
+
     }
     //1表示视频 2表示图片
     function upload_file($files, $path = "./attachment",$type=1)
@@ -173,8 +173,8 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
         
             
      //   mkdirs(ATTACHMENT_ROOT . '/' . $path);
-        
-        
+
+
         // 判断错误号
         
         if (@$files['error'] == 00) {
@@ -261,5 +261,20 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
             
         }
         
+    }
+
+    public function homeset()
+    {
+        include $this->template();
+    }
+
+    public function storeimage()
+    {
+        include $this->template();
+    }
+
+    public function storevideo()
+    {
+        include $this->template();
     }
 }
