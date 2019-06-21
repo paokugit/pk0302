@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>主页设置</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/home/homeset.css">
+<body>
+    <div class="all_box">
+        <div class="list_div">
+            <ul class="list_ul">
+                <li class="list_li">
+                    <div class="set_weixin">
+                        <span class="for_head">设置微信号</span>
+                    </div>
+                    <div class="for_text">
+                        <input class="import_input" type="button" value="输入微信号">
+                    </div>
+                </li>
+                <li class="list_li">
+                    <div class="set_weixin">
+                        <span class="for_head">店铺图片</span>
+                    </div>
+                    <div class="for_text1">
+                        <!-- <input class="import_input" type="text" placeholder="输入微信号"> -->
+                        <span class="symbol">></span>
+                    </div>
+                </li>
+                <li class="list_li">
+                    <div class="set_weixin">
+                        <span class="for_head">店铺视频</span>
+                    </div>
+                    <div class="for_text2">
+                        <span class="symbol1">></span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="mask">
+        <!-- 白框 -->
+        <div class="center_height">
+        <div class="second_level">
+            <div class="set_name">设置微信号</div>
+            <div class="import_name">
+                <input class="input_name" type="text" placeholder="输入微信号">
+            </div>
+            <div class="affirm">确认</div>
+        </div>
+    </div>
+    </div>
+</body>
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+// 遮罩显示
+    $(".for_text").click(function(){
+        $(".mask").css('display','block')
+    })
+
+    // 遮罩关闭
+    $(".affirm").click(function(){
+        $(".mask").css('display','none')
+        var str1 = document.getElementsByClassName("input_name")[0]
+        var str2 = str1.value
+        $(".import_input").attr("value",str2)
+    })
+
+    //图片界面
+    $(".for_text1").click(function(){
+        location.href="{php echo mobileUrl('merchmanage/home/homepage/storeimage')}"
+    })
+
+    //视频界面
+    $(".for_text2").click(function(){
+        location.href="{php echo mobileUrl('merchmanage/home/homepage/storevideo')}"
+    })
+</script>

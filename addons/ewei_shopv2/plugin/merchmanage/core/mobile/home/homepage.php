@@ -28,8 +28,8 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     public function video(){
         global $_W;
         global $_GPC;
-//         var_dump(ATTACHMENT_ROOT);
-        $merchid = $_W['merchmanage']['merchid'];
+        //$merchid = $_W['merchmanage']['merchid'];
+        $merchid = $_GPC['merchid'];
          if ($_POST){
              $data["shopvideo"]=$_GPC["video"];
               $data["img"]=$_GPC["img"];
@@ -47,11 +47,12 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
         include $this->template();
     }
     
+    //上传视频
     public function  upload_video(){
         
         $field = $_FILES["file"];
         
-        $resault=$this->upload_file($field);
+        $resault=$this->upload_file($field,"./attachment",1);
         //成功
         if ($resault["status"]==0){
             //获取封面图
@@ -71,10 +72,73 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
 //             if (is_file($pt)) {
                 $resault["img"]=$pt_lj;
 //             }
-            
+                $resault["addr"]=tomedia($resault["message"]);
         }
         echo json_encode($resault);
         
+    }
+    
+    //上传图片
+    public function upload_img(){
+        
+        $field = $_FILES["file"];
+        
+        $resault=$this->upload_file($field,"./attachment",2);
+        if ($resault["status"]==0){
+            $resault["addr"]=tomedia($resault["message"]);
+        }
+        echo json_encode($resault);
+        
+    }
+    
+    //商家主页图片
+    public function imgapi(){
+        global $_W;
+        global $_GPC;
+//         $merchid = $_W['merchmanage']['merchid'];
+       
+        $merchid=$_GPC["merchid"];
+        $img=$_GPC["img"];
+        if (empty($img)){
+            $re["status"]=1;
+            $re["message"]="图片不可为空";
+            echo json_encode($re);
+        }
+       $img=explode(",", $img);
+       $img=serialize($img);
+       if (pdo_update("ewei_shop_merch_user",array("shopimg"=>$img),array("id"=>$merchid))){
+           $re["status"]=0;
+           $re["message"]="成功";
+          
+       }else{
+           $re["status"]=1;
+           $re["message"]="失败";
+       }
+       echo json_encode($re);
+    }
+    
+    //获取商家主页图片
+    public function hqimg(){
+        global $_W;
+        global $_GPC;
+        //         $merchid = $_W['merchmanage']['merchid'];
+        
+        $merchid=$_GPC["merchid"];
+        $merch=pdo_get("ewei_shop_merch_user",array("id"=>$merchid));
+        if (empty($merch)){
+            $re["status"]=1;
+            $re["message"]="不存在该商家";
+        }else{
+        $piclist=unserialize($merch["shopimg"]);
+           $re["status"]=0;
+           $re["message"]=$piclist;
+           $re["video"]=$merch["shopvideo"];
+           foreach ($piclist as $k=>$v){
+               $re["imgaddr"][$k]=tomedia($v);
+           }
+           $re["videoaddr"]=tomedia($merch["shopvideo"]);
+        }
+        echo json_encode($re);
     }
     //截取视屏封面图
     public function cs(){
@@ -91,17 +155,26 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
         
         if (is_file($pt)) {
             var_dump($pt_lj);
-                  }
-        
+        }
+
     }
-    function upload_file($files, $path = "./attachment",$imagesExt=['rm', 'rmvb', 'wmv', 'avi', 'mpg', 'mpeg', 'mp4'])
+    //1表示视频 2表示图片
+    function upload_file($files, $path = "./attachment",$type=1)
     
     {
+       
+        if($type==1){
+            $imagesExt=['rm', 'rmvb', 'wmv', 'avi', 'mpg', 'mpeg', 'mp4'];
+            $path = "videos/";
+        }else{
+            $imagesExt=['jpg','jpeg','gif','png'];
+            $path = "videos/img/";
+         }
         
-        $path = "videos/";
+            
      //   mkdirs(ATTACHMENT_ROOT . '/' . $path);
-        
-        
+
+
         // 判断错误号
         
         if (@$files['error'] == 00) {
@@ -188,5 +261,20 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
             
         }
         
+    }
+
+    public function homeset()
+    {
+        include $this->template();
+    }
+
+    public function storeimage()
+    {
+        include $this->template();
+    }
+
+    public function storevideo()
+    {
+        include $this->template();
     }
 }
