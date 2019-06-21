@@ -33,12 +33,13 @@ class Memberlog_EweiShopV2Model
                 $member = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $openid ));
                 if(!$member)  throw new PDOException('会员信息不存在');
                 $memberdata['credit2'] = $member['credit2']+$money;
-                return pdo_update('ewei_shop_member',$memberdata,array('openid'=>$openid));
+                pdo_update('ewei_shop_member',$memberdata,array('openid'=>$openid));
             }
-            return $res;
+            pdo_commit();
 	    }catch (PDOException $e){
 	        pdo_rollback();
         }
+        return true;
 	}
 
 
@@ -70,12 +71,14 @@ class Memberlog_EweiShopV2Model
                 $member = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $openid ));
                 if(!$member)  throw new PDOException('会员信息不存在');
                 $memberdata['credit2'] = $member['credit2']+$money;
-                return pdo_update('ewei_shop_member',$memberdata,array('openid'=>$openid));
+                pdo_update('ewei_shop_member',$memberdata,array('openid'=>$openid));
             }
+            pdo_commit();
 
         }catch (PDOException $e){
            pdo_rollback();
         }
+        return true;
 
     }
     
