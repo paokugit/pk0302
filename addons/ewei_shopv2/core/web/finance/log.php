@@ -390,7 +390,8 @@ class Log_EweiShopV2Page extends WebPage
 		$set_name = $_W["shopset"]["shop"]["name"];
 		$account_name = $_W["account"]["name"];
 		$shop_name = (empty($account_name) ? $set_name : $account_name);
-		$desc = $shop_name . "余额提现";
+		$remark = $log['remark'] != "" ? $log['remark'] :"余额提现";
+		$desc = $shop_name . $remark;
 		$data = m("common")->getSysset("pay");
 		if( !empty($data["paytype"]["withdraw"]) ) 
 		{
