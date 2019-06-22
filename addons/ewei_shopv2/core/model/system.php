@@ -716,6 +716,10 @@ class System_EweiShopV2Model {
                         "route" => "sport"
                     ) ,
                     array(
+                        "title" => "贡献值解读",
+                        "route" => "devote"
+                    ) ,
+                    array(
                         "title" => "标签组",
                         "route" => "group"
                     ) ,

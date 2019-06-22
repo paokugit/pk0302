@@ -46,7 +46,7 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
             } else $disname = $distance. "km";
             $merch['distance'] = $disname;
         } else {
-            $merch['distance'] = 100000;
+            $merch['distance'] ="";
         }
         //获取关注情况
         $fllow=pdo_get("ewei_shop_merch_follow",array("merch_id"=>$merch_id,"openid"=>$openid));

@@ -26,29 +26,30 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     }
     //上传视频
     public function video(){
+        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
 //         var_dump(ATTACHMENT_ROOT);
-        $merchid = $_W['merchmanage']['merchid'];
-         if ($_POST){
+        //$merchid = $_W['merchmanage']['merchid'];
+        $merchid=$_GPC["merchid"];
+        
              $data["shopvideo"]=$_GPC["video"];
               $data["img"]=$_GPC["img"];
               if (pdo_update("ewei_shop_merch_user",array("shopvideo"=>$data["shopvideo"],"shopvideo_img"=>$data["img"]),array("id"=>$merchid))){
                   $res["status"]=0;
                   $res["message"]="成功";
-                  echo json_encode($res);die;
+                  echo json_encode($res);
               }else{
                   $res["status"]=1;
                   $res["message"]="失败";
-                  echo json_encode($res);die;
+                  echo json_encode($res);
               }
-         }
-           
-        include $this->template();
+         
     }
     
     //上传视频
     public function  upload_video(){
+        header('Access-Control-Allow-Origin:*');
         
         $field = $_FILES["file"];
         
@@ -80,7 +81,7 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     
     //上传图片
     public function upload_img(){
-        
+        header('Access-Control-Allow-Origin:*');
         $field = $_FILES["file"];
         
         $resault=$this->upload_file($field,"./attachment",2);
@@ -93,6 +94,7 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     
     //商家主页图片
     public function imgapi(){
+        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
 //         $merchid = $_W['merchmanage']['merchid'];
@@ -119,6 +121,7 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     
     //获取商家主页图片
     public function hqimg(){
+        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
         //         $merchid = $_W['merchmanage']['merchid'];

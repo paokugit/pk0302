@@ -540,33 +540,14 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             show_json(1,"推荐人不可为空");
         }
         $member=m("member")->getmember("sns_wa_".$openid);
-//          if ($login==0){
-//              if ($member){
-//              pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
-//              }else{
-               
-//                  $m = array("uniacid" => $_W["uniacid"],"agentid"=>$parent_id,"uid" => 0, "openid" =>"sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
-//                  pdo_insert("ewei_shop_member", $m);
-                 
-//              }
-//             //推荐人
-//             if ($parent_id!=0&&!empty($parent_id)){
-//                 $parent=m("member")->getmember($parent_id);
-//                 if (!empty($parent)){
-//                     $cd=$this->prize();
-//                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
- 
-//                 }
-//             }
-            
-//             show_json(0,"成功");
-//         }
-       
-          
+
             if ($member&&$member["agentid"]==0&&$member["id"]!=$parent_id){
-                pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
+                
                 //推荐人
                 if ($parent_id!=0&&!empty($parent_id)){
+                    
+                    pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
+                    
                     $parent=m("member")->getmember($parent_id);
                     if (!empty($parent)){
                         //                     $cd=$this->prize();
@@ -580,6 +561,8 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                         m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
                         }
                         
+                        //贡献值奖励
+                        m("devote")->rewardtwo($parent_id);
                     }
                 }
             }elseif (empty($member)){
@@ -601,6 +584,9 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                             m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
                         }
                         
+                        
+                        //贡献值奖励
+                        m("devote")->rewardtwo($parent_id);
                     }
                 }
             }
