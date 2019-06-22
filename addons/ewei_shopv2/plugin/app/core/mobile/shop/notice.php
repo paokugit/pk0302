@@ -22,6 +22,7 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		foreach ($list as $key => &$row) {
 			$row['createtime'] = date('Y-m-d H:i', $row['createtime']);
 			$row['thumb'] = empty($row['thumb']) ? tomedia($_W['shopset']['shop']['logo']) : tomedia($row['thumb']);
+			$row['iszan'] = pdo_getcolumn('ewei_shop_notice_log',['openid'=>$_GPC['openid'],'notice_id'=>$row['id']],'status');
 		}
 
 		unset($row);
@@ -44,8 +45,86 @@ class Notice_EweiShopV2Page extends AppMobilePage
 			pdo_update('ewei_shop_notice',['click_num'=>bcadd($notice['click_num'],1)],['id'=>$id]);
 		}
 		app_json(array(
-	'notice' => array('title' => $notice['title'], 'createtime' => date('Y-m-d H:i', $notice['createtime']), 'detail' => $notice['detail'])
-	));
+			'notice' => array('title' => $notice['title'], 'createtime' => date('Y-m-d H:i', $notice['createtime']), 'detail' => $notice['detail'])
+		));
+	}
+
+	/**
+	 * 点赞接口
+	 */
+	public function zan()
+	{
+		global $_W;
+		global $_GPC;
+		$openid = $_GPC['openid'];
+		$uniacid = $_W['uniacid'];
+		//$status = $_GPC['status'] == 1 ? 0 :1;
+		$status = $_GPC['status'];
+		$id = $_GPC['id'];
+		if(pdo_exists('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id])){
+			pdo_insert('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id,'createtime'=>time()]);
+		}else{
+			pdo_update('ewei_shop_notice_log',['status'=>$status],['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id]);
+		}
+		show_json(1);
+	}
+
+	/**
+	 * 私信助手
+	 */
+	public function email()
+	{
+		global $_GPC;
+		global $_W;
+		$uniacid = $_W['uniacid'];
+		$openid = $_GPC['openid'];
+		//查用户信息
+		$member = pdo_get('ewei_shop_member',['openid'=>$openid]);
+		//查用户的私信的全部
+		$list = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where uniacid = "'.$uniacid.'" and openid="'.$openid.'"');
+		//如果没 私信  也就是后台没发 就是第一次进入
+		if(count($list) <= 0){
+			//加入第一次进去的欢迎语
+			$id = $this->addlog($openid,$member['agentlevel']);
+			$data = pdo_get('ewei_shop_email',['id'=>$id]);
+			//array_push  给尾部加元素   array_unshift  给头部加元素  可以加字符串 也可以加数组
+			array_unshift($list,$data);
+		}else{
+			//如果有信息  也就是后台又发私信  但计算点击数量
+			$num = array_sum(array_map(create_function('$val', 'return $val["num"];'), $list));
+			//如果点击数总和  小于等于0  第一次进入私信页面  也加入欢迎语
+			if($num <= 0){
+				$id= $this->addlog($openid,$member['agentlevel']);
+				$data = pdo_get('ewei_shop_email',['id'=>$id]);
+				array_unshift($list,$data);
+			}
+		}
+		//如果总数大于0  也就是不是第一次进入私信页面  那么把他的私信所有的浏览数加1
+		foreach ($list as $key=>$item){
+			$item_num = bcadd($item['num'],1);
+			pdo_update('ewei_shop_email',['num'=>$item_num],['id'=>$item['id']]);
+		}
+		show_json(1,$list);
+	}
+
+	/**
+	 *  第一次进入私信页面  加入欢迎语
+	 * @param $openid
+	 * @param $level
+	 * @return array
+	 */
+	public function addlog($openid,$level){
+		global $_W;
+		$data = [
+			'uniacid'=>$_W['uniacid'],
+			'openid'=>$openid,
+			'createtime'=>time(),
+			'level'=>$level,
+			'num'=>0,
+			'content'=>"Hi，我是小库私信助手，今后我将推送关于你的个人消息，请多多关照，并及时查看哦~",
+		];
+		pdo_insert('ewei_shop_email',$data);
+		return pdo_insertid();
 	}
 }
 
