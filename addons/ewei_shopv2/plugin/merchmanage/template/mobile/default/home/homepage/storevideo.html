@@ -52,9 +52,7 @@
         $.ajax({
             type: 'post',
             url: '{php echo mobileUrl("merchmanage/home/homepage/hqimg")}',
-            data: {
-                merchid: 6,
-            },
+            data: {},
             dataType: "json",
             success: function (data) {
                 if (data.video == ''||data.video==null) {
@@ -92,18 +90,18 @@
             dataType: 'json',//这里是返回类型，一般是json,text等
             clearForm: true,//提交后是否清空表单数据
             success: function (data) {   //提交成功后自动执行的处理函数，参数data就是服务器返回的数据。
-                var video = data.message;
-                var img = data.img;
-                str2 += '<video id="myVideo" controls preload="auto" class="datavideo" src=' + data.addr + '></video>'
-                $(".video_class").html(str2)
-                $(".mask").css('display','none')
-                $(".all_box").css('display','block')
                 if (data.status == 0) {
+                    str2 = "";
+                    var img = data.img;
+                    str2 += '<video id="myVideo" controls preload="auto" class="datavideo" src=' + data.addr + '></video>'
+                    $(".video_class").html(str2)
+                    $(".mask").css('display','none')
+                    $(".all_box").css('display','block')
                     //添加数据库
                     $.ajax({
                         url: '{php echo mobileUrl("merchmanage/home/homepage/video")}',
                         type: 'post',
-                        data: { video: video, img: img,merchid:6 },
+                        data: { video: video, img: img},
                         dataType: 'json',
                         success: function (res) {
                             if (res.status == 0) {

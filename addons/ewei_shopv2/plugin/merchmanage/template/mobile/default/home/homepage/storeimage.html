@@ -43,9 +43,7 @@
             type: 'post',
             //url: 'http://192.168.3.102/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.home.homepage.hqimg',
             url: '{php echo mobileUrl("merchmanage/home/homepage/hqimg")}',
-            data: {
-                merchid: 4,
-            },
+            data: {},
             dataType: "json",
             success: function (data) {
                 img.push(data.message)
@@ -82,7 +80,7 @@
             //url: 'http://192.168.3.102/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.home.homepage.imgapi',
             url: '{php echo mobileUrl("merchmanage/home/homepage/imgapi")}',
             type: 'post',
-            data: { img: str3, merchid: 4 },
+            data: { img: str3},
             dataType: 'json',
             success: function (res) {
                 console.log(res);
@@ -113,6 +111,9 @@
             dataType: 'json',//这里是返回类型，一般是json,text等
             clearForm: true,//提交后是否清空表单数据
             success: function (data) {   //提交成功后自动执行的处理函数，参数data就是服务器返回的数据。
+                if(data.status == 1){
+                    alert(data.message); return;
+                }
                 str += '<div class="total_view">' +
                     '<img class="deleteimg" style="width:20px;height:20px;border-radius: 50%;background: #0f0;position: absolute;top:5px;right:5px" src="http://paokucoin.com/img/backgroup/imgdel@2x.png">' +
                     '<img class="imgcc" src="' + data.addr + '" alt="" data-mesage="' + data.message + '">' +
@@ -131,7 +132,7 @@
                 $.ajax({
                     url: '{php echo mobileUrl("merchmanage/home/homepage/imgapi")}',
                     type: 'post',
-                    data: { img: str3, merchid: 4 },
+                    data: { img: str3},
                     dataType: 'json',
                     success: function (res) {
                         if (res.status == 0) {
