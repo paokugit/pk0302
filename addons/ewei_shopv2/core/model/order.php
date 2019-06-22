@@ -475,6 +475,7 @@ class Order_EweiShopV2Model
                 $this->write_log('===='.$val['cates'].'====');
             }
             //店主开通店铺
+
 	        if($val['goodsid']=='7') {
                 $this->openstore($order['id']);
                 //给购买人赠送990卡路里

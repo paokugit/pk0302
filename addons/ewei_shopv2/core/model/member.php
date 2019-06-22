@@ -1119,7 +1119,7 @@ class Member_EweiShopV2Model
             
             $level=pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
             $set=pdo_get('ewei_setting',array('type'=>"level",'type_id'=>$member["agentlevel"]));
-            
+
             //加速日期
             $accelerate_day=date("Y-m-d",strtotime("+".$level["accelerate_day"]." day",strtotime($member["agentlevel_time"])));
            
@@ -1491,7 +1491,7 @@ class Member_EweiShopV2Model
      */
     public function shop_reward($openid="",$level="")
     {
-        global $_W;
+
         if($level != 5){
             return "购买等级不正确";
         }
@@ -1499,12 +1499,8 @@ class Member_EweiShopV2Model
         if(!$user){
             return "该用户不存在";
         }
-//        $order = pdo_fetchall('select * from '.tablename('ewei_shop_order').'o join'.tablename('ewei_shop_order_goods').'og on o.id=og.orderid'.' where o.openid="'.$openid.'" and goodsid="'.$goods_id.'" and status=3');
-//        if($order){
-//            return "该会员已购买过智能员工礼包（店主）";
-//        }
         $data = [
-            'uniacid'=>$_W['uniacid'],
+            'uniacid'=>1,
             'credittype'=>'credit3',
             'module'=>'ewei_shopv2',
             'num'=>2000,
@@ -1513,15 +1509,10 @@ class Member_EweiShopV2Model
             'openid'=>$openid,
         ];
         $credit = bcadd($user['credit3'],2000,2);
-            pdo_update('ewei_shop_member',['credit3'=>$credit],['openid'=>$openid]);
-            $res = pdo_insert('mc_credits_record',$data);
-            pdo_insert('ewei_shop_member_credit_record',$data);
-            pdo_commit();
-        if(!is_error($res)){
-            return true;
-        }else{
-            return $res;
-        }
+        pdo_update('ewei_shop_member',['credit3'=>$credit],['openid'=>$openid]);
+        pdo_insert('mc_credits_record',$data);
+        pdo_insert('ewei_shop_member_credit_record',$data);
+        return true;
     }
 }
 ?>
