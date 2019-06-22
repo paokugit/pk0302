@@ -40,8 +40,9 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		}
 		else {
 			$notice = pdo_fetch('select * from ' . tablename('ewei_shop_notice') . ' where id=:id and uniacid=:uniacid and status=1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
+			//浏览下详情 加一次点击浏览次数
+			pdo_update('ewei_shop_notice',['click_num'=>bcadd($notice['click_num'],1)],['id'=>$id]);
 		}
-
 		app_json(array(
 	'notice' => array('title' => $notice['title'], 'createtime' => date('Y-m-d H:i', $notice['createtime']), 'detail' => $notice['detail'])
 	));
