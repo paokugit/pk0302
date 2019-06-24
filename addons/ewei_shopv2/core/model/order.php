@@ -475,12 +475,12 @@ class Order_EweiShopV2Model
                 $this->write_log('===='.$val['cates'].'====');
             }
             //店主开通店铺
-	        if($val['goodsid']=='7'){
-	            $this->openstore($order['id']);
-	            //给购买人赠送990卡路里
-	            //m('member')->shop_reward($openid,5);
-            }
 
+	        if($val['goodsid']=='7') {
+                $this->openstore($order['id']);
+                //给购买人赠送990卡路里
+                m('member')->shop_reward($openid, 5);
+            }
 	        if($order['agentid']){//会员关系绑定@lihanwen
 	            //推荐人信息
                 $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$order['agentid']));

@@ -18,7 +18,6 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
             pdo_update("ewei_shop_merch_user",array("shopimg"=>$images),array("id"=>$merchid));
             header('location: ' . mobileUrl('merchmanage/home/homepage/img'));
             exit();
-            
         }
         $merch=pdo_get("ewei_shop_merch_user",array("id"=>$merchid));
         $piclist=unserialize($merch["shopimg"]);
@@ -29,10 +28,10 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
-//         var_dump(ATTACHMENT_ROOT);
-        //$merchid = $_W['merchmanage']['merchid'];
-        $merchid=$_GPC["merchid"];
-        
+
+        $merchid = $_W['merchmanage']['merchid'];
+         if ($_POST){
+
              $data["shopvideo"]=$_GPC["video"];
               $data["img"]=$_GPC["img"];
               if (pdo_update("ewei_shop_merch_user",array("shopvideo"=>$data["shopvideo"],"shopvideo_img"=>$data["img"]),array("id"=>$merchid))){
@@ -44,15 +43,16 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
                   $res["message"]="失败";
                   echo json_encode($res);
               }
-         
+
+         }
+        include $this->template();
+
     }
     
     //上传视频
     public function  upload_video(){
         header('Access-Control-Allow-Origin:*');
-        
         $field = $_FILES["file"];
-        
         $resault=$this->upload_file($field,"./attachment",1);
         //成功
         if ($resault["status"]==0){
@@ -83,13 +83,11 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     public function upload_img(){
         header('Access-Control-Allow-Origin:*');
         $field = $_FILES["file"];
-        
         $resault=$this->upload_file($field,"./attachment",2);
         if ($resault["status"]==0){
             $resault["addr"]=tomedia($resault["message"]);
         }
         echo json_encode($resault);
-        
     }
     
     //商家主页图片
@@ -97,9 +95,7 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
-//         $merchid = $_W['merchmanage']['merchid'];
-       
-        $merchid=$_GPC["merchid"];
+        $merchid = $_W['merchmanage']['merchid'];
         $img=$_GPC["img"];
         if (empty($img)){
             $re["status"]=1;
@@ -111,7 +107,6 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
        if (pdo_update("ewei_shop_merch_user",array("shopimg"=>$img),array("id"=>$merchid))){
            $re["status"]=0;
            $re["message"]="成功";
-          
        }else{
            $re["status"]=1;
            $re["message"]="失败";
@@ -124,9 +119,7 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
-        //         $merchid = $_W['merchmanage']['merchid'];
-        
-        $merchid=$_GPC["merchid"];
+        $merchid = $_W['merchmanage']['merchid'];
         $merch=pdo_get("ewei_shop_merch_user",array("id"=>$merchid));
         if (empty($merch)){
             $re["status"]=1;
@@ -158,8 +151,8 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
         
         if (is_file($pt)) {
             var_dump($pt_lj);
-                  }
-        
+        }
+
     }
     //1表示视频 2表示图片
     function upload_file($files, $path = "./attachment",$type=1)
@@ -173,96 +166,69 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
             $imagesExt=['jpg','jpeg','gif','png'];
             $path = "videos/img/";
          }
-        
-            
-     //   mkdirs(ATTACHMENT_ROOT . '/' . $path);
-        
-        
+        //mkdirs(ATTACHMENT_ROOT . '/' . $path);
         // 判断错误号
-        
         if (@$files['error'] == 00) {
-            
             // 判断文件类型
-            
             $ext = strtolower(pathinfo(@$files['name'],PATHINFO_EXTENSION));
-            
             if (!in_array($ext,$imagesExt)){
                 $resault["status"]=1;
                 $resault["message"]="非法文件类型";
                 return $resault;
-                
             }
-            
             // 判断是否存在上传到的目录
-            
             if (!is_dir(ATTACHMENT_ROOT . '/' .$path)){
-                
                 mkdir($path,0777,true);
-                
             }
-            
             // 生成唯一的文件名
-            
             $fileName = md5(uniqid(microtime(true),true)).'.'.$ext;
-            
             // 将文件名拼接到指定的目录下
-            
             $destName =ATTACHMENT_ROOT.'/'.$path.$fileName;
-            
             // 进行文件移动
-            
             if (!move_uploaded_file($files['tmp_name'],$destName)){
-                
                 $resault["status"]=1;
                 $resault["message"]="文件上传失败！";
                 return $resault;
-                
             }
             $resault["status"]=0;
             $resault["message"]=$path.$fileName;
             return $resault;
-            
         } else {
-            
             // 根据错误号返回提示信息
-            
             switch (@$files['error']) {
-                
                 case 1:
-                    
                     echo "上传的文件超过了 php.ini 中 upload_max_filesize 选项限制的值";
-                    
                     break;
-                    
                 case 2:
-                    
                     echo "上传文件的大小超过了 HTML 表单中 MAX_FILE_SIZE 选项指定的值";
-                    
                     break;
-                    
                 case 3:
-                    
                     echo "文件只有部分被上传";
-                    
                     break;
-                    
                 case 4:
-                    
                     echo "没有文件被上传";
-                    
                     break;
-                    
                 case 6:
-                    
+
                 case 7:
-                    
                     echo "系统错误";
-                    
                     break;
-                    
             }
-            
         }
-        
+    }
+
+    public function homeset()
+    {
+        include $this->template();
+    }
+
+    public function storeimage()
+    {
+        include $this->template();
+    }
+
+    public function storevideo()
+    {
+        include $this->template();
     }
 }

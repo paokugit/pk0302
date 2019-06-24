@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>店铺视频</title>
+</head>
+<link rel="stylesheet" href="../addons/ewei_shopv2/plugin/merchmanage/static/css/home/storevideo.css">
+<body>
+    <div class="all_box">
+        <div class="head_text">请上传品牌视频、店铺视频......仅支持一部</div>
+        <div class="layer_two">
+            <!-- 视频 -->
+            <div class="adjustment">
+                <div class="have_video">
+                    <div class="video_class">
+                        <!-- 视频所在 -->
+                    </div>
+                    <div class="video_img">
+                        <img class="star_img" src="http://paokucoin.com/img/backgroup/videostart@2x.png">
+                    </div>
+                </div>
+            </div>
+            <!-- 上传 -->
+            <input type="file" name="file" id="file" onchange="fileUpload()" style="display:none">
+            <div class="upload_again" onclick="select_file()">重新上传</div>
+        </div>
+    </div>
+    <div class="mask">
+        <div class="head_text">请上传品牌视频、店铺视频......仅支持一部</div>
+        <!-- 没有视频 -->
+        <div class="no_div">
+            <div class="no_video">
+                没有视频哦
+            </div>
+        </div>
+        <div class="upload_div">
+            <input type="file" name="file" id="file" onchange="fileUpload()" style="display:none">
+            <div class="uploading" onclick="select_file()">上传视频</div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var str = ''
+    var str2 = ''
+    $(function () {
+        $.ajax({
+            type: 'post',
+            url: '{php echo mobileUrl("merchmanage/home/homepage/hqimg")}',
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                if (data.video == ''||data.video==null) {
+                    $('.all_box').css('display', 'none')
+                    $('.mask').css('display', 'block')
+                } else {
+                    $('.all_box').css('display', 'block')
+                    $('.mask').css('display', 'none')
+                    str += '<video id="myVideo" controls preload="auto" class="datavideo" src=' + data.videoaddr + '></video>'
+                    $(".video_class").html(str)
+                }
+            }
+        })
+    })
+
+    $(".star_img").click(function () {
+        var myVideo = document.getElementById('myVideo')
+        $(".star_img").css('display', 'none')
+        myVideo.play()
+    })
+
+    function select_file() {
+        $("#file").trigger("click");
+    }
+
+    function fileUpload() {
+        var formData = new FormData();
+        formData.append('file', $('#file')[0].files[0]);
+        $.ajax({
+            url: '{php echo mobileUrl("merchmanage/home/homepage/upload_video")}',//这里写你的url
+            type: 'POST',
+            data: formData,
+            contentType: false,// 当有文件要上传时，此项是必须的，否则后台无法识别文件流的起始位置
+            processData: false,// 是否序列化data属性，默认true(注意：false时type必须是post)
+            dataType: 'json',//这里是返回类型，一般是json,text等
+            clearForm: true,//提交后是否清空表单数据
+            success: function (data) {   //提交成功后自动执行的处理函数，参数data就是服务器返回的数据。
+                if (data.status == 0) {
+                    str2 = "";
+                    var img = data.img;
+                    str2 += '<video id="myVideo" controls preload="auto" class="datavideo" src=' + data.addr + '></video>'
+                    $(".video_class").html(str2)
+                    $(".mask").css('display','none')
+                    $(".all_box").css('display','block')
+                    //添加数据库
+                    $.ajax({
+                        url: '{php echo mobileUrl("merchmanage/home/homepage/video")}',
+                        type: 'post',
+                        data: { video: video, img: img},
+                        dataType: 'json',
+                        success: function (res) {
+                            if (res.status == 0) {
+                                console.log('成功');
+                            } else {
+                                console.log('失败');
+                            }
+                        }
+                    })
+                } else {
+                    alert(data.message);
+                }
+            }
+        });
+    }
+</script>

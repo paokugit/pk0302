@@ -107,7 +107,7 @@ class Reward_EweiShopV2Model
      * @param $agentid  推荐人
      * @return bool
      */
-    public function getShopOwnerAgent($agentid){
+    public function getShopOwnerAgent2($agentid){
         while ($agentid>0){
             $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where id=:id limit 1", array(":id" => $agentid));
             $agentid = $memberInfo['agentid'];
@@ -119,6 +119,22 @@ class Reward_EweiShopV2Model
             }
         }
         return false;
+    }
+
+
+    /**
+     * 获取推荐人的上级店长
+     */
+    public function getShopOwnerAgent($agentid,$openid=''){
+        $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where id=:id limit 1", array(":id" => $agentid));
+        if($memberInfo['agentlevel']==5){
+            $openid = $memberInfo['openid'];
+        }elseif ($memberInfo['agentlevel']>0){
+            $openid = $this->getShopOwnerAgent($memberInfo['agentid'],$openid);
+        }else{
+            return false;
+        }
+        return $openid;
     }
 
      //判断是否是赏金

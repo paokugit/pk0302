@@ -85,6 +85,11 @@ class Demo_EweiShopV2Page extends AppMobilePage
         return $data;
     }
 
+    public function aa(){
+        $shopOwner = m('reward')->addReward("sns_wa_owRAK49usbCooCJGp-81VKLAFJME");//获取是否有上级店长
+        var_dump($shopOwner);
+    }
+
 }
 
 ?>
