@@ -160,7 +160,7 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     {
        
         if($type==1){
-            $imagesExt=['rm', 'rmvb', 'wmv', 'avi', 'mpg', 'mpeg', 'mp4'];
+            $imagesExt=['rm', 'rmvb', 'wmv', 'avi', 'mpg', 'mpeg', 'mp4','mov'];
             $path = "videos/";
         }else{
             $imagesExt=['jpg','jpeg','gif','png'];

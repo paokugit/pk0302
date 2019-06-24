@@ -24,9 +24,13 @@ class Devote_EweiShopV2Model{
             return false;
         }
         $count=floor($sum/30);
+        //查询是否已奖励
+        $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>"推荐付费会员,达到".$count."人"));
+        if (empty($log)){
         $jl=$count*30;
         //奖励
         m('member')->setCredit($parent["openid"], 'credit4', $jl, "推荐付费会员,达到".$count."人");
+        }
         return true;
     }
     //直推粉丝达到100个
@@ -71,7 +75,7 @@ class Devote_EweiShopV2Model{
             $remark="直推星选达人";
             $credit=10;
         }elseif ($level==5){
-            $remark="店长";
+            $remark="直推店长";
             $credit=100;
         }
         if ($credit!=0){
@@ -81,13 +85,19 @@ class Devote_EweiShopV2Model{
         return true;
     }
     //直推折扣宝
-    public function rewardfour($parent_id){
-        $member = m('member')->getMember($parent_id);
-        if (empty($member)||$member["agentlevel"]==0){
+    //openid
+    public function rewardfour($openid){
+        $member = m('member')->getMember($openid);
+        if (empty($member)){
+            return false;
+        }
+        //获取上级
+        $parent=m('member')->getMember($member["agentid"]);
+        if ($parent["agentlevel"]==0){
             return false;
         }
         //添加记录奖励
-        m('member')->setCredit($member["openid"], 'credit4', 4000, "直推22000折扣宝充值包");
+        m('member')->setCredit($parent["openid"], 'credit4', 4000, "直推22000折扣宝充值包");
         return true;
     }
 }
