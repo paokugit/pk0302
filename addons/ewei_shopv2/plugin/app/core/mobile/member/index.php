@@ -256,7 +256,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             case 5:
                 $data['one']['info'] = '开通小程序智能店铺1个';
                 $data['two']['info'] = '赠送2000折扣宝';
-                $data['three']['info'] = '每天步数可兑换30卡路里，连续20天，到期后，每天可兑换10卡路里';
+                $data['three']['info'] = '每天步数可兑换30卡路里，连续30天，到期后，每天可兑换10卡路里';
                 $data['fore']['info'] = '赠送1000-5000元礼包';
                 $data['one']['img'] = '/member/01@2x.png';
                 $data['two']['img'] = '/member/02@2x.png';

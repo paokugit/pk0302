@@ -17,10 +17,19 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         }else{
             $res["weixin"]=$member["weixin"];
             $res["mobile"]=$member["mobile"];
+            $res["credit4"]=$member["credit4"];
             if (empty($member["weixin"])||empty($member["mobile"])){
                 $res["bind"]=0;
             }else{
                 $res["bind"]=1;
+            }
+            //折扣宝提现金额
+            $res["tixian"]=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$openid,":credittype"=>"credit3",":remark"=>'折扣宝提现%'));
+            if (!$res["tixian"]){
+                $res["tixian"]=0;
+            }
+            if ($res["tixian"]<0){
+                $res["tixian"]=abs($res["tixian"]);
             }
         }
         app_error(0,$res);
@@ -104,14 +113,15 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         }
         $first=($page-1)*8;
         $list=pdo_fetchall("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype order by createtime desc limit ".$first.",8",array(":openid"=>$openid,":credittype"=>"credit4"));
-        if (!is_array($list)){
-            $list=array();
-        }else{
+        if (!empty($list)){
         foreach ($list as $k=>$v){
             $list[$k]["createtime"]=date("Y-m-d H:i:s",$v["createtime"]);
         }
         }
-        app_error(0,$list);
+        $re["list"]=$list;
+        $re["pagesize"]=8;
+        app_error(0,$re);
+        //show_json(1,$list);
     }
     
     
