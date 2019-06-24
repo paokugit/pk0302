@@ -20,7 +20,7 @@
                         <input class="import_input" type="button" value="输入微信号">
                     </div>
                 </li>
-                <li class="list_li">
+                <li class="list_li img_li">
                     <div class="set_weixin">
                         <span class="for_head">店铺图片</span>
                     </div>
@@ -29,7 +29,7 @@
                         <span class="symbol">></span>
                     </div>
                 </li>
-                <li class="list_li">
+                <li class="list_li video_li">
                     <div class="set_weixin">
                         <span class="for_head">店铺视频</span>
                     </div>
@@ -70,12 +70,12 @@
     })
 
     //图片界面
-    $(".for_text1").click(function(){
+    $(".img_li").click(function(){
         location.href="{php echo mobileUrl('merchmanage/home/homepage/storeimage')}"
     })
 
     //视频界面
-    $(".for_text2").click(function(){
+    $(".video_li").click(function(){
         location.href="{php echo mobileUrl('merchmanage/home/homepage/storevideo')}"
     })
 </script>
