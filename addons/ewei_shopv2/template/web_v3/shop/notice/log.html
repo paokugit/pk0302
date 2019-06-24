@@ -1,0 +1,129 @@
+{template '_header'}
+<div class="page-header">
+	
+	<!--<span class='pull-right'>-->
+		<!--<a class="btn btn-default  btn-sm" href="{php echo webUrl('sale/coupon/coupon')}">返回列表</a>-->
+	<!--</span>-->
+    当前位置：<span class="text-primary">私信记录 <small>{if !empty($coupon)}优惠券: {$coupon['couponname']}{/if}</small></span>
+</div>
+
+
+<div class="page-content">
+    <form action="./index.php" method="get" class="form-horizontal" role="form" id="form1">
+        <input type="hidden" name="c" value="site" />
+        <input type="hidden" name="a" value="entry" />
+        <input type="hidden" name="m" value="ewei_shopv2" />
+        <input type="hidden" name="do" value="web" />
+        <input type="hidden" name="r" value="shop.notice.log" />
+        <input type="hidden" name="couponid" value="{$id}" />
+
+        {if empty($coupon)}
+
+        <div class="page-toolbar">
+            <div class="pull-left">
+                <div class='input-group input-group-sm'  style='float:left;'  >
+                    {php echo tpl_daterange('createtime', array('sm'=>true,'placeholder'=>'发送时间'),true);}
+                </div>
+            </div>
+            <div class="">
+                <div class="input-group">
+                    <span class="input-group-select">
+                           <select name='used' class='form-control'>
+                               <option value=''>状态</option>
+                               <option value='0' {if $_GPC['status']=='0'}selected{/if}>未查看</option>
+                               <option value='1' {if $_GPC['status']=='1'}selected{/if}>已查看</option>
+                           </select>
+                    </span>
+                    <input type="text" class=" form-control" name='keyword' value="{$_GPC['keyword']}" placeholder="请输入关键词">
+                    <span class="input-group-btn">
+                        <button class="btn  btn-primary" type="submit"> 搜索</button>
+                        {ifp 'sale.coupon.log.export'}
+                            <button type="submit" name="export" value="1" class="btn btn-success ">导出</button>
+                        {/if}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {else}
+        <div class="page-toolbar row m-b-sm m-t-sm">
+            <div class="col-sm-12 pull-right">
+                <div class='input-group input-group-sm'  style='float:left;'  >
+                    {php echo tpl_daterange('time', array('sm'=>true,'placeholder'=>'获得时间'),true);}
+                </div>
+                <div class="input-group">
+                    <button class="btn btn-sm btn-primary" type="submit"> 搜索</button>
+                    {ifp 'sale.coupon.log.export'}
+                    <button type="submit" name="export" value="1" class="btn btn-success btn-sm">导出</button>
+                    {/if}
+                </div>
+            </div>
+        </div>
+        {/if}
+    </form>
+    {if count($list)>0}
+    <table class="table table-hover table-responsive">
+        <thead class="navbar-inner" >
+        <tr>
+            <th style='width:80px;'>会员信息</th>
+            <th style='width:100px;'>会员openid</th>
+            <th style='width:100px;'>私信内容</th>
+            <th style='width:40px;'>浏览次数</th>
+            <th style='width:40px;'>私信状态</th>
+            <th style='width:70px;'>发送时间</th>
+            <th style='width:70px;'>查看时间</th>
+            <th style='width:46px;'>操&nbsp;&nbsp;&nbsp;作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {loop $list $row}
+        <tr>
+            <td>
+                <img class="radius50" src='{php echo tomedia($row['avatar'])}' style='width:30px;height:30px;padding1px;border:1px solid #ccc' onerror="this.src='../addons/ewei_shopv2/static/images/noface.png'" />
+                <span title="{if empty($row['nickname'])}未更新{else}{$row['nickname']}{/if}{$row['mobile']}">{if empty($row['nickname'])}未更新{else}{$row['nickname']}{/if}{$row['mobile']}</span>
+            </td>
+            <td><span title="{$row['openid']}">{$row['openid']}</span></td>
+            <td><span title="{$row['content']}">{$row['content']}</span></td>
+            <td>{$row['num']}</td>
+            <td>
+                {if $row['status'] == 0}未查看{elseif $row['status'] == 1}已查看{/if}
+            </td>
+            <td>{php echo date('Y-m-d H:i',$row['createtime'])}</td>
+            <td>{php echo date('Y-m-d H:i',$row['updatetime'])}</td>
+            <td>
+                {ifp 'shop.notice.log.edit'}
+                    <a class="btn  btn-op btn-operation" href="{php echo webUrl('shop/notice/email',array('id' => $row['id']));}" title="">
+                        <span data-toggle="tooltip" data-placement="top" title="" data-original-title="私信详情">
+                            <i class='icow icow-bianji2'></i>
+                        </span>
+                    </a>
+                {/if}
+                {ifp 'shop.notice.log.delete'}
+                    <a class="btn btn-op btn-operation" data-toggle='ajaxRemove' href="{php echo webUrl('shop/notice/del',array('id' => $row['id']));}" data-confirm="确定要删除该会员吗？">
+                         <span data-toggle="tooltip" data-placement="top" title="" data-original-title="删除会员">
+                             <i class='icow icow-shanchu1'></i>
+                        </span>
+                    </a>
+                {/if}
+            </td>
+        </tr>
+        {/loop}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="8" style="text-align: right">
+                    {$pager}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    {else}
+    <div class='panel panel-default'>
+        <div class='panel-body' style='text-align: center;padding:30px;'>
+            暂时没有任何私信发送记录!
+        </div>
+    </div>
+    {/if}
+</div>
+{template '_footer'}
+<!--NDAwMDA5NzgyNw==-->

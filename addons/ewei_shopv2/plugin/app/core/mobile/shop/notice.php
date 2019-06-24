@@ -102,7 +102,7 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		//如果总数大于0  也就是不是第一次进入私信页面  那么把他的私信所有的浏览数加1
 		foreach ($list as $key=>$item){
 			$item_num = bcadd($item['num'],1);
-			pdo_update('ewei_shop_email',['num'=>$item_num],['id'=>$item['id']]);
+			pdo_update('ewei_shop_email',['num'=>$item_num,'updatetime'=>time(),'status'=>1],['id'=>$item['id']]);
 		}
 		show_json(1,$list);
 	}

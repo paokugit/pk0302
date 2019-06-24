@@ -27,6 +27,9 @@
             <input type="file" name="file" id="file" onchange="fileUpload()" style="display:none">
             <div class="upload_again" onclick="select_file()">重新上传</div>
         </div>
+        <div class="del">
+            <div class="delete">删除</div>
+        </div>
     </div>
     <div class="mask">
         <div class="head_text">请上传品牌视频、店铺视频......仅支持一部</div>
@@ -39,6 +42,9 @@
         <div class="upload_div">
             <input type="file" name="file" id="file" onchange="fileUpload()" style="display:none">
             <div class="uploading" onclick="select_file()">上传视频</div>
+        </div>
+        <div class="del2">
+            <div class="delete">删除</div>
         </div>
     </div>
 </body>
@@ -61,7 +67,7 @@
                 } else {
                     $('.all_box').css('display', 'block')
                     $('.mask').css('display', 'none')
-                    str += '<video id="myVideo" controls preload="auto" class="datavideo" src=' + data.videoaddr + '></video>'
+                    str += '<video id="myVideo" controls preload="auto" class="datavideo" src=' + data.video + '></video>'
                     $(".video_class").html(str)
                 }
             }
@@ -93,6 +99,7 @@
                 if (data.status == 0) {
                     str2 = "";
                     var img = data.img;
+					var video = data.message;
                     str2 += '<video id="myVideo" controls preload="auto" class="datavideo" src=' + data.addr + '></video>'
                     $(".video_class").html(str2)
                     $(".mask").css('display','none')
@@ -117,4 +124,25 @@
             }
         });
     }
+
+    // 点击删除
+    $(".delete").click(function () {
+        // 删除或隐藏展示得界面
+        $(".all_box").css('display', 'none');
+        $(".mask").css('display', 'block');
+        //将空值添加到数据库
+        $.ajax({
+            url: '{php echo mobileUrl("merchmanage/home/homepage/video")}',
+            type: 'post',
+            data: { video: '', img: ''},
+            dataType: 'json',
+            success: function (res) {
+                if (res.status == 0) {
+                    console.log('成功');
+                } else {
+                    console.log('失败');
+                }
+            }
+        })
+    })
 </script>
