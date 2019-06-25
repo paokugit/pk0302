@@ -22,19 +22,19 @@ class Game_EweiShopV2Model{
             $num = array_sum($array);
             $rand = rand(1,$num);
             //扣除抽奖的钱的日志
-            $this->addlog($openid,$type,-$money,$data['type'],'幸运转盘抽奖');
+            $this->addlog($openid,$type,-$money,$data['game_type'],'幸运转盘抽奖');
             //如果不是免费抽奖  就减去对应的东西
             if($money != 0){
-                $this->addcredit($openid,-$money,$data['type']);
+                $this->addcredit($openid,-$money,$data['game_type']);
             }
             foreach ($array as $key=>$value){
                 if($rand <= $value){
                     preg_match('/\d+/',$key,$arr);
                     //添加中奖日志
-                    $this->addlog($openid,1,$arr[0],$data['type'],"抽中".$key);
+                    $this->addlog($openid,1,$arr[0],$data['game_type'],"抽中".$key);
                     //如果$data['type']  == 1 就是卡路里   == 2 就是折扣宝
-                    $this->addcredit($openid,$arr[0],$data['type']);
-                    return $key;
+                    $this->addcredit($openid,$arr[0],$data['game_type']);
+                    return $arr[0];
                     break;
                 }else{
                     $rand -= $value;
@@ -78,12 +78,14 @@ class Game_EweiShopV2Model{
               'uniacid'=>$_W['uniacid'],
               'createtime'=>time(),
               'remark'=>$remark,
+              'credittytpe'=>"credit1"
           ];
-          if($datatype == 1){
-              $add['credittytpe'] = "credit1";
-          }elseif ($datatype == 2){
-              $add['credittype'] = "credit3";
-          }
+	  //原本的设想是  卡路里转盘  用卡路里抽奖 奖励卡路里  折扣宝抽奖  用折扣宝抽奖  奖励折扣宝
+//          if($datatype == 1){
+//              $add['credittytpe'] = "credit1";
+//          }elseif ($datatype == 2){
+//              $add['credittype'] = "credit3";
+//          }
           pdo_insert('mc_credits_record',$add);
           pdo_insert('ewei_shop_member_credit_record',$add);
       }

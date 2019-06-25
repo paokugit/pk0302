@@ -542,5 +542,32 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         show_json(1,$data);
     }
+
+    /**
+     * 卡路里转账
+     */
+    public function calorie_change()
+    {
+        global $_W;
+        global $_GPC;
+
+    }
+
+    /**
+     * 查找手机号是否存在
+     */
+    public function get_phone()
+    {
+        global $_W;
+        global $_GPC;
+        if($_GPC['mobile'] == ""){
+            show_json(0,"请完善参数");
+        }
+        if(pdo_exists('ewei_shop_member',['uniacid'=>$_W['uniacid'],'mobile'=>$_GPC['mobile']])){
+            show_json(1);
+        }else{
+            show_json(0,"查无此人");
+        }
+    }
 }
 ?>

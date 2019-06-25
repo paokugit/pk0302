@@ -183,7 +183,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			if( $data["buylevels"] != "" ) 
 			{
 				$buylevels = explode(",", $data["buylevels"]);
-				if( !in_array($member["level"], $buylevels) ) 
+				if( !in_array($member["agentlevel"], $buylevels) ) 
 				{
 					app_error(AppError::$OrderCreateMemberLevelLimit, "您的会员等级无法购买<br/>" . $data["title"] . "!");
 				}
