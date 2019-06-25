@@ -305,7 +305,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         imagettftext($target, 18, 0, 446, 998, $nameColor, $PINGFANG_BOLD, $name);
         //获取剩余卡路里未兑换
         $exchange=m("member")->exchange_step($openid);
-        $surplus=$exchange-$count+1;
+        $surplus=$exchange-$count;
         if ($surplus<0){
             $surplus=0;
         }
@@ -320,17 +320,18 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         $nameColor = imagecolorallocate($target, 51, 51, 51);
         imagettftext($target, 18, 0, 108, 1128, $nameColor, $PINGFANG_BOLD, $sign);
         //收入
-        //$count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and num>0",array(':openid'=>$openid,':credittype'=>"credit1"));
-        if (empty($count)){
-            $count=0;
-        }
-        $count=round($count,1);
-        $name="收入（元）";
-        $nameColor = imagecolorallocate($target, 51, 51, 51);
-        imagettftext($target, 20, 0, 300, 1090, $nameColor, $PINGFANG_LIGHT, $name);
-        $nameColor = imagecolorallocate($target, 51, 51, 51);
-        imagettftext($target, 18, 0, 298, 1128, $nameColor, $PINGFANG_BOLD, $count);
-        
+
+     //   $count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and num>0",array(':openid'=>$openid,':credittype'=>"credit1"));
+//         if (empty($count)){
+//             $count=0;
+//         }
+//         $count=round($count,1);
+//         $name="收入（元）";
+//         $nameColor = imagecolorallocate($target, 51, 51, 51);
+//         imagettftext($target, 20, 0, 300, 1090, $nameColor, $PINGFANG_LIGHT, $name);
+//         $nameColor = imagecolorallocate($target, 51, 51, 51);
+//         imagettftext($target, 18, 0, 298, 1128, $nameColor, $PINGFANG_BOLD, $count);
+
         //二维码
         $boxstr = file_get_contents(IA_ROOT . "/addons/ewei_shopv2/plugin/app/static/images/poster/goodsbox.png");
         $box = imagecreatefromstring($boxstr);
