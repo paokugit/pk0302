@@ -2172,13 +2172,16 @@ if( !class_exists("CommissionModel") )
 			           
 			        }*/
 			        
-			        //fbb 贡献值奖励
-			        //1.直推30人阶段奖励
-			        m("devote")->rewardone($openid);
-			        //直推付费会员
-			        m("devote")->rewardthree($openid);
-			        
+			       
 			    }
+			    
+			    //fbb 贡献值奖励
+			    //1.直推30人阶段奖励
+			    m("devote")->rewardone($openid);
+			    //直推付费会员
+			    m("devote")->rewardthree($openid,$goods['agentlevel']);
+			    
+			    
 			    //fbb 贡献值
 			    //判断是否是金主权益礼包
 			    if ($vv['goodsid']==1467){
