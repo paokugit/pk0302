@@ -53,7 +53,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             if ($log){
                 $num=$log["num"]+1;
                 //获取兑换步数
-                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$log["create_time"]));
+                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$log["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
 
 //                 var_dump($getstep);die;
                 if ($getstep){
@@ -117,7 +117,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                 //获取今天生成的海报
                 $logg=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day and num=:num order by create_time desc limit 1",array(':openid'=>$openid,':day'=>$day,':num'=>$num));
                 
-                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$logg["create_time"]));
+                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$logg["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
                 
                 $num=$num+1;
                 if ($getstep){
@@ -292,7 +292,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         //获取今日已兑换的卡路里
         $starttime=strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
         $endtime=strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
-        $count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime));
+        $count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark like :remark1 or remark like :remark2)",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime,':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
         if (empty($count)){
             $count=0;
         }
