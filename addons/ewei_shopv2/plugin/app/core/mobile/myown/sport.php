@@ -320,7 +320,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         $nameColor = imagecolorallocate($target, 51, 51, 51);
         imagettftext($target, 18, 0, 108, 1128, $nameColor, $PINGFANG_BOLD, $sign);
         //收入
-        $count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and num>0",array(':openid'=>$openid,':credittype'=>"credit1"));
+        //$count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and num>0",array(':openid'=>$openid,':credittype'=>"credit1"));
         if (empty($count)){
             $count=0;
         }
