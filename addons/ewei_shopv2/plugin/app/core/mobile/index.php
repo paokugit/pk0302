@@ -228,7 +228,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
         $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
         
-        $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and remark not like :remark",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":openid"=>$openid,":remark"=>"签到获取"));
+        $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":openid"=>$openid,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
         
         if (empty($cardtoday)){
             $jinri=0;
