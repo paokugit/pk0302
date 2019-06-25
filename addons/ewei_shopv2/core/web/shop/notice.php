@@ -129,22 +129,27 @@ class Notice_EweiShopV2Page extends WebPage
 		global $_W;
 		global $_GPC;
 		$id = $_GPC['id'];
-		$list = pdo_get('ewei_shop_email',['id'=>$id]);
+		$data = pdo_get('ewei_shop_email',['id'=>$id]);
 		if($_POST){
-			$data = $_GPC;
-			$data['uniacid'] = $_W['uniacid'];
-			var_dump($data);exit;
+			if($_GPC['content'] == "" || $_GPC['send_openid'] == ""){
+				show_json(0,"请完善参数");
+			}
 			pdo_begin();
 			try{
 				if(!$id){
-					pdo_insert('ewei_shop_email',$data);
+					$open_arr = explode(',',$_GPC['send_openid']);
+					foreach ($open_arr as $item){
+						$level = pdo_getcolumn('ewei_shop_member',['openid'=>$item],'agent_level');
+						pdo_insert('ewei_shop_email',['uniacid'=>$_W['uniacid'],'content'=>$_GPC['content'],'openid'=>$item,'level'=>$level,'createtime'=>time()]);
+					}
 				}else{
-					pdo_update('ewei_shop_email',$data,['id'=>$id]);
+					pdo_update('ewei_shop_email',['content'=>$_GPC['content']],['id'=>$id]);
 				}
 				pdo_commit();
 			}catch(Exception $exception){
 				pdo_rollback();
 			}
+			show_json(1,array('url' => webUrl('shop/notice/log')));
 		}
 		include $this->template();
 	}
@@ -160,15 +165,17 @@ class Notice_EweiShopV2Page extends WebPage
 		$page = max(1,$_GPC['page']);
 		$pageSize = 20;
 		$psize = ($page - 1) * $pageSize;
-		$condition = ' e.uniacid = "'.$uniacid.'" and delete = 0';
-		if($_GPC['openid']){
-			$condition .= ' AND e.openid = "'.$_GPC['openid'].'"';
+		$condition = ' e.uniacid = "'.$uniacid.'" and e.delete = 0';
+		if($_GPC['keyword'] != ""){
+			$condition .= ' AND (e.openid LIKE "'.$_GPC['keyword'].'" or m.nickname LIKE "'.$_GPC['keyword'].'" or m.mobile LIKE "'.$_GPC['keyword'].'")';
 		}
-		if($_GPC['nickname']){
-			$condition .= ' AND m.nickname = "'.$_GPC['nickname'].'"';
+		if($_GPC['status'] != ""){
+			$condition .= ' AND e.status = "'.$_GPC['status'].'"';
 		}
-		if($_GPC['mobile']){
-			$condition .= ' AND m.mobile = "'.$_GPC['mobile'].'"';
+		if($_GPC['createtime']['start'] != ""){
+			$start = strtotime($_GPC['createtime']['start']);
+			$end = strtotime($_GPC['createtime']['end']);
+			$condition .= " AND e.createtime between '".$start."' and '".$end."'";
 		}
 		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM '.tablename('ewei_shop_email').' e join '.tablename('ewei_shop_member').' m on e.openid = m.openid'.' where 1 and '.$condition);
 		$list = pdo_fetchall('select m.nickname,m.mobile,m.avatar,e.* from '.tablename('ewei_shop_email').' e join'.tablename('ewei_shop_member').' m on m.openid=e.openid'.' where 1 and '. $condition .' order by e.createtime desc LIMIT '.$psize.','.$pageSize);
@@ -182,12 +189,29 @@ class Notice_EweiShopV2Page extends WebPage
 	public function del()
 	{
 		global $_GPC;
-		$id = $_GPC;
+		$id = $_GPC['id'];
 		$res = pdo_update('ewei_shop_email',['delete'=>4],['id'=>$id]);
 		if($res){
-			show_json(1,"已删除");
+			show_json(1,'已删除');
 		}else{
 			show_json(0,"删除失败");
+		}
+	}
+
+	/**
+	 * 根据关键词查询用户信息
+	 */
+	public function search()
+	{
+		global $_W;
+		global $_GPC;
+		$uniacid = $_W['uniacid'];
+		$keywords = trim($_GPC['keywords']);
+		$member = pdo_fetch('select nickname,mobile,avatar,openid from '.tablename('ewei_shop_member').' where (mobile LIKE "'.$keywords.'" or nickname LIKE "'.$keywords.'" or openid LIKE "'.$keywords.'") and uniacid = "'.$uniacid.'"');
+		if($member){
+			show_json(1,$member);
+		}else{
+			show_json(0,"查无此人");
 		}
 	}
 }
