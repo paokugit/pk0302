@@ -406,11 +406,22 @@ class Index_EweiShopV2Page extends AppMobilePage
 
             $step = pdo_get('ewei_shop_member_getstep', array('id' => $_GPC['id']));
             //今日步数
-            $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $openid,':type'=>2));
+//             $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $openid,':type'=>2));
             
-            if (empty($jinri)){
+//             if (empty($jinri)){
+//                 $jinri=0;
+//             }
+            $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
+            $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
+            
+            $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":openid"=>$openid,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+            
+            if (empty($cardtoday)){
                 $jinri=0;
+            }else{
+                $jinri=$cardtoday*1500/$subscription_ratio;
             }
+            
             
             if ($step["type"]!=2){
                 
