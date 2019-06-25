@@ -2172,8 +2172,19 @@ if( !class_exists("CommissionModel") )
 			           
 			        }*/
 			        
+			        //fbb 贡献值奖励
+			        //1.直推30人阶段奖励
+			        m("devote")->rewardone($openid);
+			        //直推付费会员
+			        m("devote")->rewardthree($openid);
 			        
 			    }
+			    //fbb 贡献值
+			    //判断是否是金主权益礼包
+			    if ($vv['goodsid']==1467){
+			        m("devote")->rewardfour($openid);
+			    }
+			    
             }
 
             $goods = pdo_fetchall("select og.goodsid,g.cates,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,og.optionname as optiontitle,g.isverify,g.storeids from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:orderid", array(":orderid" => $orderid ));

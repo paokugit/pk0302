@@ -120,6 +120,76 @@ class Notice_EweiShopV2Page extends WebPage
 
 		show_json(1, array('url' => referer()));
 	}
+
+	/**
+	 * 私信发送
+	 */
+	public function email()
+	{
+		global $_W;
+		global $_GPC;
+		$id = $_GPC['id'];
+		$list = pdo_get('ewei_shop_email',['id'=>$id]);
+		if($_POST){
+			$data = $_GPC;
+			$data['uniacid'] = $_W['uniacid'];
+			var_dump($data);exit;
+			pdo_begin();
+			try{
+				if(!$id){
+					pdo_insert('ewei_shop_email',$data);
+				}else{
+					pdo_update('ewei_shop_email',$data,['id'=>$id]);
+				}
+				pdo_commit();
+			}catch(Exception $exception){
+				pdo_rollback();
+			}
+		}
+		include $this->template();
+	}
+
+	/**
+	 * 私信发送记录
+	 */
+	public function log()
+	{
+		global $_W;
+		global $_GPC;
+		$uniacid = $_W['uniacid'];
+		$page = max(1,$_GPC['page']);
+		$pageSize = 20;
+		$psize = ($page - 1) * $pageSize;
+		$condition = ' e.uniacid = "'.$uniacid.'" and delete = 0';
+		if($_GPC['openid']){
+			$condition .= ' AND e.openid = "'.$_GPC['openid'].'"';
+		}
+		if($_GPC['nickname']){
+			$condition .= ' AND m.nickname = "'.$_GPC['nickname'].'"';
+		}
+		if($_GPC['mobile']){
+			$condition .= ' AND m.mobile = "'.$_GPC['mobile'].'"';
+		}
+		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM '.tablename('ewei_shop_email').' e join '.tablename('ewei_shop_member').' m on e.openid = m.openid'.' where 1 and '.$condition);
+		$list = pdo_fetchall('select m.nickname,m.mobile,m.avatar,e.* from '.tablename('ewei_shop_email').' e join'.tablename('ewei_shop_member').' m on m.openid=e.openid'.' where 1 and '. $condition .' order by e.createtime desc LIMIT '.$psize.','.$pageSize);
+		$pager = pagination2($total, $page, $pageSize);
+		include $this->template();
+	}
+
+	/**
+	 * 删除发送记录
+	 */
+	public function del()
+	{
+		global $_GPC;
+		$id = $_GPC;
+		$res = pdo_update('ewei_shop_email',['delete'=>4],['id'=>$id]);
+		if($res){
+			show_json(1,"已删除");
+		}else{
+			show_json(0,"删除失败");
+		}
+	}
 }
 
 ?>

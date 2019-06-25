@@ -1362,6 +1362,9 @@ class Member_EweiShopV2Model
             $where['openid'] = $info['openid'];
             pdo_update("ewei_shop_member",$data,$where);
             $this->bindFromMerch($info['openid'],$data['agentid']);
+            
+            //fbb 贡献值
+            m("devote")->rewardtwo($agentinfo["id"]);
         }
         if(isset($agentinfo['id'])){
             if(isset($info['goodsid'])){

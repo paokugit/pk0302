@@ -25,27 +25,33 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     }
     //上传视频
     public function video(){
+        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
+
         $merchid = $_W['merchmanage']['merchid'];
          if ($_POST){
+
              $data["shopvideo"]=$_GPC["video"];
               $data["img"]=$_GPC["img"];
               if (pdo_update("ewei_shop_merch_user",array("shopvideo"=>$data["shopvideo"],"shopvideo_img"=>$data["img"]),array("id"=>$merchid))){
                   $res["status"]=0;
                   $res["message"]="成功";
-                  echo json_encode($res);die;
+                  echo json_encode($res);
               }else{
                   $res["status"]=1;
                   $res["message"]="失败";
-                  echo json_encode($res);die;
+                  echo json_encode($res);
               }
+
          }
         include $this->template();
+
     }
     
     //上传视频
     public function  upload_video(){
+        header('Access-Control-Allow-Origin:*');
         $field = $_FILES["file"];
         $resault=$this->upload_file($field,"./attachment",1);
         //成功
@@ -75,6 +81,7 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     
     //上传图片
     public function upload_img(){
+        header('Access-Control-Allow-Origin:*');
         $field = $_FILES["file"];
         $resault=$this->upload_file($field,"./attachment",2);
         if ($resault["status"]==0){
@@ -85,6 +92,7 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     
     //商家主页图片
     public function imgapi(){
+        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
         $merchid = $_W['merchmanage']['merchid'];
@@ -108,6 +116,7 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     
     //获取商家主页图片
     public function hqimg(){
+        header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
         $merchid = $_W['merchmanage']['merchid'];
@@ -123,8 +132,8 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
            foreach ($piclist as $k=>$v){
                $re["imgaddr"][$k]=tomedia($v);
            }
-           $re["videoaddr"]=tomedia($merch["shopvideo"]);
         }
+	$re['videoaddr'] = tomedia($re['video']);
         echo json_encode($re);
     }
     //截取视屏封面图
@@ -151,7 +160,7 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
     {
        
         if($type==1){
-            $imagesExt=['rm', 'rmvb', 'wmv', 'avi', 'mpg', 'mpeg', 'mp4'];
+            $imagesExt=['rm', 'rmvb', 'wmv', 'avi', 'mpg', 'mpeg', 'mp4','mov'];
             $path = "videos/";
         }else{
             $imagesExt=['jpg','jpeg','gif','png'];

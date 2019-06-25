@@ -53,7 +53,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
                             $goods_list[$index]['memberthumb'] = $goods_list[$index]['thumb'];
                             $goods_list[$index]['thumb'] = $this->levelurlup($item['id']);
                         }
-                        $goods_list[$index]['salesreal'] = $goods_list[$index]['sales'] = $goods_list[$index]['salesreal']*2;
+                        $goods_list[$index]['salesreal'] = $goods_list[$index]['sales'] = $goods_list[$index]['salesreal']*21+rand(0,10);
                     }
 				    if($_GPC['cate']==4){//会员产品获取有效期
                         $agentlevel = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where id=:id limit 1", array( ":id" => $item['agentlevel']));

@@ -53,7 +53,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             if ($log){
                 $num=$log["num"]+1;
                 //获取兑换步数
-                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$log["create_time"]));
+                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$log["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
 
 //                 var_dump($getstep);die;
                 if ($getstep){
@@ -117,7 +117,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                 //获取今天生成的海报
                 $logg=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day and num=:num order by create_time desc limit 1",array(':openid'=>$openid,':day'=>$day,':num'=>$num));
                 
-                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$logg["create_time"]));
+                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$logg["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
                 
                 $num=$num+1;
                 if ($getstep){
@@ -292,7 +292,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         //获取今日已兑换的卡路里
         $starttime=strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
         $endtime=strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
-        $count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime));
+        $count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark like :remark1 or remark like :remark2)",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime,':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
         if (empty($count)){
             $count=0;
         }
@@ -540,33 +540,14 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             show_json(1,"推荐人不可为空");
         }
         $member=m("member")->getmember("sns_wa_".$openid);
-//          if ($login==0){
-//              if ($member){
-//              pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
-//              }else{
-               
-//                  $m = array("uniacid" => $_W["uniacid"],"agentid"=>$parent_id,"uid" => 0, "openid" =>"sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
-//                  pdo_insert("ewei_shop_member", $m);
-                 
-//              }
-//             //推荐人
-//             if ($parent_id!=0&&!empty($parent_id)){
-//                 $parent=m("member")->getmember($parent_id);
-//                 if (!empty($parent)){
-//                     $cd=$this->prize();
-//                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
- 
-//                 }
-//             }
-            
-//             show_json(0,"成功");
-//         }
-       
-          
+
             if ($member&&$member["agentid"]==0&&$member["id"]!=$parent_id){
-                pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
+                
                 //推荐人
                 if ($parent_id!=0&&!empty($parent_id)){
+                    
+                    pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
+                    
                     $parent=m("member")->getmember($parent_id);
                     if (!empty($parent)){
                         //                     $cd=$this->prize();
@@ -580,6 +561,8 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                         m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
                         }
                         
+                        //贡献值奖励
+                        m("devote")->rewardtwo($parent_id);
                     }
                 }
             }elseif (empty($member)){
@@ -601,6 +584,9 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                             m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
                         }
                         
+                        
+                        //贡献值奖励
+                        m("devote")->rewardtwo($parent_id);
                     }
                 }
             }

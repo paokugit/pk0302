@@ -19,14 +19,15 @@ class MerchmanageMobilePage extends PluginMobilePage
 		parent::__construct(false);
 
 		$this->set = m('common')->getPluginset('merchmanage');
+// 		var_dump($this->set);
 		if (empty($this->set['open'])) {
 			$this->message('暂未开放', mobileUrl());
 			
 		}
 
 
-		//$this->checkLogin();
-// 		$this->setShare();
+		$this->checkLogin();
+		$this->setShare();
 	}
 
 	protected function checkLogin()

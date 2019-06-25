@@ -204,7 +204,7 @@ class Index_EweiShopV2Page extends AppMobilePage
       
         if (empty($member['agentlevel'])) {
            // $bushu = 5;
-            //  $subscription_ratio=1;
+             $subscription_ratio=0.5;
             $exchange=0.5/1500;
             $exchange_step=m("member")->exchange_step($openid);
          //   var_dump($exchange_step);
@@ -221,13 +221,21 @@ class Index_EweiShopV2Page extends AppMobilePage
            //可兑换的步数
 //            var_dump($bushu);
         }
-     //   var_dump($bushu);
+      // var_dump($bushu);
         //已兑换的bushu
-        $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $_W['openid'],':type'=>2));
-        if (empty($jinri)){
+      //  $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $_W['openid'],':type'=>2));
+        //获取今日已兑换的卡路里
+        $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
+        $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
+        
+        $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":openid"=>$openid,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+        
+        if (empty($cardtoday)){
             $jinri=0;
+        }else{
+            $jinri=$cardtoday*1500/$subscription_ratio;
         }
-    //    var_dump($jinri);
+     //  var_dump($jinri);
         
         $step_number=$jinri;
        
