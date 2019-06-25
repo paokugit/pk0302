@@ -132,8 +132,8 @@ class Homepage_EweiShopV2Page extends MerchmanageMobilePage
            foreach ($piclist as $k=>$v){
                $re["imgaddr"][$k]=tomedia($v);
            }
-           $re["videoaddr"]=tomedia($merch["shopvideo"]);
         }
+	$re['videoaddr'] = tomedia($re['video']);
         echo json_encode($re);
     }
     //截取视屏封面图

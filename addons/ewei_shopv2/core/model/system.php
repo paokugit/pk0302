@@ -593,6 +593,16 @@ class System_EweiShopV2Model {
                                 "desc" => "店铺公告管理"
                             ) ,
                             array(
+                                "title" => "私信助手",
+                                "route" => "notice.email",
+                                "desc" => "私信发送"
+                            ) ,
+                            array(
+                                "title" => "私信记录",
+                                "route" => "notice.log",
+                                "desc" => "私信发送记录"
+                            ) ,
+                            array(
                                 "title" => "评价管理",
                                 "route" => "comment",
                                 "desc" => "店铺商品评价管理"
