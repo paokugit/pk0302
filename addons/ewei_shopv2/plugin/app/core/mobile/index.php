@@ -608,9 +608,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         $m["step_count"]=$step_count;
         $m["step_today"]=$step_today; 
         //获取会员累计的卡路里
-        $count= pdo_fetchcolumn("select sum(num) from " . tablename('mc_credits_record') . " where `credittype`=:credittype and  'num'>:num", array(':credittype' =>"credit1", ':num' =>0,));
-        $count=3+round($count/10000,2);
-        $m["count"]=$count;
+//        $count= pdo_fetchcolumn("select sum(num) from " . tablename('mc_credits_record') . " where `credittype`=:credittype and  'num'>:num", array(':credittype' =>"credit1", ':num' =>0,));
+//        $count=3+round($count/10000,2);
+//        $m["count"]=$count;
+        $m["count"]='1268966';
         show_json(1, $m);
     }
     
