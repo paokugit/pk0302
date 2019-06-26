@@ -96,7 +96,12 @@ class Devote_EweiShopV2Model{
         }
         //获取上级
         $parent=m('member')->getMember($member["agentid"]);
-        if ($parent["agentlevel"]!=2&&$parent["agentlevel"]!=5){
+        
+        if (empty($parent)){
+            return false;
+        }
+        
+        if ($parent["agentlevel"]!=2||$parent["agentlevel"]!=5){
             //店主、星选大人
             return false;
         }
@@ -108,7 +113,7 @@ class Devote_EweiShopV2Model{
         //获取二级推荐人
         if ($parent["agentid"]!=0){
         $pparent=m("member")->getMember($parent["agentid"]);
-        if ($pparent["agentlevel"]!=2&&$pparent["agentlevel"]!=5){
+        if ($pparent["agentlevel"]!=2||$pparent["agentlevel"]!=5){
             //店主、星选大人
             return false;
         }
