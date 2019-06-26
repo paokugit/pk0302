@@ -179,7 +179,8 @@ class Index_EweiShopV2Page extends AppMobilePage
 			$result["phonecolor"] = (empty($_W["shopset"]["app"]["phonecolor"]) ? "#ff5555" : $_W["shopset"]["app"]["phonecolor"]);
 			$result["phonenumber"] = (empty($_W["shopset"]["app"]["phonenumber"]) ? "#ff5555" : $_W["shopset"]["app"]["phonenumber"]);
 		}
-		if( (empty($member["mobileverify"]) || empty($member["mobile"])) && (!empty($_W["shopset"]["app"]["openbind"]) || !empty($_W["shopset"]["wap"]["open"])) ) 
+		if( (empty($member["mobileverify"]) || empty($member["mobile"])))
+		    //if( (empty($member["mobileverify"]) || empty($member["mobile"])) && (!empty($_W["shopset"]["app"]["openbind"]) || !empty($_W["shopset"]["wap"]["open"])) )
 		{
 			$result["needbind"] = 1;
 			$result["bindtext"] = (!empty($_W["shopset"]["app"]["openbind"]) && !empty($_W["shopset"]["app"]["bindtext"]) ? $_W["shopset"]["app"]["bindtext"] : "绑定手机号可合并或同步您其他账号数据");

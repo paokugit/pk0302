@@ -39,7 +39,7 @@ class Demo_EweiShopV2Page extends AppMobilePage
 
     public function getall($page)
     {
-        $limit = $page*1000;
+        $limit = $page*100;
         $memberList = pdo_fetchall("select * from " . tablename("ewei_shop_member"). " limit ". $limit.",1000");
         foreach ($memberList as $key=>$row){
             $data = array();
