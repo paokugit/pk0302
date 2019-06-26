@@ -578,6 +578,19 @@ class Index_EweiShopV2Page extends AppMobilePage
     }
 
     /**
+     * 转账页面
+     */
+    public function rebate()
+    {
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $openid = $_GPC['openid'];
+        $credit3 = pdo_getcolumn('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid],'credit3');
+        show_json(1,['credit3'=>$credit3]);
+    }
+
+    /**
      * 查找手机号是否存在
      */
     public function check_phone()

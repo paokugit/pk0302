@@ -77,6 +77,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         //抽奖的结果
         $res = m('game')->prize($game,$type,$openid,$money);
         $num = count($user)-count($log)>0?:0;
+        if($type == 2) {
+            //如果是免费抽奖 他的记录就又加了一条  所以 再减一
+            $num = count($user) - count($log) - 1 > 0 ?: 0;
+        }
         $res['remain'] = $num;
         show_json(1,$res);
     }
