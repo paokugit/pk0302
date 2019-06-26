@@ -1049,7 +1049,7 @@ class Index_EweiShopV2Page extends WebPage
         {
             ca("sysset.game.edit");
             $add = $_GPC;
-            $type = $_GPC['type'];
+            $type = $_GPC['game_type'];
             foreach ($add as $key=>$val){
                 if(is_array($val)){
                     continue;
@@ -1059,9 +1059,9 @@ class Index_EweiShopV2Page extends WebPage
             pdo_begin();
             try{
                 if(empty($data)){
-                    pdo_insert('ewei_shop_game',['uniacid'=>$_W['uniacid'],'sets'=>iserializer($add),'createtime'=>time(),'type'=>$type]);
+                    pdo_insert('ewei_shop_game',['uniacid'=>$_W['uniacid'],'sets'=>iserializer($add),'createtime'=>time(),'game_type'=>$type]);
                 }else{
-                    pdo_update('ewei_shop_game',['sets'=>iserializer($add),'updatetime'=>time(),'type'=>$type],['id'=>$data['id']]);
+                    pdo_update('ewei_shop_game',['sets'=>iserializer($add),'updatetime'=>time(),'game_type'=>$type],['id'=>$data['id']]);
                 }
                 pdo_commit();
             }catch (Exception $exception){
