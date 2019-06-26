@@ -586,6 +586,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $uniacid = $_W['uniacid'];
         $openid = $_GPC['openid'];
+        if($openid == ""){
+            show_json(0,"请完善参数");
+        }
         $credit3 = pdo_getcolumn('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid],'credit3');
         show_json(1,['credit3'=>$credit3]);
     }
