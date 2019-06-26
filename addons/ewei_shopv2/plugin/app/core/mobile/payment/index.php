@@ -542,5 +542,81 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         show_json(1,$data);
     }
+
+    /**
+     * 折扣宝转账
+     */
+    public function rebate_change()
+    {
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $openid = $_GPC['openid'];
+        $mobile = $_GPC['mobile'];
+        $money = $_GPC['money'];
+        if($openid == "" || $mobile == "" || $money == ""){
+            show_json(0,"请完善参数信息");
+        }
+        $to = pdo_get('ewei_shop_member',['mobile'=>$mobile,'uniacid'=>$uniacid]);
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
+        if(!$member){
+            show_json(0,"用户信息不正确");
+        }
+        if(!$to){
+            show_json(0,"收款人不存在");
+        }
+        //更新转账者折扣宝余额   减去  并写入日志
+        pdo_update('ewei_shop_member',['credit3'=>bcsub($member['credit3'],$money,2)],['openid'=>$member['openid'],'uniacid'=>$uniacid]);
+        $this->addlog($member,$to,$money,1);
+        //更新收款者  折扣宝余额   加上  并写入日志
+        pdo_update('ewei_shop_member',['credit3'=>bcadd($to['credit3'],$money,2)],['openid'=>$to['openid'],'uniacid'=>$uniacid]);
+        $this->addlog($to,$member,$money,2);
+        show_json(1);
+    }
+
+    /**
+     * 查找手机号是否存在
+     */
+    public function get_phone()
+    {
+        global $_W;
+        global $_GPC;
+        if($_GPC['mobile'] == ""){
+            show_json(0,"请完善参数");
+        }
+        if(pdo_exists('ewei_shop_member',['uniacid'=>$_W['uniacid'],'mobile'=>$_GPC['mobile']])){
+            show_json(1);
+        }else{
+            show_json(0,"查无此人");
+        }
+    }
+
+    /**
+     * 添加折扣宝增减记录
+     * @param $member
+     * @param $to
+     * @param $money
+     * @param int $type   ==1  转账者加日志   ==2  收款者加日志
+     */
+    public function addlog($member,$to,$money,$type=1)
+    {
+        global $_W;
+        $data = [
+            'uniacid'=>$_W['uniacid'],
+            'credittype'=>"credit3",
+            'openid'=>$member['openid'],
+            'module'=>"ewei_shopv2",
+            'createtime'=>time(),
+        ];
+        if($type == 1){
+            $data['num'] = -$money;
+            $data['remark'] = "转帐给".$to['mobile'];
+        }elseif ($type == 2){
+            $data['num'] = $money;
+            $data['remark'] = "ID:".$to['id']."转入";
+        }
+        pdo_insert('mc_credits_record',$data);
+        pdo_insert('ewei_shop_member_credit_record',$data);
+    }
 }
 ?>

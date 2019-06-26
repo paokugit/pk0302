@@ -91,13 +91,30 @@ class Devote_EweiShopV2Model{
         if (empty($member)){
             return false;
         }
-        //获取上级
-        $parent=m('member')->getMember($member["agentid"]);
-        if ($parent["agentlevel"]==0){
+        if ($member["agentid"]==0){
             return false;
         }
-        //添加记录奖励
-        m('member')->setCredit($parent["openid"], 'credit4', 4000, "直推22000折扣宝充值包");
+        //获取上级
+        $parent=m('member')->getMember($member["agentid"]);
+        if ($parent["agentlevel"]!=2&&$parent["agentlevel"]!=5){
+            //店主、星选大人
+            return false;
+        }
+        //添加记录奖励--一级奖励--贡献值奖励
+        m('member')->setCredit($parent["openid"], 'credit4', 3000, "直推金主礼包");
+          //折扣宝奖励
+        m('member')->setCredit($parent["openid"], 'credit1', 30000, "直推金主礼包");
+        
+        //获取二级推荐人
+        if ($parent["agentid"]!=0){
+        $pparent=m("member")->getMember($parent["agentid"]);
+        if ($pparent["agentlevel"]!=2&&$pparent["agentlevel"]!=5){
+            //店主、星选大人
+            return false;
+        }
+        //二级贡献值奖励
+        m('member')->setCredit($pparent["openid"], 'credit4', 500, "团队提成 ");
+        }
         return true;
     }
 }

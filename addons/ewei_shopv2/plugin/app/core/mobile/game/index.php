@@ -15,8 +15,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC['openid'];
         $type = $_GPC['type'];
         //奖励奖项
-        $list = pdo_getcolumn('ewei_shop_game',['status'=>1,'type'=>$type,'uniacid'=>$_W['uniacid']],'sets');
-        $list = iunserializer($list);
+        $sets = pdo_getcolumn('ewei_shop_game',['status'=>1,'game_type'=>$type,'uniacid'=>$_W['uniacid']],'sets');
+        $list = iunserializer($sets);
         //如果type == 1 是指卡路里转盘   $type == 2 折扣宝转盘
         if($type == 1){
             $cate = "credit1";
@@ -48,8 +48,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC['openid'];
         //$type==2  免费抽奖   $type == 0 花钱抽奖
         $type = $_GPC['type'];
+        $game_type = $_GPC['game_type'];
         $money = $_GPC['money'];
-        $game = pdo_get('ewei_shop_game',['uniacid'=>$_W['uniacid'],'type'=>$_GPC['type']]);
+        $game = pdo_get('ewei_shop_game',['uniacid'=>$_W['uniacid']]);
         if($game['status'] == 0){
             show_json(0,"该活动已关闭");
         }
@@ -57,8 +58,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         $today = strtotime(date('Y-m-d'));
         $tomorrow = $today + 60*60*24;
         $log = pdo_fetchall('select * from '.tablename('mc_credits_record').' where createtime > "'.$today.'" and createtime < "'.$tomorrow.'" and openid = "'.$openid.'" and type = 2');
-        if(count($log) > 5){
-            show_json(0,"今日免费抽奖次数已添加");
+        if($type == 2 && count($log) > 5){
+            show_json(0,"今日免费抽奖次数已用完");
         }
         //抽奖的结果
         $res = m('game')->prize($game,$type,$openid,$money);
