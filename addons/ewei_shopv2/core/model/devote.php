@@ -15,7 +15,14 @@ class Devote_EweiShopV2Model{
         }
         //获取上级
         $parent=m('member')->getMember($member["agentid"]);
+        if (empty($parent)){
+            return  false;
+        }
         if ($parent["agentlevel"]==0){
+            return false;
+        }
+        //判断是否开启贡献值
+        if (empty($parent["mobile"])||empty($parent["weixin"])){
             return false;
         }
         //获取推荐付费会员的总数
@@ -40,6 +47,11 @@ class Devote_EweiShopV2Model{
         if (empty($member)||$member["agentlevel"]==0){
             return false;
         }
+        //判断是否开启贡献值
+        if (empty($member["mobile"])||empty($member["weixin"])){
+            return false;
+        }
+        
         //获取直推会员的总数
         $sum=pdo_fetch("select count(*) from ".tablename("ewei_shop_member")." where  agentid=:agentid",array(":agentid"=>$parent_id));
         if ($sum["count"]<100){
@@ -64,9 +76,17 @@ class Devote_EweiShopV2Model{
         }
         //获取上级
         $parent=m('member')->getMember($member["agentid"]);
+        if (empty($parent)){
+            return false;
+        }
         if ($parent["agentlevel"]==0){
             return false;
         }
+        //判断是否开启贡献值
+        if (empty($parent["mobile"])||empty($parent["weixin"])){
+            return false;
+        }
+        
         $credit=0;
         if ($level==1){
             $remark="直推健康达人";
@@ -75,7 +95,7 @@ class Devote_EweiShopV2Model{
             $remark="直推星选达人";
             $credit=10;
         }elseif ($level==5){
-            $remark="直推店长";
+            $remark="直推店主";
             $credit=100;
         }
         if ($credit!=0){
@@ -86,35 +106,48 @@ class Devote_EweiShopV2Model{
     }
     //直推折扣宝
     //openid
-    public function rewardfour($openid){
+    public function rewardfour($openid,$num){
         $member = m('member')->getMember($openid);
-        if (empty($member)){
+         $num=(int)$num;
+        if (empty($member)||$member["agentid"]==0){
             return false;
         }
-        if ($member["agentid"]==0){
-            return false;
-        }
+        //用户卡路里增加
+        m('member')->setCredit($openid, 'credit3', 30000*$num, "购买金主礼包");
         //获取上级
         $parent=m('member')->getMember($member["agentid"]);
-        if ($parent["agentlevel"]!=2&&$parent["agentlevel"]!=5){
-            //店主、星选大人
+        if (empty($parent)){
             return false;
         }
-        //添加记录奖励--一级奖励--贡献值奖励
-        m('member')->setCredit($parent["openid"], 'credit4', 3000, "直推金主礼包");
-          //折扣宝奖励
-        m('member')->setCredit($parent["openid"], 'credit1', 30000, "直推金主礼包");
         
-        //获取二级推荐人
-        if ($parent["agentid"]!=0){
-        $pparent=m("member")->getMember($parent["agentid"]);
-        if ($pparent["agentlevel"]!=2&&$pparent["agentlevel"]!=5){
-            //店主、星选大人
+        //判断是否开启贡献值
+        if (empty($parent["mobile"])||empty($parent["weixin"])){
             return false;
         }
-        //二级贡献值奖励
-        m('member')->setCredit($pparent["openid"], 'credit4', 500, "团队提成 ");
+        
+        if ($parent["agentlevel"]==2||$parent["agentlevel"]==5){
+            //添加记录奖励
+            m('member')->setCredit($parent["openid"], 'credit4', 3000*$num, "直推金主礼包");
+            
         }
+        //获取上上级
+        if ($parent["agentid"]!=0){
+            $pparent=m('member')->getMember($parent["agentid"]);
+            if (empty($pparent)){
+                return  false;
+            }
+            //判断是否开启贡献值
+            if (empty($pparent["mobile"])||empty($pparent["weixin"])){
+                return false;
+            }
+            
+            if ($pparent["agentlevel"]==2||$pparent["agentlevel"]==5){
+                //添加记录奖励
+                m('member')->setCredit($pparent["openid"], 'credit4',300*$num, "团队提成");
+              
+            }
+        }
+       
         return true;
     }
 }
