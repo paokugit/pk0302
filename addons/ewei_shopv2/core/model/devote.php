@@ -95,7 +95,7 @@ class Devote_EweiShopV2Model{
             $remark="直推星选达人";
             $credit=10;
         }elseif ($level==5){
-            $remark="直推店长";
+            $remark="直推店主";
             $credit=100;
         }
         if ($credit!=0){
@@ -113,7 +113,7 @@ class Devote_EweiShopV2Model{
             return false;
         }
         //用户卡路里增加
-        m('member')->setCredit($openid, 'credit3', 30000*$num, "直推金主礼包");
+        m('member')->setCredit($openid, 'credit3', 30000*$num, "购买金主礼包");
         //获取上级
         $parent=m('member')->getMember($member["agentid"]);
         if (empty($parent)){
