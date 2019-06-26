@@ -18,13 +18,12 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		$total = pdo_fetchcolumn($sql, $params);
 		$sql = 'SELECT * FROM ' . tablename('ewei_shop_notice') . ' where 1 ' . $condition . ' ORDER BY displayorder desc,id desc LIMIT ' . ($pindex - 1) * $psize . ',' . $psize;
 		$list = pdo_fetchall($sql, $params);
-
 		foreach ($list as $key => &$row) {
 			$row['createtime'] = date('Y-m-d H:i', $row['createtime']);
 			$row['thumb'] = empty($row['thumb']) ? tomedia($_W['shopset']['shop']['logo']) : tomedia($row['thumb']);
-			$row['iszan'] = pdo_getcolumn('ewei_shop_notice_log',['openid'=>$_GPC['openid'],'notice_id'=>$row['id']],'status');
+			$zan = pdo_getcolumn('ewei_shop_notice_log',['openid'=>$_GPC['openid'],'notice_id'=>$row['id']],'status');
+			$row['is_zan'] = isset($zan) && $zan == 1 ? 1 : 0;
 		}
-
 		unset($row);
 		app_json(array('list' => $list, 'pagesize' => $psize, 'total' => $total));
 	}
@@ -62,11 +61,12 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		$status = $_GPC['status'];
 		$id = $_GPC['id'];
 		if(pdo_exists('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id])){
-			pdo_insert('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id,'createtime'=>time()]);
-		}else{
 			pdo_update('ewei_shop_notice_log',['status'=>$status],['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id]);
+		}else{
+			pdo_insert('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id,'createtime'=>time()]);
 		}
-		show_json(1);
+		$msg = $status == 0 ? "取消点赞成功" : "点赞成功";
+		show_json(1,$msg);
 	}
 
 	/**
