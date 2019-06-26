@@ -568,6 +568,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$to){
             show_json(0,"收款人不存在");
         }
+        if($to['openid'] == $member['openid']){
+            show_json(0,'转账者和收款人相同');
+        }
         //更新转账者折扣宝余额   减去  并写入日志
         pdo_update('ewei_shop_member',['credit3'=>bcsub($member['credit3'],$money,2)],['openid'=>$member['openid'],'uniacid'=>$uniacid]);
         $this->addlog($member,$to,$money,1);
