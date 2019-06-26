@@ -2097,7 +2097,7 @@ if( !class_exists("CommissionModel") )
 				return NULL;
 			}
 
-            $order_goods = pdo_fetchall("select goodsid from " . tablename("ewei_shop_order_goods") . " where orderid=:orderid and uniacid=:uniacid  ", array( ":uniacid" => $_W["uniacid"], ":orderid" => $order["id"] ), "goodsid");
+            $order_goods = pdo_fetchall("select goodsid,total from " . tablename("ewei_shop_order_goods") . " where orderid=:orderid and uniacid=:uniacid  ", array( ":uniacid" => $_W["uniacid"], ":orderid" => $order["id"] ));
 			foreach ($order_goods as $vv){
 			    $goods=pdo_get('ewei_shop_goods',array('id'=>$vv['goodsid']));
 			    if ($goods['agentlevel']>$member['agentlevel']){
@@ -2185,7 +2185,7 @@ if( !class_exists("CommissionModel") )
 			    //fbb 贡献值
 			    //判断是否是金主权益礼包
 			    if ($vv['goodsid']==1467){
-			        m("devote")->rewardfour($openid);
+			        m("devote")->rewardfour($openid,$vv["total"]);
 			    }
 			    
             }
