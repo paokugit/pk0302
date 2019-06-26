@@ -562,6 +562,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$member){
             show_json(0,"用户信息不正确");
         }
+        if(bccomp($member['credit3'],$money,2) == -1){
+            show_json(0,"用户余额不足");
+        }
         if(!$to){
             show_json(0,"收款人不存在");
         }
@@ -577,7 +580,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     /**
      * 查找手机号是否存在
      */
-    public function get_phone()
+    public function check_phone()
     {
         global $_W;
         global $_GPC;

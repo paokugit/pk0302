@@ -17,6 +17,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         //奖励奖项
         $sets = pdo_getcolumn('ewei_shop_game',['status'=>1,'game_type'=>$type,'uniacid'=>$_W['uniacid']],'sets');
         $list = iunserializer($sets);
+        foreach ($list as $key=>$item){
+            preg_match('/\d+/',$item['reward'.($key+1)],$arr);
+            $list[$key]['reward'.($key+1)] = $arr[0];
+        }
         //如果type == 1 是指卡路里转盘   $type == 2 折扣宝转盘
         if($type == 1){
             $cate = "credit1";
