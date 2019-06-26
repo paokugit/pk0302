@@ -1,7 +1,7 @@
 {template '_header'}
 <style>
     #send_openid{
-        width: 90%;
+        width: 86%;
         float: left;
     }
     .search{
@@ -16,6 +16,18 @@
         border-radius: 36%;
         background: #6bc76c;
     }
+    .member{
+        margin-left: 10%;
+        width: 88%
+    }
+    .member li{
+        float: left;
+        margin-left: 2%;
+        width: 23%
+    }
+    .member li img{
+        width: 120px;
+    }
 </style>
 <div class="page-header">
     当前位置：<span class="text-primary">  私信发送 </span>
@@ -27,50 +39,27 @@
             <div class="form-group">
                 <label class="col-lg control-label">私信内容</label>
                 <div class="col-sm-9 col-xs-12">
-                    <input type="text" name="content" class="form-control" value=""/>
-                    <span class='help-block'>此处受总数限制，如果剩余张数不足以发放给选定会员数量，则无法发放</span>
+                    <input type="text" name="content" class="form-control" value="{if $data['content']!=''}{php echo $data['content']}{/if}"/>
                 </div>
             </div>
             <div class='page-heading'><h2 class="form-group-title">发送对象</h2></div>
             <div class="form-group">
-                <label class="col-lg control-label" >发送类型</label>
+                <label class="col-lg control-label">发送类型</label>
                 <div class="col-sm-9 col-xs-12">
                     <label class="radio-inline"><input type="radio" name="send1" value="1"  checked /> 指定用户发送</label>
-<!--                    <label class="radio-inline"><input type="radio" name="send1" value="2"    /> 按用户等级发送</label>-->
-<!--                    <label class="radio-inline"><input type="radio" name="send1" value="4" />全部发送</label>-->
                 </div>
             </div>
             <div class="form-group choose choose_1" style="margin-top: 56px;">
                 <label class="col-lg control-label">选择会员</label>
                 <div class="col-sm-9 col-xs-12">
-                    <input type="text" id="send_openid" name="send_openid" class="form-control" placeholder="请输入要发送的用户的昵称，手机号，或者openid">
+                    <input type="text" id="send_openid" class="form-control" placeholder="请输入要发送的用户的昵称，手机号，或者openid">
+                    <input type="hidden" name="send_openid" class="form-control">
                     <span class="search" id="search">搜索</span>
                 </div>
             </div>
-            <ul style="margin-left: 10%;width: 88%">
-                <li style="float: left;margin-left: 2%;width: 23%"><img style="width: 120px;" src="../addons/ewei_shopv2/static/images/noface.png"><br><span>好人一生13256987458</span></li>
-                <li style="float: left;margin-left: 2%;width: 23%"><img style="width: 120px;" src="../addons/ewei_shopv2/static/images/noface.png"><br><span>好人一生13256987458</span></li>
-                <li style="float: left;margin-left: 2%;width: 23%"><img style="width: 120px;" src="../addons/ewei_shopv2/static/images/noface.png"><br><span>好人一生13256987458</span></li>
-                <li style="float: left;margin-left: 2%;width: 23%"><img style="width: 120px;" src="../addons/ewei_shopv2/static/images/noface.png"><br><span>好人一生13256987458</span></li>
-                <li style="float: left;margin-left: 2%;width: 23%"><img style="width: 120px;" src="../addons/ewei_shopv2/static/images/noface.png"><br><span>好人一生13256987458</span></li>
-                <li style="float: left;margin-left: 2%;width: 23%"><img style="width: 120px;" src="../addons/ewei_shopv2/static/images/noface.png"><br><span>好人一生13256987458</span></li>
-                <li style="float: left;margin-left: 2%;width: 23%"><img style="width: 120px;" src="../addons/ewei_shopv2/static/images/noface.png"><br><span>好人一生13256987458</span></li>
-                <li style="float: left;margin-left: 2%;width: 23%"><img style="width: 120px;" src="../addons/ewei_shopv2/static/images/noface.png"><br><span>好人一生13256987458</span></li>
-                <li style="float: left;margin-left: 2%;width: 23%"><img style="width: 120px;" src="../addons/ewei_shopv2/static/images/noface.png"><br><span>好人一生13256987458</span></li>
-                <li style="float: left;margin-left: 2%;width: 23%"><img style="width: 120px;" src="../addons/ewei_shopv2/static/images/noface.png"><br><span>好人一生13256987458</span></li>
+            <ul class="member">
+
             </ul>
-            <div class="form-group choose choose_2" style='display: none' >
-                <label class="col-lg control-label" >选择会员等级</label>
-                <div class="col-sm-8 col-lg-9 col-xs-12">
-                    <select id="send_level" name="send_level" class="form-control" id="value_2" >
-                        <option value="">全部</option>
-                        <option value="0">普通等级</option>
-                        {loop $list $type}
-                        <option value="{$type['id']}">{$type['levelname']}</option>
-                        {/loop}
-                    </select>
-                </div>
-            </div>
         </div>
         <div class="form-group" style="margin-top: 160px;margin-left: 12%">
             <label class="col-lg control-label" ></label>
@@ -82,163 +71,73 @@
         </div>
     </form>
 </div>
-
 <script>
-    require(['bootstrap'],function(){
-        $('#settingTab a').click(function (e) {
-            e.preventDefault();
-            $('#tab').val( $(this).attr('href'));
-            $(this).tab('show');
-        })
-    });
-    $(function () {
-        $(':radio[name=send1]').click(function () {
-            var v = $(this).val();
-            $(".choose").hide();
-            $(".choose_" + v).show();
-        })
-
-        $('form').submit(function () {
-            send_total = parseInt(send_total);
-            if (send_total <= 0) {
-                $('#send_total').focus();
-                tip.msgbox.err( '最少发放一张!');
-                $('form').attr('stop',1);
-                return false;
-            }
-            var c = $('input[name=send1]:checked').val();
-            var v = $('#value_' + c).val();
-            if (c == 1 && v == '') {
-                tip.msgbox.err('请输入要发放的用户Openid!');
-                $('form').attr('stop',1);
-                return false;
-            }
-            $('form').removeAttr('stop');
-            return true;
-        });
-    });
-</script>
-<script>
-    $(function(){
-        $(':radio[name=send1]').click(function(){
-            var v = $(this).val();
-            $(".choose").hide();
-            $(".choose_"+v).show();
-        })
-    })
-
-    var openids = [];
-    function send(){
-        var btn = $('input[type=button]');
-        if(btn.attr('sending')=='1'){
-            return;
-        }
-        var c = $('input[name=send1]:checked').val();
-        var v = $('#send_openid').val();
-
-        if (c == 1 && v == '') {
-            tip.msgbox.err('请输入要发放的用户Openid!');
-            return false;
-        }
-        var send_total =$('#send_total').val(),
-            send_total = parseInt(send_total);
-        if (send_total <= 0) {
-            $('#send_total').focus();
-            tip.msgbox.err( '最少发放一张!');
-            return false;
-        }
-        btn.removeClass('btn-primary').val('正在获取发送的用户Openid...').attr('sending',1);
-        var messagetype = $('input[name=messagetype]:checked').val();
-        var data ={
-            content : $('input[name="content"]').val(),
-            send_total : $('#send_total').val(),
-            send1 : $('input[name=send1]:checked').val(),
-            send_openid  : $('#send_openid').val(),
-            send_level  : $('#send_level').val(),
-        }
-        $.ajax({
-            url: "{php echo webUrl('shop/notice/email')}",
-            type:'post',
-            dataType:'json',
-            data:data,
-            success:function(data){
-                if(messagetype !=0)
-                {
-                    if(data.status==1){
-                        openids = data.result.openids;
-                        btn.val('共要发送给 ' + openids.length +  " 个用户，准备发送!");
-                        sendmessage();
-                    } else{
-                        btn.addClass('btn-primary').removeAttr('sending').val('立即发送');
-                        tip.msgbox.err( data.result.message );
-                    }
-                }else
-                {
-                    if(data.status==1){
-                        btn.addClass('btn-primary').removeAttr('sending').val('立即发送');
-                        tip.msgbox.err('发送完成');
-                    } else{
-                        btn.addClass('btn-primary').removeAttr('sending').val('立即发送');
-                        tip.msgbox.err( data.result.message );
-                    }
-                }
-            }
-        });
-    }
-
-    var current = 0;
-    var failed = [];
-    var failmsg = "";
-    var succeed = 0;
-    function sendmessage(){
-        var btn = $('input[type=button]');
-        var messagetype = $('input[name=messagetype]:checked').val();
-        if(current>openids.length-1){
-            if(failed.length>0){
-                var msg = '发送成功 ' + succeed + ' 个用户，失败 ' + failed.length + " 个用户:\r\n";
-                msg+=failmsg;
-                msg+="\r\n 是否继续发送失败的用户? ";
-                tip.confirm(msg,function(){
-                    current = 0 ;succeed=0;
-                    openids = failed;
-                    failed=[];
-                    failmsg= "";
-                    btn.val('共要发送给 ' + openids.length + " 个用户，准备发送!");
-                    sendmessage();
-                    return;
-                },function(){
-                    location.reload();
-                })
-            } else{
-                tip.msgbox.suc('发送成功 ' + succeed + ' 个用户!',"{php echo webUrl('sale/coupon/sendcoupon')}" );
-            }
-            return;
-        }
-
-        var openid = openids[current];
-        $.ajax({
-            url: "{php echo webUrl('sale/coupon/sendcoupon/sendmessage')}",
-            type:'post',
-            data: {'openid':openid, messagetype: messagetype},
-            dataType:'json',
-            success:function(result2){
-                if(result2.result=='1'){
-                    succeed++;
-                }
-                else{
-                    failmsg+= result2.openid + "\r\n(错误信息: " + result2.message + ")\r\n\r\n";
-                    failed.push(result2.openid);
-                }
-                btn.val('已经发送 ' + current + " / " + openids.length + " 个用户...");
-                current++;
-                sendmessage();
-            }
-        });
-    }
-
+    var img = "";
+    var nickname = "";
+    var mobile = "";
+    var nick_arr = [];
+    var open_arr = [];
     $("#search").click(function () {
-
+        var keywords = $('#send_openid').val();
+        if(keywords == ""){
+            alert("输入的关键词为空");return;
+        }
+        $.ajax({
+            url:"{php echo webUrl('shop/notice/search')}",
+            type:"post",
+            data:{keywords:keywords},
+            dataType:"json",
+            success:function (res) {
+                if(res.status == 1){
+                    nickname = res.result.nickname;
+                    mobile = res.result.mobile;
+                    openid = res.result.openid;
+                    if(open_arr.indexOf(openid) >= 0){
+                        alert('该用户已存在');
+                        $("#send_openid").val("");return;
+                    }
+                    if(res.result.avatar != ""){
+                        img = res.result.avatar;
+                    }else{
+                        img = "../addons/ewei_shopv2/static/images/noface.png";
+                    }
+                    $('.member').append("<li>" +
+                        "<img src='"+img+"'><br>" +
+                        "<span>"+nickname+"</span>" +
+                        "<span>"+mobile+"</span>" +
+                        "</li>");
+                    nick_arr.push(nickname)
+                    open_arr.push(openid)
+                    openids = open_arr.join(',')
+                    $("input[name='send_openid']").val(openids)
+                    $("#send_openid").val("")
+                }else{
+                    alert(res.result.message);
+                    alert();
+                }
+            }
+        })
     })
+    
+    function send() {
+        var content = $("input[name='content']").val();
+        var send1 = $("input[name='send1']").val();
+        var send_openid = $("input[name='send_openid']").val();
+        if(content == "" || send_openid == ""){
+            alert("内容为空或接收人为空");return;
+        }
+        $.ajax({
+            url:"{php echo webUrl('shop/notice/email')}",
+            type:"post",
+            data:{content:content,send:send1,send_openid:send_openid},
+            dataType:"json",
+            success:function (data) {
+                if(data.status == 1){
+                    window.location.href=data.result.url;
+                }
+            }
+        })
+    }
 </script>
 {template '_footer'}
 <!--NDAwMDA5NzgyNw==-->

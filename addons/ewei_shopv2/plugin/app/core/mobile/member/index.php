@@ -217,13 +217,17 @@ class Index_EweiShopV2Page extends AppMobilePage
             $result['banner'][$key]['thumb'] = tomedia($item['thumb']);
         }
         //累计余额收入
-        $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where openid=:openid and type=3 and status = 1";
-        $comeparams = array(':openid' => $_W['openid']);
-        $result['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
-        //累计余额收入
-        $comesql = "select ifnull(sum(num),0) from ".tablename('mc_credits_record')." where openid=:openid and credittype=:credit and num > 0";
-        $comeparams = array(':openid' => $_W['openid'],':credit'=>'credit1');
-        $result['calorie_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
+//        $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where openid=:openid and type=3 and status = 1";
+//        $comeparams = array(':openid' => $_W['openid']);
+//        $result['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
+//        //累计余额收入
+        //$comesql = "select ifnull(sum(num),0) from ".tablename('mc_credits_record')." where openid=:openid and credittype=:credit and num > 0";
+        //$comeparams = array(':openid' => $_W['openid'],':credit'=>'credit1');
+        //$result['calorie_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计卡路里收入
+
+
+        $result['come_total'] = $result['credit2'];
+        $result['calorie_total'] = $result['credit1'];
 		app_json($result);
 	}
 

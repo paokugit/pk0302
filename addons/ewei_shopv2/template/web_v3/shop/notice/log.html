@@ -28,18 +28,15 @@
             <div class="">
                 <div class="input-group">
                     <span class="input-group-select">
-                           <select name='used' class='form-control'>
+                           <select name='status' class='form-control'>
                                <option value=''>状态</option>
                                <option value='0' {if $_GPC['status']=='0'}selected{/if}>未查看</option>
                                <option value='1' {if $_GPC['status']=='1'}selected{/if}>已查看</option>
                            </select>
                     </span>
-                    <input type="text" class=" form-control" name='keyword' value="{$_GPC['keyword']}" placeholder="请输入关键词">
+                    <input type="text" class=" form-control" name='keyword' value="{$_GPC['keyword']}" placeholder="请输入关键词,openid,手机号或昵称">
                     <span class="input-group-btn">
                         <button class="btn  btn-primary" type="submit"> 搜索</button>
-                        {ifp 'sale.coupon.log.export'}
-                            <button type="submit" name="export" value="1" class="btn btn-success ">导出</button>
-                        {/if}
                     </span>
                 </div>
             </div>
@@ -52,9 +49,6 @@
                 </div>
                 <div class="input-group">
                     <button class="btn btn-sm btn-primary" type="submit"> 搜索</button>
-                    {ifp 'sale.coupon.log.export'}
-                    <button type="submit" name="export" value="1" class="btn btn-success btn-sm">导出</button>
-                    {/if}
                 </div>
             </div>
         </div>
@@ -64,14 +58,13 @@
     <table class="table table-hover table-responsive">
         <thead class="navbar-inner" >
         <tr>
-            <th style='width:80px;'>会员信息</th>
-            <th style='width:100px;'>会员openid</th>
-            <th style='width:100px;'>私信内容</th>
-            <th style='width:40px;'>浏览次数</th>
-            <th style='width:40px;'>私信状态</th>
-            <th style='width:70px;'>发送时间</th>
-            <th style='width:70px;'>查看时间</th>
-            <th style='width:46px;'>操&nbsp;&nbsp;&nbsp;作</th>
+            <th style='width:15%;'>会员信息</th>
+            <th style='width:21%;'>会员openid</th>
+            <th style='width:23%;'>私信内容</th>
+            <th style='width:6%;'>浏览次数</th>
+            <th style='width:12%;'>私信状态</th>
+            <th style='width:12%;'>发送时间</th>
+            <th style='width:10%;'>操&nbsp;&nbsp;&nbsp;作</th>
         </tr>
         </thead>
         <tbody>
@@ -85,18 +78,19 @@
             <td><span title="{$row['content']}">{$row['content']}</span></td>
             <td>{$row['num']}</td>
             <td>
-                {if $row['status'] == 0}未查看{elseif $row['status'] == 1}已查看{/if}
+                <span title="{if $row['status'] == 0}未查看{elseif $row['status'] == 1}已查看{php echo date('Y-m-d H:i',$row['updatetime'])}{/if}">
+                    {if $row['status'] == 0}未查看{elseif $row['status'] == 1}已查看{php echo date("Y-m-d H:i",$row['updatetime'])}{/if}
+                </span>
             </td>
-            <td>{php echo date('Y-m-d H:i',$row['createtime'])}</td>
-            <td>{php echo date('Y-m-d H:i',$row['updatetime'])}</td>
+            <td><span title="{php echo date('Y-m-d H:i',$row['createtime'])}">{php echo date('Y-m-d H:i',$row['createtime'])}</span></td>
             <td>
-                {ifp 'shop.notice.log.edit'}
-                    <a class="btn  btn-op btn-operation" href="{php echo webUrl('shop/notice/email',array('id' => $row['id']));}" title="">
-                        <span data-toggle="tooltip" data-placement="top" title="" data-original-title="私信详情">
-                            <i class='icow icow-bianji2'></i>
-                        </span>
-                    </a>
-                {/if}
+<!--                {ifp 'shop.notice.log.edit'}-->
+<!--                    <a class="btn  btn-op btn-operation" href="{php echo webUrl('shop/notice/email',array('id' => $row['id']));}" title="">-->
+<!--                        <span data-toggle="tooltip" data-placement="top" title="" data-original-title="私信详情">-->
+<!--                            <i class='icow icow-bianji2'></i>-->
+<!--                        </span>-->
+<!--                    </a>-->
+<!--                {/if}-->
                 {ifp 'shop.notice.log.delete'}
                     <a class="btn btn-op btn-operation" data-toggle='ajaxRemove' href="{php echo webUrl('shop/notice/del',array('id' => $row['id']));}" data-confirm="确定要删除该会员吗？">
                          <span data-toggle="tooltip" data-placement="top" title="" data-original-title="删除会员">
