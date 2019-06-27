@@ -519,7 +519,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         foreach ($list as $key=>$item){
             $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             if(mb_substr($item['remark'],0,2) == "跑库"){
-                $list[$key]['remark'] = "商城订单";
+                if($item['num'] < 0){
+                    $list[$key]['remark'] = "商城订单支付";
+                }else{
+                    $list[$key]['remark'] = "商城订单返还";
+                }
             }
         }
         show_json(1,['credit3'=>$credit3,'list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'type'=>$type]);
