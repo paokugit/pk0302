@@ -60,6 +60,9 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		//$status = $_GPC['status'] == 1 ? 0 :1;
 		$status = $_GPC['status'];
 		$id = $_GPC['id'];
+		if($id == "" || $openid == "" || $status == ""){
+			show_json(0,"请完善参数信息");
+		}
 		if(pdo_exists('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id])){
 			pdo_update('ewei_shop_notice_log',['status'=>$status],['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id]);
 		}else{
