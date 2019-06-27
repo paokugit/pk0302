@@ -40,7 +40,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $mobile = substr($item['mobile'],0,3)."****".substr($item['mobile'],7,4);
             $log[$key]['mobile'] = $item['mobile'] == "" ? "" : $mobile;
         }
-        show_json(1,['list'=>$list,'log'=>$log,'num'=>count($user)-count($free)]);
+        show_json(1,['list'=>$list,'log'=>$log,'num'=>count($user)-count($free) > 0 ? :0]);
     }
 
     /**
