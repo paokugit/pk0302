@@ -525,6 +525,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                     $list[$key]['remark'] = "商城订单返还";
                 }
             }
+                    $list[$key]['remark'] = "折扣宝提现";
         }
         show_json(1,['credit3'=>$credit3,'list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'type'=>$type]);
     }
@@ -639,7 +640,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $data['remark'] = "转帐给".$to['mobile'];
         }elseif ($type == 2){
             $data['num'] = $money;
-            $data['remark'] = "ID:".$to['id']."转入";
+            $data['remark'] = $to['nickname']."转入";
         }
         pdo_insert('mc_credits_record',$data);
         pdo_insert('ewei_shop_member_credit_record',$data);
