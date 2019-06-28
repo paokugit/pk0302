@@ -71,9 +71,9 @@ class Notice_EweiShopV2Page extends AppMobilePage
 			pdo_insert('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id,'createtime'=>time()]);
 		}
 		$msg = $status == 0 ? "取消点赞成功" : "点赞成功";
-		$notice = 'select * from '.tablename('ewei_shop_notice').' where `uniacid` ="'.$uniacid.'" and status=1';
+		$notice = pdo_fetchall('select * from '.tablename('ewei_shop_notice').' where `uniacid` ="'.$uniacid.'" and status=1');
 		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid="'.$_GPC['openid'].'" and uniacid="'.$_W['uniacid'].'"');
-		show_json(1,['msg'=>$msg,'notice'=>bcsub(count($notice,$log))]);
+		show_json(1,['msg'=>$msg,'notice'=>bcsub(count($notice),count($log))]);
 	}
 
 	/**
@@ -112,7 +112,7 @@ class Notice_EweiShopV2Page extends AppMobilePage
 			pdo_update('ewei_shop_email',['num'=>$item_num,'updatetime'=>time(),'status'=>1],['id'=>$item['id']]);
 			$list[$key]['createtime'] = $this->transform_time($item['createtime']);
 		}
-		$notice = 'select * from '.tablename('ewei_shop_notice').' where `uniacid` ="'.$uniacid.'" and status=1';
+		$notice = pdo_fetchall('select * from '.tablename('ewei_shop_notice').' where `uniacid` ="'.$uniacid.'" and status=1');
 		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid="'.$_GPC['openid'].'" and uniacid="'.$_W['uniacid'].'"');
 		$email = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where openid="'.$_GPC['openid'].'" and num=0 and uniacid="'.$_W['uniacid'].'"');
 		show_json(1,['list'=>$list,'notice'=>bcsub(count($notice),count($log)),'email'=>count($email)]);
