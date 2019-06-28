@@ -40,7 +40,8 @@ class Index_EweiShopV2Page extends AppMobilePage
             $mobile = substr($item['mobile'],0,3)."****".substr($item['mobile'],7,4);
             $log[$key]['mobile'] = $item['mobile'] == "" ? "" : $mobile;
         }
-        show_json(1,['list'=>$list,'log'=>$log,'num'=>count($user)-count($free) > 0 ? :0]);
+        $credit1 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit1');
+        show_json(1,['list'=>$list,'log'=>$log,'num'=>count($user)-count($free) > 0 ? :0,'credit1'=>$credit1]);
     }
 
     /**
@@ -82,6 +83,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $num = count($user) - count($log) - 1 > 0 ?: 0;
         }
         $res['remain'] = $num;
+        $res['credit1'] = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit1');
         show_json(1,$res);
     }
 }
