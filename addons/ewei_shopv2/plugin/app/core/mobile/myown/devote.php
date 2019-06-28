@@ -71,8 +71,8 @@ class Devote_EweiShopV2Page extends AppMobilePage{
             app_error(1,"openid不正确");
         }
         $money=$_GPC["money"];
-        if ($money<0.3){
-            app_error(1,"提现金额不可小于0.3元");
+        if ($money<1){
+            app_error(1,"提现金额不可小于1元");
         }
         if ($member["credit3"]<$money||$member["credit4"]<$money){
             app_error(1,"提现余额或贡献值不足");
@@ -87,6 +87,8 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         $log["status"]=0;
         $log["money"]=$money;
         $log["realmoney"]=$money;
+        $log["deductionmoney"]=bcmul($money,0.03,2);
+        $log["realmoney"]=bcsub($money,$log['deductionmoney'],2);
         $log["remark"]="折扣宝提现";
         if (pdo_insert("ewei_shop_member_log",$log)){
             //增加记录

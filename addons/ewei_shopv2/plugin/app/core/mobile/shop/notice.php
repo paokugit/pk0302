@@ -25,7 +25,9 @@ class Notice_EweiShopV2Page extends AppMobilePage
 			$row['is_zan'] = isset($zan) && $zan == 1 ? 1 : 0;
 		}
 		unset($row);
-		app_json(array('list' => $list, 'pagesize' => $psize, 'total' => $total));
+		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid="'.$_GPC['openid'].'" and uniacid="'.$_W['uniacid'].'"');
+		$email = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where openid="'.$_GPC['openid'].'" and num=0 and uniacid="'.$_W['uniacid'].'"');
+		app_json(array('list' => $list, 'pagesize' => $psize, 'total' => $total,'notice'=>bcsub($total,count($log)),'email'=>count($email)));
 	}
 
 	public function detail()
@@ -108,7 +110,13 @@ class Notice_EweiShopV2Page extends AppMobilePage
 			pdo_update('ewei_shop_email',['num'=>$item_num,'updatetime'=>time(),'status'=>1],['id'=>$item['id']]);
 			$list[$key]['createtime'] = $this->transform_time($item['createtime']);
 		}
-		show_json(1,$list);
+		$condition = ' and `uniacid` =:uniacid and status=1';
+		$params = array(':uniacid' => $_W['uniacid']);
+		$sql = 'SELECT COUNT(*) FROM ' . tablename('ewei_shop_notice') . (' where 1 ' . $condition);
+		$total = pdo_fetchcolumn($sql, $params);
+		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid="'.$_GPC['openid'].'" and uniacid="'.$_W['uniacid'].'"');
+		$email = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where openid="'.$_GPC['openid'].'" and num=0 and uniacid="'.$_W['uniacid'].'"');
+		show_json(1,['list'=>$list,'notice'=>bcsub($total,count($log)),'email'=>count($email)]);
 	}
 
 	/**

@@ -35,7 +35,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         //免费抽奖记录抽奖次数
         $free = pdo_fetchall('select * from '.tablename('mc_credits_record').' where createtime > "'.$today.'" and createtime < "'.$tomorrow.'" and openid = "'.$openid.'" and type = 2');
         //抽奖记录
-        $log = pdo_fetchall('select m.nickname,m.mobile,c.num,c.remark from '.tablename('mc_credits_record').'c join '.tablename('ewei_shop_member').'m on c.openid = m.openid'.' where type = 1 and credittype = "'.$cate.'" order by c.id desc');
+        $log = pdo_fetchall('select m.nickname,m.mobile,c.num,c.remark from '.tablename('mc_credits_record').'c join '.tablename('ewei_shop_member').'m on c.openid = m.openid'.' where type = 1 and credittype = "'.$cate.'" order by c.id desc limit 20');
         foreach ($log as $key=>$item) {
             $mobile = substr($item['mobile'],0,3)."****".substr($item['mobile'],7,4);
             $log[$key]['mobile'] = $item['mobile'] == "" ? "" : $mobile;
