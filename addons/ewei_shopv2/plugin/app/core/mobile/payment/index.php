@@ -519,7 +519,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         foreach ($list as $key=>$item){
             $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             if(mb_substr($item['remark'],0,2) == "跑库"){
-                $list[$key]['remark'] = "商城订单";
+                if($item['num'] < 0){
+                    $list[$key]['remark'] = "商城订单支付";
+                }else{
+                    $list[$key]['remark'] = "商城订单返还";
+                }
             }
         }
         show_json(1,['credit3'=>$credit3,'list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'type'=>$type]);
@@ -568,6 +572,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$to){
             show_json(0,"收款人不存在");
         }
+        if($to['openid'] == $member['openid']){
+            show_json(0,'转账者和收款人相同');
+        }
         //更新转账者折扣宝余额   减去  并写入日志
         pdo_update('ewei_shop_member',['credit3'=>bcsub($member['credit3'],$money,2)],['openid'=>$member['openid'],'uniacid'=>$uniacid]);
         $this->addlog($member,$to,$money,1);
@@ -575,6 +582,22 @@ class Index_EweiShopV2Page extends AppMobilePage
         pdo_update('ewei_shop_member',['credit3'=>bcadd($to['credit3'],$money,2)],['openid'=>$to['openid'],'uniacid'=>$uniacid]);
         $this->addlog($to,$member,$money,2);
         show_json(1);
+    }
+
+    /**
+     * 转账页面
+     */
+    public function rebate()
+    {
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $openid = $_GPC['openid'];
+        if($openid == ""){
+            show_json(0,"请完善参数");
+        }
+        $credit3 = pdo_getcolumn('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid],'credit3');
+        show_json(1,['credit3'=>$credit3]);
     }
 
     /**
@@ -616,7 +639,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $data['remark'] = "转帐给".$to['mobile'];
         }elseif ($type == 2){
             $data['num'] = $money;
-            $data['remark'] = "ID:".$to['id']."转入";
+            $data['remark'] = $to['nickname']."转入";
         }
         pdo_insert('mc_credits_record',$data);
         pdo_insert('ewei_shop_member_credit_record',$data);

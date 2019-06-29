@@ -1031,6 +1031,10 @@ class System_EweiShopV2Model {
                             array(
                                 "title" => "余额明细",
                                 "route" => "credit2"
+                            ),
+                            array(
+                                "title" => "折扣宝明细",
+                                "route" => "credit3"
                             )
                         )
                     ) ,

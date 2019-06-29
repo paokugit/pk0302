@@ -18,15 +18,16 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		$total = pdo_fetchcolumn($sql, $params);
 		$sql = 'SELECT * FROM ' . tablename('ewei_shop_notice') . ' where 1 ' . $condition . ' ORDER BY displayorder desc,id desc LIMIT ' . ($pindex - 1) * $psize . ',' . $psize;
 		$list = pdo_fetchall($sql, $params);
-
 		foreach ($list as $key => &$row) {
-			$row['createtime'] = date('Y-m-d H:i', $row['createtime']);
+			$row['createtime'] = $this->transform_time($row['createtime']);
 			$row['thumb'] = empty($row['thumb']) ? tomedia($_W['shopset']['shop']['logo']) : tomedia($row['thumb']);
-			$row['iszan'] = pdo_getcolumn('ewei_shop_notice_log',['openid'=>$_GPC['openid'],'notice_id'=>$row['id']],'status');
+			$zan = pdo_getcolumn('ewei_shop_notice_log',['openid'=>$_GPC['openid'],'notice_id'=>$row['id']],'status');
+			$row['is_zan'] = isset($zan) && $zan == 1 ? 1 : 0;
 		}
-
 		unset($row);
-		app_json(array('list' => $list, 'pagesize' => $psize, 'total' => $total));
+		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid="'.$_GPC['openid'].'" and uniacid="'.$_W['uniacid'].'"');
+		$email = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where openid="'.$_GPC['openid'].'" and num=0 and uniacid="'.$_W['uniacid'].'"');
+		app_json(array('list' => $list, 'pagesize' => $psize, 'total' => $total,'notice'=>bcsub($total,count($log)),'email'=>count($email)));
 	}
 
 	public function detail()
@@ -61,12 +62,18 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		//$status = $_GPC['status'] == 1 ? 0 :1;
 		$status = $_GPC['status'];
 		$id = $_GPC['id'];
-		if(pdo_exists('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id])){
-			pdo_insert('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id,'createtime'=>time()]);
-		}else{
-			pdo_update('ewei_shop_notice_log',['status'=>$status],['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id]);
+		if($id == "" || $openid == "" || $status == ""){
+			show_json(0,"请完善参数信息");
 		}
-		show_json(1);
+		if(pdo_exists('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id])){
+			pdo_update('ewei_shop_notice_log',['status'=>$status],['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id]);
+		}else{
+			pdo_insert('ewei_shop_notice_log',['openid'=>$openid,'uniacid'=>$uniacid,'notice_id'=>$id,'createtime'=>time()]);
+		}
+		$msg = $status == 0 ? "取消点赞成功" : "点赞成功";
+		$notice = pdo_fetchall('select * from '.tablename('ewei_shop_notice').' where `uniacid` ="'.$uniacid.'" and status=1');
+		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid="'.$_GPC['openid'].'" and uniacid="'.$_W['uniacid'].'"');
+		show_json(1,['msg'=>$msg,'notice'=>bcsub(count($notice),count($log))]);
 	}
 
 	/**
@@ -103,8 +110,12 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		foreach ($list as $key=>$item){
 			$item_num = bcadd($item['num'],1);
 			pdo_update('ewei_shop_email',['num'=>$item_num,'updatetime'=>time(),'status'=>1],['id'=>$item['id']]);
+			$list[$key]['createtime'] = $this->transform_time($item['createtime']);
 		}
-		show_json(1,$list);
+		$notice = pdo_fetchall('select * from '.tablename('ewei_shop_notice').' where `uniacid` ="'.$uniacid.'" and status=1');
+		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid="'.$_GPC['openid'].'" and uniacid="'.$_W['uniacid'].'"');
+		$email = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where openid="'.$_GPC['openid'].'" and num=0 and uniacid="'.$_W['uniacid'].'"');
+		show_json(1,['list'=>$list,'notice'=>bcsub(count($notice),count($log)),'email'=>count($email)]);
 	}
 
 	/**
@@ -125,6 +136,30 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		];
 		pdo_insert('ewei_shop_email',$data);
 		return pdo_insertid();
+	}
+
+    /**
+    * 时间处理
+     * @param $time
+     * @return false|string
+     */
+	public function transform_time($time)
+	{
+	        $sub_time = time() - $time;
+	        $day = floor($sub_time/3600/24);
+	        $hour = floor($sub_time/3600);
+	        $minute = floor($sub_time/60);
+	        if($hour >= 24 && $day >0 && $day <3){
+	            return $day."天前";
+	        }elseif($hour < 24 && $hour >= 1){
+	            return $hour."小时前";
+	        }elseif($minute < 60 && $minute > 0){
+	            return $minute."分钟前";
+	        }elseif($minute <= 0){
+	            return "刚刚";
+	        }else{
+	            return date('Y-m-d H:i:s',$time);
+	        }
 	}
 }
 
