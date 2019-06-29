@@ -1365,15 +1365,17 @@ class Member_EweiShopV2Model
             
             //fbb 贡献值
             m("devote")->rewardtwo($agentinfo["id"]);
-        }
-        if(isset($agentinfo['id'])){
-            if(isset($info['goodsid'])){
-                $goodsid=$info['goodsid'];
-            }else{
-                $goodsid=0;
+
+            if(isset($agentinfo['id'])){
+                if(isset($info['goodsid'])){
+                    $goodsid=$info['goodsid'];
+                }else{
+                    $goodsid=0;
+                }
+                $this->memberAgentCount($goodsid,$agentinfo['id']);
             }
-            $this->memberAgentCount($goodsid,$agentinfo['id']);
         }
+
     }
 
     /**
@@ -1386,10 +1388,10 @@ class Member_EweiShopV2Model
         $agentCountInfo = pdo_fetch("select * from " . tablename("ewei_shop_member_agentcount") . " where openid=:openid limit 1", array(":openid" => $agentInfo['openid']));
         if(!$agentCountInfo){//添加记录
             $data['openid'] =  $agentInfo['openid'];
-            if($agentid==0 || $agentid==''){
+            //if($agentid==0 || $agentid==''){
                 $data['agentcount'] = 1;
                 $data['agentallcount'] = 1;
-            }
+            //}
             if($goodsid==7){
                 $data['shopkeepercount'] = 1;
                 $data['shopkeeperallcount'] = 1;
@@ -1404,9 +1406,9 @@ class Member_EweiShopV2Model
             }
             pdo_insert('ewei_shop_member_agentcount',$data);
         }else{//更新数据
-            if($agentid==0 || $agentid==''){
-                $data['agentcount'] = $agentCountInfo['agentcount']+1;
-                $data['agentallcount'] = $agentCountInfo['agentallcount']+1;
+            if($goodsid==0) {
+                $data['agentcount'] = $agentCountInfo['agentcount'] + 1;
+                $data['agentallcount'] = $agentCountInfo['agentallcount'] + 1;
             }
             if($goodsid==7){
                 $data['shopkeepercount'] = $agentCountInfo['shopkeepercount']+1;

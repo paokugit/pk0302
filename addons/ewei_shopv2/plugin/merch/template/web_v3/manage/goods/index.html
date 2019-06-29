@@ -58,7 +58,11 @@
                 {ifp 'goods.add'}
                 <a class='btn btn-sm btn-primary' href="{php echo webUrl('goods/add')}"><i class='fa fa-plus'></i> 添加商品</a>
                 {/if}
+                {ifp 'taobao'}
+                    <a class='btn btn-sm btn-primary' href="{php echo webUrl('taobao')}"><i class='fa fa-plus'></i> 导入商品</a>
+                {/if}
             </span>
+
             <div class="input-group col-sm-6 pull-right">
                 <span class="input-group-select">
                     <select name="cate" class='form-control select2' style="width:200px;" data-placeholder="商品分类">

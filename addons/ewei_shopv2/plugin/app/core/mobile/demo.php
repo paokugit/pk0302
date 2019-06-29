@@ -39,8 +39,8 @@ class Demo_EweiShopV2Page extends AppMobilePage
 
     public function getall($page)
     {
-        $limit = $page*100;
-        $memberList = pdo_fetchall("select * from " . tablename("ewei_shop_member"). " limit ". $limit.",1000");
+        $limit = $page*10;
+        $memberList = pdo_fetchall("select * from " . tablename("ewei_shop_member"). " limit ". $limit.",10");
         foreach ($memberList as $key=>$row){
             $data = array();
             $data["openid"] = $row['openid'];
@@ -86,8 +86,8 @@ class Demo_EweiShopV2Page extends AppMobilePage
     }
 
     public function aa(){
-        $shopOwner = m('reward')->addReward("sns_wa_owRAK49usbCooCJGp-81VKLAFJME");//获取是否有上级店长
-        var_dump($shopOwner);
+        $res = m('member')->setagent(array('agentopenid'=>'sns_wa_owRAK4-smphSYPkphpDAFOnsuy08','openid'=>'sns_wa_owRAK49usbCooCJGp-81VKLAFJME'));
+        var_dump($res);
     }
 
 }

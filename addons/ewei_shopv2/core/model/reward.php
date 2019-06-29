@@ -25,7 +25,6 @@ class Reward_EweiShopV2Model
      * @return bool
      */
     public function getReward($agentid,$memberlevel,$memberopenid){
-        global $_W;
         $agentInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where id=:id limit 1", array(  ":id" => $agentid ));
         if(!$agentInfo) return false;
         $rewardMoney = $this->getRewardMoney($agentInfo['agentlevel'],$memberlevel);// 奖励金额
@@ -33,7 +32,7 @@ class Reward_EweiShopV2Model
         if($rewardMoney>0){
             m('memberlog')->rewardMember($agentInfo['openid'],$rewardMoney,$memberopenid);//直推奖
         }
-        if($shopOwner && $memberlevel<5){//有店长
+        if($shopOwner && $memberlevel<5 && $shopOwner!=$agentInfo['openid']){//有店长
             $ownerMoney = $this->shopOwnerMoney($memberlevel);
             if($ownerMoney>0) {
                 m('memberlog')->rewardShowOwnerMember($shopOwner, $ownerMoney, $memberopenid);

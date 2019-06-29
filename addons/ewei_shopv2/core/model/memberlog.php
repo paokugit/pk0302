@@ -12,8 +12,8 @@ class Memberlog_EweiShopV2Model
      * $openid 推荐人
      */
 	function rewardMember($openid,$money,$fromopenid){
-	    try{
-	        pdo_begin();
+	   // try{
+	   //     pdo_begin();
             $frommember = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $fromopenid ));
             if(!$frommember) return false;
             $data['logno'] = 'RC'.$fromopenid.$openid.$money.$frommember['agentlevel'];
@@ -21,7 +21,7 @@ class Memberlog_EweiShopV2Model
             if($haslog) return true;
             $data['openid'] = $openid;
 	        $data['type'] = 3;//奖励
-            $data['title'] = '推荐会员奖励';
+            $data['title'] = '推荐会员奖励:'.$frommember['nickname'];
             $data['createtime'] = strtotime(date('Y-m-d H:i:s'));
             $data['status'] = 1;
             $data['money'] = $money;
@@ -31,14 +31,14 @@ class Memberlog_EweiShopV2Model
             if($res){//更新member表的cicle2值
                 $this->ts_money($fromopenid, $money, $openid);
                 $member = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $openid ));
-                if(!$member)  throw new PDOException('会员信息不存在');
+                //if(!$member)  throw new PDOException('会员信息不存在');
                 $memberdata['credit2'] = $member['credit2']+$money;
                 pdo_update('ewei_shop_member',$memberdata,array('openid'=>$openid));
             }
-            pdo_commit();
-	    }catch (PDOException $e){
-	        pdo_rollback();
-        }
+           // pdo_commit();
+	    //}catch (PDOException $e){
+	     //   pdo_rollback();
+        //}
         return true;
 	}
 
@@ -49,13 +49,13 @@ class Memberlog_EweiShopV2Model
      * @param $money
      */
     function rewardShowOwnerMember($openid,$money,$fromopenid){
-        try{
+        //try{
             $frommember = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $fromopenid ));
             if(!$frommember) return false;
             $data['logno'] = 'RC'.$fromopenid.$openid.$money.$frommember['agentlevel'];
             $haslog = pdo_fetch("select * from " . tablename("ewei_shop_member_log") . " where logno=:logno limit 1", array( ":logno" => $data['logno']));
             if($haslog) return true;
-            pdo_begin();
+           // pdo_begin();
             $data['openid'] = $openid;
             $data['type'] = 3;//奖励
             $data['title'] = '店长奖励';
@@ -69,15 +69,15 @@ class Memberlog_EweiShopV2Model
             if($res){//更新member表的cicle2值
                 $this->ts_money($fromopenid, $money, $openid);
                 $member = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array( ":openid" => $openid ));
-                if(!$member)  throw new PDOException('会员信息不存在');
+                //if(!$member)  throw new PDOException('会员信息不存在');
                 $memberdata['credit2'] = $member['credit2']+$money;
                 pdo_update('ewei_shop_member',$memberdata,array('openid'=>$openid));
             }
-            pdo_commit();
+            //pdo_commit();
 
-        }catch (PDOException $e){
-           pdo_rollback();
-        }
+        //}catch (PDOException $e){
+        //   pdo_rollback();
+        //}
         return true;
 
     }
