@@ -59,6 +59,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         if($game['status'] == 0){
             show_json(0,"该活动已关闭");
         }
+
+        $credit1=pdo_getcolumn('ewei_shop_member',["openid"=>$openid],"credit1");
+        if($type==0){
+            if(bccomp($credit1,$money,2)==-1) show_json(0,"用户卡路里不足");
+        }
+
         //计算今天的免费抽奖次数
         $today = strtotime(date('Y-m-d'));
         $tomorrow = $today + 60*60*24;
