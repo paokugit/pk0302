@@ -1638,8 +1638,7 @@ class Order_EweiShopV2Model
 						{
 							$gareas = explode(";", $g["edareas_code"]);
 						}
-						//如果基础邮寄区为空 并且偏远邮寄区为空  免邮费
-						if( empty($gareas) )
+						if( empty($gareas) ) 
 						{
 							$sendfree = true;
 						}
@@ -1647,7 +1646,7 @@ class Order_EweiShopV2Model
 						{
 							if( !empty($address) ) 
 							{
-								if( !in_array($user_city_code, $gareas) )
+								if( !in_array($user_city_code, $gareas) ) 
 								{
 									$sendfree = true;
 								}
@@ -1656,7 +1655,7 @@ class Order_EweiShopV2Model
 							{
 								if( !empty($member["city"]) ) 
 								{
-									if( !in_array($member["city"], $gareas) )
+									if( !in_array($member["city"], $gareas) ) 
 									{
 										$sendfree = true;
 									}
@@ -1684,15 +1683,15 @@ class Order_EweiShopV2Model
 						{
 							$gareas = explode(";", $g["edareas_code"]);
 						}
-						if( empty($gareas) )
+						if( empty($gareas) ) 
 						{
 							$sendfree = true;
 						}
 						else 
 						{
-							if( !empty($address) )
+							if( !empty($address) ) 
 							{
-								if( !in_array($user_city_code, $gareas) )
+								if( !in_array($user_city_code, $gareas) ) 
 								{
 									$sendfree = true;
 								}
@@ -1701,7 +1700,7 @@ class Order_EweiShopV2Model
 							{
 								if( !empty($member["city"]) ) 
 								{
-									if( !in_array($member["city"], $gareas) )
+									if( !in_array($member["city"], $gareas) ) 
 									{
 										$sendfree = true;
 									}
@@ -1715,7 +1714,7 @@ class Order_EweiShopV2Model
 					}
 				}
 			}
-			if( $g["dispatchtype"] == 1 )
+			if( $g["dispatchtype"] == 1 ) 
 			{
 				if( $city_express_data["state"] == 0 && $city_express_data["is_dispatch"] == 1 ) 
 				{
@@ -1751,36 +1750,36 @@ class Order_EweiShopV2Model
 					    $remote_dispatchprice = $g['remote_dispatchprice'] > 0 ? $g['remote_dispatchprice'] : 0;
 						$dispatch_merch[$merchid] += $g["dispatchprice"];
 						$gareas = explode(';',$g['edareas']);
-                        if(!empty($address)&&in_array($user_city_code, $gareas) || !empty($member['city'])&&in_array($member['city'],$gareas)){
-                            if( $seckillinfo && $seckillinfo["status"] == 0 )
-                            {
-                                $seckill_dispatchprice += $g["dispatchprice"];
-                            }
-                            else
-                            {
-                                $dispatch_price += $g["dispatchprice"];
-                            }
-                        }else{
-                            if( $seckillinfo && $seckillinfo["status"] == 0 )
-                            {
-                                $seckill_dispatchprice += $g["dispatchprice"]+$remote_dispatchprice;
-                            }
-                            else
-                            {
-                                $dispatch_price += $g["dispatchprice"]+$remote_dispatchprice;
-                            }
-                        }
+			                        if(!empty($address)&&in_array($user_city_code, $gareas) || !empty($member['city'])&&in_array($member['city'],$gareas)){
+			                            if( $seckillinfo && $seckillinfo["status"] == 0 )
+			                            {
+			                                $seckill_dispatchprice += $g["dispatchprice"];
+			                            }
+			                            else
+			                            {
+			                                $dispatch_price += $g["dispatchprice"];
+			                            }
+			                        }else{
+			                            if( $seckillinfo && $seckillinfo["status"] == 0 )
+			                            {
+			                                $seckill_dispatchprice += $g["dispatchprice"]+$remote_dispatchprice;
+			                            }
+			                            else
+			                            {
+			                                $dispatch_price += $g["dispatchprice"]+$remote_dispatchprice;
+			                            }
+			                        }
 
 					}
 				}
-				else
+				else 
 				{
 					if( $city_express_data["state"] == 1 ) 
 					{
-						if( 0 < $g["dispatchprice"] && !$sendfree )
+						if( 0 < $g["dispatchprice"] && !$sendfree ) 
 						{
 						    //如果有偏远地域差价  加上他 没有 还是基础差价
-                            $remote_dispatchprice = $g['remote_dispatchprice'] > 0 ?$g['remote_dispatchprice'] :0;
+                            				$remote_dispatchprice = $g['remote_dispatchprice'] > 0 ?$g['remote_dispatchprice'] :0;
 							if( $city_express_data["is_sum"] == 1 )
 							{
 								$dispatch_price += $g["dispatchprice"]+$remote_dispatchprice;
