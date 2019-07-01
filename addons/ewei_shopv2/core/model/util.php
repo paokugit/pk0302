@@ -153,11 +153,9 @@ class Util_EweiShopV2Model
 	{
 		global $_W;
 		$data = m('common')->getSysset('area_config');
-
 		if (empty($data)) {
 			$data = $this->get_area_config_data();
 		}
-
 		return $data;
 	}
 

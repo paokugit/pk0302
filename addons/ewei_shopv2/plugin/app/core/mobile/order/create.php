@@ -144,14 +144,15 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$gifts = array( );
 			if( empty($id) ) 
 			{
+			    //把偏远地域的邮费相关字段添加上
 				if( !empty($quickid) ) 
 				{
-					$sql = "SELECT c.goodsid,c.total,g.maxbuy,g.type,g.intervalfloor,g.intervalprice,g.issendfree,g.isnodiscount,g.ispresell,g.presellprice as gpprice,o.presellprice,g.preselltimeend,g.presellsendstatrttime,g.presellsendtime,g.presellsendtype" . ",g.weight,o.weight as optionweight,g.title,g.thumb,ifnull(o.marketprice, g.marketprice) as marketprice,o.title as optiontitle,c.optionid," . " g.storeids,g.isverify,g.isforceverifystore,g.deduct,g.deduct_type,g.manydeduct,g.virtual,o.virtual as optionvirtual,discounts," . " g.deduct2,g.ednum,g.edmoney,g.edareas,g.edareas_code,g.diyformtype,g.diyformid,diymode,g.dispatchtype,g.dispatchid,g.dispatchprice,g.minbuy " . " ,g.isdiscount,g.isdiscount_time,g.isdiscount_discounts,g.cates,g.isfullback, " . " g.virtualsend,invoice,o.specs,g.merchid,g.checked,g.merchsale,g.unite_total," . " g.buyagain,g.buyagain_islong,g.buyagain_condition, g.buyagain_sale, g.hasoption, g.threen" . " FROM " . tablename("ewei_shop_quick_cart") . " c " . " left join " . tablename("ewei_shop_goods") . " g on c.goodsid = g.id " . " left join " . tablename("ewei_shop_goods_option") . " o on c.optionid = o.id " . " where c.openid=:openid and c.selected=1 and  c.deleted=0 and c.uniacid=:uniacid and c.quickid=" . $quickid . "  order by c.id desc";
+					$sql = "SELECT c.goodsid,c.total,g.maxbuy,g.type,g.intervalfloor,g.intervalprice,g.issendfree,g.isnodiscount,g.ispresell,g.presellprice as gpprice,o.presellprice,g.preselltimeend,g.presellsendstatrttime,g.presellsendtime,g.presellsendtype" . ",g.weight,o.weight as optionweight,g.title,g.thumb,ifnull(o.marketprice, g.marketprice) as marketprice,o.title as optiontitle,c.optionid," . " g.storeids,g.isverify,g.isforceverifystore,g.deduct,g.deduct_type,g.manydeduct,g.virtual,o.virtual as optionvirtual,discounts," . " g.deduct2,g.ednum,g.edmoney,g.edareas,g.edareas_code,g.diyformtype,g.diyformid,diymode,g.dispatchtype,g.dispatchid,g.dispatchprice,g.remote_dispatchprice,g.minbuy " . " ,g.isdiscount,g.isdiscount_time,g.isdiscount_discounts,g.cates,g.isfullback, " . " g.virtualsend,invoice,o.specs,g.merchid,g.checked,g.merchsale,g.unite_total," . " g.buyagain,g.buyagain_islong,g.buyagain_condition, g.buyagain_sale, g.hasoption, g.threen" . " FROM " . tablename("ewei_shop_quick_cart") . " c " . " left join " . tablename("ewei_shop_goods") . " g on c.goodsid = g.id " . " left join " . tablename("ewei_shop_goods_option") . " o on c.optionid = o.id " . " where c.openid=:openid and c.selected=1 and  c.deleted=0 and c.uniacid=:uniacid and c.quickid=" . $quickid . "  order by c.id desc";
 					$goods = pdo_fetchall($sql, array( ":uniacid" => $uniacid, ":openid" => $openid ));
 				}
 				else 
 				{
-					$sql = "SELECT c.goodsid,c.total,g.maxbuy,g.type,g.issendfree,g.isnodiscount,g.ispresell,g.presellprice as gpprice,o.presellprice,g.preselltimeend,g.presellsendstatrttime,g.presellsendtime,g.presellsendtype" . ",g.weight,o.weight as optionweight,g.title,g.thumb,ifnull(o.marketprice, g.marketprice) as marketprice,o.title as optiontitle,c.optionid,g.isfullback," . " g.storeids,g.isverify,g.isforceverifystore,g.deduct,g.deduct_type,g.manydeduct,g.virtual,o.virtual as optionvirtual,discounts," . " g.deduct2,g.ednum,g.edmoney,g.edareas,g.diyformtype,g.diyformid,diymode,g.dispatchtype,g.dispatchid,g.dispatchprice,g.minbuy " . " ,g.isdiscount,g.isdiscount_time,g.isdiscount_discounts,g.cates, " . " g.virtualsend,invoice,o.specs,g.merchid,g.checked,g.merchsale," . " g.buyagain,g.buyagain_islong,g.buyagain_condition, g.buyagain_sale" . " FROM " . tablename("ewei_shop_member_cart") . " c " . " left join " . tablename("ewei_shop_goods") . " g on c.goodsid = g.id " . " left join " . tablename("ewei_shop_goods_option") . " o on c.optionid = o.id " . " where c.openid=:openid and c.selected=1 and  c.deleted=0 and c.uniacid=:uniacid  order by c.id desc";
+					$sql = "SELECT c.goodsid,c.total,g.maxbuy,g.type,g.issendfree,g.isnodiscount,g.ispresell,g.presellprice as gpprice,o.presellprice,g.preselltimeend,g.presellsendstatrttime,g.presellsendtime,g.presellsendtype" . ",g.weight,o.weight as optionweight,g.title,g.thumb,ifnull(o.marketprice, g.marketprice) as marketprice,o.title as optiontitle,c.optionid,g.isfullback," . " g.storeids,g.isverify,g.isforceverifystore,g.deduct,g.deduct_type,g.manydeduct,g.virtual,o.virtual as optionvirtual,discounts," . " g.deduct2,g.ednum,g.edmoney,g.edareas,g.diyformtype,g.diyformid,diymode,g.dispatchtype,g.dispatchid,g.dispatchprice,g.remote_dispatchprice,g.minbuy " . " ,g.isdiscount,g.isdiscount_time,g.isdiscount_discounts,g.cates, " . " g.virtualsend,invoice,o.specs,g.merchid,g.checked,g.merchsale," . " g.buyagain,g.buyagain_islong,g.buyagain_condition, g.buyagain_sale" . " FROM " . tablename("ewei_shop_member_cart") . " c " . " left join " . tablename("ewei_shop_goods") . " g on c.goodsid = g.id " . " left join " . tablename("ewei_shop_goods_option") . " o on c.optionid = o.id " . " where c.openid=:openid and c.selected=1 and  c.deleted=0 and c.uniacid=:uniacid  order by c.id desc";
 					$goods = pdo_fetchall($sql, array( ":uniacid" => $uniacid, ":openid" => $openid ));
 				}
 				if( empty($goods) ) 
@@ -228,7 +229,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			}
 			else 
 			{
-				$sql = "SELECT id as goodsid,type,title,weight,issendfree,isnodiscount,isfullback,ispresell,presellprice,preselltimeend,presellsendstatrttime,presellsendtime,presellsendtype, " . " thumb,marketprice,storeids,isverify,isforceverifystore,deduct,deduct_type," . " manydeduct,`virtual`,maxbuy,usermaxbuy,discounts,total as stock,deduct2,showlevels," . " ednum,edmoney,edareas," . " diyformtype,diyformid,diymode,dispatchtype,dispatchid,dispatchprice,cates,minbuy, " . " isdiscount,isdiscount_time,isdiscount_discounts, " . " virtualsend,invoice,needfollow,followtip,followurl,merchid,checked,merchsale, " . " buyagain,buyagain_islong,buyagain_condition, buyagain_sale" . " FROM " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid  limit 1";
+				$sql = "SELECT id as goodsid,type,title,weight,issendfree,isnodiscount,isfullback,ispresell,presellprice,preselltimeend,presellsendstatrttime,presellsendtime,presellsendtype, " . " thumb,marketprice,storeids,isverify,isforceverifystore,deduct,deduct_type," . " manydeduct,`virtual`,maxbuy,usermaxbuy,discounts,total as stock,deduct2,showlevels," . " ednum,edmoney,edareas" . " diyformtype,diyformid,diymode,dispatchtype,dispatchid,dispatchprice,remote_dispatchprice,cates,minbuy, " . " isdiscount,isdiscount_time,isdiscount_discounts, " . " virtualsend,invoice,needfollow,followtip,followurl,merchid,checked,merchsale, " . " buyagain,buyagain_islong,buyagain_condition, buyagain_sale" . " FROM " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid  limit 1";
 				$data = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $id ));
 				if( !empty($bargain_act) ) 
 				{
@@ -720,7 +721,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			else 
 			{
 				$address = pdo_fetch("select * from " . tablename("ewei_shop_member_address") . " where openid=:openid and deleted=0 and isdefault=1  and uniacid=:uniacid limit 1", array( ":uniacid" => $uniacid, ":openid" => $openid ));
-				if( !empty($carrier_list) ) 
+				if( !empty($carrier_list) )
 				{
 					$carrier = $carrier_list[0];
 				}
@@ -963,7 +964,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 						$gifts = array( );
 						$giftgoods = array( );
 						$gifts = pdo_fetchall("select id,goodsid,giftgoodsid,thumb,title,orderprice from " . tablename("ewei_shop_gift") . "\r\n                    where uniacid = " . $uniacid . " and status = 1 and starttime <= " . time() . " and endtime >= " . time() . " and orderprice <= " . $realprice . " and activity = 1 ");
-						foreach( $gifts as $key => $value ) 
+						foreach( $gifts as $key => $value )
 						{
 							$isgift = 1;
 							$giftgoods = explode(",", $value["giftgoodsid"]);
@@ -1160,9 +1161,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		if ($credit3<$discount){
 		    $discount=$credit3;
 		}
-		
 		$result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "showTab" => 0 < count($carrier_list) && !$isverify && !$isvirtual, "showAddress" => !$isverify && !$isvirtual, "isverify" => $isverify, "isvirtual" => $isvirtual, "set_realname" => $sysset["set_realname"], "set_mobile" => $sysset["set_mobile"], "carrierInfo" => (!empty($carrier_list) ? $carrier_list[0] : false), "storeInfo" => false, "address" => $address, "goods" => $allgoods, "merchid" => $merch_id, "packageid" => $packageid, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle, "changenum" => $changenum, "hasinvoice" => (bool) $hasinvoice, "invoicename" => $invoicename, "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "discount"=>$discount,"deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" => $goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => round($realprice, 2), "total" => $total, "buyagain" => round($buyagain, 2), "fromcart" => (int) $fromcart, "isonlyverifygoods" => $isonlyverifygoods, "isforceverifystore" => $isforceverifystore, "city_express_state" => (empty($dispatch_array["city_express_state"]) ? 0 : $dispatch_array["city_express_state"]), "canusecard" => $canusecard, "card_info" => $card_info, "carddiscountprice" => $carddiscountprice, "card_free_dispatch" => $card_free_dispatch );
-		
 		if( $iscycel ) 
 		{
 			$cycelset = m("common")->getSysset("cycelbuy");

@@ -1555,7 +1555,7 @@ class Common_EweiShopV2Model
 	{
 		$area_set = m("util")->get_area_config_set();
 		$new_area = intval($area_set["new_area"]);
-		if( !empty($new_area) ) 
+		if( !empty($new_area) )
 		{
 			$file = IA_ROOT . "/addons/ewei_shopv2/static/js/dist/area/AreaNew.xml";
 		}
