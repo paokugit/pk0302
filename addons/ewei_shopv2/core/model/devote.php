@@ -27,16 +27,31 @@ class Devote_EweiShopV2Model{
         }
         //获取推荐付费会员的总数
         $sum=pdo_fetch("select count(*) from ".tablename("ewei_shop_member")." where agentlevel>0 and agentid=:agentid",array(":agentid"=>$member["agentid"]));
-        if ($sum["count"]<30){
-            return false;
+        if ($sum["count"]>30){
+            $count=floor($sum["count"]/30);
+            $jl=$count*30;
+            //查询是否已奖励
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>"推荐付费会员,达到".$jl."人"));
+            if (empty($log)){
+                
+                //奖励
+                m('member')->setCredit($parent["openid"], 'credit4', 60, "推荐付费会员,达到".$jl."人");
+            }
+            
         }
-        $count=floor($sum/30);
-        //查询是否已奖励
-        $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>"推荐付费会员,达到".$count."人"));
-        if (empty($log)){
-        $jl=$count*30;
-        //奖励
-        m('member')->setCredit($parent["openid"], 'credit4', $jl, "推荐付费会员,达到".$count."人");
+        
+        //直推店主
+        $shop=pdo_fetch("select count(*) from ".tablename("ewei_shop_member")." where agentlevel=5 and agentid=:agentid",array(":agentid"=>$member["agentid"]));
+        if ($shop["count"]>10){
+            $count=floor($shop["count"]/10);
+            //查询是否已奖励
+            $jl=$count*10;
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>"推荐店主".$jl."人"));
+           
+            if (empty($log)){
+                //奖励
+                m('member')->setCredit($parent["openid"], 'credit4', 1000, "推荐店主".$jl."人");
+            }
         }
         return true;
     }
