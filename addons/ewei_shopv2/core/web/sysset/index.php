@@ -1092,5 +1092,39 @@ class Index_EweiShopV2Page extends WebPage
             show_json(0,'信息错误');
         }
     }
+
+    /**
+     * 快递设置
+     */
+    public function express_set()
+    {
+        global $_GPC;
+        global $_W;
+        $express = pdo_fetch('select * from '.tablename('ewei_shop_express_set').' where uniacid="'.$_W['uniacid'].'"');
+        $areas = m('common')->getAreas();
+        if( $_W["ispost"] )
+        {
+            ca('sysyset.express_set.edit');
+            $express_set = $_GPC['express_set'];
+            $data = [
+                'uniacid'=>$_W['uniacid'],
+                'express_set'=>$express_set,
+                'createtime'=>time(),
+            ];
+            pdo_begin();
+            try {
+                if (pdo_exists('ewei_shop_express_set', ['uniacid' => $_W['uniacid']])) {
+                    pdo_update('ewei_shop_express_set', $data, ['uniacid' => $_W['uniacid']]);
+                } else {
+                    pdo_insert('ewei_shop_express_set', $data);
+                }
+                pdo_commit();
+            }catch (Exception $exception){
+                pdo_rollback();
+            }
+            show_json(1);
+        }
+        include $this->template();
+    }
 }
 ?>

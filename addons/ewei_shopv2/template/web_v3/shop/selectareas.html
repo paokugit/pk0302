@@ -157,44 +157,13 @@
         $("#modal-areas").modal();
         var citystrs = '';
         $('#btnSubmitArea').unbind('click').click(function(){
-                   $('.city:checked').each(function(){              
+                   $('.city:checked').each(function(){
                        citystrs+= $(this).attr('city') +";";
                    }); 
                    $('#areas').html(citystrs);
                    $("#selectedareas").val(citystrs);
         })
     
-    }
-
-    function remote_selectAreas(){
-        clearSelects();
-        var old_citys = $('#remote_areas').html().split(';');
-
-
-        $('.city').each(function(){
-            var parentcheck = false;
-            for(var i in old_citys){
-                if(old_citys[i]==$(this).attr('city')){
-                    parentcheck = true;
-                    $(this).get(0).checked = true;
-                    break;
-                }
-            }
-            if(parentcheck){
-                $(this).parent().parent().parent().parent().find('.cityall').get(0).checked=  true;
-            }
-        });
-
-        $("#modal-areas").modal();
-        var citystrs = '';
-        $('#btnSubmitArea').unbind('click').click(function(){
-            $('.city:checked').each(function(){
-                citystrs+= $(this).attr('city') +";";
-            });
-            $('#remote_areas').html(citystrs);
-            $("#remote_selectedareas").val(citystrs);
-        })
-
     }
 
 </script>

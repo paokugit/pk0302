@@ -1556,13 +1556,16 @@ class Order_EweiShopV2Model
 		$goods_num = count($goods);
 		$seckill_payprice = 0;
 		$seckill_dispatchprice = 0;
+		$user_city = "";
 		$user_province = "";
+		$user_city_code = "";
 		$user_province_code = "";
 		if( empty($new_area) )
 		{
 			if( !empty($address) ) 
 			{
 				$user_province = $user_province_code = $address["province"];
+				$user_city = $user_city_code = $address["city"];
 			}
 			else 
 			{
@@ -1646,6 +1649,10 @@ class Order_EweiShopV2Model
 						{
 							if( !empty($address) ) 
 							{
+								if( !in_array($user_city_code, $gareas) ) 
+								{
+									$sendfree = true;
+								}
 								if( !in_array($user_province_code, $gareas) )
 								{
 									$sendfree = true;
@@ -1653,17 +1660,28 @@ class Order_EweiShopV2Model
 							}
 							else 
 							{
-				                                if( !empty($member["province"]) )
-				                                {
-				                                    if( !in_array($member["province"], $gareas) )
-				                                    {
-				                                        $sendfree = true;
-				                                    }
-				                                }
-				                                else
-				                                {
-				                                    $sendfree = true;
-				                                }
+								if( !empty($member["city"]) ) 
+								{
+									if( !in_array($member["city"], $gareas) ) 
+									{
+										$sendfree = true;
+									}
+								}
+								else 
+								{
+									$sendfree = true;
+								}
+                                if( !empty($member["province"]) )
+                                {
+                                    if( !in_array($member["province"], $gareas) )
+                                    {
+                                        $sendfree = true;
+                                    }
+                                }
+                                else
+                                {
+                                    $sendfree = true;
+                                }
 							}
 						}
 					}
@@ -1691,6 +1709,10 @@ class Order_EweiShopV2Model
 						{
 							if( !empty($address) ) 
 							{
+								if( !in_array($user_city_code, $gareas) ) 
+								{
+									$sendfree = true;
+								}
 								if( !in_array($user_province_code, $gareas) )
 								{
 									$sendfree = true;
@@ -1698,6 +1720,17 @@ class Order_EweiShopV2Model
 							}
 							else 
 							{
+								if( !empty($member["city"]) ) 
+								{
+									if( !in_array($member["city"], $gareas) ) 
+									{
+										$sendfree = true;
+									}
+								}
+								else 
+								{
+									$sendfree = true;
+								}
 								if( !empty($member["province"]) )
 								{
 									if( !in_array($member["province"], $gareas) )
@@ -1718,7 +1751,7 @@ class Order_EweiShopV2Model
 			{
 				if( $city_express_data["state"] == 0 && $city_express_data["is_dispatch"] == 1 ) 
 				{
-					if( !empty($user_province) )
+					if( !empty($user_city) || $user_province)
 					{
 						if( empty($new_area) ) 
 						{
@@ -1728,7 +1761,7 @@ class Order_EweiShopV2Model
 						{
 							$citys = m("dispatch")->getAllNoDispatchAreas("", 1);
 						}
-						if( !empty($citys) && in_array($user_province_code, $citys) && !empty($citys) )
+						if( !empty($citys) && in_array($user_city_code, $citys) && !empty($citys) ) 
 						{
 							$isnodispatch = 1;
 							$has_goodsid = 0;
@@ -1740,7 +1773,7 @@ class Order_EweiShopV2Model
 							{
 								$nodispatch_array["goodid"][] = $g["goodsid"];
 								$nodispatch_array["title"][] = $g["title"];
-								$nodispatch_array["city"] = $user_province;
+								$nodispatch_array["city"] = $user_city;
 							}
 						}
 					}
@@ -1750,25 +1783,45 @@ class Order_EweiShopV2Model
 					    $remote_dispatchprice = $g['remote_dispatchprice'] > 0 ? $g['remote_dispatchprice'] : 0;
 						$dispatch_merch[$merchid] += $g["dispatchprice"];
 						$gareas = explode(';',$g['edareas']);
-			                        if(!empty($address)&&in_array($user_province_code, $gareas) || !empty($member['province'])&&in_array($member['province'],$gareas)){
-			                            if( $seckillinfo && $seckillinfo["status"] == 0 )
-			                            {
-			                                $seckill_dispatchprice += $g["dispatchprice"];
-			                            }
-			                            else
-			                            {
-			                                $dispatch_price += $g["dispatchprice"];
-			                            }
-			                        }else{
-			                            if( $seckillinfo && $seckillinfo["status"] == 0 )
-			                            {
-			                                $seckill_dispatchprice += $g["dispatchprice"]+$remote_dispatchprice;
-			                            }
-			                            else
-			                            {
-			                                $dispatch_price += $g["dispatchprice"]+$remote_dispatchprice;
-			                            }
-			                        }
+                        if(!empty($address)&&in_array($user_city_code, $gareas) || !empty($member['city'])&&in_array($member['city'],$gareas)){
+                            if( $seckillinfo && $seckillinfo["status"] == 0 )
+                            {
+                                $seckill_dispatchprice += $g["dispatchprice"];
+                            }
+                            else
+                            {
+                                $dispatch_price += $g["dispatchprice"];
+                            }
+                        }else{
+                            if( $seckillinfo && $seckillinfo["status"] == 0 )
+                            {
+                                $seckill_dispatchprice += $g["dispatchprice"]+$remote_dispatchprice;
+                            }
+                            else
+                            {
+                                $dispatch_price += $g["dispatchprice"]+$remote_dispatchprice;
+                            }
+                        }
+                        if(!empty($address)&&in_array($user_province_code, $gareas) || !empty($member['province'])&&in_array($member['province'],$gareas)){
+                            if( $seckillinfo && $seckillinfo["status"] == 0 )
+                            {
+                                $seckill_dispatchprice += $g["dispatchprice"];
+                            }
+                            else
+                            {
+                                $dispatch_price += $g["dispatchprice"];
+                            }
+                        }else{
+                            if( $seckillinfo && $seckillinfo["status"] == 0 )
+                            {
+                                $seckill_dispatchprice += $g["dispatchprice"]+$remote_dispatchprice;
+                            }
+                            else
+                            {
+                                $dispatch_price += $g["dispatchprice"]+$remote_dispatchprice;
+                            }
+                        }
+
 					}
 				}
 				else 
@@ -1778,7 +1831,7 @@ class Order_EweiShopV2Model
 						if( 0 < $g["dispatchprice"] && !$sendfree ) 
 						{
 						    //如果有偏远地域差价  加上他 没有 还是基础差价
-                            				$remote_dispatchprice = $g['remote_dispatchprice'] > 0 ?$g['remote_dispatchprice'] :0;
+                            $remote_dispatchprice = $g['remote_dispatchprice'] > 0 ?$g['remote_dispatchprice'] :0;
 							if( $city_express_data["is_sum"] == 1 )
 							{
 								$dispatch_price += $g["dispatchprice"]+$remote_dispatchprice;
@@ -1796,7 +1849,7 @@ class Order_EweiShopV2Model
 					{
 						$nodispatch_array["goodid"][] = $g["goodsid"];
 						$nodispatch_array["title"][] = $g["title"];
-						$nodispatch_array["city"] = $user_province;
+						$nodispatch_array["city"] = $user_city;
 					}
 				}
 			}
@@ -1823,7 +1876,7 @@ class Order_EweiShopV2Model
 							$isnoarea = 0;
 							$dkey = $dispatch_data["id"];
 							$isdispatcharea = intval($dispatch_data["isdispatcharea"]);
-							if( !empty($user_province) )
+							if( !empty($user_city) ) 
 							{
 								if( empty($isdispatcharea) ) 
 								{
@@ -1835,7 +1888,7 @@ class Order_EweiShopV2Model
 									{
 										$citys = m("dispatch")->getAllNoDispatchAreas($dispatch_data["nodispatchareas_code"], 1);
 									}
-									if( !empty($citys) && in_array($user_province_code, $citys) )
+									if( !empty($citys) && in_array($user_city_code, $citys) ) 
 									{
 										$isnoarea = 1;
 									}
@@ -1850,13 +1903,13 @@ class Order_EweiShopV2Model
 									{
 										$citys = m("dispatch")->getAllNoDispatchAreas("", 1);
 									}
-									if( !empty($citys) && in_array($user_province_code, $citys) )
+									if( !empty($citys) && in_array($user_city_code, $citys) ) 
 									{
 										$isnoarea = 1;
 									}
 									if( empty($isnoarea) ) 
 									{
-										$isnoarea = m("dispatch")->checkOnlyDispatchAreas($user_province_code, $dispatch_data);
+										$isnoarea = m("dispatch")->checkOnlyDispatchAreas($user_city_code, $dispatch_data);
 									}
 								}
 								if( !empty($isnoarea) ) 
@@ -1871,7 +1924,7 @@ class Order_EweiShopV2Model
 									{
 										$nodispatch_array["goodid"][] = $g["goodsid"];
 										$nodispatch_array["title"][] = $g["title"];
-										$nodispatch_array["city"] = $user_province;
+										$nodispatch_array["city"] = $user_city;
 									}
 								}
 							}
@@ -1932,7 +1985,7 @@ class Order_EweiShopV2Model
 						{
 							$nodispatch_array["goodid"][] = $g["goodsid"];
 							$nodispatch_array["title"][] = $g["title"];
-							$nodispatch_array["city"] = $user_province;
+							$nodispatch_array["city"] = $user_city;
 						}
 					}
 				}
@@ -2015,7 +2068,7 @@ class Order_EweiShopV2Model
 									$areas = explode(";", $merchset["enoughareas"]);
 									if( !empty($address) ) 
 									{
-										if( !in_array($address["province"], $areas) )
+										if( !in_array($address["city"], $areas) ) 
 										{
 											$dispatch_price = $dispatch_price - $dispatch_merch[$merchid];
 											$dispatch_merch[$merchid] = 0;
@@ -2023,9 +2076,9 @@ class Order_EweiShopV2Model
 									}
 									else 
 									{
-										if( !empty($member["province"]) )
+										if( !empty($member["city"]) ) 
 										{
-											if( !in_array($member["province"], $areas) )
+											if( !in_array($member["city"], $areas) ) 
 											{
 												$dispatch_price = $dispatch_price - $dispatch_merch[$merchid];
 												$dispatch_merch[$merchid] = 0;
@@ -2033,7 +2086,7 @@ class Order_EweiShopV2Model
 										}
 										else 
 										{
-											if( empty($member["province"]) )
+											if( empty($member["city"]) ) 
 											{
 												$dispatch_price = $dispatch_price - $dispatch_merch[$merchid];
 												$dispatch_merch[$merchid] = 0;
