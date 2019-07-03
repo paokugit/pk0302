@@ -662,7 +662,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
         foreach ($log as &$item){
             //计算昵称的长度
             $length = mb_strlen($item['nickname']);
-            //如果昵称长度大于4  就截取4位  并拼接***
+            //如果昵称长度小于等于3  就截取1位 并拼接***   如果昵称大于4  截取第1位和最后1位
             if($length <= 3){
                 $item['nickname'] = mb_substr($item['nickname'],0,1)."***";
             }elseif($length > 4){
