@@ -58,8 +58,8 @@ class Index_EweiShopV2Page extends WebPage
 		$member = pdo_fetchall(' select credit2 from '.tablename('ewei_shop_member').' where credit2 > 0 and uniacid = "'.$_W['uniacid'].'"');
 		$credit2_all = array_sum(array_map(create_function('$val','return $val["credit2"];'),$member));
 		$ceshi = pdo_fetchall(' select credit2 from '.tablename('ewei_shop_member').' where credit2 > 0 and uniacid = "'.$_W['uniacid'].'" and id in (12,15,44,83,89,90,1590,4164)');
-        $credit2 = array_sum(array_map(create_function('$val','return $val["credit2"];'),$ceshi));
-        include $this->template();
+		$credit2 = array_sum(array_map(create_function('$val','return $val["credit2"];'),$ceshi));
+		include $this->template();
 	}
 
 	public function searchlist()
