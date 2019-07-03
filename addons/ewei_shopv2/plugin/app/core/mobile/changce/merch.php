@@ -663,8 +663,10 @@ class Merch_EweiShopV2Page extends AppMobilePage
             //计算昵称的长度
             $length = mb_strlen($item['nickname']);
             //如果昵称长度大于4  就截取4位  并拼接***
-            if($length > 4){
-                $item['nickname'] = mb_substr($item['nickname'],0,4)."***";
+            if($length <= 3){
+                $item['nickname'] = mb_substr($item['nickname'],0,1)."***";
+            }elseif($length > 4){
+                $item['nickname'] = mb_substr($item['nickname'],0,1)."***".mb_substr($item['nickname'],-1,1);
             }
         }
         show_json(1,['log'=>$log,'page'=>$page,'total'=>$total]);
