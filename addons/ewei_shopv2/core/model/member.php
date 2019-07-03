@@ -1365,7 +1365,8 @@ class Member_EweiShopV2Model
             
             //fbb 贡献值
             m("devote")->rewardtwo($agentinfo["id"]);
-
+            m("devote")->rewardfive($agentinfo["id"]);
+            
             if(isset($agentinfo['id'])){
                 if(isset($info['goodsid'])){
                     $goodsid=$info['goodsid'];

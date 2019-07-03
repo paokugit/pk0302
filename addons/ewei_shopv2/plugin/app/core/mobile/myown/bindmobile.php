@@ -39,7 +39,7 @@ class Bindmobile_EweiShopV2Page extends AppMobilePage{
     }
     //国家区号
     public function country(){
-        $list=pdo_fetchall("select * from ".tablename("sms_country")." where name_zh=:name_zh1 or name_zh=:name_zh2 or name_zh=:name_zh3",array(":name_zh1"=>"中国",":name_zh2"=>"马来西亚",":name_zh3"=>"泰国"));
+        $list["list"]=pdo_fetchall("select * from ".tablename("sms_country")." where name_zh=:name_zh1 or name_zh=:name_zh2 or name_zh=:name_zh3",array(":name_zh1"=>"中国",":name_zh2"=>"马来西亚",":name_zh3"=>"泰国"));
         
         app_error(0,$list);
     }
@@ -54,6 +54,9 @@ class Bindmobile_EweiShopV2Page extends AppMobilePage{
        if (empty($member)){
            app_error(1,"openid不正确");
        }else{
+           if ($member["mobile"]==$mobile){
+               app_error(1,"修改手机号不可与原手机号一样");
+           }
            if (pdo_update("ewei_shop_member",array("mobile"=>$mobile),array("openid"=>$openid))){
                //获取是否有奖励记录
                $log=pdo_get("ewei_shop_member_credit_record",array("openid"=>$openid,"remark"=>"绑定手机号获取"));

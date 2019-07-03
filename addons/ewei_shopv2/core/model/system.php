@@ -730,6 +730,10 @@ class System_EweiShopV2Model {
                         "route" => "devote"
                     ) ,
                     array(
+                        "title" => "贡献值奖励",
+                        "route" => "devote.reward"
+                    ) ,
+                    array(
                         "title" => "标签组",
                         "route" => "group"
                     ) ,

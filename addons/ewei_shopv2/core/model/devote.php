@@ -69,16 +69,35 @@ class Devote_EweiShopV2Model{
         
         //获取直推会员的总数
         $sum=pdo_fetch("select count(*) from ".tablename("ewei_shop_member")." where  agentid=:agentid",array(":agentid"=>$parent_id));
-        if ($sum["count"]<100){
-            return false;
-        }
+//         if ($sum["count"]<100){
+//             return false;
+//         }
+        if ($sum["count"]>=100){
         //查询是否奖励过
         $log=pdo_get("erwei_shop_member_credit_record",array("openid"=>$member["openid"],"credittype"=>"credit4","remark"=>"直推100人完成"));
-        if ($log){
-            return false;
-        }
+        if (empty($log)){
         //添加记录奖励
         m('member')->setCredit($member["openid"], 'credit4', 20, "直推100人完成");
+        }
+        }
+        
+       
+        //添加直推10人奖励
+        $jiangli=pdo_get("ewei_shop_member_devotejl",array("id"=>1));
+        $dt=date("Y-m-d");
+        $start_date=strtotime($jiangli["start_date"]);
+        $end_date=strtotime($jiangli["end_date"]);
+        $sum=pdo_fetch("select count(*) from ".tablename("ewei_shop_member")." where  agentid=:agentid and createtime>=:starttime and createtime<=:endtime",array(":agentid"=>$parent_id,":starttime"=>$start_date,":endtime"=>$end_date));
+        if ($sum["count"]>=$jiangli["count"]){
+            if ($member["agentlevel"]>=$jiangli["level"]&&$jiangli["start_date"]<=$dt&&$jiangli["end_date"]>=$dt){
+                //查询是否奖励过
+                $log=pdo_get("erwei_shop_member_credit_record",array("openid"=>$member["openid"],"credittype"=>"credit4","remark"=>"直推活动：".$jiangli["start_date"]."-".$jiangli["end_date"]."内推荐".$jiangli["count"]."人"));
+                if (empty($log)){
+                    //添加记录奖励
+                    m('member')->setCredit($member["openid"], 'credit4', $dt["num"], "直推活动：".$jiangli["start_date"]."-".$jiangli["end_date"]."内推荐".$jiangli["count"]."人");
+                }
+            }
+        }
         return true;
     }
     //直推付费会员
@@ -163,6 +182,21 @@ class Devote_EweiShopV2Model{
             }
         }
        
+        return true;
+    }
+    
+    //新用户助力
+    public function rewardfive($parent_id){
+        $member = m('member')->getMember($parent_id);
+        $jiangli=pdo_get("ewei_shop_member_devotejl",array("id"=>2));
+        if ($member["agentlevel"]<$jiangli["level"]){
+            return false;
+        }
+        $dt=date("Y-m-d");
+        if ($jiangli["start_date"]<=$dt&&$jiangli["end_date"]>=$dt){
+            m('member')->setCredit($member["openid"], 'credit4',$jiangli["num"], "新用户助力奖励");
+            
+        }
         return true;
     }
 }
