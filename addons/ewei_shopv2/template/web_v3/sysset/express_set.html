@@ -1,0 +1,128 @@
+{template '_header'}
+
+<style type='text/css'>
+    .province { float:left; position:relative;width:170px; height:35px; line-height:35px;border:1px solid #fff;padding-top: -10px}
+    .province:hover { border:1px solid #a6d2fe;border-bottom:1px solid #a6d2fe; background:#edf6ff;}
+    .province .cityall { margin-top:10px;}
+    .province ul { list-style: outside none none;position:absolute;padding:0;background:#edf6ff;border:1px solid #a6d2fe;display:none;
+        width:auto; width:250px; z-index:999999;left:-1px;top:32px;}
+    .province ul li  { float:left;min-width:60px;margin-left:20px; height:30px;line-height:30px; }
+    .checkbox-inline{
+        margin: 0;
+    }
+</style>
+
+<div class="page-header">
+    当前位置：<span class="text-primary">快递地区设置</span>
+</div>
+<div class="page-content">
+    <div class="alert alert-primary">
+        <p>提示：设置常用快递地区，非设置地区，即为偏远地区，需加快递费</p>
+    </div>
+    <form action="" method="post" class="form-horizontal form-validate" enctype="multipart/form-data">
+        <div>
+            <label class="col-sm-2 control-label">设置快递常用地区</label>
+            <div class="col-sm-9 col-xs-12">
+                <div id="areas" class="form-control-static">{$express['express_set']}</div>
+                <a href="javascript:;" class="btn btn-default" onclick="selectAreas()">添加不参加满包邮的地区</a>
+                <input type="hidden" id='selectedareas' name="express_set" value="{php echo $express['express_set']}"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"></label>
+            <div class="col-sm-9 subtitle">
+                <input type="submit" value="保存设置" class="btn btn-primary"/>
+            </div>
+        </div>
+    </form>
+</div>
+<!--modal-->
+<div id="modal-areas"  class="modal fade" tabindex="-1">
+    <div class="modal-dialog" style='width: 900px;'>
+        <div class="modal-content">
+            <div class="modal-header"><button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button><h3>选择区域</h3></div>
+            <div class="modal-body" style='height:300px;' >
+                {loop $areas['province'] $value}
+                    {if $value['@attributes']['name']=='请选择省份'}{php continue;}{/if}
+                    <div class='province'>
+                        <label class='checkbox-inline' style='margin-left:20px;padding: 0 0 5px 24px;'>
+                            <input type='checkbox' class='cityall' style="margin-top: -10px" city="{php echo $value['@attributes']['name']}" /> {php echo $value['@attributes']['name']}
+                            <span class="citycount" style='color:#ff6600'></span>
+                        </label>
+                    </div>
+                {/loop}
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:;" id='btnSubmitArea' class="btn btn-primary" data-dismiss="modal" aria-hidden="true">确定</a>
+                <a href="javascript:;" class="btn btn-default" data-dismiss="modal" aria-hidden="true">关闭</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{template '_footer'}
+
+
+<script language='javascript'>
+    $(function(){
+        $('.province').mouseenter(function(){
+            $(this).find('ul').show();
+        }).mouseleave(function(){
+            $(this).find('ul').hide();
+        });
+
+        $('.cityall').click(function(){
+            var checked = $(this).get(0).checked;
+            var citys = $(this).parent().parent().find('.city');
+            citys.each(function(){
+                $(this).get(0).checked = checked;
+            });
+            var count = 0;
+            if(checked){
+                count =  $(this).parent().parent().find('.city:checked').length;
+            }
+            if(count>0){
+                $(this).next().html("(" + count + ")")    ;
+            }
+            else{
+                $(this).next().html("");
+            }
+        });
+
+    });
+
+    function clearSelects(){
+        $('.city').attr('checked',false).removeAttr('disabled');
+        $('.cityall').attr('checked',false).removeAttr('disabled');
+        $('.citycount').html('');
+    }
+
+    function selectAreas(){
+        clearSelects();
+        var old_citys = $('#areas').html().split(';');
+
+        $('.cityall').each(function(){
+            var parentcheck = false;
+            for(var i in old_citys){
+                if(old_citys[i]==$(this).attr('city')){
+                    parentcheck = true;
+                    $(this).get(0).checked = true;
+                    break;
+                }
+            }
+            if(parentcheck){
+                $(this).parent().parent().parent().parent().find('.cityall').get(0).checked=  true;
+            }
+        });
+        $("#modal-areas").modal();
+        var citystrs = '';
+        $('#btnSubmitArea').unbind('click').click(function(){
+            $('.cityall:checked').each(function(){
+                citystrs+= $(this).attr('city') +";";
+            });
+            $('#areas').html(citystrs);
+            $('#selectedareas').val(citystrs);
+        })
+
+    }
+</script>

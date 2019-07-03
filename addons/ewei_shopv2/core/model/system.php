@@ -1244,6 +1244,10 @@ class System_EweiShopV2Model {
                                 "route" => "area"
                             ) ,
                             array(
+                                "title"=>"快递设置",
+                                "route"=>"express_set"
+                            ) ,
+                            array(
                                 "title" => "物流信息接口",
                                 "route" => "express"
                             )
