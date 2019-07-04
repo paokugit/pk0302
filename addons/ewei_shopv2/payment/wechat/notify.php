@@ -186,6 +186,11 @@ class EweiShopWechatPay
                                                                                     if($this->type == "30"){
                                                                                         $this->shopCode();
                                                                                     }
+                                                                                    else{
+                                                                                        if($this->type == "31"){
+                                                                                            $this->myown();
+                                                                                        }
+                                                                                    }
                                                                                 }
 																			}
 																		}
@@ -974,6 +979,45 @@ class EweiShopWechatPay
             pdo_update('ewei_shop_member_log',['status'=>-1],['logno'=>$ordersn]);
             pdo_update('ewei_shop_merch_log',['status'=>-1],['ordersn'=>$ordersn]);
 
+        }
+    }
+
+    /**
+     * 购买个人收款码的回调
+     */
+    public function myown()
+    {
+        $input = file_get_contents('php://input');
+        $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $data = json_decode(json_encode($obj), true);
+        if (!$data) {
+            exit("FAIL");
+        }
+        $res = $this->check_sign($data);
+        if (!$res) {
+            exit("FAIL");
+        }
+        $ordersn = $data['out_trade_no'];  //获得订单信息
+        //如果失败  先获得分类  cate  == 1  卡路里   cate == 2  折扣宝
+        $cate = substr($ordersn,3,1);
+        //用ordersn订单号 查订单信息
+        $order = pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
+        //从order里面获得openID 查用户的卡路里和折扣宝余额
+        $member = pdo_fetch('select * from '.tablename('ewei_shop_member').'where openid = "'.$order['openid'].'"');
+        if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
+            pdo_begin();
+            try {
+                //如果成功  修改订单的status 状态 和 用户日志   还有商户收款日志的  状态为成功
+                pdo_update('ewei_shop_order',['status'=>3,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
+                pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn]);
+                pdo_commit();
+            }catch(Exception $exception){
+                pdo_rollback();
+            }
+        }else{
+            //如果支付失败  修改订单  用户日志  和 商户收款日志为失败状态
+            pdo_update('ewei_shop_order',['status'=>-1],['ordersn'=>$ordersn]);
+            pdo_update('ewei_shop_member_log',['status'=>-1],['logno'=>$ordersn]);
         }
     }
 
