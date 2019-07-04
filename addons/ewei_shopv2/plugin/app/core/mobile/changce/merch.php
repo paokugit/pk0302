@@ -636,7 +636,41 @@ class Merch_EweiShopV2Page extends AppMobilePage
         }
     }
 
-
+    /**
+     * 提现排行榜  快报
+     */
+    public function draw_rank()
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        //计算提现总人数
+        $list = pdo_fetchall('select sum(l.money) as sum_money,m.nickname from '.tablename('ewei_shop_member_log').'l join '.tablename('ewei_shop_member').'m on m.openid=l.openid'.' where l.uniacid = "'.$uniacid.'" and type = 1 and l.status = 1 group by l.openid order by sum_money desc');
+        $total = count($list);
+        //取出来前三名
+        $third = array_slice($list,0,3);
+        //设置每页数
+        $pageSize = 20;
+        //随机获取第几页  以及每页的第几个
+        $page = rand(1,floor($total/$pageSize));
+        $psize = ($page-1)*$pageSize;
+        //分页显示
+        $log = pdo_fetchall('select sum(l.money) as sum_money,m.nickname from '.tablename('ewei_shop_member_log').'l join '.tablename('ewei_shop_member').'m on m.openid=l.openid'.' where l.uniacid = "'.$uniacid.'" and type = 1 and l.status = 1 group by l.openid order by sum_money desc LIMIT '.$psize.','.$pageSize);
+        //如果不是第一页 就把前三名合并到分页的
+        if($page != 1){
+            $log = array_merge($third,$log);
+        }
+        foreach ($log as &$item){
+            //计算昵称的长度
+            $length = mb_strlen($item['nickname']);
+            //如果昵称长度小于等于3  就截取1位 并拼接***   如果昵称大于4  截取第1位和最后1位
+            if($length <= 3){
+                $item['nickname'] = mb_substr($item['nickname'],0,1)."***";
+            }elseif($length >= 4){
+                $item['nickname'] = mb_substr($item['nickname'],0,1)."***".mb_substr($item['nickname'],-1,1);
+            }
+        }
+        show_json(1,['log'=>$log,'page'=>$page,'total'=>$total]);
+    }
 }
 
 ?>

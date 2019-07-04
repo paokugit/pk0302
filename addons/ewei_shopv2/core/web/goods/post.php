@@ -1102,7 +1102,7 @@ if (!(empty($id))) {
         }
     }
 }
-$dispatch_data = pdo_fetchall('select * from ' . tablename('ewei_shop_dispatch') . ' where uniacid=:uniacid and merchid=:merchid and enabled=1 order by displayorder desc', array(':uniacid' => $_W['uniacid'], ':merchid' => $merchid));
+$dispatch_data = pdo_fetchall(' select * from ' . tablename('ewei_shop_dispatch') . ' where uniacid=:uniacid and merchid=:merchid and enabled=1 order by displayorder desc', array(':uniacid' => $_W['uniacid'], ':merchid' => $merchid));
 if (p('commission')) {
     $com_set = p('commission')->getSet();
 }
