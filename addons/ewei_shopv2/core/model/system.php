@@ -1150,6 +1150,19 @@ class System_EweiShopV2Model {
                         )
                     ) ,
                     array(
+                        "title" => "页面优化",
+                        "items" => array(
+                            array(
+                                "title" => "运动首页",
+                                "route" => "sport"
+                            ) ,
+                            array(
+                                "title" => "达人中心",
+                                "route" => "daren"
+                            ) 
+                        )
+                    ) ,
+                    array(
                         "title" => "交易",
                         "items" => array(
                             array(

@@ -181,6 +181,57 @@
         </div>
     </div>
 </div>
+
+
+<div class="region-goods-details row">
+    <div class="region-goods-left col-sm-2">
+        贡献值奖励
+    </div>
+    <div class="region-goods-right col-sm-10">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                推荐贡献值
+            </label>
+            <div class="col-sm-9 col-xs-12">
+                {ife 'goods' $item}
+                <div class="input-group fixsingle-input-group">
+                    <input type="text" name="agent_devote" id="agent_devote" class="form-control" value="{$item['agent_devote']}"/>
+                <span class="input-group-addon">
+                           
+                            </span>
+                </div>
+                <p class="help-block">
+                    会员下单购买了，推荐人奖励贡献值
+                </p>
+                
+                {/if}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                自购贡献值
+            </label>
+            <div class="col-sm-9 col-xs-12">
+                {ife 'goods' $item}
+                <div class="input-group fixsingle-input-group">
+                    <input type="text" name="my_devote" id="my_devote" class="form-control" value="{$item['my_devote']}"
+                    />
+                <span class="input-group-addon">
+                                
+                            </span>
+                </div>
+                <p class="help-block">
+                     用户自己下单，奖励贡献值
+                </p>
+                
+               
+                {/if}
+            </div>
+        </div>
+    </div>
+</div>
+
 {if !is_error(redis())}
 <div class="region-goods-details row">
     <div class="region-goods-left col-sm-2">

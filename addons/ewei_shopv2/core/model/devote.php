@@ -199,4 +199,44 @@ class Devote_EweiShopV2Model{
         }
         return true;
     }
+    //订单商品奖励
+    public function rewardorder($order_id){
+        $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
+        if (empty($order)){
+            return false;
+        }
+        $order_good=pdo_fetchall("select * from ".tablename("ewei_shop_order_goods")." where orderid=:orderid",array(":orderid"=>$order_id));
+        $my_price=0;
+        $agent_price=0;
+        foreach ($order_good as $k=>$v){
+            $good=pdo_get("ewei_shop_goods",array("id"=>$v["goodsid"]));
+            $my_price+=$good["my_devote"]*$v["total"];
+            $agent_price+=$good["agent_devote"]*$v["total"];
+        }
+        //获取用户
+        $member=pdo_get("ewei_shop_member",array("openid"=>$order["openid"]));
+        //判断是否开启贡献值
+        if ($member["mobile"]&&$member["weixin"]){
+           //判断用户级别
+           if ($member["agentlevel"]>=1){
+               if ($my_price>0){
+                   m('member')->setCredit($member["openid"], 'credit4',$my_price, "自购订单".$order["ordersn"]);
+               }
+           }
+        }
+        //上级用户
+        if ($member["agentid"]!=0){
+            $agent=pdo_get("ewei_shop_member",array("id"=>$member["agentid"]));
+            if ($agent["mobile"]&&$agent["weixin"]){
+                //判断用户级别
+                if ($agent["agentlevel"]>=1){
+                    if ($agent_price>0){
+                        m('member')->setCredit($agent["openid"], 'credit4',$agent_price, $member["nickname"]."下单,订单编号：".$order["ordersn"]);
+                    }
+                }
+            }
+            
+        }
+        return true;
+    }
 }
