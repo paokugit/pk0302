@@ -2189,9 +2189,7 @@ if( !class_exists("CommissionModel") )
 			    }
 			    
             }
-            //fbb 贡献值订单
-            m("devote")->rewardorder($orderid);
-            
+           
             $goods = pdo_fetchall("select og.goodsid,g.cates,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,og.optionname as optiontitle,g.isverify,g.storeids from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:orderid", array(":orderid" => $orderid ));
             //lihanwen 会员奖励
             if($order['status']==3) {

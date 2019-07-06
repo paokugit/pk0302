@@ -173,6 +173,10 @@ class Order_EweiShopV2Model
 					if ($order["share_id"]!=0&&!empty($order["share_id"])&&$order["merchid"]!=0){
 					    m("merch")->order($order["id"]);
 					}
+					
+					//fbb 贡献值订单
+					m("devote")->rewardorder($order["id"]);
+					
 					if( $order["iscycelbuy"] == 1 && p("cycelbuy") )
 					{
 						p("cycelbuy")->cycelbuy_periodic($order["id"]);
