@@ -37,6 +37,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$rebate || !$calorie){
             show_json(0,'生成商家二维码错误');
         }
+        //qr是单纯的小程序码   qrcode是带背景图的小程序收款码
         show_json(1,['rebate'=>$rebate['qrcode'],'rebate_qr'=>$rebate['qr'],'calorie'=>$calorie['qrcode'],'calorie_qr'=>$calorie['qr']]);
     }
 
@@ -76,13 +77,13 @@ class Index_EweiShopV2Page extends AppMobilePage
             'status'=>0,
             'paytype'=>21,
             'createtime'=>time(),
-            'merchid'=>$_GPC['merchid'],
             'ismerch'=>1,
             'type'=>1,
+            'merchid'=>$_GPC['merchid'],
         ];
         //加入订单记录
         $order = pdo_insert('ewei_shop_order',$add);
-        $payinfo = array( "openid" => substr($_GPC['openid'],7), "title" => "商家商户收款码收款", "tid" => $order_sn, "fee" =>$_GPC["money"] );
+        $payinfo = array( "openid" => substr($_GPC['openid'],7), "title" => is_numeric($_GPC['merchid'])?"商家收款码收款":"个人收款码收款", "tid" => $order_sn, "fee" =>$_GPC["money"] );
         $res = $this->model->wxpay($payinfo, 30);
         if(is_error($res)){
             show_json(0,$res);
@@ -100,18 +101,36 @@ class Index_EweiShopV2Page extends AppMobilePage
             'rechargetype'=>'wxscan',
         ];
         pdo_insert('ewei_shop_member_log',$add2);
-        //商家收款日志
-        $mch_add = [
-            'uniacid'=>$_W['uniacid'],
-            'openid'=>$_GPC['openid'],
-            'price'=>$_GPC['money'],
-            'cate'=>$_GPC['cate'],
-            'ordersn'=>$order_sn,
-            'merchid'=>$_GPC['merchid'],
-            'createtime'=>time(),
-            'status'=>0,
-        ];
-        pdo_insert('ewei_shop_merch_log',$mch_add);
+        //现在是  merchid  商家的话传  merchid  也是从那个码弄出来的  个人的话  传openid  也是从那个码里得到的
+        // 所以判断  如果是数字的话 是商家 加日志记录 是加  merchid_log  如果不是数字  加日志是加member_Log的
+        if(is_numeric($_GPC['merchid'])){
+            //商家收款日志  加到商家表里面
+            $mch_add = [
+                'uniacid'=>$_W['uniacid'],
+                'openid'=>$_GPC['openid'],
+                'price'=>$_GPC['money'],
+                'cate'=>$_GPC['cate'],
+                'ordersn'=>$order_sn,
+                'merchid'=>$_GPC['merchid'],
+                'createtime'=>time(),
+                'status'=>0,
+            ];
+            pdo_insert('ewei_shop_merch_log',$mch_add);
+        }else{
+            //个人收款日志  加在member_log表里面  logno  是 order_sn  拼接上  传来的  merchid
+            $mem_add = [
+                'uniacid'=>$_W['uniacid'],
+                'openid'=>$_GPC['openid'],
+                'type'=>4,   //type   =  4  盈利
+                'logno'=>$order_sn.$_GPC['merchid'],   //拼接上传来的merchid
+                'title'=>'个人付款码收入',
+                'createtime'=>time(),
+                'status'=>0,
+                'money'=>$_GPC['money'],
+                'rechargetype'=>'own',
+            ];
+            pdo_insert('ewei_shop_member_log',$mem_add);
+        }
         show_json(1,$res);
     }
     
@@ -172,7 +191,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $pageSize = 8;
         //第几页从第几个显示
         $psize = ($page-1)*$pageSize;
-        if(!$mch_id || !$_GPC['openid']){
+        if(!$mch_id){
             show_json(0,"请完善参数信息");
         }
         $list = pdo_fetchall('select id,openid,price,createtime from '.tablename('ewei_shop_order').' where status = 3 and merchid = "'.$mch_id.'" LIMIT '.$psize.','.$pageSize);
@@ -197,22 +216,29 @@ class Index_EweiShopV2Page extends AppMobilePage
         $money = $_GPC['money'];
         $fee = $_GPC['deduct'];
         $cate = $_GPC['cate'];
+        $openid = $_GPC['openid'];
         $id = $_GPC['id'];
-        if(!$money || !$fee || !$cate || !$_GPC['merchid']){
+        //如果是商家的 就传商家id  如果是个人收款码  就传openid
+        $merchid = $_GPC['merchid'];
+        if($money == "" || $fee == "" || $cate == "" || $merchid == ""){
             show_json(0,"请完善参数信息");
         }
         if($fee || $money){
             $data = [
                 'uniacid'=>$_W['uniacid'],
-                'merchid'=>$_GPC['merchid'],
                 'money'=>$money,
                 'deduct'=>$fee,
                 'cate'=>$cate,
+                'openid'=>$openid,
             ];
+            //如果是商家id
+            if($merchid != 0) {
+                $data['merchid'] = $merchid;
+            }
             //有$id 修改 没有添加
             if($id){
                 //判断$money金额的满减条件是否存在
-                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where merchid="'.$_GPC['merchid'].'" and money="'.$money.'" and cate="'.$cate.'" and id!="'.$_GPC['id'].'"');
+                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where openid="'.$openid.'" and money="'.$money.'" and cate="'.$cate.'" and id!="'.$id.'"');
                 if($res){
                     show_json(0,$money.'的满减条件已存在，请前往修改或者更换满减条件');
                 }
@@ -220,7 +246,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 		        $msg = "修改成功";
             }else{
                 //判断$money金额的满减条件是否存在
-                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where merchid=:merchid and money=:money and cate=:cate',array(':merchid'=>$_GPC['merchid'],':money'=>$money,':cate'=>$cate));
+                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where openid=:openid and money=:money and cate=:cate',array(':openid'=>$openid,':money'=>$money,':cate'=>$cate));
                 if($res){
                     show_json(0,$money.'的满减条件已存在，请前往修改或者更换满减条件');
                 }
@@ -240,7 +266,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         if(!$_GPC['id']) show_json(0,"参数信息不完整");
-        $data = pdo_fetch('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where id = "'.$_GPC['id'].'"');
+        $data = pdo_fetch('select id,money,merchid,deduct,cate,openid from '.tablename('ewei_shop_deduct_setting').'where id = "'.$_GPC['id'].'"');
         if(!$data) show_json(0,'信息不存在');
         show_json(1,['data'=>$data]);
     }
@@ -254,11 +280,18 @@ class Index_EweiShopV2Page extends AppMobilePage
         $page = $_GPC['page']?intval($_GPC['page']):1;
         $pageSize = 8;
         $spage = ($page-1)*$pageSize;
+        //merchid  用传的openid
         if(!$_GPC['merchid'] || !$_GPC['cate']){
             show_json(0,"参数不完整");
         }
-        $total = pdo_count('ewei_shop_deduct_setting',['merchid'=>$_GPC['merchid'],'cate'=>$_GPC['cate']]);
-        $list = pdo_fetchall('select id,money,merchid,deduct,cate from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid and cate=:cate order by money asc LIMIT '.$spage.','.$pageSize,array(':merchid'=>$_GPC['merchid'],':cate'=>$_GPC['cate']));
+        //如果是数字  就查商家信息  不是 就查openid
+        if(is_numeric($_GPC['merchid'])){
+            $total = pdo_count('ewei_shop_deduct_setting',['merchid'=>$_GPC['merchid'],'cate'=>$_GPC['cate']]);
+            $list = pdo_fetchall('select id,money,merchid,deduct,cate,openid from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid and cate=:cate order by money asc LIMIT '.$spage.','.$pageSize,array(':merchid'=>$_GPC['merchid'],':cate'=>$_GPC['cate']));
+        }else{
+            $total = pdo_count('ewei_shop_deduct_setting',['openid'=>$_GPC['merchid'],'cate'=>$_GPC['cate']]);
+            $list = pdo_fetchall('select id,money,merchid,deduct,cate,openid from '.tablename('ewei_shop_deduct_setting').'where openid=:openid and cate=:cate order by money asc LIMIT '.$spage.','.$pageSize,array(':openid'=>$_GPC['merchid'],':cate'=>$_GPC['cate']));
+        }
         if(!$list){
             show_json(0,"暂无信息");
         }
