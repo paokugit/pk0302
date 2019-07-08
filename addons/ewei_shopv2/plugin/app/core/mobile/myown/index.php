@@ -74,6 +74,16 @@ class Index_EweiShopV2Page extends AppMobilePage{
         }
         show_json(1,$list);
     }
+    
+    //页面优化
+    public function opt(){
+        global $_W;
+        global $_GPC;
+        $id=$_GPC["id"];
+        $list=pdo_get("ewei_shop_small_set",array("id"=>$id));
+        $list["icon"]=unserialize($list["icon"]);
+        show_json(1,$list);
+    }
 }
 
 ?>
