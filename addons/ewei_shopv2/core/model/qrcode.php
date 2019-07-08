@@ -159,6 +159,7 @@ class Qrcode_EweiShopV2Model
 	}
 
 	/**
+	 * 商家收款小程序码
 	 * @param array $member
 	 * @param $mid
 	 * @return array
@@ -168,8 +169,16 @@ class Qrcode_EweiShopV2Model
 		global $_W;
 		set_time_limit(0);
 		@ini_set("memory_limit", "256M");
-		$merch = pdo_fetch('select merchname,logo from '.tablename('ewei_shop_merch_user').' where id = "'.$mid.'"');
-		$path = IA_ROOT . "/addons/ewei_shopv2/data/merch/".$mid."/";
+		//如果$mid是数字 就查商家信息 如果是用户信息
+		if(is_numeric($mid)){
+			$merch = pdo_fetch('select merchname,id from '.tablename('ewei_shop_merch_user').' where id = "'.$mid.'"');
+			$file = $merch['id'];
+		}else{
+			$merch = pdo_fetch('select nickname as merchname,id from '.tablename('ewei_shop_member').' where openid = "'.$mid.'"');
+			$file = $merch['id']."own";
+		}
+		//设置图片目录
+		$path = IA_ROOT . "/addons/ewei_shopv2/data/merch/".$file."/";
 		if( !is_dir($path) )
 		{
 			load()->func("file");
@@ -183,8 +192,8 @@ class Qrcode_EweiShopV2Model
 		$qr_filepath = $path . $qr_filename;
 		if( is_file($filepath) )
 		{
-			$qrcode_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$mid."/".$filename . "?v=1.0";
-			$qr_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$mid."/".$qr_filename . "?v=1.0";
+			$qrcode_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$file."/".$filename . "?v=1.0";
+			$qr_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$file."/".$qr_filename . "?v=1.0";
 			return ['qrcode'=>$qrcode_url,'qr'=>$qr_url];
 		}
 		//这是背景图
@@ -199,8 +208,8 @@ class Qrcode_EweiShopV2Model
 		$white = imagecolorallocate($target, 255, 255, 255);
 		//把商家的名字写在二维码下面
 		imagettftext($target,60, 0, 416, 1136, $white, $font,mb_substr($merch['merchname'],0,4));
-		//lihanwen
-		$qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $mid ."&cate=".$member['cate'],"page" => $member['url'] ));
+		//生成小程序码
+		$qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $file ."&cate=".$member['cate'],"page" => $member['url'] ));
 		if( !is_error($qrcode) )
 		{
 			$qrcode = imagecreatefromstring($qrcode);
@@ -208,8 +217,9 @@ class Qrcode_EweiShopV2Model
 		}
 		imagepng($target, $filepath);
 		imagepng($qrcode, $qr_filepath);
-		$qrcode_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$mid."/".$filename . "?v=1.0";
-		$qr_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$mid."/".$qr_filename . "?v=1.0";
+		//所有的目录 以前的$mid   改成了$file
+		$qrcode_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$file."/".$filename . "?v=1.0";
+		$qr_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$file."/".$qr_filename . "?v=1.0";
 		return ['qrcode'=>$qrcode_url,'qr'=>$qr_url];
 	}
 
