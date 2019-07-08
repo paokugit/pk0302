@@ -102,9 +102,11 @@ class Myown_EweiShopV2Page extends AppMobilePage
             'title'=>'购买个人收款码',
             'createtime'=>time(),
             'money'=>-$money,
+            'status'=>1,
+            'rechargetype'=>'wxapp',
         ];
-        $add1['status'] = 1;
-        $add1['rechargetype'] = 'wxapp';
+        //这个是用户的余额变化记录表
+        pdo_insert('ewei_shop_member_log',$add1);
         //如果是余额付款的话 加上减余额记录
         $data = [
             'openid'=>$openid,
@@ -118,8 +120,6 @@ class Myown_EweiShopV2Page extends AppMobilePage
         //这个是credit资产变化记录
         pdo_insert('mc_credits_record',$data);
         pdo_insert('ewei_shop_member_credit_record',$data);
-        //这个是用户的余额变化记录表
-        pdo_insert('ewei_shop_member_log',$add1);
         //如果是用户余额支付  可以减余额  并改变状态
         pdo_update('ewei_shop_member',['is_own'=>1,'credit2'=>bcsub($member['credit2'],$money,2)],['openid'=>$openid,'uniacid'=>$uniacid]);
         show_json(1,"支付成功");
