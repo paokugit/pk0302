@@ -23,6 +23,11 @@ class List_EweiShopV2Page extends WebPage
 			$condition .= " and ( dm.realname like :realname or dm.nickname like :realname or dm.mobile like :realname or dm.id like :realname)";
 			$params[":realname"] = "%" . $_GPC["realname"] . "%";
 		}
+        if( !empty($_GPC["agentid"]) )
+        {
+            $condition .= " and dm.agentid=:agentid";
+            $params[":agentid"] = intval($_GPC["agentid"]);
+        }
 		if( empty($starttime) || empty($endtime) ) 
 		{
 			$starttime = strtotime("-1 month");
@@ -394,6 +399,12 @@ class List_EweiShopV2Page extends WebPage
 						}
 						if( cv("commission.agent.changeagent") ) 
 						{
+                            $agentInfo = m("member")->getMember($adata["agentid"]);
+                            $laoagentInfo = m("member")->getMember($member["agentid"]);
+						    $datalog['openid'] = $member["openid"];
+                            $datalog['item'] = 'member';
+                            $datalog['value'] = "修改上级:  " . $member["openid"] . "/" . $member["nickname"] . "  上级ID: " . $member["agentid"].'-'.$laoagentInfo['nickname'] . " -> 新上级ID: " . $adata["agentid"].'-'.$agentInfo['nickname'];
+                            m('memberoperate')->addlog($datalog);
 							plog("commission.agent.changeagent", "修改上级分销商 <br/> 会员信息:  " . $member["openid"] . "/" . $member["nickname"] . "/" . $member["realname"] . "/" . $member["mobile"] . " <br/>上级ID: " . $member["agentid"] . " -> 新上级ID: " . $adata["agentid"] . "; <br/> 固定上级: " . (($member["fixagentid"] ? "是" : "否")) . " -> " . (($adata["fixagentid"] ? "是" : "否")));
 						}
 						else 
@@ -444,7 +455,14 @@ class List_EweiShopV2Page extends WebPage
 						$plugin_com->sendMessage($member["openid"], array( "nickname" => $member["nickname"], "agenttime" => $time ), TM_COMMISSION_BECOME);
 						plog("commission.agent.check", "审核分销商 <br/>分销商信息:  ID: " . $member["id"] . " /  " . $member["openid"] . "/" . $member["nickname"] . "/" . $member["realname"] . "/" . $member["mobile"]);
 					}
-					plog("commission.agent.edit", "修改分销商 <br/>分销商信息:  ID: " . $member["id"] . " /  " . $member["openid"] . "/" . $member["nickname"] . "/" . $member["realname"] . "/" . $member["mobile"]);
+//
+//                    $data['openid'] = $member["openid"];
+//                    $data['item'] = 'member';
+//                    $data['value'] = "修改上级, 会员信息:  " . $member["openid"] . "/" . $member["nickname"] . "/" . $member["realname"] . "/" . $member["mobile"] . " <br/>上级ID: " . $member["agentid"] . " -> 新上级ID: " . $adata["agentid"] . "; <br/> 固定上级: " . (($member["fixagentid"] ? "是" : "否")) . " -> " . (($adata["fixagentid"] ? "是" : "否"));
+//                    m('memberoperate')->addlog($data);
+
+
+                    plog("commission.agent.edit", "修改分销商 <br/>分销商信息:  ID: " . $member["id"] . " /  " . $member["openid"] . "/" . $member["nickname"] . "/" . $member["realname"] . "/" . $member["mobile"]);
 					pdo_update("ewei_shop_member", $adata, array( "id" => $id, "uniacid" => $_W["uniacid"] ));
 					if( $adata["agentid"] != $member["agentid"] && p("dividend") ) 
 					{
@@ -985,6 +1003,54 @@ class List_EweiShopV2Page extends WebPage
         $agentinfo = pdo_fetch("select * from " . tablename("ewei_shop_member_agentcount") . " where openid=:openid limit 1", array( ":openid" => $openid));
         $data['agentinfo'] = $agentinfo;
         include($this->template());
+    }
+
+    public function fanslist()
+    {
+        global $_W;
+        global $_GPC;
+        $openid = $_W['openid'];
+        $member = m("member")->getInfo($openid);
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 10;
+        $condition = ' and agentid=' . $member['id'];
+        $list = pdo_fetchall('select * from ' . tablename('ewei_shop_member') . ' where uniacid = ' . $_W['uniacid'] . (' ' . $condition . '  ORDER BY id desc,isagent desc limit ') . ($pindex - 1) * $psize . ',' . $psize);
+        if (!is_array($list) || empty($list)) {
+            $list = array();
+        }
+        foreach ($list as &$row) {
+            $row['agentcount'] = $this->getagentcount($row['openid']);
+            $row['agenttime'] = date('Y-m-d H:i', $row['agenttime']);
+            //获取会员等级
+            $level = m("member")->agentlevel($row['openid']);
+            $row['levelname'] = $level['levelname']?$level['levelname']:'普通会员';
+            $row['createtime'] = date('Y-m-d H:i', $row['createtime']);
+        }
+        unset($row);
+        $agentcount = pdo_fetch("select * from " . tablename("ewei_shop_member_agentcount") . " where openid=:openid limit 1", array( ":openid" => $member['openid'] ));
+        $data['list'] = $list;
+        $data['agentcount'] = $agentcount;
+        include($this->template());
+    }
+
+    public function getagentcount($openid){
+        $agentCountInfo = pdo_fetch("select * from " . tablename("ewei_shop_member_agentcount") . " where openid=:openid limit 1", array(":openid" => $openid ));
+        if($agentCountInfo) return $agentCountInfo['agentcount'];
+        return 0;
+
+    }
+
+    public function memberlog(){
+        global $_W;
+        global $_GPC;
+        $condition = " AND (`openid`=:openid )";
+        $params[":openid"] = $_GPC['openid'];
+        $list = pdo_fetchall("SELECT * FROM " . tablename("ewei_shop_member_operate_log") . " WHERE 1 " . $condition, $params);
+        if (!is_array($list) || empty($list)) {
+            $list = array();
+        }
+        include($this->template());
+
     }
 
 }
