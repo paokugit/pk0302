@@ -60,7 +60,7 @@ class Credit_EweiShopV2Page extends WebPage
 				{
 					$condition .= " and log.uid<>0";
 					$table1 = "select log.id,log.num,log.createtime,log.remark,log.credittype,m.id as mid,m.openid, m.realname,m.nickname,m.avatar, m.mobile, m.weixin,u.username,g.groupname,l.levelname  from " . tablename("mc_credits_record") . " log " . " left join " . tablename("users") . " u on  log.operator=u.uid and log.operator<>0 and log.operator<>log.uid" . " left join " . tablename("ewei_shop_member") . " m on m.uid=log.uid" . " left join " . tablename("ewei_shop_member_group") . " g on m.groupid=g.id" . " left join " . tablename("ewei_shop_member_level") . " l on m.level =l.id" . " where 1 " . $condition;
-					$table2 = "select log.id,log.money,log.createtime,log.remark,'credit2' as credittype,m.id as mid,m.openid, m.realname,m.nickname,m.avatar, m.mobile, m.weixin,log.rechargetype as username,g.groupname,l.levelname from " . tablename("ewei_shop_member_log") . "as log " . " inner join " . tablename("ewei_shop_member") . " m on m.openid=log.openid" . " left join " . tablename("ewei_shop_member_group") . " g on m.groupid=g.id" . " left join " . tablename("ewei_shop_member_level") . " l on m.level =l.id" . " where m.uid=0 and log.status=1 " . $condition1;
+					$table2 = "select log.id,log.money,log.createtime,log.title as remark,'credit2' as credittype,m.id as mid,m.openid, m.realname,m.nickname,m.avatar, m.mobile, m.weixin,log.rechargetype as username,g.groupname,l.levelname from " . tablename("ewei_shop_member_log") . "as log " . " inner join " . tablename("ewei_shop_member") . " m on m.openid=log.openid" . " left join " . tablename("ewei_shop_member_group") . " g on m.groupid=g.id" . " left join " . tablename("ewei_shop_member_level") . " l on m.level =l.id" . " where m.uid=0 and log.status=1 " . $condition1;
 					$sql = "select * from (" . $table1 . " UNION ALL " . $table2 . ") as main order by createtime desc";
 				}elseif($type == "credit3" ){
                     $table1 = "select log.id,log.num,log.createtime,log.remark,log.credittype,m.id as mid,m.openid, m.realname,m.nickname,m.avatar, m.mobile, m.weixin,u.username,g.groupname,l.levelname from " . tablename("mc_credits_record") . " log " . " left join " . tablename("users") . " u on  log.operator=u.uid and log.operator<>0 and log.operator<>log.uid" . " left join " . tablename("ewei_shop_member") . " m on m.uid=log.uid" . " left join " . tablename("ewei_shop_member_group") . " g on m.groupid=g.id" . " left join " . tablename("ewei_shop_member_level") . " l on m.level =l.id" . " where 1 " . $condition . " and log.uid<>0";
@@ -178,6 +178,7 @@ class Credit_EweiShopV2Page extends WebPage
 		$pager = pagination2($total, $pindex, $psize);
 		$groups = m("member")->getGroups();
 		$levels = m("member")->getLevels();
+		//var_dump($list);
 		include($this->template("finance/credit"));
 	}
 	public function credit1() 
