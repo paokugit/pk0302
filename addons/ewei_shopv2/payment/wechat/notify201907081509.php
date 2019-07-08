@@ -183,15 +183,15 @@ class EweiShopWechatPay
 																				}
 																				else
 																				{
-                                                                                    if($this->type == "30"){
-                                                                                        $this->shopCode();
-                                                                                    }
-                                                                                    else{
-                                                                                        if($this->type == "31"){
-                                                                                            $this->myown();
-                                                                                        }
-                                                                                    }
-                                                                                }
+										                                                                                    if($this->type == "30"){
+										                                                                                        $this->shopCode();
+										                                                                                    }
+										                                                                                    else{
+										                                                                                        if($this->type == "31"){
+										                                                                                            $this->myown();
+										                                                                                        }
+										                                                                                    }
+										                                                                                }
 																			}
 																		}
 																	}
@@ -929,10 +929,8 @@ class EweiShopWechatPay
         $cate = substr($ordersn,2,1);
         //用ordersn订单号 查订单信息
         $order = pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
-        //计算付款者 是不是第一次给收款码付款
-        $count = pdo_count('ewei_shop_member_log',['openid'=>$order['openid'],'rechargetype'=>"scan",'status'=>1]);
         //从order里面获得openID 查用户的卡路里和折扣宝余额
-        $member = pdo_fetch('select agentid,credit1,credit3 from '.tablename('ewei_shop_member').'where openid = "'.$order['openid'].'"');
+        $member = pdo_fetch('select credit1,credit3 from '.tablename('ewei_shop_member').'where openid = "'.$order['openid'].'"');
         if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
             pdo_begin();
             try {
@@ -946,7 +944,7 @@ class EweiShopWechatPay
                     //如果是个人收款  改变个人收款日志的状态
                     pdo_update('ewei_shop_member_log',['status'=>1],['ordersn'=>$ordersn.$order['merchid']]);
                     //然后 查个人的个人资产的余额 个人收款资金加钱
-                    $own_member = pdo_get('ewei_shop_member',['id'=>intval($order['merchid']),'uniacid'=>$order['uniacid']]);
+                    $own_member = pdo_get('ewei_shop_member',['openid'=>$order['merchid'],'uniacid'=>$order['uniacid']]);
                     pdo_update('ewei_shop_member',['credit5'=>bcadd($own_member['credit5'],$order['price'],2)],['openid'=>$order['merchid'],'uniacid'=>$order['uniacid']]);
                 }
                 $data = [
@@ -955,38 +953,43 @@ class EweiShopWechatPay
                     'num'=>-($order['goodsprice']-$order['price']),
                     'createtime'=>time(),
                     'module'=>"ewei_shopv2",
-                    'merchid'=>$order['merchid'],   //因为可能是个人收款码  所以数据类型是char
+                    'merchid'=>$order['merchid'],
                 ];
                 if($cate == 1){
-                    //添加日志
-                    m('game')->addlog($order['openid'],0,-($order['goodsprice']-$order['price']),1,"卡路里付款");
+                    $add1 = [
+                       'remark'=>"卡路里付款",
+                       'credittype'=>"credit1",
+                    ];
+                    $add = array_merge($add1,$data);
                 }elseif ($cate == 2){
-                    m('game')->addlog($order['openid'],0,-($order['goodsprice']-$order['price']),2,"折扣宝付款");
+                    $add2 = [
+                        'remark'=>"折扣宝付款",
+                        'credittype'=>"credit3",
+                    ];
+                    $add = array_merge($add2,$data);
                 }
-                //支付成功的话  且付款者 没有上级  并且是个人收款码  锁粉
-                if($member['agentid'] == 0 && !is_numeric($order['merchid'])){
-                    $mem_data['agentid'] = intval($order['merchid']);
-                }
+                pdo_insert('mc_credits_record',$add);
+                pdo_insert('ewei_shop_member_credit_record',$add);
                 //支付成功的话 给用户扣除的卡路里  和 折扣宝
                 if($cate == 1){
                     $credit1 = $member['credit1'] - ($order['goodsprice'] - $order['price']);
-                    $mem_data['credit1'] = $credit1;
-                    $mem_data['credit3'] = $member['credit3'];
+                    pdo_update('ewei_shop_member',['credit1'=>$credit1],['openid'=>$order['openid']]);
                 }elseif($cate == 2){
                     $credit3 = $member['credit3'] - ($order['goodsprice'] - $order['price']);
-                    $mem_data['credit3'] = $credit3;
-                    $mem_data['credit1'] = $member['credit1'];
+                    pdo_update('ewei_shop_member',['credit3'=>$credit3],['openid'=>$order['openid']]);
                 }
-                //如果付款码方是第一次给收款码付款  就给他送一定量的折扣宝
-                if($count == 0){
-                    //首次使用收款码付款  给奖励对应的折扣宝数量
-                    $mem_data['credit3'] += $order['price'];
-                    m('game')->addlog($order['openid'],0,$order['price'],2,"首次使用收款码付款奖励折扣宝");
-                }
-                pdo_update('ewei_shop_member',$mem_data,['openid'=>$order['openid']]);
                 pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();
+            }
+        }else{
+            //如果支付失败  修改订单  用户日志  和 商户收款日志为失败状态
+            pdo_update('ewei_shop_order',['status'=>-1],['ordersn'=>$ordersn]);
+            pdo_update('ewei_shop_member_log',['status'=>-1],['logno'=>$ordersn]);
+            if(is_numeric($order['merchid'])){
+                pdo_update('ewei_shop_merch_log',['status'=>-1],['ordersn'=>$ordersn]);
+            }else{
+                pdo_update('ewei_shop_member_log',['status'=>-1],['ordersn'=>$ordersn.$order['merchid']]);
             }
         }
     }
@@ -1008,7 +1011,7 @@ class EweiShopWechatPay
         }
         $ordersn = $data['out_trade_no'];  //获得订单信息
         //用ordersn订单号 查订单信息
-        pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
+        $order = pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
         if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
             pdo_begin();
             try {
@@ -1019,6 +1022,10 @@ class EweiShopWechatPay
             }catch(Exception $exception){
                 pdo_rollback();
             }
+        }else{
+            //如果支付失败  修改订单  用户日志  和 商户收款日志为失败状态
+            pdo_update('ewei_shop_order',['status'=>-1],['ordersn'=>$ordersn]);
+            pdo_update('ewei_shop_member_log',['status'=>-1],['logno'=>$ordersn]);
         }
     }
 
