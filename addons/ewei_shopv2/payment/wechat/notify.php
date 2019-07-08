@@ -1015,6 +1015,8 @@ class EweiShopWechatPay
                 //如果成功  修改订单的status 状态 和 用户日志   还有商户收款日志的  状态为成功
                 pdo_update('ewei_shop_order',['status'=>3,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
                 pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn]);
+                //改变用户的状态
+                pdo_update('ewei_shop_member',['is_own'=>1],['openid'=>$data['openid']]);
                 pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();

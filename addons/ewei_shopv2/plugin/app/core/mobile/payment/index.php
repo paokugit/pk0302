@@ -219,8 +219,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC['openid']?:0;
         $id = $_GPC['id'];
         //如果是商家的 就传商家id  如果是个人收款码  就传openid
-        $merchid = $_GPC['merchid'];
-        if($money == "" || $fee == "" || $cate == "" || $merchid == "" || $openid == ""){
+        $merchid = $_GPC['merchid']?:0;
+        if($money == "" || $fee == "" || $cate == "" || $merchid === "" || $openid === ""){
             show_json(0,"请完善参数信息");
         }
         if($fee || $money){
@@ -238,7 +238,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             //有$id 修改 没有添加
             if($id){
                 //判断$money金额的满减条件是否存在
-                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where openid="'.$openid.'" and money="'.$money.'" and cate="'.$cate.'" and id!="'.$id.'"');
+                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where openid="'.$openid.'" and merchid = "'.$merchid.'" and money="'.$money.'" and cate="'.$cate.'" and id!="'.$id.'"');
                 if($res){
                     show_json(0,$money.'的满减条件已存在，请前往修改或者更换满减条件');
                 }
@@ -246,7 +246,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 		        $msg = "修改成功";
             }else{
                 //判断$money金额的满减条件是否存在
-                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where openid=:openid and money=:money and cate=:cate',array(':openid'=>$openid,':money'=>$money,':cate'=>$cate));
+                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where openid=:openid and merchid = "'.$merchid.'" and money=:money and cate=:cate',array(':openid'=>$openid,':money'=>$money,':cate'=>$cate));
                 if($res){
                     show_json(0,$money.'的满减条件已存在，请前往修改或者更换满减条件');
                 }

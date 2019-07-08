@@ -66,6 +66,9 @@ class Myown_EweiShopV2Page extends AppMobilePage
         if($member['agentlelvel'] != 5 && $member['is_own'] == 1){
             show_json(0,"你已购买过个人收款码");
         }
+        if($money != 99){
+            show_json(0,"输入的金额不对");
+        }
         //购买个人收款码的订单前缀 OWN  生成订单号
         $order_sn = "OWN".date('YmdHis',time()).random(12);
         //其中merchid  和  ismerch  都是有自己默认值的  因为 这个是平台的商品
@@ -98,16 +101,11 @@ class Myown_EweiShopV2Page extends AppMobilePage
             'logno'=>$order_sn,
             'title'=>'购买个人收款码',
             'createtime'=>time(),
-            'status'=>0,
             'money'=>-$money,
         ];
-        if($type == 1){
-            $add1['rechargetype'] = 'wechat';
-        }else{
-            $add1['rechargetype'] = 'wxapp';
-        }
-        pdo_insert('ewei_shop_member_log',$add1);
-        //加上减余额记录
+        $add1['status'] = 1;
+        $add1['rechargetype'] = 'wxapp';
+        //如果是余额付款的话 加上减余额记录
         $data = [
             'openid'=>$openid,
             'uniacid'=>$uniacid,
@@ -115,10 +113,15 @@ class Myown_EweiShopV2Page extends AppMobilePage
             'createtime'=>time(),
             'module'=>"ewei_shopv2",
             'credittype'=>"credit2",
-            'remark'=>"用户购买个人收款码",
+            'remark'=>"余额购买个人收款码",
         ];
+        //这个是credit资产变化记录
         pdo_insert('mc_credits_record',$data);
         pdo_insert('ewei_shop_member_credit_record',$data);
+        //这个是用户的余额变化记录表
+        pdo_insert('ewei_shop_member_log',$add1);
+        //如果是用户余额支付  可以减余额  并改变状态
+        pdo_update('ewei_shop_member',['is_own'=>1,'credit2'=>bcsub($member['credit2'],$money,2)],['openid'=>$openid,'uniacid'=>$uniacid]);
         show_json(1,"支付成功");
     }
 
