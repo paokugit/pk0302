@@ -216,11 +216,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         $money = $_GPC['money'];
         $fee = $_GPC['deduct'];
         $cate = $_GPC['cate'];
-        $openid = $_GPC['openid'];
+        $openid = $_GPC['openid']?:0;
         $id = $_GPC['id'];
         //如果是商家的 就传商家id  如果是个人收款码  就传openid
         $merchid = $_GPC['merchid'];
-        if($money == "" || $fee == "" || $cate == "" || $merchid == ""){
+        if($money == "" || $fee == "" || $cate == "" || $merchid == "" || $openid == ""){
             show_json(0,"请完善参数信息");
         }
         if($fee || $money){
