@@ -134,7 +134,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $uniacid = $_W['uniacid'];
         $openid = $_GPC['openid'];
-        if($openid){
+        if($openid == ""){
             show_json(0,"参数不完整");
         }
         $credit5 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],'credit5');
