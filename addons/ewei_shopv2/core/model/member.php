@@ -1196,7 +1196,7 @@ class Member_EweiShopV2Model
             }
             
         }else{
-            $set=pdo_get('ewei_setting',array('type'=>"level",'type_id'=>0));
+           
             $day=date("Y-m-d",time());
             $create_day=date("Y-m-d",$member["createtime"]);
             $subordinate = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_member') . ' WHERE agentid=:agentid and agentlevel>:agentlevel order by agentlevel_time desc', array(':agentid' => $member["id"],':agentlevel'=>0));

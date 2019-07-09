@@ -1163,6 +1163,23 @@ class System_EweiShopV2Model {
                         )
                     ) ,
                     array(
+                        "title" => "新手攻略",
+                        "items" => array(
+                            array(
+                                "title" => "热点关注",
+                                "route" => "notive"
+                            ) ,
+                            array(
+                                "title" => "问题反馈",
+                                "route" => "question"
+                            ),
+                            array(
+                                "title" => "帮助指南",
+                                "route" => "help"
+                            )
+                        )
+                    ) ,
+                    array(
                         "title" => "交易",
                         "items" => array(
                             array(
