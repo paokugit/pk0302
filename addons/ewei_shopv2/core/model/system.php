@@ -1100,8 +1100,24 @@ class System_EweiShopV2Model {
                                 "route" => "member_cost"
                             ) ,
                             array(
-                                "title" => "增长趋势",
-                                "route" => "member_increase"
+                                "title" => "卡路里排行榜",
+                                "route" => "member_credit/member_credit1"
+                            ),
+                             array(
+                                 "title" => "余额排行榜",
+                                 "route" => "member_credit/member_credit2"
+                             ),
+                            array(
+                                "title" => "折扣宝排行榜",
+                                "route" => "member_credit/member_credit3"
+                            ),
+                            array(
+                                "title" => "贡献值排行榜",
+                                "route" => "member_credit/member_credit4"
+                            ),
+                            array(
+                                 "title" => "增长趋势",
+                                 "route" => "member_increase"
                             )
                         )
                     )
