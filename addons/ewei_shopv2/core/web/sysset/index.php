@@ -1221,6 +1221,24 @@ class Index_EweiShopV2Page extends WebPage
         echo json_encode($resault);
     }
     
+    public function  upload_video(){
+        
+        $field = $_FILES["file"];
+        
+        $resault=$this->upload_file($field,"./attachment",1);
+        //成功
+        if ($resault["status"]==0){
+            //获取封面图
+            
+            //视频绝对路径
+            $lujing=tomedia($resault["message"]);
+          
+           $resault["lujing"]=$lujing;
+            
+        }
+        echo json_encode($resault);
+        
+    }
     
     //1表示视频 2表示图片
     function upload_file($files, $path = "./attachment",$type=1)
@@ -1284,5 +1302,6 @@ class Index_EweiShopV2Page extends WebPage
             }
         }
     }
+    
 }
 ?>
