@@ -88,7 +88,10 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 				$total_level = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member') . ' where agentid in( ' . implode(',', array_keys($member['level2_agentids'])) . ') and uniacid=:uniacid limit 1', array(':uniacid' => $_W['uniacid']));
 			}
 		}
-
+		//
+		if($_GPC['nickname']){
+			$condition .= ' and nickname like "%'.$_GPC['nickname'].'%"';
+		}
 		$list = pdo_fetchall('select * from ' . tablename('ewei_shop_member') . ' where uniacid = ' . $_W['uniacid'] . (' ' . $condition . '  ORDER BY id desc,isagent desc limit ') . ($pindex - 1) * $psize . ',' . $psize);
 		if (!is_array($list) || empty($list)) {
 			$list = array();
