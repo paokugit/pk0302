@@ -184,13 +184,13 @@ class Qrcode_EweiShopV2Model
 			load()->func("file");
 			mkdirs($path);
 		}
-		$qrcode = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $mid , 'merchname'=>$merch['merchname'],'back'=>$member['back'],'type'=>'qrcode')));
-		$qr = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $mid ,'merchname'=>$merch['merchname'], 'back'=>$member['back'])));
+		$qrcode = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $mid , 'merchname'=>$merch['merchname'],'back'=>$member['back'],'cate'=>$member['cate'],'type'=>'qrcode')));
+		$qr = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $mid ,'merchname'=>$merch['merchname'], 'back'=>$member['back'],'cate'=>$member['cate'])));
 		$filename = $qrcode . ".png";
 		$qr_filename = $qr . ".png";
 		$filepath = $path . $filename;
 		$qr_filepath = $path . $qr_filename;
-		if( is_file($filepath) )
+		if( is_file($filepath) && is_file($qr_filepath))
 		{
 			$qrcode_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$file."/".$filename . "?v=1.0";
 			$qr_url = $_W["siteroot"] . "addons/ewei_shopv2/data/merch/".$file."/".$qr_filename . "?v=1.0";

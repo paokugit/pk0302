@@ -23,11 +23,17 @@ class Index_EweiShopV2Page extends AppMobilePage
 	public function qrcode()
     {
         global $_GPC;
-        $mid = $_GPC['merchid'];
-        if(!$mid) show_json(0,"商家id不能为空");
-        //折扣宝收款码
-        $rebate_url = 'pages/discount/zkbscancode/zkbscancode';
-        $rebate_back= 'zhekoubao';
+        $mid = trim($_GPC['merchid']);
+        if(!$mid) show_json(0,"参数不能为空");
+        if(is_numeric($mid)){
+            //折扣宝收款码
+            $rebate_url = 'pages/discount/zkbscancode/zkbscancode';
+        }else{
+            //折扣宝收款码
+            $rebate_url = 'pages/personalcode/scancode';
+        }
+        //$rebate_back= 'zhekoubao';
+        $rebate_back= 'kaluli';
         //卡路里收款码
         $calorie_url  = 'pages/discount/kllscancode/kllscancode';
         $calorie_back = 'kaluli';
@@ -146,7 +152,10 @@ class Index_EweiShopV2Page extends AppMobilePage
             show_json(0,"请完善参数信息");
         }
         //计算这个店铺成交的第一个订单的日期
-        $start_time = pdo_getcolumn('ewei_shop_order',['status'=>3,'merchid'=>$mch_id],'createtime');
+        if(!is_numeric($mch_id)){
+            $mch_id = pdo_getcolumn('ewei_shop_member',['openid'=>$mch_id],'id')."own";
+        }
+        $start_time = pdo_getcolumn('ewei_shop_order',['status'=>3,'merchid'=>$mch_id],'createtime')?:time();
         //计算时间
         $day = round((time()-$start_time)/86400);
         $list = [];
