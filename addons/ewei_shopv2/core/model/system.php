@@ -931,6 +931,10 @@ class System_EweiShopV2Model {
                             array(
                                 "title" => "绑定送卡路里",
                                 "route" => "bindmobile"
+                            ),
+                            array(
+                                "title" => "拉新礼包",
+                                "route" => "giftbag"
                             )
                         )
                     ) ,
