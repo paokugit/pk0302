@@ -93,7 +93,8 @@ class Index_EweiShopV2Page extends AppMobilePage{
            $data['step_today']=$ste_today;
        }
        //助力获取的总卡路里
-       $credit=m('credits')->get_sum_credit(1,$openid);
+       //$credit=m('credits')->get_sum_credit(1,$openid);
+       $credit = '';
        if (empty($credit)){
            $credit=0;
        }
