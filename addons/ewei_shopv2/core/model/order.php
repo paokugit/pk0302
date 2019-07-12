@@ -1570,13 +1570,13 @@ class Order_EweiShopV2Model
 			}
 			else 
 			{
-				if( !empty($member["city"]) ) 
+				if( !empty($member["province"]) )
 				{
-					if( !strexists($member["city"], "市") ) 
+					if( !strexists($member["province"], "省") )
 					{
-						$member["city"] = $member["city"] . "市";
+						$member["province"] = $member["province"] . "省";
 					}
-					$user_city = $user_city_code = $member["city"];
+					$user_province = $user_province_code = $member["province"];
 				}
 			}
 		}
@@ -1584,8 +1584,8 @@ class Order_EweiShopV2Model
 		{
 			if( !empty($address) ) 
 			{
-				$user_city = $address["city"] . $address["area"];
-				$user_city_code = $address["datavalue"];
+                		$user_province = $address["province"] . $address["city"];
+				$user_province_code = $address["datavalue"];
 			}
 		}
 		$is_merchid = 0;
@@ -1758,24 +1758,24 @@ class Order_EweiShopV2Model
 					    $remote_dispatchprice = $g['remote_dispatchprice'] > 0 ? $g['remote_dispatchprice'] : 0;
 						$dispatch_merch[$merchid] += $g["dispatchprice"];
 						$gareas = explode(';',$g['edareas']);
-                        if(!empty($address)&&in_array($user_province_code, $gareas) || !empty($member['province'])&&in_array($member['province'],$gareas)){
-                            if( $seckillinfo && $seckillinfo["status"] == 0 )
-                            {
-                                $seckill_dispatchprice += $g["dispatchprice"];
-                            }
-                            else
-                            {
-                                $dispatch_price += $g["dispatchprice"];
+                        //if(!empty($address)&&in_array($user_province_code, $gareas) || !empty($member['province'])&&in_array($member['province'],$gareas)){
+                        //先判断地址是不是空  基础邮费
+                        if(!empty($address) ) {
+                            if (in_array($user_province_code, $gareas) || !empty($member['province']) && in_array($member['province'], $gareas)) {
+                                if ($seckillinfo && $seckillinfo["status"] == 0) {
+                                    $seckill_dispatchprice += $g["dispatchprice"];
+                                } else {
+                                    $dispatch_price += $g["dispatchprice"];
+                                }
+                            } else {
+                                if ($seckillinfo && $seckillinfo["status"] == 0) {
+                                    $seckill_dispatchprice += $g["dispatchprice"] + $remote_dispatchprice;
+                                } else {
+                                    $dispatch_price += $g["dispatchprice"] + $remote_dispatchprice;
+                                }
                             }
                         }else{
-                            if( $seckillinfo && $seckillinfo["status"] == 0 )
-                            {
-                                $seckill_dispatchprice += $g["dispatchprice"]+$remote_dispatchprice;
-                            }
-                            else
-                            {
-                                $dispatch_price += $g["dispatchprice"]+$remote_dispatchprice;
-                            }
+                            $dispatch_price = $g["dispatchprice"];
                         }
 					}
 				}
