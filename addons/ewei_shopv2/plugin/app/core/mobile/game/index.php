@@ -108,6 +108,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $uniacid = $_W['uniacid'];
         $gift = pdo_fetchall(' select id,title,levels from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
         $res = $this->get_gift($gift,$openid);
+        //show_json(1,['is_show'=>$res?:0]);
         show_json(1,['is_show'=>$res?1:0]);
     }
 

@@ -937,53 +937,43 @@ class EweiShopWechatPay
             pdo_begin();
             try {
                 //如果成功  修改订单的status 状态 和 用户日志   还有商户收款日志的  状态为成功
-                pdo_update('ewei_shop_order',['status'=>3,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
-                pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn]);
+                $a = pdo_update('ewei_shop_order',['status'=>3,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
                 //如果商家的收款信息merchid 是数字  就是商家收款  如果是字符串 就是个人收款码
                 if(is_numeric($order['merchid'])){
-                    pdo_update('ewei_shop_merch_log',['status'=>1],['ordersn'=>$ordersn]);
+                    $b = pdo_update('ewei_shop_merch_log',['status'=>1],['logno'=>$ordersn]);
                 }else{
                     //如果是个人收款  改变个人收款日志的状态
-                    pdo_update('ewei_shop_member_log',['status'=>1],['ordersn'=>$ordersn.$order['merchid']]);
+                    $b = pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn.$order['merchid']]);
                     //然后 查个人的个人资产的余额 个人收款资金加钱
                     $own_member = pdo_get('ewei_shop_member',['id'=>intval($order['merchid']),'uniacid'=>$order['uniacid']]);
-                    pdo_update('ewei_shop_member',['credit5'=>bcadd($own_member['credit5'],$order['price'],2)],['openid'=>$order['merchid'],'uniacid'=>$order['uniacid']]);
+                    $c = pdo_update('ewei_shop_member',['credit5'=>bcadd($own_member['credit5'],$order['price'],2)],['openid'=>$own_member['openid'],'uniacid'=>$order['uniacid']]);
                 }
-                $data = [
-                    'openid'=>$order['openid'],
-                    'uniacid'=>$order['uniacid'],
-                    'num'=>-($order['goodsprice']-$order['price']),
-                    'createtime'=>time(),
-                    'module'=>"ewei_shopv2",
-                    'merchid'=>$order['merchid'],   //因为可能是个人收款码  所以数据类型是char
-                ];
+                //支付成功的话 给用户扣除的卡路里  和 折扣宝
+                $mem_data = [];
                 if($cate == 1){
+                    $credit1 = $member['credit1'] - ($order['goodsprice'] - $order['price']);
+                    $mem_data['credit1'] = $credit1;
+                    $mem_data['credit3'] = $member['credit3'];
                     //添加日志
-                    m('game')->addlog($order['openid'],0,-($order['goodsprice']-$order['price']),1,"卡路里付款");
+                    $d = m('game')->addlog($order['openid'],0,-($order['goodsprice']-$order['price']),1,"卡路里付款");
                 }elseif ($cate == 2){
-                    m('game')->addlog($order['openid'],0,-($order['goodsprice']-$order['price']),2,"折扣宝付款");
+                    $credit3 = $member['credit3'] - ($order['goodsprice'] - $order['price']);
+                    $mem_data['credit3'] = $credit3;
+                    $mem_data['credit1'] = $member['credit1'];
+                    $d = m('game')->addlog($order['openid'],0,-($order['goodsprice']-$order['price']),2,"折扣宝付款");
                 }
                 //支付成功的话  且付款者 没有上级  并且是个人收款码  锁粉
                 if($member['agentid'] == 0 && !is_numeric($order['merchid'])){
                     $mem_data['agentid'] = intval($order['merchid']);
                 }
-                //支付成功的话 给用户扣除的卡路里  和 折扣宝
-                if($cate == 1){
-                    $credit1 = $member['credit1'] - ($order['goodsprice'] - $order['price']);
-                    $mem_data['credit1'] = $credit1;
-                    $mem_data['credit3'] = $member['credit3'];
-                }elseif($cate == 2){
-                    $credit3 = $member['credit3'] - ($order['goodsprice'] - $order['price']);
-                    $mem_data['credit3'] = $credit3;
-                    $mem_data['credit1'] = $member['credit1'];
-                }
                 //如果付款码方是第一次给收款码付款  就给他送一定量的折扣宝
                 if($count == 0){
                     //首次使用收款码付款  给奖励对应的折扣宝数量
                     $mem_data['credit3'] += $order['price'];
-                    m('game')->addlog($order['openid'],0,$order['price'],2,"首次使用收款码付款奖励折扣宝");
+                    $e = m('game')->addlog($order['openid'],0,$order['price'],2,"首次使用收款码付款奖励折扣宝");
                 }
-                pdo_update('ewei_shop_member',$mem_data,['openid'=>$order['openid']]);
+                $f = pdo_update('ewei_shop_member',$mem_data,['openid'=>$order['openid']]);
+                pdo_insert('log',['log'=>$a.$b.$c.$d.$e.$f,'createtime'=>date('Y-m-d H:i:s',time())]);
                 pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();
@@ -999,6 +989,7 @@ class EweiShopWechatPay
         $input = file_get_contents('php://input');
         $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
         $data = json_decode(json_encode($obj), true);
+        pdo_insert('log',['log'=>json_encode($data),'createtime'=>date('Y-m-d H:i:s',time())]);
         if (!$data) {
             exit("FAIL");
         }
@@ -1008,16 +999,17 @@ class EweiShopWechatPay
         }
         $ordersn = $data['out_trade_no'];  //获得订单信息
         //用ordersn订单号 查订单信息
-        pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
+        $order = pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
         if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
             pdo_begin();
             try {
                 //如果成功  修改订单的status 状态 和 用户日志   还有商户收款日志的  状态为成功
-                pdo_update('ewei_shop_order',['status'=>3,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
-                pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn]);
+                $a = pdo_update('ewei_shop_order',['status'=>3,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
+                $b = pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn]);
                 //改变用户的状态
-                pdo_update('ewei_shop_member',['is_own'=>1],['openid'=>$data['openid']]);
-                pdo_commit();
+                $c = pdo_update('ewei_shop_member',['is_own'=>1],['openid'=>$order['openid']]);
+        	pdo_insert('log',['log'=>$a.$b.$c,'createtime'=>date('Y-m-d H:i:s')]);        
+		pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();
             }

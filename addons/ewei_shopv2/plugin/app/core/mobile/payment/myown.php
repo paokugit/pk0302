@@ -85,14 +85,6 @@ class Myown_EweiShopV2Page extends AppMobilePage
         ];
         //加入订单记录
         pdo_insert('ewei_shop_order',$add);
-        if($type == 1){
-            $payinfo = array( "openid" => substr($openid,7), "title" => "购买个人收款码", "tid" => $order_sn, "fee" =>$money );
-            $res = $this->model->wxpay($payinfo, 31);
-            if(is_error($res)){
-                show_json(0,$res);
-            }
-            show_json(1,$res);
-        }
         //用户付款的日志
         $add1= [
             'uniacid'=>$uniacid,
@@ -105,6 +97,17 @@ class Myown_EweiShopV2Page extends AppMobilePage
             'status'=>1,
             'rechargetype'=>'wxapp',
         ];
+        if($type == 1){
+            $payinfo = array( "openid" => substr($openid,7), "title" => "购买个人收款码", "tid" => $order_sn, "fee" =>$money );
+            $res = $this->model->wxpay($payinfo, 31);
+            if(is_error($res)){
+                show_json(0,$res);
+            }
+            $add1['status'] = 0;
+            //这个是用户的余额变化记录表
+            pdo_insert('ewei_shop_member_log',$add1);
+            show_json(1,$res);
+        }
         //这个是用户的余额变化记录表
         pdo_insert('ewei_shop_member_log',$add1);
         //如果是余额付款的话 加上减余额记录
@@ -201,7 +204,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
         $psize = ($page - 1)*$pageSize;
         $total = pdo_count('ewei_shop_member_log',"openid = '".$openid."' and title = '个人资金提现'");
         //查询提现记录
-        $list = pdo_fetchall('select l.money,m.nickname,l.status,l.refuse_reason from '.tablename('ewei_shop_member_log').'l join '.tablename('ewei_shop_member').'m on m.openid = l.openid'.' where l.openid = "'.$openid.'" and title = "个人资金提现" order by l.id desc LIMIT '.$psize.','.$pageSize);
+        $list = pdo_fetchall('select title,money,FROM_UNIXTIME(createtime) as createtime,status,refuse_reason from '.tablename('ewei_shop_member_log').' where openid = "'.$openid.'" and title = "个人资金提现" order by id desc LIMIT '.$psize.','.$pageSize);
         show_json(1,['list'=>$list,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize]);
     }
 }

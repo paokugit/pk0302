@@ -1588,7 +1588,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 					}
 					else 
 					{
-						$sql = "SELECT id as goodsid,title,type, weight,total,issendfree,isnodiscount, thumb,marketprice,cash,isverify,isforceverifystore,goodssn,productsn,sales,istime," . " timestart,timeend,usermaxbuy,maxbuy,unit,buylevels,buygroups,deleted,status,deduct,ispresell,presellprice,preselltimeend,manydeduct,`virtual`," . " discounts,deduct2,ednum,edmoney,edareas,diyformid,diyformtype,diymode,dispatchtype,dispatchid,dispatchprice," . " isdiscount,isdiscount_time,isdiscount_discounts ,virtualsend,merchid,merchsale," . " buyagain,buyagain_islong,buyagain_condition, buyagain_sale,bargain" . " FROM " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid  limit 1";
+						$sql = "SELECT id as goodsid,title,type, weight,total,issendfree,isnodiscount, thumb,marketprice,cash,isverify,isforceverifystore,goodssn,productsn,sales,istime," . " timestart,timeend,usermaxbuy,maxbuy,unit,buylevels,buygroups,deleted,status,deduct,ispresell,presellprice,preselltimeend,manydeduct,`virtual`," . " discounts,deduct2,ednum,edmoney,edareas,diyformid,diyformtype,diymode,dispatchtype,dispatchid,dispatchprice,remote_dispatchprice," . " isdiscount,isdiscount_time,isdiscount_discounts ,virtualsend,merchid,merchsale," . " buyagain,buyagain_islong,buyagain_condition, buyagain_sale,bargain" . " FROM " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid  limit 1";
 						$data = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $goodsid ));
 						$data["seckillinfo"] = plugin_run("seckill::getSeckill", $goodsid, $optionid, true, $_W["openid"]);
 						if( 0 < $data["ispresell"] && ($data["preselltimeend"] == 0 || time() < $data["preselltimeend"]) ) 

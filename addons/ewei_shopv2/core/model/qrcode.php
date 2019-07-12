@@ -207,7 +207,7 @@ class Qrcode_EweiShopV2Model
 		}
 		$white = imagecolorallocate($target, 255, 255, 255);
 		//把商家的名字写在二维码下面
-		imagettftext($target,60, 0, 416, 1136, $white, $font,mb_substr($merch['merchname'],0,4));
+		imagettftext($target,60, 0, 416, 1136, $white, $font,mb_substr($merch['merchname'],0,5));
 		//生成小程序码
 		$qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $file ."&cate=".$member['cate'],"page" => $member['url'] ));
 		if( !is_error($qrcode) )
