@@ -1584,7 +1584,7 @@ class Order_EweiShopV2Model
 		{
 			if( !empty($address) ) 
 			{
-                		$user_province = $address["province"] . $address["city"];
+			    $user_province = $address["province"] . $address["city"];
 				$user_province_code = $address["datavalue"];
 			}
 		}
@@ -1621,9 +1621,15 @@ class Order_EweiShopV2Model
 			{
 				$sendfree = true;
 			}
-			if( !empty($g["issendfree"]) ) 
+			if( $g["issendfree"]  == 1 )
 			{
-				$sendfree = true;
+				if($g['remote_dispatchprice'] != 0){
+				    $dispatch_price += $g['remote_dispatchprice'];
+				    $is_remote = 1;
+                }else{
+				    $is_remote = 0;
+				    $sendfree = true;
+                }
 			}
 			else 
 			{
@@ -1984,7 +1990,7 @@ class Order_EweiShopV2Model
 				$dispatch_info[$dispatch_data["id"]]["price"] += $dprice;
 				$dispatch_info[$dispatch_data["id"]]["freeprice"] = intval($dispatch_data["freeprice"]);
 			}
-			if( !empty($dispatch_info) ) 
+			if( !empty($dispatch_info) && !$sendfree)
 			{
 				foreach( $dispatch_info as $k => $v ) 
 				{
@@ -1996,8 +2002,10 @@ class Order_EweiShopV2Model
 				if( $dispatch_price < 0 ) 
 				{
 				    $dispatch_price = 0;
+				    $is_remote = 0;
 				}else{
 				    //如果是模板的话 加上偏远地区的差价
+                    $is_remote = 1;
 				    $dispatch_price += $g['remote_dispatchprice'];
 				}
 			}
