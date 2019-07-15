@@ -133,7 +133,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                 'createtime'=>time(),
                 'status'=>0,
                 'money'=>$_GPC['money'],
-                'rechargetype'=>'own',
+                'rechargetype'=>$_GPC['merchid'],
             ];
             pdo_insert('ewei_shop_member_log',$mem_add);
         }
@@ -165,7 +165,11 @@ class Index_EweiShopV2Page extends AppMobilePage
             $start = strtotime(date('Y-m-d',strtotime('-'.$i.'day')));
             $time = date('Y年m月d日',$start);
             $end = $start + 86400;
-            $list[$time]['list'] = pdo_fetchall('select id,openid,price,createtime,cate from '.tablename('ewei_shop_merch_log').' where createtime between "'.$start.'" and "'.$end.'" and status = 1 and merchid = "'.$mch_id.'"  and price > 0 and cate = "'.$_GPC['cate'].'"');
+            if(is_numeric($mch_id)){
+                $list[$time]['list'] = pdo_fetchall('select id,openid,price,createtime,cate from '.tablename('ewei_shop_merch_log').' where createtime between "'.$start.'" and "'.$end.'" and status = 1 and merchid = "'.$mch_id.'"  and price > 0 and cate = "'.$_GPC['cate'].'"');
+            }else{
+                $list[$time]['list'] = pdo_fetchall('select id,openid,money as price,createtime from '.tablename('ewei_shop_member_log').' where createtime between "'.$start.'" and "'.$end.'" and status = 1 and rechargetype = "'.$mch_id.'"  and money > 0');
+            }
             $list[$time]['count'] = count($list[$time]['list']);
             if($list[$time]['count'] == 0){
                 unset($list[$time]);

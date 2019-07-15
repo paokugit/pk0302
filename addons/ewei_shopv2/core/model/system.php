@@ -933,7 +933,7 @@ class System_EweiShopV2Model {
                                 "route" => "bindmobile"
                             ),
                             array(
-                                "title" => "拉新礼包",
+                                "title" => "礼包管理",
                                 "route" => "giftbag"
                             )
                         )
