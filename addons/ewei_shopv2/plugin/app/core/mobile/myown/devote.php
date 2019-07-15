@@ -66,12 +66,6 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
-        var_dump($openid);
-        $redis = new Redis();
-        $a = $redis->lLen('devote');
-        $b = $redis->lPushx('devote',time());
-        $c = $redis->lLen('devote');
-        var_dump($a,$b,$c);exit;
         $member = m('member')->getMember($openid);
         if (empty($member)){
             app_error(1,"openid不正确");
