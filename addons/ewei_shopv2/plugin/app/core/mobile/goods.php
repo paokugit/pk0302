@@ -1159,7 +1159,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		}
 
         $goods['showshare'] = 0;
-
+        $goods['showprice'] = sprintf('%.2f',$minprice-$goods['deduct']);
 		app_json(array( "goods" => $goods ));
 	}
 	public function getCommission($goods, $level, $set) 

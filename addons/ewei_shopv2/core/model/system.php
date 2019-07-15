@@ -1354,6 +1354,16 @@ class System_EweiShopV2Model {
                                 "route" => "coupon"
                             )
                         )
+                    ),
+                    array(
+                        "title" => "小程序显示",
+                        "route" => "wechart",
+                        "items" => array(
+                            array(
+                                "title" => "版本显示控制",
+                                "route" => "version"
+                            )
+                        )
                     )
                 )
             )
