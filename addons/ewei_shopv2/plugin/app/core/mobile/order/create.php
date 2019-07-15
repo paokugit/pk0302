@@ -2766,7 +2766,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$merchisdiscountprice = $return_array["merchisdiscountprice"];
 			$coupongoodprice = $return_array["coupongoodprice"];
 			$couponmerchid = $return_array["couponmerchid"];
-			$allgoods = $return_array["\$goodsarr"];
+			$allgoods = $return_array["goodsarr"];
 			$allgoods = array_merge($allgoods, $goodsdata_coupon_temp);
 		}
 		if( $isonlyverifygoods ) 
