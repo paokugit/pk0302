@@ -26,11 +26,11 @@ class Version_EweiShopV2Page extends AppMobilePage
         $setting = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 7 ));
         $goodsshare = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 8 ));
 //        if($_GPC['versions'] && $_GPC['versions']>=16)
-//            app_json(array(
-//            'app_version' => 0,
-//            'storeshow'=>$setting['value'],
-//            'goodsshare'=>$goodsshare['value']
-//        ));
+////            app_json(array(
+////            'app_version' => 0,
+////            'storeshow'=>$setting['value'],
+////            'goodsshare'=>$goodsshare['value']
+////        ));
 
 
         $referer = $_SERVER['HTTP_REFERER'];
@@ -38,9 +38,10 @@ class Version_EweiShopV2Page extends AppMobilePage
         if($matches[1]){
             $res = array(
                 'app_id' => $matches[1],
+               // 'app_version' =>0,
                 'app_version' => $matches[2],
-                'storeshow'=>$setting['value'],
-                'goodsshare'=>$goodsshare['value']
+                'storeshow'=>(int)$setting['value'],
+                'goodsshare'=>(int)$goodsshare['value']
             );
             app_json($res);
         }
