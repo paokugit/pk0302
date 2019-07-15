@@ -730,6 +730,10 @@ class System_EweiShopV2Model {
                         "route" => "devote"
                     ) ,
                     array(
+                        "title" => "贡献值奖励",
+                        "route" => "devote.reward"
+                    ) ,
+                    array(
                         "title" => "标签组",
                         "route" => "group"
                     ) ,
@@ -927,6 +931,10 @@ class System_EweiShopV2Model {
                             array(
                                 "title" => "绑定送卡路里",
                                 "route" => "bindmobile"
+                            ),
+                            array(
+                                "title" => "礼包管理",
+                                "route" => "giftbag"
                             )
                         )
                     ) ,
@@ -1162,6 +1170,36 @@ class System_EweiShopV2Model {
                         )
                     ) ,
                     array(
+                        "title" => "页面优化",
+                        "items" => array(
+                            array(
+                                "title" => "运动首页",
+                                "route" => "sport"
+                            ) ,
+                            array(
+                                "title" => "达人中心",
+                                "route" => "daren"
+                            ) 
+                        )
+                    ) ,
+                    array(
+                        "title" => "新手攻略",
+                        "items" => array(
+                            array(
+                                "title" => "热点关注",
+                                "route" => "notive"
+                            ) ,
+                            array(
+                                "title" => "问题反馈",
+                                "route" => "question"
+                            ),
+                            array(
+                                "title" => "帮助指南",
+                                "route" => "help"
+                            )
+                        )
+                    ) ,
+                    array(
                         "title" => "交易",
                         "items" => array(
                             array(
@@ -1256,6 +1294,10 @@ class System_EweiShopV2Model {
                                 "route" => "area"
                             ) ,
                             array(
+                                "title"=>"快递设置",
+                                "route"=>"express_set"
+                            ) ,
+                            array(
                                 "title" => "物流信息接口",
                                 "route" => "express"
                             )
@@ -1314,6 +1356,16 @@ class System_EweiShopV2Model {
                             array(
                                 "title" => "优惠券入口",
                                 "route" => "coupon"
+                            )
+                        )
+                    ),
+                    array(
+                        "title" => "小程序显示",
+                        "route" => "wechart",
+                        "items" => array(
+                            array(
+                                "title" => "版本显示控制",
+                                "route" => "version"
                             )
                         )
                     )

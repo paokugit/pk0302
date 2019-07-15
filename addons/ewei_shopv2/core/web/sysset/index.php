@@ -1092,5 +1092,216 @@ class Index_EweiShopV2Page extends WebPage
             show_json(0,'信息错误');
         }
     }
+
+    /**
+     * 快递设置
+     */
+    public function express_set()
+    {
+        global $_GPC;
+        global $_W;
+        $express = pdo_fetch('select * from '.tablename('ewei_shop_express_set').' where uniacid="'.$_W['uniacid'].'"');
+        $areas = m('common')->getAreas();
+        if( $_W["ispost"] )
+        {
+            ca('sysyset.express_set.edit');
+            $express_set = $_GPC['express_set'];
+            $data = [
+                'uniacid'=>$_W['uniacid'],
+                'express_set'=>$express_set,
+                'createtime'=>time(),
+            ];
+            pdo_begin();
+            try {
+                if (pdo_exists('ewei_shop_express_set', ['uniacid' => $_W['uniacid']])) {
+                    pdo_update('ewei_shop_express_set', $data, ['uniacid' => $_W['uniacid']]);
+                } else {
+                    pdo_insert('ewei_shop_express_set', $data);
+                }
+                pdo_commit();
+            }catch (Exception $exception){
+                pdo_rollback();
+            }
+            show_json(1);
+        }
+        include $this->template();
+    }
+    //运动首页--页面设置
+    public function sport(){
+        global $_W;
+        global $_GPC;
+       
+        if( $_W["ispost"] )
+        {
+            
+           
+            $data["backgroup"] = save_media($_POST["backgroup"]);
+            $icon[0]["img"]=$_POST["icon1_img"];
+            $icon[0]["title"]=$_POST["icon1_title"];
+            $icon[0]["url"]=$_POST["icon1_url"];
+            
+            $icon[1]["img"]=$_POST["icon2_img"];
+            $icon[1]["title"]=$_POST["icon2_title"];
+            $icon[1]["url"]=$_POST["icon2_url"];
+            
+            $icon[2]["img"]=$_POST["icon3_img"];
+            $icon[2]["title"]=$_POST["icon3_title"];
+            $icon[2]["url"]=$_POST["icon3_url"];
+            
+            $icon[3]["img"]=$_POST["icon4_img"];
+            $icon[3]["title"]=$_POST["icon4_title"];
+            $icon[3]["url"]=$_POST["icon4_url"];
+            $data["icon"]=serialize($icon);
+            if (pdo_update("ewei_shop_small_set",$data,array("id"=>1))){
+            
+            show_json(1);
+            }else{
+                show_json(0);
+            }
+        }
+        $data=pdo_get("ewei_shop_small_set",array("id"=>1));
+        $data["icon"]=unserialize($data["icon"]);
+//         var_dump($data["icon"]);
+        
+        //上传视频连接
+        $submitUrl = $_W['siteroot'] . ('/web/index.php?c=site&a=entry&m=ewei_shopv2&do=web&r=sysset.index.upload_img');
+        include($this->template());
+    }
+    
+    //达人中心
+    public function daren(){
+        
+        global $_W;
+        global $_GPC;
+        
+        if( $_W["ispost"] )
+        {
+            $data["backgroup"] = save_media($_POST["backgroup"]);
+            $data["banner"] = save_media($_POST["banner"]);
+            $icon[0]["img"]=$_POST["icon1_img"];
+            $icon[0]["title"]=$_POST["icon1_title"];
+            $icon[0]["url"]=$_POST["icon1_url"];
+            
+            $icon[1]["img"]=$_POST["icon2_img"];
+            $icon[1]["title"]=$_POST["icon2_title"];
+            $icon[1]["url"]=$_POST["icon2_url"];
+            
+            $icon[2]["img"]=$_POST["icon3_img"];
+            $icon[2]["title"]=$_POST["icon3_title"];
+            $icon[2]["url"]=$_POST["icon3_url"];
+            
+            $icon[3]["img"]=$_POST["icon4_img"];
+            $icon[3]["title"]=$_POST["icon4_title"];
+            $icon[3]["url"]=$_POST["icon4_url"];
+            $data["icon"]=serialize($icon);
+            if (pdo_update("ewei_shop_small_set",$data,array("id"=>2))){
+                
+                show_json(1);
+            }else{
+                show_json(0);
+            }
+        }
+        $data=pdo_get("ewei_shop_small_set",array("id"=>2));
+        $data["icon"]=unserialize($data["icon"]);
+        //         var_dump($data["icon"]);
+        
+        //上传视频连接
+        $submitUrl = $_W['siteroot'] . ('/web/index.php?c=site&a=entry&m=ewei_shopv2&do=web&r=sysset.index.upload_img');
+        include($this->template());
+        
+    }
+    //上传图片
+    public function upload_img(){
+        header('Access-Control-Allow-Origin:*');
+        $field = $_FILES["file"];
+        $resault=$this->upload_file($field,"./attachment",2);
+        if ($resault["status"]==0){
+            $resault["addr"]=tomedia($resault["message"]);
+        }
+        echo json_encode($resault);
+    }
+    
+    public function  upload_video(){
+        
+        $field = $_FILES["file"];
+        
+        $resault=$this->upload_file($field,"./attachment",1);
+        //成功
+        if ($resault["status"]==0){
+            //获取封面图
+            
+            //视频绝对路径
+            $lujing=tomedia($resault["message"]);
+          
+           $resault["lujing"]=$lujing;
+            
+        }
+        echo json_encode($resault);
+        
+    }
+    
+    //1表示视频 2表示图片
+    function upload_file($files, $path = "./attachment",$type=1)
+    
+    {
+        
+        if($type==1){
+            $imagesExt=['rm', 'rmvb', 'wmv', 'avi', 'mpg', 'mpeg', 'mp4','mov'];
+            $path = "videos/";
+        }else{
+            $imagesExt=['jpg','jpeg','gif','png'];
+            $path = "videos/img/";
+        }
+        //mkdirs(ATTACHMENT_ROOT . '/' . $path);
+        // 判断错误号
+        if (@$files['error'] == 00) {
+            // 判断文件类型
+            $ext = strtolower(pathinfo(@$files['name'],PATHINFO_EXTENSION));
+            if (!in_array($ext,$imagesExt)){
+                $resault["status"]=1;
+                $resault["message"]="非法文件类型";
+                return $resault;
+            }
+            // 判断是否存在上传到的目录
+            if (!is_dir(ATTACHMENT_ROOT . '/' .$path)){
+                mkdir($path,0777,true);
+            }
+            // 生成唯一的文件名
+            $fileName = md5(uniqid(microtime(true),true)).'.'.$ext;
+            // 将文件名拼接到指定的目录下
+            $destName =ATTACHMENT_ROOT.'/'.$path.$fileName;
+            // 进行文件移动
+            if (!move_uploaded_file($files['tmp_name'],$destName)){
+                $resault["status"]=1;
+                $resault["message"]="文件上传失败！";
+                return $resault;
+            }
+            $resault["status"]=0;
+            $resault["message"]=$path.$fileName;
+            return $resault;
+        } else {
+            // 根据错误号返回提示信息
+            switch (@$files['error']) {
+                case 1:
+                    echo "上传的文件超过了 php.ini 中 upload_max_filesize 选项限制的值";
+                    break;
+                case 2:
+                    echo "上传文件的大小超过了 HTML 表单中 MAX_FILE_SIZE 选项指定的值";
+                    break;
+                case 3:
+                    echo "文件只有部分被上传";
+                    break;
+                case 4:
+                    echo "没有文件被上传";
+                    break;
+                case 6:
+                    
+                case 7:
+                    echo "系统错误";
+                    break;
+            }
+        }
+    }
+    
 }
 ?>

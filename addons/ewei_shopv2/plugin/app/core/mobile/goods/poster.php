@@ -510,8 +510,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $filepath = $path . $filename;
         if( is_file($filepath) )
         {
-            $imgurl = $_W["siteroot"] . "addons/ewei_shopv2/data/sharegoods/".$filename;
-            app_json(array( "url" => $imgurl ));
+            return $this->getImgUrl($filename);
         }
         $target = imagecreatetruecolor(750, 1360);
         $white = imagecolorallocate($target, 255, 255, 255);
@@ -532,15 +531,13 @@ class Poster_EweiShopV2Page extends AppMobilePage
                 $thumbStr = substr($goods["thumb"], stripos($goods["thumb"], "//"));
                 $thumb = $this->createImage(tomedia("https:" . $thumbStr));
             }
-
-
-            $avatartarget = imagecreatetruecolor(650, 650);
-            $avatarwhite = imagecolorallocate($avatartarget, 255, 255, 255);
-            imagefill($avatartarget, 0, 0, $avatarwhite);
-            $memberthumb = tomedia($goods["thumb"]);
-            $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
-            $image = $this->mergegoodsImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
-            imagecopyresized($target, $image, 48, 332, 0, 0, 650, 650, 650, 650);
+//            $avatartarget = imagecreatetruecolor(650, 650);
+//            $avatarwhite = imagecolorallocate($avatartarget, 255, 255, 255);
+//            imagefill($avatartarget, 0, 0, $avatarwhite);
+//            $memberthumb = tomedia($goods["thumb"]);
+//            $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
+//            $image = $this->mergegoodsImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
+            imagecopyresized($target, $thumb, 48, 332, 0, 0, 650, 650, imagesx($thumb), imagesy($thumb));
         }
         $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_BOLD.TTF";
         if( !is_file($font) )
@@ -567,7 +564,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         imagecopyresized($target, $thumb, 46, 1042, 0, 0, 300, 3, 300, 3);
         //原价
         $ypricecolor = imagecolorallocate($target, 140, 140, 140);
-        imagettftext($target, 30, 0, 52, 1052, $ypricecolor, $font, '原价:￥'.$goods["minprice"]);
+        imagettftext($target, 30, 0, 52, 1052, $ypricecolor, $font, '原价:￥'.$goods["productprice"]);
         $pricecolor = imagecolorallocate($target, 249, 53, 51);
 
         $useprice = round($goods["minprice"]-$goods['deduct'],2);

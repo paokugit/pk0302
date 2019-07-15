@@ -69,7 +69,7 @@ class Game_EweiShopV2Model{
     /**
      * 添加日志
      * @param $openid
-     * @param $type  $type == 0消费   1中奖   2免费抽奖
+     * @param $type  $type == 0普通的开支   1中奖   2免费抽奖
      * @param $money
      * @param $datatype
      * @param $remark

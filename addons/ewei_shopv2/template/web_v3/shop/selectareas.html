@@ -157,7 +157,7 @@
         $("#modal-areas").modal();
         var citystrs = '';
         $('#btnSubmitArea').unbind('click').click(function(){
-                   $('.city:checked').each(function(){              
+                   $('.city:checked').each(function(){
                        citystrs+= $(this).attr('city') +";";
                    }); 
                    $('#areas').html(citystrs);

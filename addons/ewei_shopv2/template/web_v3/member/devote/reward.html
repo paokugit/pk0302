@@ -1,0 +1,103 @@
+{template '_header'}
+<meta charset="utf-8">
+
+<div class="page-header">当前位置：<span class="text-primary">运动日记管理</span></div>
+
+<div class="page-content">
+
+    <form action="./index.php" method="get" class="form-horizontal form-search" role="form">
+        <input type="hidden" name="c" value="site" />
+        <input type="hidden" name="a" value="entry" />
+        <input type="hidden" name="m" value="ewei_shopv2" />
+        <input type="hidden" name="do" value="web" />
+        <input type="hidden" name="r"  value="member.devote.reward" />
+
+        <div class="page-toolbar">
+            
+            <div class="pull-right col-md-6">
+                
+            </div>
+        </div>
+    </form>
+
+    {if empty($list)}
+        <div class="panel panel-default">
+            <div class="panel-body empty-data">未查询到相关数据</div>
+        </div>
+    {else}
+        <form action="" method="post">
+            <div class="page-table-header">
+                <input type='checkbox' />
+               
+            </div>
+            <table class="table table-responsive table-hover" >
+                <thead class="navbar-inner">
+                    <tr>
+                        <th style="width:25px;"></th>
+                      
+                        <th style="width:250px;">标题</th>
+                        <th style="width:250px;">推荐人数</th>
+                        <th style="width:250px;">奖励贡献值</th>
+                       <th style="width:250px;">会员级别</th>
+                       <th style="width:250px;">时间</th>
+                        <th style="width:250px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $list $row}
+                        <tr>
+                            <td>
+                                <input type='checkbox'   value="{$row['id']}"/>
+                            </td>
+                            
+                            <td>
+                            {$row['title']}
+                            </td>
+                            <td>
+                            {if $row['count']==0}
+                                                                                       不限
+                            {else}
+                              {$row['count']}人
+                            {/if}
+                            </td>
+                            <td>
+                           {$row['num']}
+                            </td>
+                            <td>
+                             {if $row['level']==0}
+                                                                                       不限
+                            {else}
+                            
+                             {php echo pdo_getcolumn("ewei_shop_commission_level",array("id"=>$row['level']),"levelname")}
+                              
+                            {/if}
+                            </td>
+                            <td>{$row["start_date"]}--{$row["end_date"]}</td>
+                            <td style="text-align:left;">
+                               {ifp 'member.devote.edit'}
+                                    <a href="{php echo webUrl('member/devote/edit', array('id' => $row['id']))}" class="btn btn-op btn-operation" >
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="修改">
+                                                <i class='icow icow-bianji2'></i>
+                                            </span>
+                                    </a>
+                                {/if}
+                            </td>
+                        </tr>
+                    {/loop}
+                </tbody>
+                <tfoot>
+                <tr>
+                   
+                    <td colspan="2" style="text-align: right">
+                        {$pager}
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </form>
+    {/if}
+
+</div>
+
+{template '_footer'}
+<!--6Z2S5bKb5piT6IGU5LqS5Yqo572R57uc56eR5oqA5pyJ6ZmQ5YWs5Y+4-->

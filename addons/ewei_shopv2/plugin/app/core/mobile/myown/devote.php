@@ -100,6 +100,7 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         }
         
     }
+    
     //贡献值记录
     public function dovate_log(){
         global $_W;

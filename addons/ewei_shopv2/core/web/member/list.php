@@ -1,4 +1,4 @@
-<?php  if( !defined("IN_IA") ) 
+ <?php  if( !defined("IN_IA") )
 {
 	exit( "Access Denied" );
 }

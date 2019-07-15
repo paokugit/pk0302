@@ -22,21 +22,28 @@ class Version_EweiShopV2Page extends AppMobilePage
 
     public function appversion()
     {
-        echo 1111;die();
         global $_GPC;
+        $setting = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 7 ));
+        $goodsshare = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 8 ));
+//        if($_GPC['versions'] && $_GPC['versions']>=16)
+////            app_json(array(
+////            'app_version' => 0,
+////            'storeshow'=>$setting['value'],
+////            'goodsshare'=>$goodsshare['value']
+////        ));
 
-        if($_GPC['versions'] && $_GPC['versions']>=16) app_json(array(
-            'app_version' => 0,
-        ));
 
         $referer = $_SERVER['HTTP_REFERER'];
         preg_match('/https:\/\/servicewechat\.com\/(.+?)\/(.+?)\/page-frame\.html/i', $referer,$matches);
         if($matches[1]){
             $res = array(
                 'app_id' => $matches[1],
+               // 'app_version' =>0,
                 'app_version' => $matches[2],
+                'storeshow'=>(int)$setting['value'],
+                'goodsshare'=>(int)$goodsshare['value']
             );
-            app_json(1111);
+            app_json($res);
         }
 
         app_error(0, "参数错误");

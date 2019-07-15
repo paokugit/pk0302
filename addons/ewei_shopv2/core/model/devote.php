@@ -27,16 +27,45 @@ class Devote_EweiShopV2Model{
         }
         //获取推荐付费会员的总数
         $sum=pdo_fetch("select count(*) from ".tablename("ewei_shop_member")." where agentlevel>0 and agentid=:agentid",array(":agentid"=>$member["agentid"]));
-        if ($sum["count"]<30){
-            return false;
+        if ($sum["count"]>30){
+            $count=floor($sum["count"]/30);
+            $jl=$count*30;
+            //查询是否已奖励
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>"推荐付费会员,达到".$jl."人"));
+            if (empty($log)){
+                
+                //奖励
+                m('member')->setCredit($parent["openid"], 'credit4', 60, "推荐付费会员,达到".$jl."人");
+                //消息提醒
+                $dd["keyword1"]=60;
+                $dd["keyword2"]="推荐付费会员,达到".$jl."人";
+                $dd["keyword3"]=date("Y-m-d H:i:s");
+                $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+                $this->notice($parent["openid"], $dd);
+            }
+            
         }
-        $count=floor($sum/30);
-        //查询是否已奖励
-        $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>"推荐付费会员,达到".$count."人"));
-        if (empty($log)){
-        $jl=$count*30;
-        //奖励
-        m('member')->setCredit($parent["openid"], 'credit4', $jl, "推荐付费会员,达到".$count."人");
+        
+        //直推店主
+        $shop=pdo_fetch("select count(*) from ".tablename("ewei_shop_member")." where agentlevel=5 and agentid=:agentid",array(":agentid"=>$member["agentid"]));
+        if ($shop["count"]>10){
+            $count=floor($shop["count"]/10);
+            //查询是否已奖励
+            $jl=$count*10;
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>"推荐店主".$jl."人"));
+           
+            if (empty($log)){
+                //奖励
+                m('member')->setCredit($parent["openid"], 'credit4', 1000, "推荐店主".$jl."人");
+                
+                //消息提醒
+                $dd["keyword1"]=1000;
+                $dd["keyword2"]="推荐店主".$jl."人";
+                $dd["keyword3"]=date("Y-m-d H:i:s");
+                $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+                $this->notice($parent["openid"], $dd);
+                
+            }
         }
         return true;
     }
@@ -52,18 +81,70 @@ class Devote_EweiShopV2Model{
             return false;
         }
         
+        //活动期间内--奖励
+        $jl=pdo_get("ewei_shop_member_devotejl",array("id"=>3));
+        $ddt=date("Y-m-d");
+        if ($jl["start_date"]<=$ddt&&$jl["end_date"]>=$ddt){
+            //添加记录奖励
+            m('member')->setCredit($member["openid"], 'credit4', $jl["num"], "推荐新用户获取");
+            
+            //消息提醒
+            $dd["keyword1"]=$jl["num"];
+            $dd["keyword2"]="推荐新用户获取";
+            $dd["keyword3"]=date("Y-m-d H:i:s");
+            $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+            $this->notice($member["openid"], $dd);
+            
+        }
+        
         //获取直推会员的总数
         $sum=pdo_fetch("select count(*) from ".tablename("ewei_shop_member")." where  agentid=:agentid",array(":agentid"=>$parent_id));
-        if ($sum["count"]<100){
-            return false;
-        }
+//         if ($sum["count"]<100){
+//             return false;
+//         }
+        if ($sum["count"]>=100){
         //查询是否奖励过
         $log=pdo_get("erwei_shop_member_credit_record",array("openid"=>$member["openid"],"credittype"=>"credit4","remark"=>"直推100人完成"));
-        if ($log){
-            return false;
-        }
+        if (empty($log)){
         //添加记录奖励
         m('member')->setCredit($member["openid"], 'credit4', 20, "直推100人完成");
+        
+        //消息提醒
+        $dd["keyword1"]=20;
+        $dd["keyword2"]="直推100人";
+        $dd["keyword3"]=date("Y-m-d H:i:s");
+        $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+        $this->notice($member["openid"], $dd);
+        
+        
+        }
+        }
+        
+       
+        //添加直推10人奖励
+        $jiangli=pdo_get("ewei_shop_member_devotejl",array("id"=>1));
+        $dt=date("Y-m-d");
+        $start_date=strtotime($jiangli["start_date"]);
+        $end_date=strtotime($jiangli["end_date"]);
+        $sum=pdo_fetch("select count(*) from ".tablename("ewei_shop_member")." where  agentid=:agentid and createtime>=:starttime and createtime<=:endtime",array(":agentid"=>$parent_id,":starttime"=>$start_date,":endtime"=>$end_date));
+        if ($sum["count"]>=$jiangli["count"]){
+            if ($member["agentlevel"]>=$jiangli["level"]&&$jiangli["start_date"]<=$dt&&$jiangli["end_date"]>=$dt){
+                //查询是否奖励过
+                $log=pdo_get("erwei_shop_member_credit_record",array("openid"=>$member["openid"],"credittype"=>"credit4","remark"=>"直推活动：".$jiangli["start_date"]."-".$jiangli["end_date"]."内推荐".$jiangli["count"]."人"));
+                if (empty($log)){
+                    //添加记录奖励
+                    m('member')->setCredit($member["openid"], 'credit4', $dt["num"], "直推活动：".$jiangli["start_date"]."-".$jiangli["end_date"]."内推荐".$jiangli["count"]."人");
+                    
+                    //消息提醒
+                    $dd["keyword1"]=$dt["num"];
+                    $dd["keyword2"]="最活动内推荐人数达到标准获取贡献值奖励";
+                    $dd["keyword3"]=date("Y-m-d H:i:s");
+                    $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+                    $this->notice($member["openid"], $dd);
+                    
+                }
+            }
+        }
         return true;
     }
     //直推付费会员
@@ -101,6 +182,13 @@ class Devote_EweiShopV2Model{
         if ($credit!=0){
             //添加记录奖励
             m('member')->setCredit($parent["openid"], 'credit4', $credit, $remark);
+            //消息提醒
+            $dd["keyword1"]=$credit;
+            $dd["keyword2"]=$remark;
+            $dd["keyword3"]=date("Y-m-d H:i:s");
+            $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+            $this->notice($parent["openid"], $dd);
+            
         }
         return true;
     }
@@ -114,6 +202,12 @@ class Devote_EweiShopV2Model{
         }
         //用户卡路里增加
         m('member')->setCredit($openid, 'credit3', 30000*$num, "购买金主礼包");
+        //消息提醒
+        $dd["keyword1"]=30000*$num;
+        $dd["keyword2"]="购买金主礼包";
+        $dd["keyword3"]=date("Y-m-d H:i:s");
+        $dd["keyword4"]="恭喜您获取折扣宝奖励，奖励已达到您的折扣宝账户，请注意查收";
+        $this->notice($openid, $dd);
         //获取上级
         $parent=m('member')->getMember($member["agentid"]);
         if (empty($parent)){
@@ -128,7 +222,12 @@ class Devote_EweiShopV2Model{
         if ($parent["agentlevel"]==2||$parent["agentlevel"]==5){
             //添加记录奖励
             m('member')->setCredit($parent["openid"], 'credit4', 3000*$num, "直推金主礼包");
-            
+            //消息提醒
+            $dd["keyword1"]=3000*$num;
+            $dd["keyword2"]="直推金主礼包";
+            $dd["keyword3"]=date("Y-m-d H:i:s");
+            $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+            $this->notice($parent["openid"], $dd);
         }
         //获取上上级
         if ($parent["agentid"]!=0){
@@ -144,10 +243,111 @@ class Devote_EweiShopV2Model{
             if ($pparent["agentlevel"]==2||$pparent["agentlevel"]==5){
                 //添加记录奖励
                 m('member')->setCredit($pparent["openid"], 'credit4',300*$num, "团队提成");
-              
+                //消息提醒
+                $dd["keyword1"]=300*$num;
+                $dd["keyword2"]="团队提成";
+                $dd["keyword3"]=date("Y-m-d H:i:s");
+                $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+                $this->notice($pparent["openid"], $dd);
             }
         }
        
+        return true;
+    }
+    
+    //新用户助力
+    public function rewardfive($parent_id){
+        $member = m('member')->getMember($parent_id);
+        $jiangli=pdo_get("ewei_shop_member_devotejl",array("id"=>2));
+        if ($member["agentlevel"]<$jiangli["level"]){
+            return false;
+        }
+        $dt=date("Y-m-d");
+        if ($jiangli["start_date"]<=$dt&&$jiangli["end_date"]>=$dt){
+            m('member')->setCredit($member["openid"], 'credit4',$jiangli["num"], "新用户助力奖励");
+            //消息提醒
+            $dd["keyword1"]=$jiangli["num"];
+            $dd["keyword2"]="推荐新用户获取贡献值奖励";
+            $dd["keyword3"]=date("Y-m-d H:i:s");
+            $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+            $this->notice($member["openid"], $dd);
+        }
+        return true;
+    }
+    //订单商品奖励
+    public function rewardorder($order_id){
+        $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
+        if (empty($order)){
+            return false;
+        }
+        $order_good=pdo_fetchall("select * from ".tablename("ewei_shop_order_goods")." where orderid=:orderid",array(":orderid"=>$order_id));
+        $my_price=0;
+        $agent_price=0;
+        foreach ($order_good as $k=>$v){
+            $good=pdo_get("ewei_shop_goods",array("id"=>$v["goodsid"]));
+            $my_price+=$good["my_devote"]*$v["total"];
+            $agent_price+=$good["agent_devote"]*$v["total"];
+        }
+        //获取用户
+        $member=m('member')->getMember($order["openid"]);
+        //判断是否开启贡献值
+        if ($member["mobile"]&&$member["weixin"]){
+           //判断用户级别
+           if ($member["agentlevel"]>=1){
+               if ($my_price>0){
+                   m('member')->setCredit($member["openid"], 'credit4',$my_price, "自购订单".$order["ordersn"]);
+                   //消息提醒
+                   $d["keyword1"]=$my_price;
+                   $d["keyword2"]="自购订单获取贡献值";
+                   $d["keyword3"]=date("Y-m-d H:i:s");
+                   $d["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+                   $this->notice($member["openid"], $d);
+               }
+           }
+        }
+        //上级用户
+        if ($member["agentid"]!=0){
+          //  $agent=pdo_get("ewei_shop_member",array("id"=>$member["agentid"]));
+            $agent=m('member')->getMember($member["agentid"]);
+            if ($agent["mobile"]&&$agent["weixin"]){
+                //判断用户级别
+                if ($agent["agentlevel"]>=1){
+                    if ($agent_price>0){
+                        m('member')->setCredit($agent["openid"], 'credit4',$agent_price, $member["nickname"]."下单,订单编号：".$order["ordersn"]);
+                        //消息提醒
+                        $dd["keyword1"]=$agent_price;
+                        $dd["keyword2"]="您推荐的用户购买商品获取贡献值奖励";
+                        $dd["keyword3"]=date("Y-m-d H:i:s");
+                        $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+                        $this->notice($agent["openid"], $dd);
+                    }
+                }
+            }
+            
+        }
+        return true;
+    }
+    //消息提醒
+    public function notice($openid,$data){
+        $postdata=array(//变动金额
+            'keyword1'=>array(
+                'value'=>$data["keyword1"],
+                'color' => '#ff510'
+            ),//原因
+            'keyword2'=>array(
+                'value'=>$data["keyword2"],
+                'color' => '#ff510'
+            ),//时间
+            'keyword3'=>array(
+                'value'=>$data["keyword3"],
+                'color' => '#ff510'
+            ),//备注
+            'keyword4'=>array(
+                'value'=>$data["keyword4"],
+                'color' => '#ff510'
+            )
+        );
+        p("app")->mysendNotice($openid, $postdata, "", "nSJSBKVYwLYN_LcsUXyvTLVjseO46nQA8RqKsRnsiRs");
         return true;
     }
 }

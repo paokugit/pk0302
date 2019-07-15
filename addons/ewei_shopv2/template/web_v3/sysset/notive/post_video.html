@@ -1,0 +1,127 @@
+{template '_header'}
+   <meta charset="UTF-8">
+<div class="page-header">
+    当前位置：<span class="text-primary">{if !empty($notice['id'])}编辑{else}添加{/if}{if !empty($notice['id'])}({$notice['title']}){/if}</span>
+</div>
+
+<div class="page-content">
+    <div class="page-sub-toolbar">
+        <span class=''>
+           
+                <a class="btn btn-primary btn-sm" href="{php echo webUrl('sysset/notive/add')}"> 添加文章</a>
+                 <a class='btn btn-primary btn-sm' href="{php echo webUrl('sysset/notive/add_video')}">添加视频</a>
+          
+        </span>
+    </div>
+    <form {ife 'sysset.notive.add_video' $notice}action="" method="post"{/if} class="form-horizontal form-validate" enctype="multipart/form-data" onsubmit='return formcheck()'>
+        <input type="hidden" name="id" value="{$notice['id']}" />
+        <div class="form-group">
+            <label class="col-lg control-label">排序</label>
+            <div class="col-sm-9 col-xs-12">
+                
+                    <input type="text" name="sort" class="form-control" value="{$notice['sort']}" />(数字越大越靠前)
+               
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg control-label must">标题</label>
+            <div class="col-sm-9 col-xs-12">
+               
+                    <input type="text" id='title' name="title" class="form-control" value="{$notice['title']}" data-rule-required='true' />
+               
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg control-label">封面图</label>
+            <div class="col-sm-9 col-xs-12">
+               
+                    {php echo tpl_form_field_image2('thumb', $notice['photo'])}
+                    <span class="help-block">正方型图片</span>
+                
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg control-label">视频时长</label>
+            <div class="col-sm-9 col-xs-12">
+               
+                   <input type="text" id='title' name="time" class="form-control" value="{$notice['time']}" data-rule-required='true' />
+               
+            </div>
+        </div>
+        
+        
+<div class="page-content">
+
+      <div>
+    <video src="{$notice['video']}" controls="controls" style="width:400px;height:300px;margin-left:25%" id="video">
+             您的浏览器不支持 video 标签。
+     </video>
+     </div>
+     <input name="video" value="{$notice['video']}" id="sd" type="hidden">
+     <div style="margin-top:20px;margin-left:35%;">
+     <input type="file" name="file" id="file" onchange="fileUpload()" style="display:none">
+     <input type="button"  onclick="select_file()" value="上传"  style="background: #44abf7 !important; border-color: #44abf7 !important;color: #fff !important;width:150px;height:30px;">
+     </div>
+</div>
+       
+        
+        <div class="form-group"></div>
+        <div class="form-group">
+            <label class="col-lg control-label"></label>
+            <div class="col-sm-9 col-xs-12">
+               
+                    <input type="submit"  value="提交" class="btn btn-primary"  />
+               
+                <input type="button" name="back" onclick='history.back()' {ifp 'shop.notice.add|shop.notice.edit'}style='margin-left:10px;'{/if} value="返回列表" class="btn btn-default" />
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+
+function select_file(){
+    $("#file").trigger("click");
+}
+
+function fileUpload(){
+    var formData = new FormData();
+    formData.append('file', $('#file')[0].files[0]);
+    $.ajax({
+                url : "{$submitUrl}",//这里写你的url
+                type : 'POST',
+                data : formData,
+                contentType: false,// 当有文件要上传时，此项是必须的，否则后台无法识别文件流的起始位置
+                processData: false,// 是否序列化data属性，默认true(注意：false时type必须是post)
+                dataType: 'json',//这里是返回类型，一般是json,text等
+                clearForm: true,//提交后是否清空表单数据
+                success: function(data) {   //提交成功后自动执行的处理函数，参数data就是服务器返回的数据。
+                	console.log(data);
+                    console.log(data.status);
+                    var video=data.lujing;
+                    var lujing=data.message;
+                    if(data.status==0){
+                    	//添加数据库
+                    	
+                    				var _videoPlay = document.getElementById("video");
+                    				 
+                    				_videoPlay.src = video;
+                    				  _videoPlay.play();
+                    				
+                    				  document.getElementById("sd").value=lujing;
+                    				  
+                    				alert('成功');
+                    			
+                    	//alert('上传成功');
+                    }else{
+                    	alert(data.message);
+                    }
+                }
+            });
+}
+
+
+</script>
+{template '_footer'}
+<!--NDAwMDA5NzgyNw==-->
