@@ -729,6 +729,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 					$dispatch_array = m("order")->getOrderDispatchPrice($goods, $member, $address, $saleset, $merch_array, 0);
 					$dispatch_price = $dispatch_array["dispatch_price"] - $dispatch_array["seckill_dispatch_price"];
 					$seckill_dispatchprice = $dispatch_array["seckill_dispatch_price"];
+					$isdispatcharea = $dispatch_array['isdispatcharea'];
 				}
 			}
 			$card_info = array( );
@@ -909,6 +910,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			}
 			$goodsdata = array( );
 			$goodsdata_temp = array( );
+            $remote_dispatchprice = 0;
 			foreach( $goods as $g ) 
 			{
 				if( $g["seckillinfo"] && $g["seckillinfo"]["status"] == 0 ) 
@@ -929,6 +931,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 					}
 				}
 				$goodsdata[] = array( "goodsid" => $g["goodsid"], "total" => $g["total"], "optionid" => $g["optionid"], "marketprice" => $g["marketprice"], "merchid" => $g["merchid"], "cates" => $g["cates"], "discounttype" => $g["discounttype"], "isdiscountprice" => $g["isdiscountprice"], "discountprice" => $g["discountprice"], "isdiscountunitprice" => $g["isdiscountunitprice"], "discountunitprice" => $g["discountunitprice"] );
+                $remote_dispatchprice += $g['remote_dispatchprice'];
 			}
 			if( $g["seckillinfo"] && $g["seckillinfo"]["status"] == 0 ) 
 			{
@@ -1180,6 +1183,8 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$result["seckill_dispatchprice"] = intval($seckill_dispatchprice);
 		$result["seckill_price"] = intval($seckill_price);
 		$result["seckill_payprice"] = intval($seckill_payprice);
+		$result['isdispatcharea'] = $isdispatcharea;
+		$result['remote_dispatchprice'] = $remote_dispatchprice;
 		if( $hasinvoice ) 
 		{
 			$result["invoice_info"] = $invoice_arr;
@@ -1426,7 +1431,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$return_array["discountprice_array"] = $discountprice_array;
 		$return_array["merchisdiscountprice"] = $merchisdiscountprice;
 		$return_array["couponmerchid"] = $merchid;
-		$return_array["\$goodsarr"] = $goodsarr;
+		$return_array["goodsarr"] = $goodsarr;
         if($data['couponid']==2) {
 
            //$return_array["deductprice"] = $totalprice;
@@ -1800,6 +1805,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 					$dispatch_price = $dispatch_array["dispatch_price"] - $dispatch_array["seckill_dispatch_price"];
 					$nodispatch_array = $dispatch_array["nodispatch_array"];
 					$seckill_dispatchprice = $dispatch_array["seckill_dispatch_price"];
+                    			$isdispatcharea = $dispatch_array['isdispatcharea'];
 				}
 				$cardid = intval($_GPC["cardid"]);
 				$plugin_membercard = p("membercard");
@@ -1880,6 +1886,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 					$dispatch_price = 0;
 				}
 				$goodsdata_coupon = array( );
+                $remote_dispatchprice = 0;
 				foreach( $allgoods as $g ) 
 				{
 					if( $g["seckillinfo"] && $g["seckillinfo"]["status"] == 0 ) 
@@ -1899,6 +1906,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 							$goodsdata_coupon[] = array( "goodsid" => $g["goodsid"], "total" => $g["total"], "optionid" => $g["optionid"], "marketprice" => $g["marketprice"], "merchid" => $g["merchid"], "cates" => $g["cates"], "discounttype" => $g["discounttype"], "isdiscountprice" => $g["isdiscountprice"], "discountprice" => $g["discountprice"], "isdiscountunitprice" => $g["isdiscountunitprice"], "discountunitprice" => $g["discountunitprice"] );
 						}
 					}
+                    $remote_dispatchprice += $g['remote_dispatchprice'];
 				}
 				$couponcount = com_run("coupon::consumeCouponCount", $openid, $realprice - $seckill_payprice, $merch_array, $goodsdata_coupon);
 				if( empty($goodsdata_coupon) || !$allow_sale ) 
@@ -1973,10 +1981,10 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$coupon_price = $this->caculatecoupon($couponid, $goodsdata_coupon, $totalprice, $discountprice, $isdiscountprice, 0, array( ), 0, $realprice - $express_fee);
 			$coupon_deductprice = $coupon_price["deductprice"];
 			//lihanwen
-            $sql = "SELECT d.id,d.couponid,c.enough,c.backtype,c.deduct,c.discount,c.backmoney,c.backcredit,c.backredpack,c.merchid,c.limitgoodtype,c.limitgoodcatetype,c.limitgoodids,c.limitgoodcateids,c.limitdiscounttype  FROM " . tablename("ewei_shop_coupon_data") . " d";
-            $sql .= " left join " . tablename("ewei_shop_coupon") . " c on d.couponid = c.id";
-            $sql .= " where d.id=:id and d.uniacid=:uniacid and d.openid=:openid and d.used=0  limit 1";
-            $coupondata = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $couponid, ":openid" => $openid ));
+	            	$sql = "SELECT d.id,d.couponid,c.enough,c.backtype,c.deduct,c.discount,c.backmoney,c.backcredit,c.backredpack,c.merchid,c.limitgoodtype,c.limitgoodcatetype,c.limitgoodids,c.limitgoodcateids,c.limitdiscounttype  FROM " . tablename("ewei_shop_coupon_data") . " d";
+	            	$sql .= " left join " . tablename("ewei_shop_coupon") . " c on d.couponid = c.id";
+	            	$sql .= " where d.id=:id and d.uniacid=:uniacid and d.openid=:openid and d.used=0  limit 1";
+	           	$coupondata = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $couponid, ":openid" => $openid ));
 
 			$deductcredit2 -= $coupon_deductprice;
 			$deductmoney -= $coupon_deductprice;
@@ -2029,7 +2037,9 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$return_array["card_free_dispatch"] = $card_free_dispatch;
 		$return_array["coupon_deductprice"] = $coupon_deductprice;
 		$return_array["gifts"] = $gifts;
-		if( !empty($nodispatch_array["isnodispatch"]) ) 
+		$return_array['isdispatcharea'] = $isdispatcharea;
+		$return_array['remote_dispatchprice'] = $remote_dispatchprice;
+		if( !empty($nodispatch_array["isnodispatch"]) )
 		{
 			$return_array["isnodispatch"] = 1;
 			$return_array["nodispatch"] = $nodispatch_array["nodispatch"];
@@ -2718,7 +2728,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$couponid = intval($_GPC["couponid"]);
 		$goodsdata_coupon = array( );
 		$goodsdata_coupon_temp = array( );
-		foreach( $allgoods as $g ) 
+ 		foreach( $allgoods as $g )
 		{
 			if( $g["seckillinfo"] && $g["seckillinfo"]["status"] == 0 ) 
 			{

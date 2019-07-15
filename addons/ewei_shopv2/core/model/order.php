@@ -1767,15 +1767,18 @@ class Order_EweiShopV2Model
                                 } else {
                                     $dispatch_price += $g["dispatchprice"];
                                 }
+                                $is_remote = 0;
                             } else {
                                 if ($seckillinfo && $seckillinfo["status"] == 0) {
                                     $seckill_dispatchprice += $g["dispatchprice"] + $remote_dispatchprice;
                                 } else {
                                     $dispatch_price += $g["dispatchprice"] + $remote_dispatchprice;
                                 }
+                                $is_remote = 1;
                             }
                         }else{
                             $dispatch_price = $g["dispatchprice"];
+			                $is_remote = 0;
                         }
 					}
 				}
@@ -2162,6 +2165,7 @@ class Order_EweiShopV2Model
 		$data["nodispatch_array"] = $nodispatch_array;
 		$data["seckill_dispatch_price"] = $seckill_dispatchprice;
 		$data["city_express_state"] = $city_express_data["state"];
+		$data['isdispatcharea'] = $is_remote;
 		return $data;
 	}
 	public function changeParentOrderPrice($parent_order) 
