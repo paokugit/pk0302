@@ -950,6 +950,19 @@ class EweiShopWechatPay
                 }
                 //支付成功的话 给用户扣除的卡路里  和 折扣宝
                 $mem_data = [];
+                //支付成功的话  且付款者没有上级  锁粉
+                if($member['agentid'] == 0){
+                    //如果是商家  那么也锁粉  然后把商家对应的member_id  赋值给mem_data
+                    if(is_numeric($order['merchid'])){
+                        //查这个商家的信息
+                        $merch = pdo_get('ewei_shop_merch_user',['id'=>$order['merchid']]);
+                        $mem_data['agentid'] = $member['agentid'] = $merch['member_id']?:0;
+                    }else{
+                        $mem_data['agentid'] = intval($order['merchid']);
+                    }
+                }
+                //查找上级信息  如果有使用折扣宝
+                $agent = pdo_get('ewei_shop_member',['id'=>$member['agentid']]);
                 if($cate == 1){
                     $credit1 = $member['credit1'] - ($order['goodsprice'] - $order['price']);
                     $mem_data['credit1'] = $credit1;
@@ -961,10 +974,10 @@ class EweiShopWechatPay
                     $mem_data['credit3'] = $credit3;
                     $mem_data['credit1'] = $member['credit1'];
                     $d = m('game')->addlog($order['openid'],0,-($order['goodsprice']-$order['price']),2,"折扣宝付款");
-                }
-                //支付成功的话  且付款者 没有上级  并且是个人收款码  锁粉
-                if($member['agentid'] == 0 && !is_numeric($order['merchid'])){
-                    $mem_data['agentid'] = intval($order['merchid']);
+                    //order表的goodsprice  减去  price 等于折扣宝的金额  乘以0.5是上级的奖励  加到上级的折扣宝  credit1卡路里  2余额  3折扣宝  4贡献值  5个人资产
+                    pdo_update('ewei_shop_member',['credit3'=>bcadd($agent['credit3'],bcmul(bcsub($order['goodsprice'],$order['price'],2),0.5,2),2)],['openid'=>$agent['openid']]);
+                    //写入日志
+                    m('game')->addlog($agent['openid'],0,($order['goodsprice']-$order['price'])*0.5,2,"下级用折扣宝付款的奖励");
                 }
                 //如果付款码方是第一次给收款码付款  就给他送一定量的折扣宝
                 if($count == 0){
