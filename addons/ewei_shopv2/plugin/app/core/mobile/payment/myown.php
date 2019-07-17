@@ -203,8 +203,8 @@ class Myown_EweiShopV2Page extends AppMobilePage
         $pageSize = 20;
         $psize = ($page - 1)*$pageSize;
         $total = pdo_count('ewei_shop_member_log',"openid = '".$openid."' and title = '个人资金提现'");
-        //查询提现记录
-        $list = pdo_fetchall('select title,money,FROM_UNIXTIME(createtime) as createtime,status,refuse_reason from '.tablename('ewei_shop_member_log').' where openid = "'.$openid.'" and title = "个人资金提现" order by id desc LIMIT '.$psize.','.$pageSize);
+        //查询提现记录  FROM_UNIXTIIME()    sql语句中 时间戳转换成时间格式
+        $list = pdo_fetchall('select id,title,money,FROM_UNIXTIME(createtime) as createtime,status,refuse_reason from '.tablename('ewei_shop_member_log').' where openid = "'.$openid.'" and title = "个人资金提现" order by id desc LIMIT '.$psize.','.$pageSize);
         show_json(1,['list'=>$list,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize]);
     }
 }
