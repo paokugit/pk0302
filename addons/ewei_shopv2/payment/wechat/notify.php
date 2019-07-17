@@ -940,7 +940,8 @@ class EweiShopWechatPay
                 $a = pdo_update('ewei_shop_order',['status'=>3,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
                 //如果商家的收款信息merchid 是数字  就是商家收款  如果是字符串 就是个人收款码
                 if(is_numeric($order['merchid'])){
-                    $b = pdo_update('ewei_shop_merch_log',['status'=>1],['logno'=>$ordersn]);
+                    //商家收款记录  ordersn
+                    $b = pdo_update('ewei_shop_merch_log',['status'=>1],['ordersn'=>$ordersn]);
                 }else{
                     //如果是个人收款  改变个人收款日志的状态
                     $b = pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn.$order['merchid']]);
@@ -956,7 +957,9 @@ class EweiShopWechatPay
                     if(is_numeric($order['merchid'])){
                         //查这个商家的信息
                         $merch = pdo_get('ewei_shop_merch_user',['id'=>$order['merchid']]);
-                        $mem_data['agentid'] = $member['agentid'] = $merch['member_id']?:0;
+                        if($member['id'] != $merch['member_id']){
+                            $mem_data['agentid'] = $member['agentid'] = $merch['member_id']?:0;
+                        }
                     }else{
                         $mem_data['agentid'] = intval($order['merchid']);
                     }

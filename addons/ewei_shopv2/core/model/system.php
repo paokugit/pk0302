@@ -738,6 +738,10 @@ class System_EweiShopV2Model {
                         "route" => "devote.reward"
                     ) ,
                     array(
+                        "title" => "等级年卡",
+                        "route" => "memlevel"
+                    ) ,
+                    array(
                         "title" => "标签组",
                         "route" => "group"
                     ) ,

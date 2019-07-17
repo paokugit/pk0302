@@ -74,6 +74,15 @@ class Index_EweiShopV2Page extends AppMobilePage
         if($_GPC['rebate'] == "" || $_GPC['merchid'] == "" || $_GPC['money'] == "" || $_GPC['cate'] == "" || $_GPC['openid'] == ""){
             show_json(0,"请完善参数信息");
         }
+        if(is_numeric($_GPC['merchid'])){
+            $merch = pdo_get('ewei_shop_merch_user',['id'=>$_GPC['merchid']]);
+            $income_id = $merch['member_id'];
+        }else{
+            $income_id = intval($_GPC['merchid']);
+        }
+        if($_GPC['openid'] == pdo_getcolumn('ewei_shop_member',['id'=>$income_id],'openid')){
+            show_json(0,"不能给自己的收款码付款");
+        }
         //扫码订单前缀 SC  生成订单号
         $order_sn = "SC".$_GPC['cate'].date('YmdHis',time()).random(12);
         $add = [
@@ -312,11 +321,13 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(is_numeric($_GPC['merchid'])){
             $total = pdo_count('ewei_shop_deduct_setting',['merchid'=>$_GPC['merchid'],'cate'=>$_GPC['cate']]);
             $list = pdo_fetchall('select id,money,merchid,deduct,cate,openid from '.tablename('ewei_shop_deduct_setting').'where merchid=:merchid and cate=:cate order by money asc LIMIT '.$spage.','.$pageSize,array(':merchid'=>$_GPC['merchid'],':cate'=>$_GPC['cate']));
-        }else{
-            //$member = pdo_get('ewei_shop_member',['id'=>intval($_GPC['merchid'])]);
-            //$total = pdo_count('ewei_shop_deduct_setting',['openid'=>$member['openid'],'cate'=>$_GPC['cate']]);
-            $total = pdo_count('ewei_shop_deduct_setting',['openid'=>$_GPC['merchid'],'cate'=>$_GPC['cate']]);
+        }elseif (strpos($_GPC['merchid'],"own")){
+            $member = pdo_get('ewei_shop_member',['id'=>intval($_GPC['merchid'])]);
+            $total = pdo_count('ewei_shop_deduct_setting',['openid'=>$member['openid'],'cate'=>$_GPC['cate']]);
             $list = pdo_fetchall('select id,money,merchid,deduct,cate,openid from '.tablename('ewei_shop_deduct_setting').'where openid=:openid and cate=:cate order by money asc LIMIT '.$spage.','.$pageSize,array(':openid'=>$member['openid'],':cate'=>$_GPC['cate']));
+        }else{
+            $total = pdo_count('ewei_shop_deduct_setting',['openid'=>$_GPC['merchid'],'cate'=>$_GPC['cate']]);
+            $list = pdo_fetchall('select id,money,merchid,deduct,cate,openid from '.tablename('ewei_shop_deduct_setting').'where openid=:openid and cate=:cate order by money asc LIMIT '.$spage.','.$pageSize,array(':openid'=>$_GPC['merchid'],':cate'=>$_GPC['cate']));
         }
         if(!$list){
             show_json(0,"暂无信息");

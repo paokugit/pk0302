@@ -157,6 +157,9 @@ class Myown_EweiShopV2Page extends AppMobilePage
         if($openid == "" || $money == ""){
             show_json(0,"请完善参数信息");
         }
+        if($money < 1){
+            show_json(0,"最少提现1块");
+        }
         $credit5 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],'credit5');
         //bccomp  比较 两个精确的小数的大小   == -1  是前者小于后者
         if(bccomp($credit5,$money,2) == -1){
