@@ -200,10 +200,10 @@ class Devote_EweiShopV2Model{
         if (empty($member)||$member["agentid"]==0){
             return false;
         }
-        //用户卡路里增加
-        m('member')->setCredit($openid, 'credit3', 30000*$num, "购买金主礼包");
-        //消息提醒
-        $dd["keyword1"]=30000*$num;
+        //用户卡路里增加(折扣宝)
+        m('member')->setCredit($openid, 'credit3', 15000*$num, "购买金主礼包");
+        //消息提醒9960
+        $dd["keyword1"]=15000*$num;
         $dd["keyword2"]="购买金主礼包";
         $dd["keyword3"]=date("Y-m-d H:i:s");
         $dd["keyword4"]="恭喜您获取折扣宝奖励，奖励已达到您的折扣宝账户，请注意查收";

@@ -14,11 +14,14 @@ class Wechart_EweiShopV2Page extends ComWebPage
 		global $_W;
 		global $_GPC;
 		$setting = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 7 ));
-		var_dump($setting);
+		$goodsshare = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 8 ));
+
 		if ($_W['ispost'])
 		{
 			$data['value'] = $_GPC['storeshow'];
 			pdo_update('ewei_setting',$data,array('id'=>7));
+			$data1['value'] = $_GPC['goodsshare'];
+			pdo_update('ewei_setting',$data1,array('id'=>8));
 			show_json(1);
 		}
 		include($this->template());

@@ -617,5 +617,108 @@ class Poster_EweiShopV2Page extends AppMobilePage
         return $target;
     }
 
+
+    /**
+     * 金主商品海报
+     * @param array $goods
+     * @param array $member
+     * @return string
+     */
+    private function createDevote($goods = array( ), $member = array( ))
+    {
+        global $_W;
+        set_time_limit(0);
+        @ini_set("memory_limit", "256M");
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/goods/" . $_W["uniacid"] . "/";
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "openid" => $member["openid"], "goodstitle" => $goods["title"], "goodprice" => $goods["minprice"], "version" => 1 )));
+        $filename = $md5 . ".png";
+        $filepath = $path . $filename;
+        if( is_file($filepath) )
+        {
+            return $this->getImgUrl($filename);
+        }
+        $target = imagecreatetruecolor(750, 1360);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+
+        $thumb = "/addons/ewei_shopv2/static/images/goodsshare.png";
+        $thumb = $this->createImage(tomedia($thumb));
+        imagecopyresized($target, $thumb, 0, 0, 0, 0, 750, 1360, imagesx($thumb), imagesy($thumb));
+
+        if( !empty($goods["thumb"]) )
+        {
+            if( stripos($goods["thumb"], "//") === false )
+            {
+                $thumb = $this->createImage(tomedia($goods["thumb"]));
+            }
+            else
+            {
+                $thumbStr = substr($goods["thumb"], stripos($goods["thumb"], "//"));
+                $thumb = $this->createImage(tomedia("https:" . $thumbStr));
+            }
+//            $avatartarget = imagecreatetruecolor(650, 650);
+//            $avatarwhite = imagecolorallocate($avatartarget, 255, 255, 255);
+//            imagefill($avatartarget, 0, 0, $avatarwhite);
+//            $memberthumb = tomedia($goods["thumb"]);
+//            $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
+//            $image = $this->mergegoodsImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
+            imagecopyresized($target, $thumb, 48, 332, 0, 0, 650, 650, imagesx($thumb), imagesy($thumb));
+        }
+        $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_BOLD.TTF";
+        if( !is_file($font) )
+        {
+            $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
+        }
+        $avatartarget = imagecreatetruecolor(98, 98);
+        $avatarwhite = imagecolorallocate($avatartarget, 255, 255, 255);
+        imagefill($avatartarget, 0, 0, $avatarwhite);
+
+        $memberthumb = tomedia($member["avatar"]);
+        $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
+        $image = $this->mergeImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
+        imagecopyresized($target, $image, 53, 184, 0, 0, 98, 98, 98, 98);
+
+        $name = $this->memberName($member["nickname"]);
+        $nameColor = imagecolorallocate($target, 138, 138, 138);
+        imagettftext($target, 34, 0, 180, 215, $nameColor, $font, $name);
+        $shareColor = imagecolorallocate($target, 51, 51, 51);
+        imagettftext($target, 28, 0, 180, 280, $shareColor, $font, "推荐给你一个好物！");
+
+        $thumb = "/addons/ewei_shopv2/static/images/1pxbg.png";
+        $thumb = $this->createImage(tomedia($thumb));
+        imagecopyresized($target, $thumb, 46, 1042, 0, 0, 300, 3, 300, 3);
+        //原价
+        $ypricecolor = imagecolorallocate($target, 140, 140, 140);
+        imagettftext($target, 30, 0, 52, 1052, $ypricecolor, $font, '原价:￥'.$goods["productprice"]);
+        $pricecolor = imagecolorallocate($target, 249, 53, 51);
+
+        $useprice = round($goods["minprice"]-$goods['deduct'],2);
+        imagettftext($target, 54, 0, 100, 1130, $pricecolor, $font, $useprice);
+        imagettftext($target, 38, 0, 52, 1126, $pricecolor, $font, "￥");
+
+        $titles = $this->getGoodsTitles($goods["title"], 30, $font, 400);
+        $black = imagecolorallocate($target, 0, 0, 0);
+        imagettftext($target, 30, 0, 60, 1237, $black, $font, $titles[0]);
+        imagettftext($target, 30, 0, 60, 1287, $black, $font, $titles[1]);
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "id=" . $goods["id"] . "&mid=" . $member["id"], "page" => "pages/goods/detail/index" ));
+        if( !is_error($qrcode) )
+        {
+            $qrcode = imagecreatefromstring($qrcode);
+            imagecopyresized($target, $qrcode, 502, 1100, 0, 0, 220, 220, imagesx($qrcode), imagesy($qrcode));
+        }
+        $gary2 = imagecolorallocate($target, 140, 140, 140);
+        imagettftext($target, 30, 0, 523, 1085, $gary2, $font, "长按识别");
+        imagepng($target, $filepath);
+        imagedestroy($target);
+        return $this->getImgUrl($filename);
+    }
+
+
+
 }
 ?>
