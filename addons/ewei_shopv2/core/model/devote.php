@@ -170,13 +170,13 @@ class Devote_EweiShopV2Model{
         
         $credit=0;
         if ($level==1){
-            $remark="直推健康达人";
+            $remark="直推健康达人：".$member["nickname"];
             $credit=1;
         }elseif ($level==2){
-            $remark="直推星选达人";
+            $remark="直推星选达人:".$member["nickname"];
             $credit=10;
         }elseif ($level==5){
-            $remark="直推店主";
+            $remark="直推店主:".$member["nickname"];
             $credit=100;
         }
         if ($credit!=0){

@@ -726,6 +726,10 @@ class System_EweiShopV2Model {
                         "route" => "sport"
                     ) ,
                     array(
+                        "title" => "加速宝",
+                        "route" => "acceleration"
+                    ) ,
+                    array(
                         "title" => "贡献值解读",
                         "route" => "devote"
                     ) ,

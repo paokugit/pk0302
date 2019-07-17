@@ -1123,13 +1123,15 @@ class Member_EweiShopV2Model
             //加速日期
             $accelerate_day=date("Y-m-d",strtotime("+".$level["accelerate_day"]." day",strtotime($member["agentlevel_time"])));
            
+           
+            //获取加速器剩余时间--加速宝
+            $d=$this->acceleration($openid);
             
             $day=date("Y-m-d",time());
             
-            if ($accelerate_day>=$day){
+            if ($d["day"]>0){
                 //加速期间
-                $ratio=$level["duihuan"];
-                
+                $ratio=$d["duihuan"];
             }else{ 
                 
                 /**
@@ -1344,6 +1346,7 @@ class Member_EweiShopV2Model
         }
         return $ratio;
     }
+    
 
     /**
      * 绑带会员
@@ -1519,6 +1522,35 @@ class Member_EweiShopV2Model
         pdo_insert('mc_credits_record',$data);
         pdo_insert('ewei_shop_member_credit_record',$data);
         return true;
+    }
+    //fbb
+    //获取剩余加速时间
+    public function acceleration($openid=""){
+        $member=pdo_get("ewei_shop_member",array("openid"=>$openid));
+        $res["day"]=0;
+        $res["duihuan"]=0;
+        if ($member["agentlevel"]==0){
+            return $res;
+        }
+        //获取
+        $level=pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
+        //加速日期
+        $accelerate_day=date("Y-m-d",strtotime("+".$level["accelerate_day"]." day",strtotime($member["agentlevel_time"])));
+        
+        $day=date("Y-m-d",time());
+        if ($accelerate_day>$day){
+            $res["day"]=$this->count_days($accelerate_day, $day);
+            $res["duihuan"]=$level["duihuan"];
+            return $res;
+        }else{
+            //判断是否在加速宝内
+            if (!empty($member["accelerate_end"])&&$member["accelerate_end"]>$day){
+                $res["day"]=$this->count_days($member["accelerate_end"], $day);
+                $res["duihuan"]=$member["duihuan"];
+                return $res;
+            }
+        }
+        return $res;
     }
 }
 ?>

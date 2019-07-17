@@ -22,7 +22,7 @@ class Version_EweiShopV2Page extends AppMobilePage
 
     public function appversion()
     {
-        echo 1111;die();
+       // echo 1111;die();
         global $_GPC;
 
         if($_GPC['versions'] && $_GPC['versions']>=16) app_json(array(
@@ -36,7 +36,7 @@ class Version_EweiShopV2Page extends AppMobilePage
                 'app_id' => $matches[1],
                 'app_version' => $matches[2],
             );
-            app_json(1111);
+            app_json($res);
         }
 
         app_error(0, "参数错误");
