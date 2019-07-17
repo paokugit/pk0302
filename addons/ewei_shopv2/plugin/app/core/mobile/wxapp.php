@@ -45,6 +45,7 @@ class Wxapp_EweiShopV2Page extends Page
         if ($member){
            $arr["login"]=$member["is_login"];
            $arr["is_own"]=$member["is_own"];
+           $arr["agentlevel"]=$member["agentlevel"];
             //判断用户是否是商家
             $merchUser=pdo_get('ewei_shop_merch_user',array('member_id'=>$member['id']));
             if($merchUser){
@@ -185,6 +186,7 @@ class Wxapp_EweiShopV2Page extends Page
                 $data['merchInfo'] = false;
             }
             $data['is_own'] = $member['is_own'];
+            $data['agentlevel'] = $member['agentlevel'];
             app_json($data, $data["openId"]);
         }
         app_error(AppError::$WxAppError, "登录错误, 错误代码: " . $errCode);
@@ -219,7 +221,7 @@ class Wxapp_EweiShopV2Page extends Page
         }else{
             $merchInfo = false;
         }
-        app_json(array("merchInfo"=>$merchInfo,"uniacid" => $member["uniacid"], "openid" => $member["openid"], "id" => $member["id"], "nickname" => $member["nickname"], "avatarUrl" => tomedia($member["avatar"]), "isblack" => $member["isblack"],'is_own'=>$member['is_own']), $member["openid"]);
+        app_json(array("merchInfo"=>$merchInfo,"uniacid" => $member["uniacid"], "openid" => $member["openid"], "id" => $member["id"], "nickname" => $member["nickname"], "avatarUrl" => tomedia($member["avatar"]), "isblack" => $member["isblack"],'is_own'=>$member['is_own'],'agentlevel'=>$member['agentlevel']), $member["openid"]);
     }
     
    
