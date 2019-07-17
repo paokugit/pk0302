@@ -504,8 +504,8 @@ class Order_EweiShopV2Model
      */
 	public function openstore($orderid){
         global $_W;
-        $orderInfo = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where  id = " . $orderid . " ");
-        $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where  openid = " . $orderInfo['openid'] . " ");
+        $orderInfo = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where  id = " . $orderid);
+        $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where  openid = '".$orderInfo['openid']."'");
 
         if($orderInfo['carrier']){
             $addressInfo = unserialize($orderInfo['carrier']);
