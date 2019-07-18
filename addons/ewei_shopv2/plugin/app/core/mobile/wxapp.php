@@ -44,6 +44,7 @@ class Wxapp_EweiShopV2Page extends Page
         $member=pdo_get('ewei_shop_member',array('openid'=>$openid));
         if ($member){
            $arr["login"]=$member["is_login"];
+           $arr["agentid"]=$member["agentid"];
            $arr["is_own"]=$member["is_own"];
            $arr["agentlevel"]=$member["agentlevel"];
             //判断用户是否是商家
@@ -185,6 +186,7 @@ class Wxapp_EweiShopV2Page extends Page
             }else{
                 $data['merchInfo'] = false;
             }
+            $arr["agentid"]=$member["agentid"];
             $data['is_own'] = $member['is_own'];
             $data['agentlevel'] = $member['agentlevel'];
             app_json($data, $data["openId"]);
@@ -221,7 +223,7 @@ class Wxapp_EweiShopV2Page extends Page
         }else{
             $merchInfo = false;
         }
-        app_json(array("merchInfo"=>$merchInfo,"uniacid" => $member["uniacid"], "openid" => $member["openid"], "id" => $member["id"], "nickname" => $member["nickname"], "avatarUrl" => tomedia($member["avatar"]), "isblack" => $member["isblack"],'is_own'=>$member['is_own'],'agentlevel'=>$member['agentlevel']), $member["openid"]);
+        app_json(array("agentid"=>$member['agentid'],"merchInfo"=>$merchInfo,"uniacid" => $member["uniacid"], "openid" => $member["openid"], "id" => $member["id"], "nickname" => $member["nickname"], "avatarUrl" => tomedia($member["avatar"]), "isblack" => $member["isblack"],'is_own'=>$member['is_own'],'agentlevel'=>$member['agentlevel']), $member["openid"]);
     }
     
    

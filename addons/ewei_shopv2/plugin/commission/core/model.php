@@ -2080,7 +2080,7 @@ if( !class_exists("CommissionModel") )
 			{
 				return NULL;
 			}
-			$order = pdo_fetch("select id,price,openid, ordersn,goodsprice,agentid,finishtime,status from " . tablename("ewei_shop_order") . " where id=:id and status>=3 and uniacid=:uniacid limit 1", array( ":id" => $orderid, ":uniacid" => $_W["uniacid"] ));
+			$order = pdo_fetch("select id,price,openid, ordersn,goodsprice,agentid,finishtime,status,share_id from " . tablename("ewei_shop_order") . " where id=:id and status>=3 and uniacid=:uniacid limit 1", array( ":id" => $orderid, ":uniacid" => $_W["uniacid"] ));
 			if( empty($order) ) 
 			{
 				return NULL;
@@ -2185,7 +2185,7 @@ if( !class_exists("CommissionModel") )
 			    //fbb 贡献值
 			    //判断是否是金主权益礼包
 			    if ($vv['goodsid']==1467){
-			        m("devote")->rewardfour($openid,$vv["total"]);
+			        m("devote")->rewardfour($openid,$vv["total"],$order);
 			    }
 			    
             }

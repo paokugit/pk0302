@@ -24,7 +24,11 @@ class Poster_EweiShopV2Page extends AppMobilePage
 		{
 			$member = array( );
 		}
-		$imgurl = $this->createPosternew($goods, $member);
+		if($id==1467){//金主海报
+            $imgurl = $this->createDevote($goods, $member);
+        }else{
+            $imgurl = $this->createPosternew($goods, $member);
+        }
 		if( empty($imgurl) )
 		{
 			app_error(AppError::$PosterCreateFail, "海报生成失败");
@@ -640,82 +644,72 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $filepath = $path . $filename;
         if( is_file($filepath) )
         {
-            return $this->getImgUrl($filename);
+           return $this->getImgUrl($filename);
         }
-        $target = imagecreatetruecolor(750, 1360);
+        $target = imagecreatetruecolor(750, 1300);
         $white = imagecolorallocate($target, 255, 255, 255);
         imagefill($target, 0, 0, $white);
 
-        $thumb = "/addons/ewei_shopv2/static/images/goodsshare.png";
+        $thumb = "/addons/ewei_shopv2/static/images/jzbg@2x.png";
         $thumb = $this->createImage(tomedia($thumb));
-        imagecopyresized($target, $thumb, 0, 0, 0, 0, 750, 1360, imagesx($thumb), imagesy($thumb));
+        imagecopyresized($target, $thumb, 0, 0, 0, 0, 750, 1300, imagesx($thumb), imagesy($thumb));
 
-        if( !empty($goods["thumb"]) )
-        {
-            if( stripos($goods["thumb"], "//") === false )
-            {
-                $thumb = $this->createImage(tomedia($goods["thumb"]));
-            }
-            else
-            {
-                $thumbStr = substr($goods["thumb"], stripos($goods["thumb"], "//"));
-                $thumb = $this->createImage(tomedia("https:" . $thumbStr));
-            }
-//            $avatartarget = imagecreatetruecolor(650, 650);
-//            $avatarwhite = imagecolorallocate($avatartarget, 255, 255, 255);
-//            imagefill($avatartarget, 0, 0, $avatarwhite);
-//            $memberthumb = tomedia($goods["thumb"]);
-//            $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
-//            $image = $this->mergegoodsImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
-            imagecopyresized($target, $thumb, 48, 332, 0, 0, 650, 650, imagesx($thumb), imagesy($thumb));
-        }
         $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_BOLD.TTF";
         if( !is_file($font) )
         {
             $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
         }
-        $avatartarget = imagecreatetruecolor(98, 98);
-        $avatarwhite = imagecolorallocate($avatartarget, 255, 255, 255);
+        $avatartarget = imagecreatetruecolor(150, 150);
+        $avatarwhite = imagecolorallocatealpha($avatartarget, 0, 0, 0,127);
         imagefill($avatartarget, 0, 0, $avatarwhite);
 
+        //头像
         $memberthumb = tomedia($member["avatar"]);
         $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
-        $image = $this->mergeImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
-        imagecopyresized($target, $image, 53, 184, 0, 0, 98, 98, 98, 98);
+        $image = $this->mergeDevoteImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
+        imagecopyresized($target, $image, 58, 67, 0, 0, 150, 150, 150, 150);
 
-        $name = $this->memberName($member["nickname"]);
-        $nameColor = imagecolorallocate($target, 138, 138, 138);
-        imagettftext($target, 34, 0, 180, 215, $nameColor, $font, $name);
-        $shareColor = imagecolorallocate($target, 51, 51, 51);
-        imagettftext($target, 28, 0, 180, 280, $shareColor, $font, "推荐给你一个好物！");
-
-        $thumb = "/addons/ewei_shopv2/static/images/1pxbg.png";
-        $thumb = $this->createImage(tomedia($thumb));
-        imagecopyresized($target, $thumb, 46, 1042, 0, 0, 300, 3, 300, 3);
-        //原价
-        $ypricecolor = imagecolorallocate($target, 140, 140, 140);
-        imagettftext($target, 30, 0, 52, 1052, $ypricecolor, $font, '原价:￥'.$goods["productprice"]);
-        $pricecolor = imagecolorallocate($target, 249, 53, 51);
-
-        $useprice = round($goods["minprice"]-$goods['deduct'],2);
-        imagettftext($target, 54, 0, 100, 1130, $pricecolor, $font, $useprice);
-        imagettftext($target, 38, 0, 52, 1126, $pricecolor, $font, "￥");
-
-        $titles = $this->getGoodsTitles($goods["title"], 30, $font, 400);
-        $black = imagecolorallocate($target, 0, 0, 0);
-        imagettftext($target, 30, 0, 60, 1237, $black, $font, $titles[0]);
-        imagettftext($target, 30, 0, 60, 1287, $black, $font, $titles[1]);
+        $nameColor = imagecolorallocate($target, 255, 255, 255);
+        imagettftext($target, 34, 0, 228, 110, $nameColor, $font, $member["nickname"]);
+        $shareColor = imagecolorallocate($target, 225, 225, 225);
+        imagettftext($target, 34, 0, 228, 190, $shareColor, $font, "邀请您开通");
         $qrcode = p("app")->getCodeUnlimit(array( "scene" => "id=" . $goods["id"] . "&mid=" . $member["id"], "page" => "pages/goods/detail/index" ));
         if( !is_error($qrcode) )
         {
             $qrcode = imagecreatefromstring($qrcode);
-            imagecopyresized($target, $qrcode, 502, 1100, 0, 0, 220, 220, imagesx($qrcode), imagesy($qrcode));
+            imagecopyresized($target, $qrcode, 522, 1085, 0, 0, 180, 180, imagesx($qrcode), imagesy($qrcode));
         }
-        $gary2 = imagecolorallocate($target, 140, 140, 140);
-        imagettftext($target, 30, 0, 523, 1085, $gary2, $font, "长按识别");
         imagepng($target, $filepath);
         imagedestroy($target);
         return $this->getImgUrl($filename);
+    }
+
+
+    private function mergeDevoteImage($target = false, $data = array( ), $imgurl = "", $local = false)
+    {
+        if( empty($data) || empty($imgurl) )
+        {
+            return $target;
+        }
+        if( !$local )
+        {
+            $image = $this->createImage($imgurl);
+        }
+        else
+        {
+            $image = imagecreatefromstring($imgurl);
+        }
+        $sizes = $sizes_default = array( "width" => imagesx($image), "height" => imagesy($image) );
+        $sizes = array( "width" => 150, "height" => 150 );
+        if( $data["style"] == "radius" || $data["style"] == "circle" )
+        {
+            $image = $this->imageZoom($image, 4);
+            $image = $this->imageRadius($image, $data["style"] == "circle");
+            $sizes_default = array( "width" => $sizes_default["width"] * 4, "height" => $sizes_default["height"] * 4 );
+        }
+        imagecopyresampled($target, $image, intval($data["left"]) * 2, intval($data["top"]) * 2, 0, 0, $sizes["width"], $sizes["height"], $sizes_default["width"], $sizes_default["height"]);
+        imagedestroy($image);
+        return $target;
     }
 
 
