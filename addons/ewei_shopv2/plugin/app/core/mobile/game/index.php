@@ -134,10 +134,16 @@ class Index_EweiShopV2Page extends AppMobilePage
         $help_count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime > "'.$gift['starttime'].'"');
         //邀请新人记录
         $new = pdo_fetchall('select id,nickname,avatar,openid from '.tablename('ewei_shop_member').' where agentid = "'.$member['id'].'" and createtime > "'.$gift['starttime'].'" order by createtime desc LIMIT 10');
+        $new_count = count($new);
+        //如果新邀请的人数  不达需要邀请的人数  追加空数据
+        if($new_count < $gift['member']){
+            $new = $this->addnew($new,$gift['member'],$new_count,'https://paokucoin.com/img/backgroup/touxiang02.png');
+        }
         //如果用户身份是店主的话   检测他成为 店主时  是否获得了  免费兑换
         $count = pdo_count('ewei_shop_coupon_data',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
         $is_get = $count > 0 && $member['agentlevel'] == 5 ? 0 :1;
-        show_json(1,['all'=>$gift['member'],'help_count'=>$help_count,'new'=>$new,'remain'=>bcsub($gift['member'],$help_count),'agentlevel'=>$member['agentlevel'],'gift'=>$gift['title'],'is_get'=>$is_get]);
+        $agentlevel = pdo_getcolumn('ewei_shop_commission_level',['id'=>$member['agentlevel'],'uniacid'=>$uniacid],'levelname');
+        show_json(1,['all'=>$gift['member'],'help_count'=>$help_count,'new_member'=>$new,'remain'=>bcsub($gift['member'],$help_count),'agent_level'=>$member['agentlevel'],'agentlevel'=>$agentlevel,'gift'=>$gift['title'],'is_get'=>$is_get]);
     }
 
     /**
@@ -301,6 +307,26 @@ class Index_EweiShopV2Page extends AppMobilePage
             $list[$key]['is_valid'] = $member['createtime'] > $time ? 1 :0;
         }
         return $list;
+    }
+
+    /**
+     * 当邀请人数  少于需要的人数的时候  追加空数据
+     * @param $new
+     * @param $total
+     * @param $count
+     * @param $avatar
+     * @return mixed
+     */
+    public function addnew($new,$total,$count,$avatar)
+    {
+        $new_push = [
+            'nickname'=>'待邀请',
+            'avatar'=>$avatar,
+        ];
+        for ($i=0;$i<$total-$count;$i++){
+            array_push($new,$new_push);
+        }
+        return $new;
     }
 }
 ?>

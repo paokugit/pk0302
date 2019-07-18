@@ -96,15 +96,15 @@
                 </div>
                 <div class="input-group multi-img-details container ui-sortable goods_show">
                     {if !empty($goods)}
-                    {loop $goods $g}
-                    <div class="multi-item" data-id="{$g['id']}" data-name="goodsid" id="{$g['id']}">
-                        <img class="img-responsive img-thumbnail" src="{php echo tomedia($g['thumb'])}" onerror="this.src='../addons/ewei_shopv2/static/images/nopic.png'" style="width:100px;height:100px;">
-                        <div class="img-nickname">{$g['title']}</div>
-                        <input type="hidden" value="{$g['id']}" name="goodsid[]">
-                        <em onclick="removeHtml({$g['id']})" class="close">×</em>
-                        <div style="clear:both;"></div>
-                    </div>
-                    {/loop}
+                        {loop $goods $g}
+                            <div class="multi-item" data-id="{$g['id']}" data-name="goodsid" id="{$g['id']}">
+                                <img class="img-responsive img-thumbnail" src="{php echo tomedia($g['thumb'])}" onerror="this.src='../addons/ewei_shopv2/static/images/nopic.png'" style="width:100px;height:100px;">
+                                <div class="img-nickname">{$g['title']}</div>
+                                <input type="hidden" value="{$g['id']}" name="goodsid[]">
+                                <em onclick="removeHtml({$g['id']})" class="close">×</em>
+                                <div style="clear:both;"></div>
+                            </div>
+                        {/loop}
                     {/if}
                 </div>
                 <script>
@@ -159,13 +159,13 @@
                     }
                 </script>
                 {else}
-                <div class="input-group multi-img-details container ui-sortable">
-                    {loop $goods $item}
-                    <div data-name="goodsid" data-id="{$item['id']}" class="multi-item">
-                        <div class="img-nickname">{$item['title']}</div>
+                    <div class="input-group multi-img-details container ui-sortable">
+                        {loop $goods $item}
+                        <div data-name="goodsid" data-id="{$item['id']}" class="multi-item">
+                            <div class="img-nickname">{$item['title']}</div>
+                        </div>
+                        {/loop}
                     </div>
-                    {/loop}
-                </div>
                 {/if}
             </div>
         </div>
