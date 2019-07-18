@@ -20,7 +20,7 @@ class List_EweiShopV2Page extends WebPage
 		if( !empty($_GPC["realname"]) ) 
 		{
 			$_GPC["realname"] = trim($_GPC["realname"]);
-			$condition .= " and ( dm.realname like :realname or dm.nickname like :realname or dm.mobile like :realname or dm.id like :realname)";
+			$condition .= " and ( dm.realname like :realname or dm.nickname like :realname or dm.mobile like :realname or dm.id like :realname or dm.weixin like :realname)";
 			$params[":realname"] = "%" . $_GPC["realname"] . "%";
 		}
         if( !empty($_GPC["agentid"]) )
