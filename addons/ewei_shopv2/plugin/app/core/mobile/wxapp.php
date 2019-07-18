@@ -186,7 +186,7 @@ class Wxapp_EweiShopV2Page extends Page
             }else{
                 $data['merchInfo'] = false;
             }
-            $arr["agentid"]=$member["agentid"];
+            $data["agentid"]=$member["agentid"];
             $data['is_own'] = $member['is_own'];
             $data['agentlevel'] = $member['agentlevel'];
             app_json($data, $data["openId"]);
