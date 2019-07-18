@@ -340,6 +340,27 @@ class Index_EweiShopV2Page extends AppMobilePage
     }
 
 
+    public function member_info_byid(){
+        global $_W;
+        global $_GPC;
+        $member_info = m('member')->getInfo($_GPC['mid']);
+        if( empty($member_info) )
+        {
+            app_error(AppError::$UserNotFound);
+        }
+        $data['id'] = $member_info['id'];
+        $data['openid'] = $member_info['openid'];
+        $data['nickname'] = $member_info['nickname'];
+        $data['mobile'] = $member_info['mobile'];
+        $data['createtime'] = date('Y-m-d',$member_info['createtime']);
+        $level = m("member")->agentlevel($_GPC["fansopenid"]);
+        $data['levelname'] = $level['levelname'];
+        $data['levelid'] = $level['levelid'];
+        $data['avatar'] = $member_info['avatar'];
+        app_json($data);
+    }
+
+
 
     /**
      *

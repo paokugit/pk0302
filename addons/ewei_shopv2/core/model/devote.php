@@ -194,7 +194,7 @@ class Devote_EweiShopV2Model{
     }
     //直推折扣宝
     //openid
-    public function rewardfour($openid,$num){
+    public function rewardfour($openid,$num,$order=array()){
         $member = m('member')->getMember($openid);
          $num=(int)$num;
         if (empty($member)||$member["agentid"]==0){
@@ -209,7 +209,11 @@ class Devote_EweiShopV2Model{
         $dd["keyword4"]="恭喜您获取折扣宝奖励，奖励已达到您的折扣宝账户，请注意查收";
         $this->notice($openid, $dd);
         //获取上级
-        $parent=m('member')->getMember($member["agentid"]);
+        if(count($order)>0 && $order['share_id']>0){
+            $parent=m('member')->getMember($order["share_id"]);
+        }else{
+            $parent=m('member')->getMember($member["agentid"]);
+        }
         if (empty($parent)){
             return false;
         }
