@@ -27,22 +27,35 @@ class Index_EweiShopV2Page extends AppMobilePage{
         
         $day=date("Y-m-d",time());
         
-        //加速剩余天数
-        if ($day>=$accelerate_day){
+//         //加速剩余天数
+//         if ($day>=$accelerate_day){
            
-            $resault["surplus_day"]=0;
-        }else{
-            $count_days=m("member")->count_days($accelerate_day,$day);
+//             $resault["surplus_day"]=0;
+//         }else{
+//             $count_days=m("member")->count_days($accelerate_day,$day);
             
-            $resault["surplus_day"]=$count_days;
-        }
-        $resault["give_day"]=$level["accelerate_day"];
-        //已加速天数
-        $resault["accelerate_day"]=$level["accelerate_day"]-$resault["surplus_day"];
-        //获取用户加速期间的卡路里
+//             $resault["surplus_day"]=$count_days;
+//         }
+//         $resault["give_day"]=$level["accelerate_day"];
+//         //已加速天数
+//         $resault["accelerate_day"]=$level["accelerate_day"]-$resault["surplus_day"];
         
+        $dd=m("member")->acceleration($openid);
+        //加速剩余天数
+        $resault["surplus_day"]=$dd["day"];
+        $resault["give_day"]=$dd["give_day"];
+        $resault["accelerate_day"]=$dd["accelerate_day"];
+        $resault["type"]=$dd["type"];
+        
+        //获取用户加速期间的卡路里
+        if ($dd["type"]==0){
         $starttime=strtotime($member["agentlevel_time"]);
         $endtime=strtotime($accelerate_day);
+        }else{
+            $starttime=strtotime($member["accelerate_start"]);
+            $endtime=strtotime($member["accelerate_end"]);
+        }
+        
 //         var_dump($starttime);
 //         var_dump($endtime);
         $credit=pdo_fetchcolumn("select sum(num) from ".tablename('mc_credits_record')."where credittype=:credittype and  openid=:openid and createtime>=:starttime and createtime<=:endtime and (remark like :remark or remark like :cc)",array('credittype'=>"credit1",':openid'=>$openid,':starttime'=>$starttime,':endtime'=>$endtime,':remark'=>'%'.'步数兑换',':cc'=>'好友助力'));

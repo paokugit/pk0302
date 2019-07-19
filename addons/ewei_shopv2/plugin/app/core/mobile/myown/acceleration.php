@@ -89,7 +89,7 @@ class Acceleration_EweiShopV2Page extends AppMobilePage{
         if (!(empty($params['goods_tag']))) {
             $package['goods_tag'] = $params['goods_tag'];
         }
-        $package['notify_url'] = $_W['siteroot'] . '/app/ewei_shopv2_api.php?i=1&r=myown.acceleration.back&comefrom=wxapp';
+        $package['notify_url'] = "https://paokucoin.com//app/ewei_shopv2_api.php?i=1&r=myown.acceleration.back&comefrom=wxapp";
         $package['trade_type'] = 'JSAPI';
         $package['openid'] = $openid;
         ksort($package, SORT_STRING);
@@ -136,6 +136,8 @@ class Acceleration_EweiShopV2Page extends AppMobilePage{
     public function back(){
         $input = file_get_contents('php://input');
         $isxml = true;
+        $d["content"]=11;
+        pdo_insert("ims_ewei_shop_member_cs",$d);
         if (!empty($input) && empty($_GET['out_trade_no'])) {
             $obj = isimplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
             $data = json_decode(json_encode($obj), true);
@@ -160,6 +162,9 @@ class Acceleration_EweiShopV2Page extends AppMobilePage{
             $isxml = false;
             $get = $_GET;
         }
+        //测试
+        $d["content"]=$get;
+        pdo_insert("ims_ewei_shop_member_cs",$d);
         $order_sn=$get["out_trade_no"];
         $order=pdo_get("ewei_shop_member_acceleration_order",array("ordersn"=>$order_sn));
         if ($order&&$order["status"]==0){
@@ -170,13 +175,34 @@ class Acceleration_EweiShopV2Page extends AppMobilePage{
            pdo_update("ewei_shop_member",$data,array("openid"=>$order["openid"]));
                echo success;
            }else {
-               echo fail;
+               echo false;
            }
         }
 //         echo date("Y-m-d",strtotime("+1 day"));
         
-        echo fail;
+        echo false;
     }
+    
+   public function wx_back(){
+       global $_W;
+       global $_GPC;
+       $order_id=$_GPC["order_id"];
+       $order=pdo_get("ewei_shop_member_acceleration_order",array("id"=>$order_id));
+       if ($order&&$order["status"]==0){
+           if (pdo_update("ewei_shop_member_acceleration_order",array("status"=>1),array("id"=>$order_id))){
+               $data["accelerate_start"]=date("Y-m-d");
+               $data["accelerate_end"]=date("Y-m-d",strtotime("+".$order["accelerate_day"]." day"));
+               $data["duihuan"]=$order["duihuan"];
+               pdo_update("ewei_shop_member",$data,array("openid"=>$order["openid"]));
+               app_error(0,"成功");
+           }else {
+               app_error(1,"失败");
+           }
+       }
+       
+       app_error(1,"不可重复更改");
+   }
+   
     //成功后
     public function back_message(){
         global $_W;

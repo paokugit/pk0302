@@ -1527,8 +1527,15 @@ class Member_EweiShopV2Model
     //获取剩余加速时间
     public function acceleration($openid=""){
         $member=pdo_get("ewei_shop_member",array("openid"=>$openid));
+        //加速剩余天数
         $res["day"]=0;
         $res["duihuan"]=0;
+        //加速类型
+        $res["type"]=0;
+        //已加速时间
+        $res["accelerate_day"]=0;
+        //加速总天数
+        $res["give_day"]=0;
         if ($member["agentlevel"]==0){
             return $res;
         }
@@ -1541,12 +1548,19 @@ class Member_EweiShopV2Model
         if ($accelerate_day>$day){
             $res["day"]=$this->count_days($accelerate_day, $day);
             $res["duihuan"]=$level["duihuan"];
+            $res["type"]=0;
+            $res["accelerate_day"]=$level["accelerate_day"]-$res["day"];
+            $res["give_day"]=$level["accelerate_day"];
             return $res;
         }else{
             //判断是否在加速宝内
             if (!empty($member["accelerate_end"])&&$member["accelerate_end"]>$day){
                 $res["day"]=$this->count_days($member["accelerate_end"], $day);
                 $res["duihuan"]=$member["duihuan"];
+                $res["type"]=1;
+                $d=$this->count_days($member["accelerate_end"],$member["accelerate_start"]);
+                $res["accelerate_day"]=$d-$res["day"];
+                $res["give_day"]=$d;
                 return $res;
             }
         }
