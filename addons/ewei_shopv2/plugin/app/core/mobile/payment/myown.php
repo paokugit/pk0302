@@ -166,7 +166,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
             show_json(0,"资金余额不足");
         }
         //个人资产提现 logno的  开头是OW  own_withdraw
-        $order_sn = "OW".date('YmdHis ').random(12);
+        $order_sn = "OW".date('YmdHis').random(12);
         $data = [
             'uniacid'=>$uniacid,
             'openid'=>$openid,
@@ -208,6 +208,133 @@ class Myown_EweiShopV2Page extends AppMobilePage
         $total = pdo_count('ewei_shop_member_log',"openid = '".$openid."' and title = '个人资金提现'");
         //查询提现记录  FROM_UNIXTIIME()    sql语句中 时间戳转换成时间格式
         $list = pdo_fetchall('select id,title,money,FROM_UNIXTIME(createtime) as createtime,status,refuse_reason from '.tablename('ewei_shop_member_log').' where openid = "'.$openid.'" and title = "个人资金提现" order by id desc LIMIT '.$psize.','.$pageSize);
+        if(!$list){
+            show_json(-1,"暂无信息");
+        }
+        show_json(1,['list'=>$list,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize]);
+    }
+
+    /**
+     * 商家提现页面
+     */
+    public function merch()
+    {
+        global $_W;
+        global $_GPC;
+        $merchid = $_GPC['merchid'];
+        $item = p('merch')->getScanPrice($merchid,1);
+	var_dump($item);exit;
+        show_json(1,['orderprice'=>number_format($item['orderprice'],2),'realpricerate'=>number_format($item['realpricerate'],2)]);
+    }
+
+    /**
+     * 商家提现
+     */
+    public function merch_draw()
+    {
+        global $_W;
+        global $_GPC;
+        $merchid = $_GPC['merchid'];
+        $item = p('merch')->getScanPrice($merchid,1);
+        $list = p('merch')->getScanPriceList($merchid);
+        $order_num = count($list);
+        $cansettle = true;
+        if ($item['realpricerate'] <= 0) {
+            $cansettle = false;
+        }
+        if (($item['realprice'] <= 0)  || empty($list))
+        {
+            show_json(0, '您没有可提现的金额');
+        }
+        if($item['realpricerate'] < 0.3){
+            show_json(0, '提现金额不足');
+        }
+        $applytype = intval($_GPC['applytype']);
+        $insert = array();
+        $insert['uniacid'] = $_W['uniacid'];
+        $insert['merchid'] = $merchid;
+        $insert['applyno'] = m('common')->createNO('merch_bill', 'applyno', 'MO');
+        $insert['orderids'] = iserializer($item['orderids']);
+        $insert['ordernum'] = $order_num;
+        $insert['price'] = $item['price'];
+        $insert['realprice'] = $item['realprice'];
+        $insert['realpricerate'] = $item['realpricerate'];
+        $insert['finalprice'] = $item['finalprice'];
+        $insert['orderprice'] = $item['orderprice'];
+        $insert['payrateprice'] = round(($item['realpricerate'] * $item['payrate']) / 100, 2);
+        $insert['payrate'] = $item['payrate'];
+        $insert['applytime'] = time();
+        $insert['status'] = 1;
+        $insert['applytype'] = $applytype;
+
+        pdo_insert('ewei_shop_merch_bill', $insert);
+        $billid = pdo_insertid();
+        foreach ($list as $k => $v )
+        {
+            $orderid = $v['id'];
+            $insert_data = array();
+            $insert_data['uniacid'] = $_W['uniacid'];
+            $insert_data['billid'] = $billid;
+            $insert_data['orderid'] = $orderid;
+            $insert_data['ordermoney'] = $v['realprice'];
+            pdo_insert('ewei_shop_merch_billo', $insert_data);
+            $change_order_data = array();
+            $change_order_data['merchapply'] = 1;
+            pdo_update('ewei_shop_order', $change_order_data, array('id' => $orderid));
+        }
+        $merch_user = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where uniacid=:uniacid and id=' . $merchid, array(':uniacid' => $_W['uniacid']));
+        p('merch')->sendMessage(array('merchname' => $merch_user['merchname'], 'money' => $insert['realprice'], 'realname' => $merch_user['realname'], 'mobile' => $merch_user['mobile'], 'applytime' => time()), 'merch_apply_money');
+
+        if (!empty($merch_user["wxopenid"])){
+            $postdata=array(
+                'keyword1'=>array(
+                    'value'=>$item['realprice'],
+                    'color' => '#ff510'
+                ),
+                'keyword2'=>array(
+                    'value'=>"提现申请",
+                    'color' => '#ff510'
+                ),
+                'keyword3'=>array(
+                    'value'=>date("Y-m-d",time()),
+                    'color' => '#ff510'
+                ),
+                'keyword4'=>array(
+                    'value'=>"商家已提现申请，等待管理员确认",
+                    'color' => '#ff510'
+                )
+
+            );
+            p("app")->mysendNotice($merch_user["wxopenid"], $postdata, "", "nSJSBKVYwLYN_LcsUXyvTLVjseO46nQA8RqKsRnsiRs");
+        }
+
+        show_json(1, "提现申请成功");
+    }
+
+    /**
+     * 商家提现记录
+     */
+    public function merch_log()
+    {
+        global $_W;
+        global $_GPC;
+        $merchid = $_GPC['merchid'];
+        $page = max(1,$_GPC['page']);
+        $pageSize = 20;
+        $pindex = ($page - 1)*$pageSize;
+        if($page == "" || $merchid == ""){
+            show_json(0,"参数不完整");
+        }
+        $uniacid = $_W['uniacid'];
+        $total = pdo_count('ewei_shop_merch_bill',['uniacid'=>$uniacid,'merchid'=>$merchid]);
+        $list = pdo_getall('ewei_shop_merch_bill','merchid="'.$merchid.'" and uniacid="'.$uniacid.'" order by id desc LIMIT '.$pindex.','.$pageSize,['id','realprice','realpricerate','status','applytime']);
+        foreach ($list as $key=>$item){
+            $list[$key]['applytime'] = date('Y-m-d H:i:s',$item['applytime']);
+            $list[$key]['title'] = "资金提现";
+        }
+        if(!$list){
+            show_json(-1,"暂无信息");
+        }
         show_json(1,['list'=>$list,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize]);
     }
 }

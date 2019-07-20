@@ -125,7 +125,9 @@ class Index_EweiShopV2Page extends AppMobilePage
             show_json(0,"openid不能为空");
         }
         //礼包总和
-        $gifts = pdo_fetchall(' select id,title,levels,starttime,member from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
+        $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
+        //礼包商品
+        $goods = $this->gift($gifts);
         //该用户对应的礼包
         $gift = $this->get_gift($gifts,$openid);
         //该用户的用户ID
@@ -143,7 +145,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $count = pdo_count('ewei_shop_coupon_data',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
         $is_get = $count > 0 && $member['agentlevel'] == 5 ? 0 :1;
         $agentlevel = pdo_getcolumn('ewei_shop_commission_level',['id'=>$member['agentlevel'],'uniacid'=>$uniacid],'levelname');
-        show_json(1,['all'=>$gift['member'],'help_count'=>$help_count,'new_member'=>$new,'remain'=>bcsub($gift['member'],$help_count),'agent_level'=>$member['agentlevel'],'agentlevel'=>$agentlevel,'gift'=>$gift['title'],'is_get'=>$is_get]);
+        show_json(1,['goods'=>$goods,'all'=>$gift['member'],'help_count'=>$help_count,'new_member'=>$new,'remain'=>bcsub($gift['member'],$help_count)?:0,'agent_level'=>$member['agentlevel'],'agentlevel'=>$agentlevel,'gift'=>$gift['title'],'is_get'=>$is_get,'start'=>date('Y-m-d',$gift['starttime']),'end'=>date('Y-m-d',$gift['endtime'])]);
     }
 
     /**
@@ -327,6 +329,31 @@ class Index_EweiShopV2Page extends AppMobilePage
             array_push($new,$new_push);
         }
         return $new;
+    }
+
+    /**
+     * @param $gifts
+     * @return array
+     */
+    public function gift($gifts)
+    {
+        $goods = [];
+        foreach ($gifts as $key=>$item){
+            $ids = explode(',',$item['goodsid']);
+            $levels = explode(',',$item['levels']);
+            $goods[$key]['level_id'] = $item['id'];
+            $goods[$key]['level'] = pdo_getcolumn('ewei_shop_gift_bag',['id'=>$item['id']],'title');
+            foreach ($ids as $id){
+                $goods[$key]['thumbs'][] = ['thumb'=>tomedia(pdo_getcolumn('ewei_shop_goods',['id'=>$id],'thumb'))];
+            }
+            foreach ($levels as $level){
+                if($level == 0){
+                    $goods[$key]['level_name'] .= '普通会员';
+                }
+                $goods[$key]['level_name'] .= pdo_getcolumn('ewei_shop_commission_level',['id'=>$level],'levelname');
+            }
+        }
+        return $goods;
     }
 }
 ?>

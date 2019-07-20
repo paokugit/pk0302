@@ -35,6 +35,12 @@ class Level_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $uniacid = $_W['uniacid'];
+        $level_id = $_GPC['id'];
+        if($level_id == ""){
+            show_json(0,"年卡礼包id不能为空");
+        }
+        $level = pdo_get('ewei_shop_member_memlevel',['id'=>$level_id,'uniacid'=>$uniacid]);
+        show_json(1,['level'=>$level]);
     }
 
     /**
@@ -84,8 +90,13 @@ class Level_EweiShopV2Page extends AppMobilePage
         $uniacid = $_W['uniacid'];
         $openid = $_GPC['openid'];
         $money = $_GPC['money'];
-        if($openid == "" || $money == ""){
+        $level_id = $_GPC['level_id'];
+        if($openid == "" || $money == "" || $level_id == ""){
             show_json(0,"参数不完整");
+        }
+        $level = pdo_get('ewei_shop_member_memlevel',['uniacid'=>$uniacid,'id'=>$level_id]);
+        if($level['price'] == $money){
+            show_json(0,"价格不正确");
         }
         //生成订单号
         $order_sn = "LEV".date('YmdHis').random(12);
@@ -99,7 +110,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         if(is_error($res)){
             show_json(0,$res);
         }
-        $this->addmemberlog($openid,$order_sn,$money,"购买年卡");
+        $this->addmemberlog($openid,$order_sn,$money,$level_id."购买年卡");
         show_json(1,$res);
     }
 
@@ -112,6 +123,10 @@ class Level_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $uniacid = $_W['uniacid'];
         $openid = $_GPC['openid'];
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
+        $endtime = date('Y-m-d',$member['expire_time']);
+        $is_open = $member['is_open'];
+        show_json(1,['member'=>$member,'end'=>$endtime,'is_open'=>$is_open]);
     }
 
     /**
