@@ -93,6 +93,8 @@ class Game_EweiShopV2Model{
                   $add['credittytpe'] = "credit1";
               }elseif ($datatype == 2){
                   $add['credittype'] = "credit3";
+              }else{
+                  $add['credittype'] = 'credit4';
               }
           }
           pdo_insert('mc_credits_record',$add);
