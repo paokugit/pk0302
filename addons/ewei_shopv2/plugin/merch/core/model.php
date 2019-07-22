@@ -1442,7 +1442,7 @@ class MerchModel extends PluginModel
         return $data;
     }
 
-    public function getMerchPrice($merchid, $flag = 0)
+    public function getMerchPrice($merchid, $flag = 0,$type = 0)
     {
         global $_W;
         $merch_data = m("common")->getPluginset("merch");
@@ -1460,7 +1460,7 @@ class MerchModel extends PluginModel
             $deduct_commission = 0;
         }
 
-        $condition = " and u.uniacid=:uniacid and u.id=:merchid and o.status=3 and o.isparent=0 and o.merchapply<=0 and o.paytype<>3 ";
+        $condition = " and u.uniacid=:uniacid and u.id=:merchid and o.status=3 and o.isparent=0 and o.merchapply<=0 and o.paytype<>3 and type ='".$type."'";
         $params = array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid );
         //$con = "u.id,u.merchname,u.payrate,sum(o.price) price,sum(o.goodsprice) goodsprice,sum(o.dispatchprice) dispatchprice,sum(o.discountprice) discountprice,sum(o.deductprice) deductprice,sum(o.deductcredit2) deductcredit2,sum(o.isdiscountprice) isdiscountprice,sum(o.deductenough) deductenough,sum(o.merchdeductenough) merchdeductenough,sum(o.merchisdiscountprice) merchisdiscountprice,sum(o.changeprice) changeprice,sum(o.seckilldiscountprice) seckilldiscountprice";
         $con = "u.id,u.merchname,u.payrate,sum(o.price) price,sum(o.goodsprice) goodsprice,sum(o.dispatchprice) dispatchprice,sum(o.discountprice) discountprice,sum(o.deductprice) deductprice,sum(o.deductcredit2) deductcredit2,sum(o.isdiscountprice) isdiscountprice,sum(o.deductenough) deductenough,sum(o.merchdeductenough) merchdeductenough,sum(o.merchisdiscountprice) merchisdiscountprice,sum(o.changeprice) changeprice,sum(o.seckilldiscountprice) seckilldiscountprice,sum(o.share_price) share_price";
@@ -1511,55 +1511,7 @@ class MerchModel extends PluginModel
         return $list;
     }
 
-    /**
-     * @param $merchid
-     * @param int $flag
-     * @return bool
-     */
-    public function getScanPrice($merchid,$flag = 0)
-    {
-        global $_W;
-        $condition = " and u.uniacid=:uniacid and u.id=:merchid and o.status=3 and o.isparent=0 and o.merchapply<=0 and o.paytype<>3 and type = 1";
-        $params = array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid );
-        $con = "u.id,u.merchname,u.payrate,sum(o.price) price,sum(o.goodsprice) goodsprice,sum(o.dispatchprice) dispatchprice,sum(o.discountprice) discountprice,sum(o.deductprice) deductprice,sum(o.deductcredit2) deductcredit2,sum(o.isdiscountprice) isdiscountprice,sum(o.deductenough) deductenough,sum(o.merchdeductenough) merchdeductenough,sum(o.merchisdiscountprice) merchisdiscountprice,sum(o.changeprice) changeprice,sum(o.seckilldiscountprice) seckilldiscountprice,sum(o.share_price) share_price";
-
-        $tradeset = m("common")->getSysset("trade");
-        $refunddays = intval($tradeset["refunddays"]);
-        if( 0 < $refunddays )
-        {
-            $finishtime = intval(time() - $refunddays * 3600 * 24);
-            $condition .= " and o.finishtime<:finishtime";
-            $params[":finishtime"] = $finishtime;
-        }
-
-        $sql = "select " . $con . " from " . tablename("ewei_shop_merch_user") . " u " . " left join " . tablename("ewei_shop_order") . " o on u.id=o.merchid" . " where 1 " . $condition . " limit 1";
-        $list = pdo_fetch($sql, $params);
-        $merchcouponprice = pdo_fetchcolumn("select sum(o.couponprice) from " . tablename("ewei_shop_merch_user") . " u " . " left join " . tablename("ewei_shop_order") . " o on u.id=o.merchid" . " where o.couponmerchid>0 " . $condition . " limit 1", $params);
-        if( 0 < $flag )
-        {
-            $sql = "select o.id,o.agentid from " . tablename("ewei_shop_merch_user") . " u " . " left join " . tablename("ewei_shop_order") . " o on u.id=o.merchid" . " where 1 " . $condition;
-            $order = pdo_fetchall($sql, $params);
-            var_dump($order);exit;
-            $orderids = array();
-            $commission = 0;
-            if( !empty($order) )
-            {
-                foreach( $order as $k => $v )
-                {
-                    $orderids[] = $v["id"];
-                    $commission += m("order")->getOrderCommission($v["id"], $v["agentid"]);
-                }
-            }
-            $list["orderids"] = $orderids;
-            $list["commission"] = $commission;
-        }
-        $list["orderprice"] = $list["price"] + $list["dispatchprice"] + $list["changeprice"];
-        $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice - $list["seckilldiscountprice"]-$list["share_price"];
-        $list["realpricerate"] = ((100 - floatval($list["payrate"])) * $list["realprice"]) / 100;
-        return $list;
-    }
-
-    public function getMerchPriceList($merchid, $orderid = 0, $flag = 0)
+    public function getMerchPriceList($merchid, $orderid = 0, $flag = 0 ,$type = 0)
     {
         global $_W;
         $merch_data = m("common")->getPluginset("merch");
@@ -1577,7 +1529,7 @@ class MerchModel extends PluginModel
             $deduct_commission = 0;
         }
 
-        $condition = " and u.uniacid=:uniacid and u.id=:merchid and o.status=3 and o.isparent=0 and o.paytype<>3 ";
+        $condition = " and u.uniacid=:uniacid and u.id=:merchid and o.status=3 and o.isparent=0 and o.paytype<>3 and type = '".$type."'";
         $params = array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid );
         switch( $flag ) 
         {
@@ -1634,70 +1586,6 @@ class MerchModel extends PluginModel
         }
         unset($list);
         if( !empty($orderid) ) 
-        {
-            return $order[0];
-        }
-
-        return $order;
-    }
-
-    public function getScanPriceList($merchid, $orderid = 0, $flag = 0)
-    {
-        global $_W;
-
-        $condition = " and u.uniacid=:uniacid and u.id=:merchid and o.status=3 and o.isparent=0 and o.paytype<>3 and type = 1";
-        $params = array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid );
-        switch( $flag )
-        {
-            case 0:
-                $condition .= " and o.merchapply <= 0";
-                break;
-            case 1:
-                $condition .= " and o.merchapply = 1";
-                break;
-            case 2:
-                $condition .= " and o.merchapply = 2";
-                break;
-            case 3:
-                $condition .= " and o.merchapply = 3";
-                break;
-        }
-        $tradeset = m("common")->getSysset("trade");
-        $refunddays = intval($tradeset["refunddays"]);
-        if( 0 < $refunddays )
-        {
-            $finishtime = intval(time() - $refunddays * 3600 * 24);
-            $condition .= " and o.finishtime<:finishtime";
-            $params[":finishtime"] = $finishtime;
-        }
-
-        if( !empty($orderid) )
-        {
-            $condition .= " and o.id=:id Limit 1";
-            $params["id"] = $orderid;
-        }
-
-        $con = "o.id,u.merchname,u.payrate,o.price,o.goodsprice,o.dispatchprice,discountprice," . "o.deductprice,o.deductcredit2,o.isdiscountprice,o.deductenough,o.changeprice,o.agentid,o.seckilldiscountprice," . "o.merchdeductenough,o.merchisdiscountprice,o.couponmerchid,o.couponprice,o.couponmerchid,o.ordersn,o.finishtime,o.merchapply";
-        $sql = "select " . $con . " from " . tablename("ewei_shop_merch_user") . " u " . " left join " . tablename("ewei_shop_order") . " o on u.id=o.merchid" . " where 1 " . $condition;
-        $order = pdo_fetchall($sql, $params);
-        foreach( $order as &$list )
-        {
-            $merchcouponprice = 0;
-            if( 0 < $list["couponmerchid"] )
-            {
-                $merchcouponprice = $list["couponprice"];
-            }
-
-            $list["commission"] = m("order")->getOrderCommission($list["id"], $list["agentid"]);
-            //  $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
-            $list["orderprice"] = $list["price"] + $list["dispatchprice"] + $list["changeprice"];
-            $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice;
-
-            $list["realpricerate"] = ((100 - floatval($list["payrate"])) * $list["realprice"]) / 100;
-            $list["merchcouponprice"] = $merchcouponprice;
-        }
-        unset($list);
-        if( !empty($orderid) )
         {
             return $order[0];
         }

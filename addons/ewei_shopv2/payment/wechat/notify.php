@@ -954,23 +954,29 @@ class EweiShopWechatPay
                     $own_member = pdo_get('ewei_shop_member',['id'=>intval($order['merchid']),'uniacid'=>$order['uniacid']]);
                     $c = pdo_update('ewei_shop_member',['credit5'=>bcadd($own_member['credit5'],$order['price'],2)],['openid'=>$own_member['openid'],'uniacid'=>$order['uniacid']]);
                 }
+                //更改付款人的付款状态
+                pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn]);
                 //支付成功的话 给用户扣除的卡路里  和 折扣宝
                 $mem_data = [];
+                if(is_numeric($order['merchid'])){
+                    //查这个商家的信息
+                    $merch = pdo_get('ewei_shop_merch_user',['id'=>$order['merchid']]);
+                    if($member['id'] != $merch['member_id']){
+                        //商家的信息  openid信息的id
+                       $own_id = $merch['member_id']?:0;
+                    }
+                }else{
+                    //个人收款码的  id
+                    $own_id = intval($order['merchid']);
+                }
                 //支付成功的话  且付款者没有上级  锁粉
                 if($member['agentid'] == 0){
                     //如果是商家  那么也锁粉  然后把商家对应的member_id  赋值给mem_data
-                    if(is_numeric($order['merchid'])){
-                        //查这个商家的信息
-                        $merch = pdo_get('ewei_shop_merch_user',['id'=>$order['merchid']]);
-                        if($member['id'] != $merch['member_id']){
-                            //商家的信息  openid信息的id
-                            $mem_data['agentid'] = $merch['member_id']?:0;
-                        }
-                    }else{
-                        //个人收款码的  id
-                        $mem_data['agentid'] = intval($order['merchid']);
-                    }
+                    $mem_data['agentid'] = $own_id;
                 }
+                //查找收款码的拥有者的信息
+                $own = pdo_get('ewei_shop_member',['id'=>$own_id]);
+                pdo_insert('log',['log'=>json_encode($own),'createtime'=>date('Y-m-d H:i:s',time())]);
                 //查找爸爸信息  如果有使用折扣宝
                 if($member['agentid']){
                     $father = pdo_get('ewei_shop_member',['id'=>$member['agentid']]);
@@ -979,18 +985,16 @@ class EweiShopWechatPay
                 if($father['agentid']){
                     $grandpa = pdo_get('ewei_shop_member',['id'=>$father['agentid']]);
                 }
-                //查找收款码的拥有者的信息
-                $merch = pdo_get('ewei_shop_member',['id'=>$mem_data['agentid']]);
                 if($cate == 1){
                     $credit1 = $member['credit1'] - ($order['goodsprice'] - $order['price']);
                     $mem_data['credit1'] = $credit1;
                     $mem_data['credit3'] = $member['credit3'];
-                    $this->addmoney($order['openid'],$merch,$father,$grandpa,$order['goodsprice'],$order['price'],1,"卡路里付款");
+                    $this->addmoney($order['openid'],$own,$father,$grandpa,$order['goodsprice'],$order['price'],1,"卡路里付款");
                 }elseif ($cate == 2){
                     $credit3 = $member['credit3'] - ($order['goodsprice'] - $order['price']);
                     $mem_data['credit3'] = $credit3;
                     $mem_data['credit1'] = $member['credit1'];
-                    $this->addmoney($order['openid'],$merch,$father,$grandpa,$order['goodsprice'],$order['price'],3,"折扣宝付款");
+                    $this->addmoney($order['openid'],$own,$father,$grandpa,$order['goodsprice'],$order['price'],3,"折扣宝付款");
                 }
                 //如果付款码方是第一次给收款码付款  就给他送一定量的折扣宝
                 if($count == 0){
@@ -999,6 +1003,8 @@ class EweiShopWechatPay
                     $e = m('game')->addlog($order['openid'],0,$order['price'],2,"首次使用收款码付款奖励折扣宝");
                 }
                 $f = pdo_update('ewei_shop_member',$mem_data,['openid'=>$order['openid']]);
+                //小程序消息发送
+                $this->message($own['openid'],$order['price'],$order['merchid']);
                 pdo_insert('log',['log'=>$a.$b.$c.$e.$f,'createtime'=>date('Y-m-d H:i:s',time())]);
                 pdo_commit();
             }catch(Exception $exception){
@@ -1177,6 +1183,38 @@ class EweiShopWechatPay
            //写入爷爷的收入日志
            m('game')->addlog($grandpa['openid'],0,$price*0.01,3,"下级付款奖励贡献值");
        }
+    }
+
+    /**
+     * 收款码付款成功后  发消息通知
+     * @param $openid
+     * @param $money
+     * @param $merchid
+     */
+    public function message($openid,$money,$merchid)
+    {
+        $postdata=array(
+            'keyword1'=>array(
+                'value'=>$money,
+                'color' => '#ff510'
+            ),
+            'keyword3'=>array(
+                'value'=>date("Y-m-d",time()),
+                'color' => '#ff510'
+            ),
+        );
+        if(is_numeric($merchid)){
+            $postdata['keyword2'] = array(
+                'value'=>'商家收款码收款',
+                'color' => '#ff510',
+            );
+        }else{
+            $postdata['keyword2'] = array(
+                'value'=>'个人收款码收款',
+                'color' => '#ff510',
+            );
+        }
+        p("app")->mysendNotice($openid, $postdata,'', "qN-Wi2Jw8HnheTTuJRFivIKrevwk70m8lvH4mnf_ad0");
     }
 }
 ?>

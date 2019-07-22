@@ -222,8 +222,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $merchid = $_GPC['merchid'];
-        $item = p('merch')->getScanPrice($merchid,1);
-	var_dump($item);exit;
+        $item = p('merch')->getMerchPrice($merchid,1,1);
         show_json(1,['orderprice'=>number_format($item['orderprice'],2),'realpricerate'=>number_format($item['realpricerate'],2)]);
     }
 
@@ -235,8 +234,8 @@ class Myown_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $merchid = $_GPC['merchid'];
-        $item = p('merch')->getScanPrice($merchid,1);
-        $list = p('merch')->getScanPriceList($merchid);
+        $item = p('merch')->getMerchPrice($merchid,1,1);
+        $list = p('merch')->getMerchPriceList($merchid,0,0,1);
         $order_num = count($list);
         $cansettle = true;
         if ($item['realpricerate'] <= 0) {
