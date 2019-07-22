@@ -525,6 +525,7 @@ class Order_EweiShopV2Model
         $data['uniacid'] = $data['groupid'] = 1;
         $data['realname'] = $carrier_realname;
         $data['member_id'] = $memberInfo['id'];
+        $data['payopenid'] = $data['wxopenid'] = $orderInfo['openid'];
         $merchInfo = pdo_fetch("select * from " . tablename("ewei_shop_merch_user") . " where  mobile = '" . $data['mobile'] . "'");
         if($merchInfo) return true;
 
