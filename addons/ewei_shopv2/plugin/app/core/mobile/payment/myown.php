@@ -237,6 +237,13 @@ class Myown_EweiShopV2Page extends AppMobilePage
         $item = p('merch')->getMerchPrice($merchid,1,1);
         $list = p('merch')->getMerchPriceList($merchid,0,0,1);
         $order_num = count($list);
+        $redis = redis();
+        if($redis->get($merchid.'merch_token')){
+            show_json(0,"您的提现申请已提交，为防止重复操作,请1分钟后谨慎操作");
+        }else{
+            $token = md5($merchid.random(12));
+            $redis->set($merchid.'merch_token',$token,30);
+        }
         $cansettle = true;
         if ($item['realpricerate'] <= 0) {
             $cansettle = false;
@@ -265,6 +272,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
         $insert['applytime'] = time();
         $insert['status'] = 1;
         $insert['applytype'] = $applytype;
+        $insert['type'] = 1;
 
         pdo_insert('ewei_shop_merch_bill', $insert);
         $billid = pdo_insertid();
@@ -326,7 +334,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
         }
         $uniacid = $_W['uniacid'];
         $total = pdo_count('ewei_shop_merch_bill',['uniacid'=>$uniacid,'merchid'=>$merchid]);
-        $list = pdo_getall('ewei_shop_merch_bill','merchid="'.$merchid.'" and uniacid="'.$uniacid.'" order by id desc LIMIT '.$pindex.','.$pageSize,['id','realprice','realpricerate','status','applytime']);
+        $list = pdo_getall('ewei_shop_merch_bill','merchid="'.$merchid.'" and uniacid="'.$uniacid.'" and type = 1 order by id desc LIMIT '.$pindex.','.$pageSize,['id','realprice','realpricerate','status','applytime']);
         foreach ($list as $key=>$item){
             $list[$key]['applytime'] = date('Y-m-d H:i:s',$item['applytime']);
             $list[$key]['title'] = "资金提现";

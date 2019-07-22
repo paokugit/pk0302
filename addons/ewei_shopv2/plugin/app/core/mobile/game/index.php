@@ -155,15 +155,17 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         $openid = $_GPC['openid'];
-        if($openid == ""){
+        $goods_id = $_GPC['goods_id'];
+        $address_id = $_GPC['address_id'];
+        if($openid == "" || $goods_id == "" || $address_id == ""){
             show_json(0,"参数不完善");
         }
         //检测用户的情况
-        $reason = $this->check($openid);
-        if($reason !== true){
-            show_json(0,$reason);
-        }
-        $res = $this->addlog($openid);
+        //$reason = $this->check($openid);
+        //if($reason !== true){
+        //    show_json(0,$reason);
+        //}
+        $res = $this->addlog($openid,$goods_id,$address_id);
         if(!is_error($res)){
             show_json(1,'领取成功');
         }
@@ -253,18 +255,22 @@ class Index_EweiShopV2Page extends AppMobilePage
     /**
      * 加领取日志
      * @param $openid
+     * @param $goods_id
+     * @param $address_id
      * @return bool
      */
-    public function addlog($openid)
+    public function addlog($openid,$goods_id,$address_id)
     {
         global $_W;
         //查找所有开启状态的礼包
-        $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$_W['uniacid'].'"');
+        //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$_W['uniacid'].'"');
         //该用户对应的礼包
-        $gift = $this->get_gift($gifts,$openid);
+        //$gift = $this->get_gift($gifts,$openid);
+        $goods = pdo_get('ewei_shop_goods',['id'=>$goods_id,'uniacid'=>$_W['uniacid']]);
         $data = [
             'openid'=>$openid,
-            'gift_id'=>$gift['id'],
+            //'gift_id'=>$gift['id'],
+            'gift_id'=>$goods_id,
             'uniacid'=>$_W['uniacid'],
             'createtime'=>time(),
         ];
@@ -344,7 +350,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $goods[$key]['level_id'] = $item['id'];
             $goods[$key]['level'] = pdo_getcolumn('ewei_shop_gift_bag',['id'=>$item['id']],'title');
             foreach ($ids as $id){
-                $goods[$key]['thumbs'][] = ['thumb'=>tomedia(pdo_getcolumn('ewei_shop_goods',['id'=>$id],'thumb'))];
+                $goods[$key]['thumbs'][] = ['id'=>$id,'thumb'=>tomedia(pdo_getcolumn('ewei_shop_goods',['id'=>$id],'thumb'))];
             }
             foreach ($levels as $level){
                 if($level == 0){

@@ -98,4 +98,26 @@ class Game_EweiShopV2Model{
           pdo_insert('mc_credits_record',$add);
           pdo_insert('ewei_shop_member_credit_record',$add);
       }
+
+    /**
+     * @param $openid
+     * @param $credittype
+     * @param $money
+     * @param $remark
+     */
+      public function addCreditLog($openid,$credittype,$money,$remark)
+      {
+          global $_W;
+          $add = [
+              'openid'=>$openid,
+              'module'=>'ewei_shopv2',
+              'num'=>$money==0?0:$money,
+              'uniacid'=>$_W['uniacid'],
+              'createtime'=>time(),
+              'remark'=>$remark,
+              'credittype'=>"credit".$credittype,
+          ];
+          pdo_insert('mc_credits_record',$add);
+          pdo_insert('ewei_shop_member_credit_record',$add);
+      }
 }
