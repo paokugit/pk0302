@@ -343,7 +343,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     public function member_info_byid(){
         global $_W;
         global $_GPC;
-        $member_info = m('member')->getInfo($_GPC['mid']);
+        $member_info = m('member')->getInfo($_GPC['inviteid']);
         if( empty($member_info) )
         {
             app_error(AppError::$UserNotFound);

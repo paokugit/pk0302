@@ -198,7 +198,7 @@
         {ifp 'member.list.edit'}
         <label class="radio-inline"><input type="radio" name="data[supermaster]" value="1" {if $member['supermaster']==1}checked{/if}>是</label>
         <label class="radio-inline" ><input type="radio" name="data[supermaster]" value="0" {if $member['supermaster']==0}checked{/if}>否</label>
-        <span class="help-block">设置是既享受团队下所有新开通金主订单的+500贡献值/人</span>
+        <span class="help-block">设置是既享受团队下所有新开通金主订单的+300贡献值/人</span>
         {else}
         <input type='hidden' name='data[supermaster]' value="{$member['supermaster']}" />
         <div class='form-control-static'>{if $member['isblack']==1}是{else}否{/if}</div>

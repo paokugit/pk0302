@@ -27,8 +27,13 @@ class Demo_EweiShopV2Page extends AppMobilePage
             $membersql = "SELECT id from ims_ewei_shop_member where mobile=".$val['mobile'];
             $memberinfo = pdo_fetch($membersql);
             if(!$memberinfo) continue;
-            pdo_update('ewei_shop_merch_user', array('member_id' => $memberinfo['id']), array('mobile' => $val['mobile']));
+            //pdo_update('ewei_shop_merch_user', array('member_id' => $memberinfo['id']), array('mobile' => $val['mobile']));
         }
+    }
+
+    public function aa(){
+        $supperAgentId = m('devote')->getSupperOwnerAgent('89');
+        var_dump($supperAgentId);
     }
 
 
