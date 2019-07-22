@@ -209,10 +209,9 @@ class Devote_EweiShopV2Model{
         $dd["keyword4"]="恭喜您获取折扣宝奖励，奖励已达到您的折扣宝账户，请注意查收";
         $this->notice($openid, $dd);
         //获取上级
+        $sparent = $parent=m('member')->getMember($member["agentid"]);
         if(count($order)>0 && $order['share_id']>0){
             $parent=m('member')->getMember($order["share_id"]);
-        }else{
-            $parent=m('member')->getMember($member["agentid"]);
         }
         if (empty($parent)){
             return false;
@@ -234,8 +233,8 @@ class Devote_EweiShopV2Model{
             $this->notice($parent["openid"], $dd);
         }
         //获取上上级
-        if ($parent["agentid"]!=0){
-            $pparent=m('member')->getMember($parent["agentid"]);
+        if ($sparent["agentid"]!=0){
+            $pparent=m('member')->getMember($sparent["agentid"]);
             if (empty($pparent)){
                 return  false;
             }
@@ -254,9 +253,62 @@ class Devote_EweiShopV2Model{
                 $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
                 $this->notice($pparent["openid"], $dd);
             }
+
+            //发送超级推荐人奖励
+           $supperAgentId = $this->getSupperOwnerAgent($parent["agentid"]);
+           if($supperAgentId){
+                $supperAgent=m('member')->getMember($supperAgentId);
+                //添加记录奖励
+                m('member')->setCredit($supperAgent['openid'], 'credit4',300*$num, "团队提成");
+                //消息提醒
+                $sdd["keyword1"]=300*$num;
+                $sdd["keyword2"]="团队提成";
+                $sdd["keyword3"]=date("Y-m-d H:i:s");
+                $sdd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+                $this->notice($supperAgent["openid"], $sdd);
+            }
         }
        
         return true;
+    }
+
+    /**
+     * 获取推荐人的上级是否是超级金主
+     */
+    public function getSupperOwnerAgent($agentid){
+        $mids = $this->getSupperMember();
+        if($mids){
+            if(in_array($agentid,$mids)){
+                return $agentid;
+            }else{
+                $memberInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where id=:id limit 1", array(":id" => $agentid));
+                if($memberInfo['agentid']>0 && in_array($memberInfo['agentid'],$mids)){
+                    return $memberInfo['agentid'];
+                }elseif($memberInfo['agentid']>0){
+                    return $this->getSupperOwnerAgent($memberInfo['agentid']);
+                }else{
+                    return false;
+                }
+            }
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * 获取超级上级
+     * @author lihanwen@paokucoin.com
+     */
+    public function getSupperMember(){
+        $memberList=pdo_fetchall("select id from ".tablename("ewei_shop_member")." where supermaster=:supermaster",array(":supermaster"=>1));
+        if($memberList){
+            $ids = array();
+            foreach ($memberList as $key=>$member){
+                array_push($ids,$member['id']);
+            }
+            return $ids;
+        }
+        return false;
     }
     
     //新用户助力

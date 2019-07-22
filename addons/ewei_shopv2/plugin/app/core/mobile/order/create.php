@@ -2021,7 +2021,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$return_array["deductenough_enough"] = $deductenough_enough;
 		$return_array["deductcredit2"] = $deductcredit2;
 		$return_array["deductcredit"] = $deductcredit;
-		$return_array["deductmoney"] = $deductmoney;
+		$return_array['discount'] = $return_array["deductmoney"] = $deductmoney;
 		$return_array["taskdiscountprice"] = $taskdiscountprice;
 		$return_array["discountprice"] = $discountprice;
 		$return_array["isdiscountprice"] = $isdiscountprice;

@@ -143,7 +143,7 @@ class My_EweiShopV2Page extends AppMobilePage
                 if($row["couponid"]==2){
                     $title2 = "免费兑换券";
                     $tagtitle = "店主专享";
-                    $row['timestr'] = "活的期间内有效";
+                    $row['timestr'] = "活动期间内有效";
                 }
 
             }
