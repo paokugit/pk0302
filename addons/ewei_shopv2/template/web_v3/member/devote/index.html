@@ -14,9 +14,8 @@
        <div class="form-group">
             <label class="col-lg control-label">贡献值解读</label>
             <div class="col-sm-9 col-xs-12">
-               
-                    <textarea id='detail'  name="detail"  rows="30" cols="90">{$notice['content']}</textarea>
-                    
+                {php echo tpl_ueditor('detail',$notice['content'])}
+              
             </div>
         </div>
 
