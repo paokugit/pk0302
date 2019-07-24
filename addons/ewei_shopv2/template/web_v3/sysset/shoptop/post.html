@@ -1,0 +1,162 @@
+{template '_header'}
+   <meta charset="UTF-8">
+<div class="page-header">
+    当前位置：<span class="text-primary">{if !empty($detail['id'])}编辑{else}添加{/if}</span>
+</div>
+
+<div class="page-content">
+    <div class="page-sub-toolbar">
+        <span class=''>
+           
+                <a class="btn btn-primary btn-sm" href="{php echo webUrl('sysset/shoptop/add')}"> 添加文章</a>
+               
+        </span>
+    </div>
+    <form {ife 'sysset.shoptop' $detail}action="" method="post"{/if} class="form-horizontal form-validate" enctype="multipart/form-data" onsubmit='return formcheck()'>
+        <input type="hidden" name="id" value="{$detail['id']}" />
+        <div class="form-group">
+            <label class="col-lg control-label">展示位置</label>
+            <div class="col-sm-9 col-xs-12">
+                <select name="sort">
+                <option value="0">展示位置</option>
+                 <option value="2" {if $detail['sort']==2} selected = "selected"{/if}>好物推荐第2位</option>
+                 <option value="3" {if $detail['sort']==3} selected = "selected"{/if}>好物推荐第3位</option>
+                 <option value="6" {if $detail['sort']==6} selected = "selected"{/if}>好物推荐第6位</option>
+                 <option value="8" {if $detail['sort']==8} selected = "selected"{/if}>好物推荐第8位</option>
+                 <option value="9" {if $detail['sort']==9} selected = "selected"{/if}>好物推荐第9位</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg control-label must">主标</label>
+            <div class="col-sm-9 col-xs-12">
+               
+                    <input type="text" id='title' name="main_target" class="form-control" value="{$detail['main_target']}" data-rule-required='true' />
+               
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg control-label must">副标</label>
+            <div class="col-sm-9 col-xs-12">
+               
+                    <input type="text" id='title' name="substandard" class="form-control" value="{$detail['substandard']}" data-rule-required='true' />
+               
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-lg control-label must">开始日期</label>
+            <div class="col-sm-9 col-xs-12">
+               
+                    <input type="date" id='title' name="start_date" class="form-control" value="{$detail['start_date']}" data-rule-required='true' />
+               
+            </div>
+        </div>
+        
+         <div class="form-group">
+            <label class="col-lg control-label must">结束日期</label>
+            <div class="col-sm-9 col-xs-12">
+               
+                    <input type="date" id='title' name="end_date" class="form-control" value="{$detail['end_date']}" data-rule-required='true' />
+               
+            </div>
+        </div>
+       
+       <div class="form-group" style="height: auto; overflow:hidden;margin-left:125px;">
+            <div class="col-sm-9 col-xs-12">
+               
+                <div class="input-group">
+                    <input type="text" id="goodsid_text" name="goodsid_text" value="" class="form-control text" readonly="">
+                    <div class="input-group-btn">
+                        <button class="btn btn-primary select_goods" type="button">选择商品（仅限一件）</button>
+                    </div>
+                    
+                </div>
+                <div class="input-group multi-img-details container ui-sortable goods_show">
+                    {if !empty($goods)}
+                    {loop $goods $g}
+                    <div class="multi-item" data-id="{$g['id']}" data-name="goodsid" id="{$g['id']}">
+                        <img class="img-responsive img-thumbnail" src="{php echo tomedia($g['thumb'])}" onerror="this.src='../addons/ewei_shopv2/static/images/nopic.png'" style="width:100px;height:100px;">
+                        <div class="img-nickname">{$g['title']}</div>
+                        <input type="hidden" value="{$g['id']}" name="goodsid[]">
+                        <em onclick="removeHtml({$g['id']})" class="close">×</em>
+                        <div style="clear:both;"></div>
+                    </div>
+                    {/loop}
+                    {/if}
+                </div>
+                <script>
+                    $(function(){
+                        var title = '';
+                        $('.img-nickname').each(function(){
+                            title += $(this).html()+';';
+                        });
+                        $('#goodsid_text').val(title);
+                    })
+                    myrequire(['web/goods_selector'],function (Gselector) {
+                        $('.select_goods').click(function () {
+                            var ids = select_goods_ids();
+                            Gselector.open('goods_show','',0,true,'',ids);
+                        });
+                    })
+                    function goods_show(data) {
+//                        console.log(data);
+                        if(data.act == 1){
+                            var html = '<div class="multi-item" data-id="'+data.id+'" data-name="goodsid" id="'+data.id+'">'
+                                +'<img class="img-responsive img-thumbnail" src="'+data.thumb+'" onerror="this.src=\'../addons/ewei_shopv2/static/images/nopic.png\'" style="width:100px;height:100px;">'
+                                +'<div class="img-nickname">'+data.title+'</div>'
+                                +'<input type="hidden" value="'+data.id+'" name="goodsid[]">'
+                                +'<em onclick="removeHtml('+data.id+')" class="close">×</em>'
+                                +'</div>';
+
+                            $('.goods_show').append(html);
+                            var title = '';
+                            $('.img-nickname').each(function(){
+                                title += $(this).html()+';';
+                            });
+                            $('#goodsid_text').val(title);
+                        }else if(data.act == 0){
+                                removeHtml(data.id);
+                        }
+
+                    }
+                    function removeHtml(id){
+                        $("[id='"+id+"']").remove();
+                        var title = '';
+                        $('.img-nickname').each(function(){
+                            title += $(this).html()+';';
+                        });
+                        $('#goodsid_text').val(title);
+                    }
+                    function select_goods_ids(){
+                        var goodsids = [];
+                        $(".multi-item").each(function(){
+                            goodsids.push($(this).attr('data-id'));
+                        });
+                        return goodsids;
+                    }
+                </script>
+                
+            </div>
+        </div>
+       
+        
+        <div class="form-group"></div>
+        <div class="form-group">
+            <label class="col-lg control-label"></label>
+            <div class="col-sm-9 col-xs-12">
+               
+                    <input type="submit"  value="提交" class="btn btn-primary"  />
+             
+                <input type="button" name="back" onclick='history.back()' {ifp 'shop.notice.add|shop.notice.edit'}style='margin-left:10px;'{/if} value="返回列表" class="btn btn-default" />
+            </div>
+        </div>
+    </form>
+</div>
+<script language="javascript">
+    require(['jquery.ui'],function(){
+        $('.multi-img-details').sortable();
+    })
+</script>
+{template '_footer'}
+<!--NDAwMDA5NzgyNw==-->

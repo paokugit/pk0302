@@ -130,6 +130,12 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		{
 			app_error(AppError::$ParamsError);
 		}
+		//添加查看记录
+		$view["goodid"]=$id;
+		$view["time"]=date("Y-m-d");
+		$view["openid"]=$openid;
+		pdo_insert("ewei_shop_goodview",$view);
+		
 		$merch_plugin = p("merch");
 		$merch_data = m("common")->getPluginset("merch");
 		if( $merch_plugin && $merch_data["is_openmerch"] ) 

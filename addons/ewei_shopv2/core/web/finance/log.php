@@ -521,7 +521,15 @@ class Log_EweiShopV2Page extends WebPage
 		pdo_update("ewei_shop_member_log", array( "status" => -1 ,'refuse_reason'=>$reason ), array( "id" => $id, "uniacid" => $_W["uniacid"] ));
 		if( 0 < $log["money"] ) 
 		{
-			m("member")->setCredit($log["openid"], "credit2", $log["money"], array( 0, "余额提现退回" ));
+		    if ($log["title"]=="折扣宝提现"){
+			m("member")->setCredit($log["openid"], "credit3", $log["money"], array( 0, "折扣宝提现退回" ));
+			m("member")->setCredit($log["openid"], "credit4", $log["money"], array( 0, "折扣宝提现退回" ));
+			
+		    }else{
+		        m("member")->setCredit($log["openid"], "credit2", $log["money"], array( 0, "余额提现退回" ));
+		        
+		    }
+			
 		}
 		$member = pdo_fetchall("SELECT * FROM " . tablename("ewei_shop_member") . " WHERE uniacid =:uniacid AND openid=:openid", array( ":uniacid" => $_W["uniacid"], ":openid" => $log["openid"] ));
 		//m("notice")->sendMemberLogMessage($log["id"]);

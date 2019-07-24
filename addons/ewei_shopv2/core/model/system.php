@@ -1165,6 +1165,7 @@ class System_EweiShopV2Model {
                                 "title" => "商城状态",
                                 "route" => "close"
                             ) ,
+                           
                             array(
                                 "title" => "模板设置",
                                 "route" => "templat"
@@ -1174,7 +1175,11 @@ class System_EweiShopV2Model {
                                 "route" => "wap",
                                 "iscom" => "wap",
                                 "permcom" => "sms"
-                            )
+                            ),
+                            array(
+                                "title" => "商品置顶",
+                                "route" => "shoptop"
+                            ) 
                         )
                     ) ,
                     array(
