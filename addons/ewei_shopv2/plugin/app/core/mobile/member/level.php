@@ -15,8 +15,11 @@ class Level_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $uniacid = $_W['uniacid'];
         $openid = $_GPC['openid'];
+        if($openid == ""){
+            show_json(0,"用户的openid不能为空");
+        }
         //用户的信息
-        $member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid]);
+        $member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid],['nickname','realname','is_open',"FROM_UNIXTIME(expire_time) as expire"]);
         //待领取的优惠券  两个
         $coupon = pdo_fetchall('select cd.id,cd.used,co.deduct,co.enough,co.couponname from '.tablename('ewei_shop_coupon_data').'cd join '.tablename('ewei_shop_coupon').'co on co.id=cd.couponid'.' where cd.gettype = 1 and cd.openid = "'.$openid.'" and cd.used = 0 order by id desc LIMIT 0,2');
         //特权产品列表
@@ -24,7 +27,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         //本月的权益礼包
         $month = date('Ym',time());
         $level = pdo_get('ewei_shop_level_record',['openid'=>$openid,'uniacid'=>$uniacid,'month'=>$month]);
-        var_dump($level);exit;
+        show_json(1,['member'=>$member,'coupon'=>$coupon,'goods'=>$goods,'level'=>$level]);
     }
 
     /**
@@ -83,7 +86,7 @@ class Level_EweiShopV2Page extends AppMobilePage
     /**
      * 购买年卡
      */
-    public function order_cs()
+    public function order()
     {
         global $_W;
         global $_GPC;

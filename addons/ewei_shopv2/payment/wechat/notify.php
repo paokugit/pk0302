@@ -1000,7 +1000,7 @@ class EweiShopWechatPay
                 if($count == 0){
                     //首次使用收款码付款  给奖励对应的折扣宝数量
                     $mem_data['credit3'] += $order['price'];
-                    $e = m('game')->addlog($order['openid'],0,$order['price'],2,"首次使用收款码付款奖励折扣宝");
+                    m('game')->addCreditLog($order['openid'],3,$order['price'],"首次使用收款码付款奖励折扣宝");
                 }
                 $f = pdo_update('ewei_shop_member',$mem_data,['openid'=>$order['openid']]);
                 //小程序消息发送
@@ -1161,27 +1161,27 @@ class EweiShopWechatPay
      * @param $remark
      */
     public function addmoney($openid,$merch,$father,$grandpa,$goodsprice,$price,$type,$remark){
-        //添加日志
-        m('game')->addlog($openid,0,-($goodsprice-$price),1,$remark);
         //order表的goodsprice  减去  price 等于折扣宝的金额  乘以0.5是收款者的奖励  加到收款者的折扣宝  credit1卡路里  2余额  3折扣宝  4贡献值  5个人资产
         if($goodsprice-$price > 0){   //如果用折扣宝付款了
+            //添加日志
+            m('game')->addCreditLog($openid,$type,-($goodsprice-$price),$remark);
             pdo_update('ewei_shop_member',['credit'.$type=>bcadd($merch['credit'.$type],bcmul(bcsub($goodsprice,$price,2),0.5,2),2)],['openid'=>$merch['openid']]);
             //写入收款人的日志
-            m('game')->addlog($merch['openid'],0,($goodsprice-$price)*0.5,2,"用户".$remark."的奖励");
+            m('game')->addCreditLog($merch['openid'],$type,($goodsprice-$price)*0.5,0,"用户".$remark."的奖励");
         }
         //如果爸爸存在 给爸爸奖励
-        if($father){
+        if($father && $price * 0.01 > 0){
             //order表的price是交易金额  乘以0.01是爸爸的奖励  加到爸爸的贡献者
             pdo_update('ewei_shop_member',['credit4'=>bcadd($father['credit4'],bcmul($price,0.01,2),2)],['openid'=>$father['openid']]);
             //写入爸爸的收入日志
-            m('game')->addlog($father['openid'],0,$price*0.01,3,"下级付款奖励贡献值");
+            m('game')->addCreditLog($father['openid'],4,$price*0.01,"下级付款奖励贡献值");
         }
         //如果爷爷存在 给爷爷奖励
-       if($grandpa){
+       if($grandpa && $price * 0.01 > 0){
            //order表的price是交易金额  乘以0.01是爷爷的奖励  加到爷爷的贡献者
            pdo_update('ewei_shop_member',['credit4'=>bcadd($grandpa['credit4'],bcmul($price,0.01,2),2)],['openid'=>$grandpa['openid']]);
            //写入爷爷的收入日志
-           m('game')->addlog($grandpa['openid'],0,$price*0.01,3,"下级付款奖励贡献值");
+           m('game')->addCreditLog($grandpa['openid'],4,$price*0.01,"下级付款奖励贡献值");
        }
     }
 
@@ -1214,7 +1214,8 @@ class EweiShopWechatPay
                 'color' => '#ff510',
             );
         }
-        p("app")->mysendNotice($openid, $postdata,'', "qN-Wi2Jw8HnheTTuJRFivIKrevwk70m8lvH4mnf_ad0");
+        $res = p("app")->mysendNotice($openid, $postdata,'', "qN-Wi2Jw8HnheTTuJRFivIKrevwk70m8lvH4mnf_ad0");
+        pdo_insert('log',['log'=>$openid.json_encode($res),'createtime'=>date('Y-m-d H:i:s')]);
     }
 }
 ?>

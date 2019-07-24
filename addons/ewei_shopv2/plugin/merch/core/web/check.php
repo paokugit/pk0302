@@ -185,8 +185,9 @@ class Check_EweiShopV2Page extends PluginWebPage
 		$list = array( );
 		foreach( $orderids as $key => $orderid ) 
 		{
-			$data = $this->model->getMerchPriceList($item["merchid"], $orderid, 10, $id);
-			if( !empty($data) ) 
+			//$data = $this->model->getMerchPriceList($item["merchid"], $orderid, 10 ,$id);
+			$data = $this->model->getMerchPriceList($item["merchid"], $orderid, 10 ,$item['type']);
+			if( !empty($data) )
 			{
 				$flag = 1;
 				if( !empty($keyword) ) 

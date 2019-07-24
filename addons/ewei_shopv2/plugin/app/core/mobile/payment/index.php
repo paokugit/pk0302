@@ -512,11 +512,11 @@ class Index_EweiShopV2Page extends AppMobilePage
             show_json(0,"请完善参数信息");
         }
         $redis = redis();
-        if($redis->get('token')){
+        if($redis->get($openid.'rebate_token')){
             show_json(0,"您给".$mobile."转账".$money."已提交，为防止重复操作,请1分钟后谨慎操作");
         }else{
             $token = md5($openid.$mobile.$money.time());
-            $redis->set('token',$token,30);
+            $redis->set($openid.'rebate_token',$token,30);
         }
         $to = pdo_get('ewei_shop_member',['mobile'=>$mobile,'uniacid'=>$uniacid]);
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
