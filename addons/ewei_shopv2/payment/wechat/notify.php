@@ -1165,9 +1165,9 @@ class EweiShopWechatPay
         if($goodsprice-$price > 0){   //如果用折扣宝付款了
             //添加日志
             m('game')->addCreditLog($openid,$type,-($goodsprice-$price),$remark);
-            pdo_update('ewei_shop_member',['credit'.$type=>bcadd($merch['credit'.$type],bcmul(bcsub($goodsprice,$price,2),0.5,2),2)],['openid'=>$merch['openid']]);
+            pdo_update('ewei_shop_member',['credit'.$type=>bcadd($merch['credit'.$type],bcsub($goodsprice,$price,2),2)],['openid'=>$merch['openid']]);
             //写入收款人的日志
-            m('game')->addCreditLog($merch['openid'],$type,($goodsprice-$price)*0.5,0,"用户".$remark."的奖励");
+            m('game')->addCreditLog($merch['openid'],$type,$goodsprice-$price,0,"用户".$remark."的奖励");
         }
         //如果爸爸存在 给爸爸奖励
         if($father && $price * 0.01 > 0){

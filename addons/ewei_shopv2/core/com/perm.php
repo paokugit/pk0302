@@ -931,14 +931,17 @@ class Perm_EweiShopV2ComModel extends ComModel {
             "recharge" => array(
                 "text" => "充值",
                 "credit1" => "充值卡路里-log",
-                "credit2" => "充值余额-log"
+                "credit2" => "充值余额-log",
+                "credit3" => "充值折扣宝-log"
             ) ,
             "credit" => array(
                 "text" => "卡路里余额明细",
                 "credit1" => "卡路里明细",
                 "credit1.export" => "导出卡路里明细",
                 "credit2" => "余额明细",
-                "credit2.export" => "导出余额明细"
+                "credit2.export" => "导出余额明细",
+                "credit3" => "折扣宝明细",
+                "credit3.export" => "导出折扣宝明细"
             )
         );
     }

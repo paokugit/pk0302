@@ -23,10 +23,15 @@ class Level_EweiShopV2Page extends AppMobilePage
         //待领取的优惠券  两个
         $coupon = pdo_fetchall('select cd.id,cd.used,co.deduct,co.enough,co.couponname from '.tablename('ewei_shop_coupon_data').'cd join '.tablename('ewei_shop_coupon').'co on co.id=cd.couponid'.' where cd.gettype = 1 and cd.openid = "'.$openid.'" and cd.used = 0 order by id desc LIMIT 0,2');
         //特权产品列表
-        $goods = pdo_getall('ewei_shop_goods','status = 1 and is_right = 1 and total > 0',['id','title','thumb','total','productprice','marketprice']);
+        $goods = pdo_getall('ewei_shop_goods','status = 1 and is_right = 1 and total > 0 order by id desc LIMIT 0,8',['id','title','thumb','total','productprice','marketprice']);
+        foreach ($goods as $key=>$item){
+            $goods[$key]['thumb'] = tomedia($item['thumb']);
+        }
         //本月的权益礼包
         $month = date('Ym',time());
-        $level = pdo_get('ewei_shop_level_record',['openid'=>$openid,'uniacid'=>$uniacid,'month'=>$month]);
+        $level = pdo_get('ewei_shop_level_record',['openid'=>$openid,'uniacid'=>$uniacid,'month'=>$month],['id','openid','level_name','level_id','goods_id','status','month','FROM_UNIXTIME(updatetime) as updatetime']);
+        $good = pdo_get('ewei_shop_goods',['id'=>$level['goods_id'],'uniacid'=>$uniacid],['thumb','productprice']);
+        $level = array_merge($level,['thumb'=>tomedia($good['thumb']),'price'=>$good['productprice']]);
         show_json(1,['member'=>$member,'coupon'=>$coupon,'goods'=>$goods,'level'=>$level]);
     }
 
@@ -98,7 +103,7 @@ class Level_EweiShopV2Page extends AppMobilePage
             show_json(0,"参数不完整");
         }
         $level = pdo_get('ewei_shop_member_memlevel',['uniacid'=>$uniacid,'id'=>$level_id]);
-        if($level['price'] == $money){
+        if($level['price'] != $money){
             show_json(0,"价格不正确");
         }
         //生成订单号
@@ -126,10 +131,8 @@ class Level_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $uniacid = $_W['uniacid'];
         $openid = $_GPC['openid'];
-        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
-        $endtime = date('Y-m-d',$member['expire_time']);
-        $is_open = $member['is_open'];
-        show_json(1,['member'=>$member,'end'=>$endtime,'is_open'=>$is_open]);
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],['id','openid','nickname','realname','is_open','FROM_UNIXTIME(expire_time) as expire']);
+        show_json(1,['member'=>$member]);
     }
 
     /**

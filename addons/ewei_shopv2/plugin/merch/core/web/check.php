@@ -344,7 +344,8 @@ class Check_EweiShopV2Page extends PluginWebPage
 			$change_data = array( );
 			$change_data["checktime"] = time();
 			$change_data["status"] = 2;
-			$pass_data = $this->model->getPassApplyPrice($item["merchid"], $bpid, $id);
+			//$pass_data = $this->model->getPassApplyPrice($item["merchid"], $bpid, $id);
+			$pass_data = $this->model->getPassApplyPrice($item["merchid"], $bpid, $item['type']);
 			$change_data["passrealprice"] = $pass_data["realprice"];
 			$change_data["passrealpricerate"] = $pass_data["realpricerate"];
 			$change_data["passorderprice"] = $pass_data["orderprice"];
