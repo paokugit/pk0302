@@ -344,13 +344,22 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $money = $_GPC['money'];
         $openid = $_GPC['openid'];
-        if(!$money || !$openid){
+        if($money == "" || $openid == ""){
             show_json(0,"参数不完整");
+        };
+        $redis = redis();
+        if($redis->get($openid.'calorie_token')){
+            show_json(0,"您的".$money."充值折扣宝已提交，为防止重复操作,请1分钟后谨慎操作");
+        }else{
+            $token = md5($openid.$money.time().random(6));
+            $redis->set($openid.'calorie_token',$token,30);
         }
         //查用户的卡路里和折扣宝的信息
         $member = pdo_fetch('select credit1,credit3 from '.tablename('ewei_shop_member').'where openid=:openid and uniacid=:uniacid',array(':openid'=>$openid,':uniacid'=>$_W['uniacid']));
         //判断要转换的卡路里和用户的卡路里的多少
-        if($money > $member['credit1']){
+        if($money = 0){
+            show_json(0,'充值金额不能为0');
+        }elseif($money > $member['credit1']){
             show_json(0,'您的卡路里不足');
         }else{
             //计算转换后的用户的卡路里和折扣宝的余额
@@ -515,7 +524,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         if($redis->get($openid.'rebate_token')){
             show_json(0,"您给".$mobile."转账".$money."已提交，为防止重复操作,请1分钟后谨慎操作");
         }else{
-            $token = md5($openid.$mobile.$money.time());
+            $token = md5($openid.$mobile.$money.time().random(6));
             $redis->set($openid.'rebate_token',$token,30);
         }
         $to = pdo_get('ewei_shop_member',['mobile'=>$mobile,'uniacid'=>$uniacid]);

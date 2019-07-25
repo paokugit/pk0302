@@ -71,6 +71,14 @@ class Devote_EweiShopV2Page extends AppMobilePage{
             app_error(1,"openid不正确");
         }
         $money=$_GPC["money"];
+        //防止折扣宝提现重复
+        $redis = redis();
+        if($redis->get($openid.'rebate_withdraw')){
+            show_json(0,"您的".$money."提现已提交，为防止重复操作,请1分钟后谨慎操作");
+        }else{
+            $token = md5($openid.$money.time().random(6));
+            $redis->set($openid.'rebate_withdraw',$token,45);
+        }
         if ($money<1){
             app_error(1,"提现金额不可小于1元");
         }
