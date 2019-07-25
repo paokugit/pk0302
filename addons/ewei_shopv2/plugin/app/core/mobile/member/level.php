@@ -111,10 +111,10 @@ class Level_EweiShopV2Page extends AppMobilePage
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid]);
         //添加订单
-        $this->addorder($openid,$order_sn,$money,$member);
+        $this->addorder($openid,$order_sn,$money,$member,'','购买年卡id=5');
         //微信支付
         $payinfo = array( "openid" => substr($openid,7), "title" => "购买年卡", "tid" => $order_sn, "fee" =>$money );
-        $res = $this->model->wxpay($payinfo, 31);
+        $res = $this->model->wxpay($payinfo, 32);
         if(is_error($res)){
             show_json(0,$res);
         }
@@ -166,6 +166,25 @@ class Level_EweiShopV2Page extends AppMobilePage
         $address = serialize(pdo_get('ewei_shop_member_address',['id'=>$address_id,'uniacid'=>$uniacid]));
         $this->addorder($openid,$order_sn,0,$member,$address,"领取年卡".$record["month"]."权益");
         show_json(1,"领取成功");
+    }
+
+    /**
+     * 地址列表接口
+     */
+    public function address_list()
+    {
+        global $_W;
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        $uniacid = $_W['uniacid'];
+        if($openid == ""){
+            show_json(0,"用户openid不能为空");
+        }
+        $list = pdo_getall('ewei_shop_member_address',['uniacid'=>$uniacid,'openid'=>$openid]);
+        if(!$list){
+            show_json(-1,"暂无地址，请去添加地址");
+        }
+        show_json(1,['list'=>$list]);
     }
 
     /**

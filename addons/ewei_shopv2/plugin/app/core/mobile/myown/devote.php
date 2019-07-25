@@ -50,7 +50,7 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         if (pdo_update("ewei_shop_member",array("weixin"=>$weixin),array("openid"=>$openid))){
             app_error(0,"成功");
         }else{
-            app_error(0,"失败");
+            app_error(1,"失败");
         }
         
     }
@@ -73,11 +73,11 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         $money=$_GPC["money"];
         //防止折扣宝提现重复
         $redis = redis();
-        if($redis->get($openid.'rebate_withdraw')){
-            show_json(0,"您的".$money."提现已提交，为防止重复操作,请1分钟后谨慎操作");
+        if($redis->get($openid.$money.'rebate_withdraw')){
+            app_error(1,"您的".$money."提现已提交，为防止重复操作,请1分钟后谨慎操作");
         }else{
             $token = md5($openid.$money.time().random(6));
-            $redis->set($openid.'rebate_withdraw',$token,45);
+            $redis->set($openid.$money.'rebate_withdraw',$token,45);
         }
         if ($money<1){
             app_error(1,"提现金额不可小于1元");
