@@ -148,7 +148,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         $address_id = $_GPC['address_id'];
         //记录id
         $record_id = $_GPC['record_id'];
-        if($openid == "" || $level_id == "" || $record_id == "" || $address == ""){
+        if($openid == "" || $level_id == "" || $record_id == "" || $address_id == ""){
             show_json(0,"参数不完善");
         }
         //查询该记录的信息
