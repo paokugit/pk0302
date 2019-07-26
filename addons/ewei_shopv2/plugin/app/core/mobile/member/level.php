@@ -152,16 +152,20 @@ class Level_EweiShopV2Page extends AppMobilePage
             show_json(0,"参数不完善");
         }
         //查询该记录的信息
-        $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'id'=>$level_id]);
-        if(date('Ymd',time()) < $record['month']."10" || date('md',time()) > $record['month']."20"){
-            show_json(0,"该权益礼包不在领取日期");
+        $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id]);
+        //if(date('Ymd',time()) < $record['month']."10" || date('md',time()) > $record['month']."20"){
+        if(date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."30"){
+            show_json(0,$record['month']."权益礼包不在领取日期");
+        }
+        if($record['status'] > 0){
+            show_json(0,$record['month']."权利礼包已领取");
         }
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         //生成订单号
         $order_sn = "LQ".date('YmdHis').random(12);
         //更新领取记录的状态
-        pdo_update('ewei_shop_level_record',['status'=>1,'updatetime'=>time()],['id'=>$level_id,'uniacid'=>$uniacid]);
+        pdo_update('ewei_shop_level_record',['status'=>1,'updatetime'=>time()],['id'=>$record_id,'level_id'=>$level_id,'uniacid'=>$uniacid]);
         //因为领取的权益是实物产品
         $address = serialize(pdo_get('ewei_shop_member_address',['id'=>$address_id,'uniacid'=>$uniacid]));
         $this->addorder($openid,$order_sn,0,$member,$address,"领取年卡".$record["month"]."权益");
