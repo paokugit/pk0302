@@ -64,7 +64,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         if($openid == "" || $page == ""){
             show_json(0,"参数不完整");
         }
-        $pageSize = 20;
+        $pageSize = 10;
         $pindex = ($page - 1) * pageSize;
         //计算记录总数
         $year_month = date('Ym',time());      //当前的年月份
@@ -73,7 +73,9 @@ class Level_EweiShopV2Page extends AppMobilePage
         $record = pdo_getall('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and month <= "'.$year_month.'" order by id desc LIMIT '.$pindex.','.$pageSize);
         foreach ($record as $key=>$item) {
             $record[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
-            $record[$key]['updatetime'] = date('Y-m-d H:i:s',$item['updatetime']);
+            $record[$key]['updatetime'] = date('Y年m月d日',$item['updatetime']);
+            $record[$key]['month'] = substr($item['month'],4);
+            $record[$key]['thumb'] = tomedia(pdo_getcolumn('ewei_shop_goods',['id'=>$item['goods_id']],'thumb'));
             //如果今天的年月份  大于记录中的 则更新他为失效   或者  月份相同  日期大于20  并把更新时间改成当月的21号为失效时间   并且状态为未领取
             if((date('Ym',time()) > $item['month'] || date('Ym',time()) == $item['month'] && date('d',time()) > 20) && $item['status'] == 0){
                 pdo_update('ewei_shop_level_record',['status'=>2,'updatetime'=>strtotime($item['month']."21")],['uniacid'=>$uniacid,'id'=>$item['id']]);
@@ -131,7 +133,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $uniacid = $_W['uniacid'];
         $openid = $_GPC['openid'];
-        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],['id','openid','nickname','realname','is_open','FROM_UNIXTIME(expire_time) as expire']);
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],['id','openid','nickname','avatar','realname','is_open','FROM_UNIXTIME(expire_time) as expire']);
         show_json(1,['member'=>$member]);
     }
 
@@ -184,7 +186,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         if($openid == ""){
             show_json(0,"用户openid不能为空");
         }
-        $list = pdo_getall('ewei_shop_member_address',['uniacid'=>$uniacid,'openid'=>$openid]);
+        $list = pdo_getall('ewei_shop_member_address',['uniacid'=>$uniacid,'openid'=>$openid,'deleted'=>0]);
         if(!$list){
             show_json(-1,"暂无地址，请去添加地址");
         }

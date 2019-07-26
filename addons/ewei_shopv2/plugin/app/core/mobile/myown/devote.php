@@ -98,6 +98,7 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         $log["deductionmoney"]=bcmul($money,0.03,2);
         $log["realmoney"]=bcsub($money,$log['deductionmoney'],2);
         $log["remark"]="折扣宝提现";
+        $log['draw_type'] = 2;
         if (pdo_insert("ewei_shop_member_log",$log)){
             //增加记录
             m('member')->setCredit($openid, 'credit3', -$money, "折扣宝提现:提现编号".$log["logno"]);
