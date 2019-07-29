@@ -1005,7 +1005,7 @@ class EweiShopWechatPay
                 $f = pdo_update('ewei_shop_member',$mem_data,['openid'=>$order['openid']]);
                 //小程序消息发送
                 $this->message($own['openid'],$order['price'],$order['merchid']);
-                pdo_insert('log',['log'=>$a.$b.$c.$e.$f,'createtime'=>date('Y-m-d H:i:s',time())]);
+                pdo_insert('log',['log'=>$a.$b.$c.$f,'createtime'=>date('Y-m-d H:i:s',time())]);
                 pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();
@@ -1067,23 +1067,26 @@ class EweiShopWechatPay
         //用ordersn订单号 查订单信息
         $order = pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
         $member = pdo_get('ewei_shop_member',['openid'=>$order['openid']]);
-        $level = pdo_get('ewei_shop_member_mem_level',['id'=>intval($order['remark'])]);
+        preg_match_all('/\d+/',$order['remark'],$arr);
+        $level = pdo_get('ewei_shop_member_memlevel',['id'=>$arr[0][0]]);
+        pdo_insert('log',['log'=>json_encode($level).$arr[0][0].$order['remark'],'createtime'=>date('Y-m-d H:i:s',time())]);
         if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
             pdo_begin();
             try {
                 //如果成功  修改订单的status 状态 和 用户日志   还有商户收款日志的  状态为成功
-                pdo_update('ewei_shop_order',['status'=>3,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
+                pdo_update('ewei_shop_order',['status'=>3,'paytime'=>strtotime($data['time_end']),'finishtime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
                 pdo_update('ewei_shop_member_log',['status'=>1],['logno'=>$ordersn]);
-                //如果用户已买年卡  则给到期时间加1年
-                if(!$member['end_time']){
-                    $endtime = strtotime('+1 year',$member['end_time']);
-                    $this->add_record($order['openid'],$endtime,$level);
+                //如果用户已买年卡  则给到期时间加1年   并且到期时间大于当前时间   小于 代表已过期
+                if($member['expire_time'] && $member['expire_time'] > time()){
+                    $endtime = strtotime('+1 year',$member['expire_time']);
+                    $a = $this->add_record($order['openid'],$endtime,$level);
                 }else{
                     $endtime = strtotime('+1 year');
-                    $this->add_record($order['openid'],time(),$level);
+                    $a = $this->add_record($order['openid'],time(),$level);
                 }
                 //改变用户的状态
-                pdo_update('ewei_shop_member',['is_open'=>1,'expire_time'=>$endtime],['openid'=>$order['openid']]);
+                $b = pdo_update('ewei_shop_member',['is_open'=>1,'expire_time'=>$endtime],['openid'=>$order['openid']]);
+                pdo_insert('log',['log'=>$a.$b,'createtime'=>date('Y-m-d H:i:s',time())]);
                 pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();
@@ -1165,9 +1168,9 @@ class EweiShopWechatPay
         if($goodsprice-$price > 0){   //如果用折扣宝付款了
             //添加日志
             m('game')->addCreditLog($openid,$type,-($goodsprice-$price),$remark);
-            pdo_update('ewei_shop_member',['credit'.$type=>bcadd($merch['credit'.$type],bcmul(bcsub($goodsprice,$price,2),0.5,2),2)],['openid'=>$merch['openid']]);
+            pdo_update('ewei_shop_member',['credit'.$type=>bcadd($merch['credit'.$type],bcsub($goodsprice,$price,2),2)],['openid'=>$merch['openid']]);
             //写入收款人的日志
-            m('game')->addCreditLog($merch['openid'],$type,($goodsprice-$price)*0.5,0,"用户".$remark."的奖励");
+            m('game')->addCreditLog($merch['openid'],$type,$goodsprice-$price,0,"用户".$remark."的奖励");
         }
         //如果爸爸存在 给爸爸奖励
         if($father && $price * 0.01 > 0){

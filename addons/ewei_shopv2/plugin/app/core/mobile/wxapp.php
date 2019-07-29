@@ -43,10 +43,15 @@ class Wxapp_EweiShopV2Page extends Page
         $openid="sns_wa_".$arr["openid"];
         $member=pdo_get('ewei_shop_member',array('openid'=>$openid));
         if ($member){
-           $arr["login"]=$member["is_login"];
+            $arr["nickname"]=$member["nickname"];
+            $arr["mobile"]=$member["mobile"];
+            $arr["avatar"]=$member["avatar"];
+            $arr["id"]=$member["id"];
+            $arr["login"]=$member["is_login"];
            $arr["agentid"]=$member["agentid"];
            $arr["is_own"]=$member["is_own"];
            $arr["agentlevel"]=$member["agentlevel"];
+
             //判断用户是否是商家
             $merchUser=pdo_get('ewei_shop_merch_user',array('member_id'=>$member['id']));
             if($merchUser){

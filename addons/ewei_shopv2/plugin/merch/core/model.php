@@ -1820,7 +1820,8 @@ class MerchModel extends PluginModel
         return $data;
     }
 
-    public function getPassApplyPrice($merchid, $orderids)
+    //public function getPassApplyPrice($merchid, $orderids)
+     public function getPassApplyPrice($merchid, $orderids,$type)
     {
         global $_W;
         $data = array(  );
@@ -1831,7 +1832,8 @@ class MerchModel extends PluginModel
         {
             foreach( $orderids as $key => $orderid ) 
             {
-                $item = $this->getMerchPriceList($merchid, $orderid, 1);
+                //$item = $this->getMerchPriceList($merchid, $orderid, 1);
+                $item = $this->getMerchPriceList($merchid, $orderid, 1,$type);
                 $data["realprice"] += $item["realprice"];
                 $data["realpricerate"] += $item["realpricerate"];
                 $data["orderprice"] += $item["orderprice"];

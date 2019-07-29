@@ -29,6 +29,7 @@ class Bindmobile_EweiShopV2Page extends AppMobilePage{
             $resault=com_run("sms::mysend", array('mobile'=>$country["phonecode"].$mobile,'tp_id'=>3,'code'=>$code));
         }
         if ($resault["status"]==1){
+            //pdo_insert('core_sendsms_log',['uniacid'=>$_W['uniacid'],'mobile'=>$mobile,'content'=>$code,'createtime'=>time()]);
             $re["code"]=$code;
             $re["mobile"]=$mobile;
             app_error(0,$re);

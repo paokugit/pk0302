@@ -178,6 +178,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
             'money'=>$money,
             'realmoney'=>bcsub($money,bcmul($money,0.03,2),2),
             'deductionmoney'=>bcmul($money,0.03,2),
+            'draw_type'=>3,
         ];
         pdo_begin();
         try{
