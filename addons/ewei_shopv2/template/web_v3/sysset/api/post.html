@@ -1,0 +1,145 @@
+{template '_header'}
+<style type="text/css">
+    .multi-img-details .multi-item img{height:100px;}
+</style>
+<div class="page-header">
+    当前位置：<span class="text-primary">{if !empty($item['id'])}编辑{else}添加{/if}外接公司 <small>{if !empty($item['id'])}修改【{$item['company']}】{/if}</small></span>
+</div>
+<style>
+    .api{
+        font-size:14px;
+        float: left;
+        margin-left:2%;
+        width:12%;
+        text-align:center;
+        line-height:32px;
+        height:32px;
+        border: 1px solid #44b525;
+        border-radius: 66px;
+        background: #44b525
+    }
+</style>
+
+<div class="page-content">
+    <div class="page-sub-toolbar">
+        <span class="">
+            {ifp 'sale.giftbag.add'}
+                <a class='btn btn-primary btn-sm' href="{php echo webUrl('sysset/api/add',array('type'=>$type))}"><i class='fa fa-plus'></i> 添加外接公司</a>
+            {/if}
+        </span>
+    </div>
+    <form {ife 'sysset.api' $item}action="" method="post"{/if} class="form-horizontal form-validate" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="{$item['id']}" />
+        <div class="tab-content ">
+            <div class="tab-pane active">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-lg control-label must">公司名称</label>
+                        <div class="col-sm-9 col-xs-12 ">
+                            {ife 'sysset.api' $item}
+                                <input type="text" id='company' name="company" class="form-control" value="{$item['company']}" data-rule-required="true"/>
+                            {else}
+                                <div class='form-control-static'>{$item['company']}</div>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-lg control-label must">手&nbsp;机&nbsp;号</label>
+                <div class="col-sm-9 col-xs-12 ">
+                    {ife 'sysset.api' $item}
+                        <input type="text" id='mobile' name="mobile" class="form-control" value="{$item['mobile']}" data-rule-required="true"/>
+                    {else}
+                        <div class='form-control-static'>{$item['mobile']}</div>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-lg control-label must">负&nbsp;责&nbsp;人</label>
+                <div class="col-sm-9 col-xs-12 ">
+                    {ife 'sysset.api' $item}
+                        <input type="text" id='principal' name="principal" class="form-control" value="{$item['principal']}" data-rule-required="true"/>
+                    {else}
+                        <div class='form-control-static'>{$item['principal']}</div>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-lg control-label must">接口apikey</label>
+                <div class="col-sm-9 col-xs-12 ">
+                    {ife 'sysset.api' $item}
+                        <input style="width: 86%;float: left;" type="text" readonly id='apikey' name="apikey" class="form-control" value="{$item['apikey']}" data-rule-required="true"/>
+                        <span class="api">生成apikey</span>
+                    {else}
+                        <div class='form-control-static'>{$item['apikey']}</div>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-lg control-label must">接口apisecret</label>
+                <div class="col-sm-9 col-xs-12 ">
+                    {ife 'sysset.api' $item}
+                        <input type="text" readonly id='apisecret' name="apisecret" class="form-control" value="{$item['apisecret']}" data-rule-required="true"/>
+                    {else}
+                        <div class='form-control-static'>{$item['apisecret']}</div>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-lg control-label">状态</label>
+                <div class="col-xs-12 col-sm-8">
+                    <div class="input-group">
+                        {ife 'sysset.api' $item}
+                            <label class="radio radio-inline">
+                                <input type="radio" name="status" value="1" {if intval($item['status']) ==1 }checked="checked"{/if}> 正常
+                            </label>
+                            <label class="radio radio-inline">
+                                <input type="radio" name="status" value="0" {if intval($item['status']) ==0}checked="checked"{/if}> 禁止
+                            </label>
+                        {else}
+                            <div class='form-control-static'>{if intval($item['status']) ==1 }正常{else}禁止{/if}</div>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {ife 'sysset.api' $item}
+        <div class="form-group">
+            <label class="col-lg control-label"></label>
+            <div class="col-sm-9 col-xs-12">
+                <input type="submit"  value="提交" class="btn btn-primary" />
+                <a class="btn btn-default" href="{php echo webUrl('sysset/api',array('type'=>$type))}">返回列表</a>
+            </div>
+        </div>
+        {/if}
+    </form>
+</div>
+
+<script>
+    $('.api').click(function () {
+        var mobile = $('#mobile').val();
+        var reg = /^[1][3,4,5,7,8][0-9]{9}$/;
+        if(mobile == "" || !reg.test(mobile)){
+           alert("手机号有问题");return false;
+        }
+        $.ajax({
+            url:'{php echo WebUrl("sysset/api/get")}',
+            type:'get',
+            dataType:'json',
+            data:{'mobile':mobile},
+            success:function (data) {
+                if(data.status == 1){
+                    $('#apikey').val(data.result.apikey);
+                    $('#apisecret').val(data.result.apisecret);
+                }
+            }
+        })
+    })
+</script>
+{template '_footer'}
