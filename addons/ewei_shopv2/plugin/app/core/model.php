@@ -579,35 +579,100 @@ if (!class_exists("AppModel")) {
                 $item['data'] = m('goods')->getList($args);
                 $item['total'] = $item['data']['total'];
                 $item['pagesize'] = 20;
-                $item['data'] = $this->getGoodsList($item['data']);
+                $item['data'] = $this->getGoodsList($item['data'],$pagess);
                 return $item;
         }
 
-        public function getGoodsList($goodsList){
+        public function getGoodsList($goodsList,$pages){
             $newGoodsList = array();
-            foreach ($goodsList['list'] as $key=>$goods){
-                $newGoodsList[$key]['gid'] = $goods['id'];
-                $newGoodsList[$key]['deduct'] = $goods['deduct'];
-                $newGoodsList[$key]['deduct_type'] = $goods['deduct_type'];
-                $newGoodsList[$key]['title'] = $goods['title'];
-                $newGoodsList[$key]['subtitle'] = $goods['subtitle'];
-                $newGoodsList[$key]['price'] = $goods['minprice'];
-                $newGoodsList[$key]['productprice'] = $goods['productprice'];
-                $newGoodsList[$key]['thumb'] = $goods['thumb'];
-                $newGoodsList[$key]['total'] = $goods['total'];
-                $newGoodsList[$key]['ctype'] = $goods['type'];
-                $newGoodsList[$key]['sales'] = $goods['sales'];
-                $newGoodsList[$key]['video'] = $goods['video'];
-                $newGoodsList[$key]['seecommission'] = $goods['seecommission'];
-                $newGoodsList[$key]['cansee'] = $goods['cansee'];
-                $newGoodsList[$key]['seetitle'] = $goods['seetitle'];
-                $newGoodsList[$key]['bargain'] = $goods['bargain'];
-                $newGoodsList[$key]['showprice'] = round($goods['minprice']-$goods['deduct'],2);
-                $newGoodsList[$key]['issendfree'] = $goods['issendfree'];
+            $day=date("Y-m-d");
+            $adv=pdo_fetchall("select * from ".tablename("ewei_shop_goodtop")." where is_del=0 and start_date<=:start_date and end_date<=:end_date",array(":start_date"=>$day,":end_date"=>$day));
+            if ($pages==0){
+                foreach ($goodsList['list'] as $key=>$goods){
+                    //判断是否包含
+                    $gid=$this->inarray($adv, $key);
+                    if ($gid==0){
+                        $newGoodsList[$key]['gid'] = $goods['id'];
+                        $newGoodsList[$key]['deduct'] = $goods['deduct'];
+                        $newGoodsList[$key]['deduct_type'] = $goods['deduct_type'];
+                        $newGoodsList[$key]['title'] = $goods['title'];
+                        $newGoodsList[$key]['subtitle'] = $goods['subtitle'];
+                        $newGoodsList[$key]['price'] = $goods['minprice'];
+                        $newGoodsList[$key]['productprice'] = $goods['productprice'];
+                        $newGoodsList[$key]['thumb'] = $goods['thumb'];
+                        $newGoodsList[$key]['total'] = $goods['total'];
+                        $newGoodsList[$key]['ctype'] = $goods['type'];
+                        $newGoodsList[$key]['sales'] = $goods['sales'];
+                        $newGoodsList[$key]['video'] = $goods['video'];
+                        $newGoodsList[$key]['seecommission'] = $goods['seecommission'];
+                        $newGoodsList[$key]['cansee'] = $goods['cansee'];
+                        $newGoodsList[$key]['seetitle'] = $goods['seetitle'];
+                        $newGoodsList[$key]['bargain'] = $goods['bargain'];
+                        $newGoodsList[$key]['showprice'] = round($goods['minprice']-$goods['deduct'],2);
+                        $newGoodsList[$key]['issendfree'] = $goods['issendfree'];
+                        //添加广告表示
+                        $newGoodsList[$key]['adv']=0;
+                    }else{
+                        $gd=pdo_get("ewei_shop_goods",array("id"=>$gid));
+                        $newGoodsList[$key]['gid'] = $gd['id'];
+                        $newGoodsList[$key]['deduct'] = $gd['deduct'];
+                        $newGoodsList[$key]['deduct_type'] = $gd['deduct_type'];
+                        $newGoodsList[$key]['title'] = $gd['title'];
+                        $newGoodsList[$key]['subtitle'] = $gd['subtitle'];
+                        $newGoodsList[$key]['price'] = $gd['minprice'];
+                        $newGoodsList[$key]['productprice'] = $gd['productprice'];
+                        $newGoodsList[$key]['thumb'] = $gd['thumb'];
+                        $newGoodsList[$key]['total'] = $gd['total'];
+                        $newGoodsList[$key]['ctype'] = $gd['type'];
+                        $newGoodsList[$key]['sales'] = $gd['sales'];
+                        $newGoodsList[$key]['video'] = $gd['video'];
+                        $newGoodsList[$key]['seecommission'] = $gd['seecommission'];
+                        $newGoodsList[$key]['cansee'] = $gd['cansee'];
+                        $newGoodsList[$key]['seetitle'] = $gd['seetitle'];
+                        $newGoodsList[$key]['bargain'] = $gd['bargain'];
+                        $newGoodsList[$key]['showprice'] = round($gd['minprice']-$gd['deduct'],2);
+                        $newGoodsList[$key]['issendfree'] = $gd['issendfree'];
+                        //添加广告表示
+                        $newGoodsList[$key]['adv']=1;
+                    }
+                }
+                
+            }else{
+                foreach ($goodsList['list'] as $key=>$goods){
+                    $newGoodsList[$key]['gid'] = $goods['id'];
+                    $newGoodsList[$key]['deduct'] = $goods['deduct'];
+                    $newGoodsList[$key]['deduct_type'] = $goods['deduct_type'];
+                    $newGoodsList[$key]['title'] = $goods['title'];
+                    $newGoodsList[$key]['subtitle'] = $goods['subtitle'];
+                    $newGoodsList[$key]['price'] = $goods['minprice'];
+                    $newGoodsList[$key]['productprice'] = $goods['productprice'];
+                    $newGoodsList[$key]['thumb'] = $goods['thumb'];
+                    $newGoodsList[$key]['total'] = $goods['total'];
+                    $newGoodsList[$key]['ctype'] = $goods['type'];
+                    $newGoodsList[$key]['sales'] = $goods['sales'];
+                    $newGoodsList[$key]['video'] = $goods['video'];
+                    $newGoodsList[$key]['seecommission'] = $goods['seecommission'];
+                    $newGoodsList[$key]['cansee'] = $goods['cansee'];
+                    $newGoodsList[$key]['seetitle'] = $goods['seetitle'];
+                    $newGoodsList[$key]['bargain'] = $goods['bargain'];
+                    $newGoodsList[$key]['showprice'] = round($goods['minprice']-$goods['deduct'],2);
+                    $newGoodsList[$key]['issendfree'] = $goods['issendfree'];
+                    //添加广告表示
+                    $newGoodsList[$key]['adv']=0;
+                }
             }
             return $newGoodsList;
         }
-
+       
+        //判断是否包含
+        public function inarray($arary,$key){
+            foreach ($arary as $k=>$v){
+               if ($v["sort"]==$key){
+                   return $v["goodid"];
+               } 
+            }
+            return 0;
+        }
         public function calculate($str = NULL, $pagetype = false)
         {
             global $_W;

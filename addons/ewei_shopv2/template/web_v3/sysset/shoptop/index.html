@@ -38,7 +38,7 @@
                         <th class='th-sortable' data-sort-name='title'>结束时间</th>
                         
                       
-                        <th style="width: 65px;">操作</th>
+                        <th style="width: 85px;">操作</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,6 +68,12 @@
                                     <a data-toggle='ajaxRemove' href="{php echo webUrl('sysset/shoptop/delete', array('id' => $row['id']))}"class="btn btn-op btn-operation" data-confirm='确认要删除此信息吗?'>
                                         <span data-toggle="tooltip" data-placement="top" data-original-title="删除">
                                                <i class='icow icow-shanchu1'></i>
+                                        </span>
+                                    </a>
+                                    
+                                     <a href="{php echo webUrl('sysset/shoptop/census',array('id' => $row['id']))}" class="btn btn-op btn-operation" >
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="统计">
+                                                <i class='icow icow-bianji2'></i>
                                             </span>
                                     </a>
                                
@@ -78,7 +84,7 @@
                 <tfoot>
                     <tr>
                         
-                        <td colspan="3" style="text-align: right">
+                        <td colspan="8" style="text-align: right">
                             {$pager}
                         </td>
                     </tr>

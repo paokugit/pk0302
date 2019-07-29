@@ -1,0 +1,62 @@
+{template '_header'}
+<meta charset="UTF-8">
+<div class="page-header">当前位置：<span class="text-primary">商品置顶统计</span></div>
+
+<div class="page-content">
+   
+
+   
+        <form action="" method="post">
+           
+            <table class="table table-responsive table-hover" >
+                <thead class="navbar-inner">
+                    <tr>
+                        
+                        <th class='th-sortable' data-sort-name='title'>查看次数</th>
+                         <th class='th-sortable' data-sort-name='title'>成交的订单</th>
+                        <th class='th-sortable' data-sort-name='title'>待支付订单</th>
+                        <th class='th-sortable' data-sort-name='title'>今日成交额</th>
+                        <th class='th-sortable' data-sort-name='title'>昨日成交额</th>
+                        <th class='th-sortable' data-sort-name='title'>累计成交额</th>
+                        
+                       <th style="width: 85px;">操作</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                   
+                        <tr>
+                           
+                            <td>{$viewcount["total"]}</td>
+                             <td>{$success_order["total"]}</td>
+                            <td>{$unpaid_order['total']}</td>
+                            <td>{$today_money['total']}</td>
+                           <td>{$yesterday_money['total']}</td>
+                           <td>{$count_money['total']}</td>
+                           <td style="text-align:left;">
+                               
+                                    
+                                    <a href="{php echo webUrl('sysset/shoptop/view',array('id' =>$id))}" class="btn btn-op btn-operation" >
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="预览">
+                                                <i class='icow icow-bianji2'></i>
+                                            </span>
+                                    </a>
+                                    
+                                    <a  href="{php echo webUrl('sysset/shoptop/order', array('id' =>$id))}"class="btn btn-op btn-operation" >
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="订单">
+                                               <i class='icow icow-bianji2'></i>
+                                        </span>
+                                    </a>
+                                    
+                                   
+                            </td>
+                        </tr>
+                    
+                </tbody>
+                
+            </table>
+        </form>
+  
+</div>
+{template '_footer'}
+<!--NDAwMDA5NzgyNw==-->

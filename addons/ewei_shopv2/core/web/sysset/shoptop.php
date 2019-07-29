@@ -93,12 +93,140 @@ class Shoptop_EweiShopV2Page extends WebPage
         global $_GPC;
         $id = intval($_GPC['id']);
         
-        
-        
         pdo_update("ewei_shop_goodtop",array("is_del"=>1),array("id"=>$id));
-        
         
         show_json(1, array('url' => referer()));
         
+    }
+    //统计
+    public function census(){
+        global $_W;
+        global $_GPC;
+        $id = intval($_GPC['id']);
+        $detail=pdo_get("ewei_shop_goodtop",array("id"=>$id));
+        //获取查看次数
+        $viewcount=pdo_fetch("select count(*) as total from ".tablename("ewei_shop_goodview")." where goodid=:goodid and time>=:starttime and time<=:endtime",array(":goodid"=>$detail["goodid"],":starttime"=>$detail["start_date"],":endtime"=>$detail["end_date"]));
+        
+        //获取成交的订单
+        $where="a.status>0 and a.status!=4 and o.goodsid=".$detail["goodid"]."  and a.paytime>=".strtotime($detail["start_date"])." and a.paytime<=".strtotime($detail["end_date"]);
+        $success_order=pdo_fetch("select count(*) as total from ".tablename("ewei_shop_order_goods")." o"." left join ".tablename("ewei_shop_order")." a on a.id=o.orderid where ".$where);
+        //未支付
+        $where="a.status=0 and o.goodsid=".$detail["goodid"]."  and a.paytime>=".strtotime($detail["start_date"])." and a.paytime<=".strtotime($detail["end_date"]);
+        $unpaid_order=pdo_fetch("select count(*) as total from ".tablename("ewei_shop_order_goods")." o"." left join ".tablename("ewei_shop_order")." a on a.id=o.orderid where ".$where);
+        //今日订单金额
+        $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
+        $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
+        $where="a.status>0 and a.status!=4 and o.goodsid=".$detail["goodid"]."  and a.paytime>=".$beginToday." and a.paytime<=".$endToday;
+        $today_money=pdo_fetch("select sum(a.price) as total from ".tablename("ewei_shop_order_goods")." o"." left join ".tablename("ewei_shop_order")." a on a.id=o.orderid where ".$where);
+        //昨日订单金额
+        $beginYesterday=mktime(0,0,0,date('m'),date('d')-1,date('Y'));
+        $endYesterday=mktime(0,0,0,date('m'),date('d'),date('Y'))-1;
+        $where="a.status>0 and a.status!=4 and o.goodsid=".$detail["goodid"]."  and a.paytime>=".$beginToday." and a.paytime<=".$endYesterday;
+        $yesterday_money=pdo_fetch("select sum(a.price) as total from ".tablename("ewei_shop_order_goods")." o"." left join ".tablename("ewei_shop_order")." a on a.id=o.orderid where ".$where);
+        //累计成交额
+        $where="a.status>0 and a.status!=4 and o.goodsid=".$detail["goodid"]."  and a.paytime>=".strtotime($detail["start_date"])." and a.paytime<=".strtotime($detail["end_date"]);
+        $count_money=pdo_fetch("select sum(a.price) as total from ".tablename("ewei_shop_order_goods")." o"." left join ".tablename("ewei_shop_order")." a on a.id=o.orderid where ".$where);
+        
+        include $this->template();
+        
+    }
+    //查看记录
+    public function view(){
+        global $_W;
+        global $_GPC;
+        $id = intval($_GPC['id']);
+        $detail=pdo_get("ewei_shop_goodtop",array("id"=>$id));
+        //获取查看次数
+       
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 20;
+        $condition = ' and goodid=:goodid and time>=:starttime and time<=:endtime';
+        $params = array(":goodid"=>$detail["goodid"],":starttime"=>$detail["start_date"],":endtime"=>$detail["end_date"]);
+        
+        
+        $view = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_goodview') . (' WHERE 1 ' . $condition.'  limit ') . ($pindex - 1) * $psize . ',' . $psize, $params);
+        foreach ($view as $k=>$v){
+            $member=pdo_get("ewei_shop_member",array("openid"=>$detail["openid"]));
+            $view[$k]["nickname"]=$member["nickname"];
+        }
+        $total = pdo_fetchcolumn('SELECT count(*) FROM ' . tablename('ewei_shop_goodview') . (' WHERE 1 ' . $condition), $params);
+        $pager = pagination2($total, $pindex, $psize);
+        
+        include $this->template();
+    }
+    
+    //订单
+    public function order(){
+        global $_W;
+        global $_GPC;
+        $id = intval($_GPC['id']);
+        $detail=pdo_get("ewei_shop_goodtop",array("id"=>$id));
+        $searchtime=$_GPC["searchtime"];
+        
+        $time=$_GPC["time"];
+        if ($time["start"]&&$searchtime){
+            
+            $starttime=strtotime($time["start"]);
+        }else{
+            $starttime=time();
+        }
+        if ($time["end"]&&$searchtime){
+           
+            $endtime=strtotime($time["end"]);
+        }else{
+            $endtime=time();
+            
+        }
+        
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 20;
+       if ($time&&$searchtime){
+            
+            $params = array(":goodid"=>$detail["goodid"],":starttime"=>strtotime($time["start"]),":endtime"=>strtotime($time["end"]));
+            
+       }else{
+           $params = array(":goodid"=>$detail["goodid"],":starttime"=>strtotime($detail["start_date"]),":endtime"=>strtotime($detail["end_date"]));
+           
+         }
+        
+        //获取成交的订单
+        $where="o.goodsid=:goodid  and a.createtime>=:starttime and a.createtime<=:endtime";
+        
+        $status=$_GPC["status"];
+        if ($status){
+            $params[":status"]=$status;
+            $where.="  and a.status=:status";
+        }
+        
+        $list= pdo_fetchall("select a.ordersn as ordersn, a.price as price,a.openid as openid ,a.status as status,a.paytime as paytime,a.createtime as createtime from ".tablename("ewei_shop_order_goods")." o"." left join ".tablename("ewei_shop_order")." a on a.id=o.orderid where ".$where."  limit ". ($pindex - 1) * $psize . ',' . $psize,$params);
+//        var_dump($list);
+//        var_dump($time);
+        foreach ($list as $k=>$v){
+            
+            $list[$k]["createtime"]=date("Y-m-d H:i:s",$v["createtime"]);
+            
+            //获取用户
+            $member=pdo_get("ewei_shop_member",array("openid"=>$v["openid"]));
+            $list[$k]["nickname"]=$member["nickname"];
+            if ($v["status"]==0){
+                $list[$k]["status_type"]="待支付";
+            }elseif ($v["status"]==-1){
+                $list[$k]["status_type"]="取消状态";
+            }elseif ($v["status"]==1){
+                $list[$k]["status_type"]="待发货";
+            }elseif ($v["status"]==2){
+                $list[$k]["status_type"]="待收货";
+            }elseif ($v["status"]==3){
+                $list[$k]["status_type"]="成功";
+            }elseif ($v["status"]==4){
+                $list[$k]["status_type"]="退款";
+            }
+        }
+        $total = pdo_fetchcolumn('SELECT count(*) FROM ' .tablename("ewei_shop_order_goods")." o"." left join ".tablename("ewei_shop_order")." a on a.id=o.orderid " . (' WHERE  ' . $where), $params);
+        //订单金额
+        $price=pdo_fetch("select sum(a.price) as total from ".tablename("ewei_shop_order_goods")." o"." left join ".tablename("ewei_shop_order")." a on a.id=o.orderid where ".$where."  limit ". ($pindex - 1) * $psize . ',' . $psize,$params);
+        
+        $pager = pagination2($total, $pindex, $psize);
+        include $this->template();
     }
 }

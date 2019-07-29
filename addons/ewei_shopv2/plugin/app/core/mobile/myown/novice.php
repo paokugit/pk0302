@@ -12,9 +12,10 @@ class Novice_EweiShopV2Page extends AppMobilePage{
         global $_W;
         $page=$_GPC["page"];
         $first=($page-1)*10;
-        $list=pdo_fetchall("select id,title,photo,time,type from ".tablename("ewei_shop_notive")."order by sort desc limit ".$first." ,10");
+        $list=pdo_fetchall("select id,title,photo,time,type,video from ".tablename("ewei_shop_notive")."order by sort desc limit ".$first." ,10");
         foreach ($list as $k=>$v){
             $list[$k]["photo"]=tomedia($v["photo"]);
+            $list[$k]["video"]=tomedia($v["video"]);
         }
         app_error(0,$list);
     }
@@ -46,6 +47,7 @@ class Novice_EweiShopV2Page extends AppMobilePage{
         global $_W;
         $id=$_GPC["id"];
         $detail=pdo_get("ewei_shop_notive_article",array("id"=>$id));
+        $detail["createtime"]=date("Y-m-d H:i:s");
         app_error(0,$detail);
     }
     

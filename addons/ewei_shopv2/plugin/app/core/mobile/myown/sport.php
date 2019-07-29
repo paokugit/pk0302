@@ -646,6 +646,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             $m = array("uniacid" => $_W["uniacid"],"is_login"=>1,"uid" => 0, "openid" => "sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
             pdo_insert("ewei_shop_member", $m);
         }
+        m('member')->setCredit("sns_wa_".$openid, 'credit3', 100, "新人专享金");
         show_json(0, "success");
     }
 }

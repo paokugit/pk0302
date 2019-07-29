@@ -1,0 +1,47 @@
+{template '_header'}
+<meta charset="UTF-8">
+<div class="page-header">当前位置：<span class="text-primary">商品置顶浏览记录</span></div>
+
+<div class="page-content">
+  
+
+    {if empty($view)}
+        <div class="panel panel-default">
+            <div class="panel-body empty-data">未查询到相关数据</div>
+        </div>
+    {else}
+        <form action="" method="post">
+           
+            <table class="table table-responsive table-hover" >
+                <thead class="navbar-inner">
+                    <tr>
+                       
+                        <th class='th-sortable' data-sort-name='title'>用户</th>
+                         <th class='th-sortable' data-sort-name='title'>时间</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $view $row}
+                        <tr>
+                            
+                            <td>{$row['nickname']}</td>
+                             <td>{$row['time']}</td>
+                            
+                        </tr>
+                    {/loop}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        
+                        <td colspan="8" style="text-align: right">
+                            {$pager}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </form>
+    {/if}
+</div>
+{template '_footer'}
+<!--NDAwMDA5NzgyNw==-->
