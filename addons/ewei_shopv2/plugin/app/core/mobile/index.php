@@ -512,6 +512,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             if ($member["qiandao"]==$yesterday){
                 //连签天数<7
                 if ($member["sign_days"]!=7){
+
 //                     if ($member["sign_days"]>0){
 //                     $step=[1+2*($member["sign_days"]-1)]*$shopset['qiandao'];
 //                     }else{
@@ -571,6 +572,10 @@ class Index_EweiShopV2Page extends AppMobilePage
                     'sign_days'=>$sign_days
                 ];
                 $update['credit3'] = $member['is_open'] == 1 ? bcadd($member['credit3'],10,2) : $member['credit3'] ;
+                //如果过期时间 小于 当前时间  并且  is_open == 1  然后更改is_open
+                if($member['expire_time'] < time() && $member['is_open'] == 1){
+                    $update['is_open'] = 2;
+                }
                 pdo_update('ewei_shop_member', $update, array('openid' => $member['openid']));
                 wxmessage($openid, $sign_days,'1卡路里');
                 //如果是年卡会员   则给会员发送小程序消息
