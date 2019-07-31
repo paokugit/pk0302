@@ -1079,12 +1079,13 @@ class EweiShopWechatPay
                 //如果用户已买年卡  则给到期时间加1年   并且到期时间大于当前时间   小于 代表已过期
                 if($member['expire_time'] && $member['expire_time'] > time()){
                     $endtime = strtotime('+1 year',$member['expire_time']);
-                    $a = $this->add_record($order['openid'],$endtime,$level);
+                    $expire_time =  strtotime(date('Y-m',$member['expire_time']));
                 }else{
                     $endtime = strtotime('+1 year');
-                    $a = $this->add_record($order['openid'],time(),$level);
+                    $expire_time = strtotime(date('Y-m',time()));
                 }
                 //改变用户的状态
+                $a = $this->add_record($order['openid'],$expire_time,$level);
                 $b = pdo_update('ewei_shop_member',['is_open'=>1,'expire_time'=>$endtime],['openid'=>$order['openid']]);
                 pdo_insert('log',['log'=>$a.$b,'createtime'=>date('Y-m-d H:i:s',time())]);
                 pdo_commit();
@@ -1136,12 +1137,12 @@ class EweiShopWechatPay
         for ($i=0;$i<12;$i++){
             $data = [
                 'uniacid'=>$_W['uniacid'],
-                'month'=>date('Ym',strtotime('+1 month',$time)),
+                'month'=>date('Ym',strtotime('+'.$i.' month',$time)),
                 'openid'=>$openid,
                 'level_id'=>$level['id'],
                 'level_name'=>$level['level_name'],
-                'goods_id'=>iunserializer($level['goods_id']),
-                'createtime'=>time(),
+                'goods_id'=>iunserializer($level['goods_id'])[0],
+                'createtime'=>strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
             ];
             //如果已经加过发放记录   就继续结束
             if(pdo_exists('ewei_shop_level_record',['openid'=>$openid,'month'=>$data['month'],'level_id'=>$data['level_id']])){

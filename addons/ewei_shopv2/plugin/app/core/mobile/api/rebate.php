@@ -20,23 +20,22 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $money = $_GPC['money'];
         $token = $_GPC['token'];
         //判断参数完整性
+        $add = ['mobile'=>$mobile,'msg'=>$msg,'money'=>$money,'token'=>$token];
         if($mobile == "" || $msg == "" || $money == "" || $token == ""){
             //show_json(201,"参数不完整");
+            $this->addlog($add,201,'参数不完整');
             exit(json_encode(['code'=>201,'msg'=>"参数不完整"]));
         }
-        $add = ['mobile'=>$mobile,'msg'=>$msg,'money'=>$money,'token'=>$token];
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['mobile'=>$mobile,'uniacid'=>$uniacid]);
         if($token != md5(md5(base64_encode($mobile.$msg.$member['openid'])))){
-            $response = ['code'=>202,'msg'=>'折扣宝充值鉴权验证失败'];
-            pdo_insert('core_rebate_log',['request'=>json_encode($add),'response'=>json_encode($response),'createtime'=>time()]);
-            exit(json_encode($response));
+            $this->addlog($add,202,'折扣宝充值鉴权验证失败');
+            exit(json_encode(['code'=>202,'msg'=>'折扣宝充值鉴权验证失败']));
         }
         $redis = redis();
         if($redis->get($mobile.$msg.$money."token")){
-            $response = ['code'=>203,'msg'=>"请求过于频繁,请1分钟后谨慎处理"];
-            pdo_insert('core_rebate_log',['request'=>json_encode($add),'response'=>json_encode($response),'createtime'=>time()]);
-            exit(json_encode($response));
+           $this->addlog($add,203,"请求过于频繁,请1分钟后谨慎处理");
+           exit(json_encode(['code'=>203,'msg'=>"请求过于频繁,请1分钟后谨慎处理"]));
         }else{
             $token = md5($mobile.$msg.$money.time().random(6));
             $redis->set($mobile.$msg.$money."token",$token,60);
@@ -44,14 +43,12 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         //用户不存在  用户的折扣宝余额
         if(!$member){
             //show_json(204,"用户不存在");
-            $response = ['code'=>204,'msg'=>"用户信息不正确"];
-            pdo_insert('core_rebate_log',['request'=>json_encode($add),'response'=>json_encode($response),'createtime'=>time()]);
-            exit(json_encode($response));
+            $this->addlog($add,204,"用户信息不正确");
+            exit(json_encode(['code'=>204,'msg'=>"用户信息不正确"]));
         }elseif($member['credit3'] < $money){
             //show_json(205,"折扣宝余额不足");
-            $response = ['code'=>205,'msg'=>"折扣宝余额不足"];
-            pdo_insert('core_rebate_log',['request'=>json_encode($add),'response'=>json_encode($response),'createtime'=>time()]);
-            exit(json_encode($response));
+            $this->addlog($add,205,"折扣宝余额不足");
+            exit(json_encode(['code'=>205,'msg'=>"折扣宝余额不足"]));
         }
         //查看短息信息
         $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'content'=>$msg,'result'=>0]);
@@ -59,9 +56,8 @@ class Rebate_EweiShopV2Page extends AppMobilePage
             pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
         }else{
             //show_json(206,"短信验证码不正确");
-            $response = ['code'=>206,'msg'=>"短信验证码不正确"];
-            pdo_insert('core_rebate_log',['request'=>json_encode($add),'response'=>json_encode($response),'createtime'=>time()]);
-            exit(json_encode($response));
+            $this->addlog($add,206,"短信验证码不正确");
+            exit(json_encode(['code'=>206,'msg'=>"短信验证码不正确"]));
         }
         //结算折扣宝的余额
         $data['credit3'] = bcsub($member['credit3'],$money,2);
@@ -69,9 +65,8 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         if($res){
             //show_json(200,"支付成功");
             m('game')->addCreditlog($member['openid'],3,-$money,"外部网站消费折扣宝");
-            $response = ['code'=>200,'msg'=>"支付成功"];
-            pdo_insert('core_rebate_log',['request'=>json_encode($add),'response'=>json_encode($response),'createtime'=>time()]);
-            exit(json_encode($response));
+            $this->addlog($add,200,"支付成功");
+            exit(json_encode(['code'=>200,'msg'=>"支付成功"]));
         }
     }
 
@@ -118,9 +113,20 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         }
     }
 
+    /**
+     * @param $add
+     * @param $code
+     * @param $msg
+     * @return bool
+     */
     public function addlog($add,$code,$msg)
     {
-
+        $data = [
+            'request'=>json_encode($add),
+            'response'=>json_encode(['code'=>$code,'msg'=>$msg]),
+            'createtime'=>time()
+        ];
+        return pdo_insert('core_rebate_log',$data);
     }
 }
 ?>

@@ -21,9 +21,9 @@ class Level_EweiShopV2Page extends AppMobilePage
         //用户的信息
         $member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid],['nickname','realname','is_open',"FROM_UNIXTIME(expire_time) as expire"]);
         //待领取的优惠券  两个
-        $coupon = pdo_fetchall('select cd.id,cd.used,co.deduct,co.enough,co.couponname from '.tablename('ewei_shop_coupon_data').'cd join '.tablename('ewei_shop_coupon').'co on co.id=cd.couponid'.' where cd.gettype = 1 and cd.openid = "'.$openid.'" and cd.used = 0 order by id desc LIMIT 0,2');
+        $coupon = pdo_fetchall('select cd.id,cd.used,co.deduct,co.enough,co.couponname from '.tablename('ewei_shop_coupon_data').'cd join '.tablename('ewei_shop_coupon').'co on co.id=cd.couponid'.' where cd.gettype = 1 and cd.openid = "'.$openid.'" order by id desc LIMIT 0,2');
         //特权产品列表
-        $goods = pdo_getall('ewei_shop_goods','status = 1 and is_right = 1 and total > 0 order by id desc LIMIT 0,8',['id','title','thumb','total','productprice','marketprice']);
+        $goods = pdo_getall('ewei_shop_goods','status = 1 and is_right = 1 and total > 0 order by id desc LIMIT 0,8',['id','title','thumb','total','productprice','marketprice','bargain']);
         foreach ($goods as $key=>$item){
             $goods[$key]['thumb'] = tomedia($item['thumb']);
         }
@@ -32,6 +32,14 @@ class Level_EweiShopV2Page extends AppMobilePage
         $level = pdo_get('ewei_shop_level_record',['openid'=>$openid,'uniacid'=>$uniacid,'month'=>$month],['id','openid','level_name','level_id','goods_id','status','month','FROM_UNIXTIME(updatetime) as updatetime']);
         $good = pdo_get('ewei_shop_goods',['id'=>$level['goods_id'],'uniacid'=>$uniacid],['thumb','productprice']);
         $level = array_merge($level,['thumb'=>tomedia($good['thumb']),'price'=>$good['productprice']]);
+        $log = pdo_getall('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'status'=>1]);
+        //如果今天的年月份  大于记录中的 则更新他为失效   或者  月份相同  日期大于20  并把更新时间改成当月的21号为失效时间   并且状态为未领取
+        $record = pdo_getall('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and month <= "'.$year_month.'" order by id desc LIMIT '.$pindex.','.$pageSize);
+        foreach ($record as $key => $item){
+            if((date('Ym',time()) > $item['month'] || date('Ym',time()) == $item['month'] && date('d',time()) > 21) && $item['status'] == 0 && count($log) > 0){
+                pdo_update('ewei_shop_level_record',['status'=>2,'updatetime'=>strtotime($item['month']."21")],['uniacid'=>$uniacid,'id'=>$item['id']]);
+            }
+        }
         show_json(1,['member'=>$member,'coupon'=>$coupon,'goods'=>$goods,'level'=>$level]);
     }
 
@@ -74,15 +82,8 @@ class Level_EweiShopV2Page extends AppMobilePage
         foreach ($record as $key=>$item) {
             $record[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             $record[$key]['updatetime'] = date('Y年m月d日',$item['updatetime']);
-            $record[$key]['month'] = substr($item['month'],4);
+            $record[$key]['month'] = date('Y年m月',$item['createtime']);
             $record[$key]['thumb'] = tomedia(pdo_getcolumn('ewei_shop_goods',['id'=>$item['goods_id']],'thumb'));
-            //如果今天的年月份  大于记录中的 则更新他为失效   或者  月份相同  日期大于20  并把更新时间改成当月的21号为失效时间   并且状态为未领取
-            if((date('Ym',time()) > $item['month'] || date('Ym',time()) == $item['month'] && date('d',time()) > 20) && $item['status'] == 0){
-                pdo_update('ewei_shop_level_record',['status'=>2,'updatetime'=>strtotime($item['month']."21")],['uniacid'=>$uniacid,'id'=>$item['id']]);
-                //给记录改变状态  并且给失效时间
-                $record[$key]['status'] = 2;
-                $record[$key]['updatetime'] = date('Y-m-d H:i:s',strtotime($item['month']."21"));
-            }
         }
         if(!$record){
             show_json(0,"暂无信息");
@@ -155,8 +156,8 @@ class Level_EweiShopV2Page extends AppMobilePage
         }
         //查询该记录的信息
         $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id]);
-        //if(date('Ymd',time()) < $record['month']."10" || date('md',time()) > $record['month']."20"){
-        if(date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."30"){
+        $log = pdo_getall('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'status'=>1]);
+        if(count($log) > 0 && (date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."21")){
             show_json(0,$record['month']."权益礼包不在领取日期");
         }
         if($record['status'] > 0){
@@ -250,6 +251,23 @@ class Level_EweiShopV2Page extends AppMobilePage
             'rechargetype'=>'waapp',
         ];
         return pdo_insert('ewei_shop_member_log',$data);
+    }
+
+    /**
+     * 个人中心的年卡入口
+     */
+    public function mem_level()
+    {
+        global $_W;
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        $uniacid = $_W['uniacid'];
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
+        if($member['is_open']){
+            show_json(1,['is_open'=>$member['is_open'],'expire_time'=>date('y年m月d日',$member['expire_time'])]);
+        }else{
+            show_json(0);
+        }
     }
 }
 ?>

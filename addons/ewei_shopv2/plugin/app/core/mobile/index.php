@@ -519,16 +519,15 @@ class Index_EweiShopV2Page extends AppMobilePage
 //                         $step=$shopset['qiandao'];
 //                     }
                     $step=$shopset['qiandao'];
-                $data = array(
-                    'timestamp' => time(),
-                    'openid' => trim($_W["openid"]),
-                    'day' => date('Y-m-d'),
-                    'uniacid' => $_W['uniacid'],
-                    'step' => $step,
-                    'type' => 2
-                );
-                $sign_days=$member["sign_days"]+1;
-
+                    $data = array(
+                        'timestamp' => time(),
+                        'openid' => trim($_W["openid"]),
+                        'day' => date('Y-m-d'),
+                        'uniacid' => $_W['uniacid'],
+                        'step' => $step,
+                        'type' => 2
+                    );
+                    $sign_days=$member["sign_days"]+1;
                 }else{
                     $step=$shopset['qiandao'];
                     $data = array(
@@ -542,10 +541,17 @@ class Index_EweiShopV2Page extends AppMobilePage
 //                     $sign_days=1;
                     $sign_days=$member["sign_days"]+1;
                 }
+                $update = array('qiandao' => $day,'sign_days'=>$sign_days);
+                //如果是年卡会员  则折扣宝加10  否则是原来的credit3
+                $update['credit3'] = $member['is_open'] == 1 ? bcadd($member['credit3'],10,2) : $member['credit3'] ;
+
                 pdo_insert('ewei_shop_member_getstep', $data);
-                pdo_update('ewei_shop_member', array('qiandao' => $day,'sign_days'=>$sign_days), array('openid' => $member['openid']));
+                pdo_update('ewei_shop_member', $update , array('openid' => $member['openid']));
                 //签到消息提醒
-                wxmessage($openid, $sign_days);
+                wxmessage($openid, $sign_days,'1卡路里');
+                if($member['is_open'] == 1){
+                    wxmessage($openid,date('Y-m-d',time()),'年卡会员每日登陆领取10折扣宝');
+                }
                 app_error(0,"签到成功,获取步数".$step);
             }else{
                 
@@ -561,8 +567,21 @@ class Index_EweiShopV2Page extends AppMobilePage
                 );
                 $sign_days=1;
                 pdo_insert('ewei_shop_member_getstep', $data);
-                pdo_update('ewei_shop_member', array('qiandao' => $day,'sign_days'=>$sign_days), array('openid' => $member['openid']));
-                wxmessage($openid, $sign_days);
+                $update = [
+                    'qiandao' => $day,
+                    'sign_days'=>$sign_days
+                ];
+                $update['credit3'] = $member['is_open'] == 1 ? bcadd($member['credit3'],10,2) : $member['credit3'] ;
+                //如果过期时间 小于 当前时间  并且  is_open == 1  然后更改is_open
+                if($member['expire_time'] < time() && $member['is_open'] == 1){
+                    $update['is_open'] = 2;
+                }
+                pdo_update('ewei_shop_member', $update, array('openid' => $member['openid']));
+                wxmessage($openid, $sign_days,'1卡路里');
+                //如果是年卡会员   则给会员发送小程序消息
+                if($member['is_open'] == 1){
+                    wxmessage($openid,date('Y-m-d',time()),"年卡会员每日登陆领取10折扣宝");
+                }
                 app_error(0,"签到成功,获取步数".$step);
             }
             
@@ -618,7 +637,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 }
 
 //签到消息
-function wxmessage($openid,$sign_days){
+function wxmessage($openid,$sign_days,$remark){
     //获取用户信息
     $member = m("member")->getMember($openid);
     $postdata=array(
@@ -627,7 +646,7 @@ function wxmessage($openid,$sign_days){
             'color' => '#ff510'
         ),
         'keyword2'=>array(
-            'value'=>"1卡路里",
+            'value'=>$remark,
             'color' => '#ff510'
         ),
         'keyword3'=>array(

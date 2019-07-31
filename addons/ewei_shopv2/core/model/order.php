@@ -1625,15 +1625,15 @@ class Order_EweiShopV2Model
 			if( $g["issendfree"]  == 1 )
 			{
 			    //如果包邮  但是是偏远地区邮费又不是空  那么 是偏远地域
-                $area = explode(';',$g['edareas']);
-                //如果他没设置  偏远  普通 默认 没有偏远地域
-                if(!in_array($user_province,$area) && !empty($g['edareas'])&& $g['remote_dispatchprice'] != 0){
-                    $dispatch_price += $g['remote_dispatchprice'];
-                    $is_remote = 1;
-                }else{
-                    $is_remote = 0;
-                    $sendfree = true;
-                }
+			    $area = explode(';',$g['edareas']);
+			    //如果他没设置  偏远  普通 默认 没有偏远地域
+			    if(!in_array($user_province,$area) && !empty($g['edareas'])&& $g['remote_dispatchprice'] != 0){
+			    	$dispatch_price += $g['remote_dispatchprice'];
+			        $is_remote = 1;
+			    }else{
+			    	$is_remote = 0;
+			    }
+			    $sendfree = true;
 			}
 			else 
 			{
