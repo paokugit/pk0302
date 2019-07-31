@@ -69,8 +69,9 @@ class Log_EweiShopV2Page extends AppMobilePage
         $condition = " and openid=:openid and uniacid=:uniacid and credittype=:credittype and module=:module   ".$addwhere;
         $params = array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid'], ':credittype' => 'credit1', ':module' => 'ewei_shopv2');
         $list = pdo_fetchall('select * from ' . tablename('mc_credits_record') . ' where 1 ' . $condition . ' order by createtime desc LIMIT ' . (($pindex - 1) * $psize) . ',' . $psize, $params);
-        $total = pdo_fetchcolumn('select count(*) from ' . tablename('mc_credits_record') . ' where 1 ' . $condition, $params);
-
+        //$total = pdo_fetchcolumn('select count(*) from ' . tablename('mc_credits_record') . ' where 1 ' . $condition, $params) < 100 ?  : 100;
+	$total = 100;
+	
         foreach ($list as &$row) {
             $row['createtime'] = date('Y-m-d H:i', $row['createtime']);
             $row['type']=0;

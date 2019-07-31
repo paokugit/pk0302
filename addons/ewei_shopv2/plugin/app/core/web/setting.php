@@ -32,7 +32,9 @@ class Setting_EweiShopV2Page extends PluginWebPage
 
 				$isMob = '/^1[3-9]{1}[0-9]{9}$/';
 				$isTel = '/^([0-9]{3,4}-)?[0-9]{7,8}$/';
-				if (!preg_match($isMob, $_GPC['set']['phonenumber']) && !preg_match($isTel, $_GPC['set']['phonenumber'])) {
+				$is_four = '/^400[0-9]{7}$/';     //400电话
+				$is_eight = '/^800[0-9]{7}$/';    //800电话
+				if (!preg_match($isMob, $_GPC['set']['phonenumber']) && !preg_match($isTel, $_GPC['set']['phonenumber']) && !preg_match($is_four,$_GPC['set']['phonenumber']) && !preg_match($is_eight,$_GPC['set']['phonenumber'])) {
 					show_json(0, '请输入正确的手机号码或座机号码');
 				}
 			}

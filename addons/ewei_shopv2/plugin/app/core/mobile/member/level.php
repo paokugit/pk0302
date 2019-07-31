@@ -32,6 +32,14 @@ class Level_EweiShopV2Page extends AppMobilePage
         $level = pdo_get('ewei_shop_level_record',['openid'=>$openid,'uniacid'=>$uniacid,'month'=>$month],['id','openid','level_name','level_id','goods_id','status','month','FROM_UNIXTIME(updatetime) as updatetime']);
         $good = pdo_get('ewei_shop_goods',['id'=>$level['goods_id'],'uniacid'=>$uniacid],['thumb','productprice']);
         $level = array_merge($level,['thumb'=>tomedia($good['thumb']),'price'=>$good['productprice']]);
+        $log = pdo_getall('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'status'=>1]);
+        //如果今天的年月份  大于记录中的 则更新他为失效   或者  月份相同  日期大于20  并把更新时间改成当月的21号为失效时间   并且状态为未领取
+        $record = pdo_getall('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and month <= "'.$year_month.'" order by id desc LIMIT '.$pindex.','.$pageSize);
+        foreach ($record as $key => $item){
+            if((date('Ym',time()) > $item['month'] || date('Ym',time()) == $item['month'] && date('d',time()) > 21) && $item['status'] == 0 && count($log) > 0){
+                pdo_update('ewei_shop_level_record',['status'=>2,'updatetime'=>strtotime($item['month']."21")],['uniacid'=>$uniacid,'id'=>$item['id']]);
+            }
+        }
         show_json(1,['member'=>$member,'coupon'=>$coupon,'goods'=>$goods,'level'=>$level]);
     }
 
@@ -76,13 +84,6 @@ class Level_EweiShopV2Page extends AppMobilePage
             $record[$key]['updatetime'] = date('Y年m月d日',$item['updatetime']);
             $record[$key]['month'] = date('Y年m月',$item['createtime']);
             $record[$key]['thumb'] = tomedia(pdo_getcolumn('ewei_shop_goods',['id'=>$item['goods_id']],'thumb'));
-            //如果今天的年月份  大于记录中的 则更新他为失效   或者  月份相同  日期大于20  并把更新时间改成当月的21号为失效时间   并且状态为未领取
-            if((date('Ym',time()) > $item['month'] || date('Ym',time()) == $item['month'] && date('d',time()) > 20) && $item['status'] == 0){
-                pdo_update('ewei_shop_level_record',['status'=>2,'updatetime'=>strtotime($item['month']."21")],['uniacid'=>$uniacid,'id'=>$item['id']]);
-                //给记录改变状态  并且给失效时间
-                $record[$key]['status'] = 2;
-                $record[$key]['updatetime'] = date('Y-m-d H:i:s',strtotime($item['month']."21"));
-            }
         }
         if(!$record){
             show_json(0,"暂无信息");
@@ -155,8 +156,8 @@ class Level_EweiShopV2Page extends AppMobilePage
         }
         //查询该记录的信息
         $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id]);
-        //if(date('Ymd',time()) < $record['month']."10" || date('md',time()) > $record['month']."20"){
-        if(date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."30"){
+        $log = pdo_getall('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'status'=>1]);
+        if(count($log) > 0 && (date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."21")){
             show_json(0,$record['month']."权益礼包不在领取日期");
         }
         if($record['status'] > 0){
