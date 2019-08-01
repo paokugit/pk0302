@@ -1362,7 +1362,8 @@ if( !class_exists("CommissionModel") )
 				$first = m("member")->memberRadisCount($redis_key);
 				if( !$first ) 
 				{
-					$first = pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_member") . " where uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"] ));
+// 					$first = pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_member") . " where uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"] ));
+				    $first = pdo_fetchcolumn("select id from " . tablename("ewei_shop_member") . " where uniacid=:uniacid order by id desc limit 1", array( ":uniacid" => $_W["uniacid"] ));
 					m("member")->memberRadisCount($redis_key, $first);
 				}
 			}

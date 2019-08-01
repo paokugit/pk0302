@@ -97,6 +97,18 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $list["icon"]=unserialize($list["icon"]);
         show_json(1,$list);
     }
+    
+    public function cd(){
+        $openid="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
+        //卡路里
+        //获取今日已兑换的卡路里
+        $starttime=strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
+        $endtime=strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
+        $count_list=pdo_fetchall("select num from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark like :remark1 or remark like :remark2) order by id desc",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime,':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+        var_dump($count_list);
+        $count=array_sum(array_column($count_list, 'num'));
+        var_dump($count);
+    }
 }
 
 ?>
