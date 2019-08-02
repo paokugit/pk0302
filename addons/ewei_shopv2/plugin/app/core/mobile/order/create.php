@@ -96,6 +96,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$diyformdata = $this->diyformData($member);
 			extract($diyformdata);
 			$id = intval($_GPC["id"]);
+            		$flag = $this->gift_check($openid,$id);
 			$bargain_id = intval($_GPC["bargainid"]);
 			$_SESSION["bargain_id"] = NULL;
 			if( p("bargain") && !empty($bargain_id) ) 
@@ -1163,9 +1164,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		if ($credit3<$discount){
 		    $discount=$credit3;
 		}
-		
-		$result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "showTab" => 0 < count($carrier_list) && !$isverify && !$isvirtual, "showAddress" => !$isverify && !$isvirtual, "isverify" => $isverify, "isvirtual" => $isvirtual, "set_realname" => $sysset["set_realname"], "set_mobile" => $sysset["set_mobile"], "carrierInfo" => (!empty($carrier_list) ? $carrier_list[0] : false), "storeInfo" => false, "address" => $address, "goods" => $allgoods, "merchid" => $merch_id, "packageid" => $packageid, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle, "changenum" => $changenum, "hasinvoice" => (bool) $hasinvoice, "invoicename" => $invoicename, "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "discount"=>$discount,"deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" => $goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => round($realprice, 2), "total" => $total, "buyagain" => round($buyagain, 2), "fromcart" => (int) $fromcart, "isonlyverifygoods" => $isonlyverifygoods, "isforceverifystore" => $isforceverifystore, "city_express_state" => (empty($dispatch_array["city_express_state"]) ? 0 : $dispatch_array["city_express_state"]), "canusecard" => $canusecard, "card_info" => $card_info, "carddiscountprice" => $carddiscountprice, "card_free_dispatch" => $card_free_dispatch );
-		
+		$result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "showTab" => 0 < count($carrier_list) && !$isverify && !$isvirtual, "showAddress" => !$isverify && !$isvirtual, "isverify" => $isverify, "isvirtual" => $isvirtual, "set_realname" => $sysset["set_realname"], "set_mobile" => $sysset["set_mobile"], "carrierInfo" => (!empty($carrier_list) ? $carrier_list[0] : false), "storeInfo" => false, "address" => $address, "goods" => $allgoods, "merchid" => $merch_id, "packageid" => $packageid, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle, "changenum" => $changenum, "hasinvoice" => (bool) $hasinvoice, "invoicename" => $invoicename, "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "discount"=>$discount,"deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" =>$flag == true? 0 :$goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => $flag == true ? $dispatch_price :round($realprice, 2), "total" => $total, "buyagain" => round($buyagain, 2), "fromcart" => (int) $fromcart, "isonlyverifygoods" => $isonlyverifygoods, "isforceverifystore" => $isforceverifystore, "city_express_state" => (empty($dispatch_array["city_express_state"]) ? 0 : $dispatch_array["city_express_state"]), "canusecard" => $canusecard, "card_info" => $card_info, "carddiscountprice" => $carddiscountprice, "card_free_dispatch" => $card_free_dispatch );
 		if( $iscycel ) 
 		{
 			$cycelset = m("common")->getSysset("cycelbuy");
@@ -1485,6 +1484,10 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$goodsstring = htmlspecialchars_decode(str_replace("\\", "", $_GPC["goods"]));
 			$goodsarr = @json_decode($goodsstring, true);
 		}
+        $flag = false;
+        if(count($goodsarr) == 1){
+            $flag = $this->gift_check($openid,$goodsarr[0]['id']);
+        }
 		if( $_GPC["cardid"] ) 
 		{
 			$packageid = 0;
@@ -1981,10 +1984,10 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$coupon_price = $this->caculatecoupon($couponid, $goodsdata_coupon, $totalprice, $discountprice, $isdiscountprice, 0, array( ), 0, $realprice - $express_fee);
 			$coupon_deductprice = $coupon_price["deductprice"];
 			//lihanwen
-            $sql = "SELECT d.id,d.couponid,c.enough,c.backtype,c.deduct,c.discount,c.backmoney,c.backcredit,c.backredpack,c.merchid,c.limitgoodtype,c.limitgoodcatetype,c.limitgoodids,c.limitgoodcateids,c.limitdiscounttype  FROM " . tablename("ewei_shop_coupon_data") . " d";
-            $sql .= " left join " . tablename("ewei_shop_coupon") . " c on d.couponid = c.id";
-            $sql .= " where d.id=:id and d.uniacid=:uniacid and d.openid=:openid and d.used=0  limit 1";
-            $coupondata = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $couponid, ":openid" => $openid ));
+            		$sql = "SELECT d.id,d.couponid,c.enough,c.backtype,c.deduct,c.discount,c.backmoney,c.backcredit,c.backredpack,c.merchid,c.limitgoodtype,c.limitgoodcatetype,c.limitgoodids,c.limitgoodcateids,c.limitdiscounttype  FROM " . tablename("ewei_shop_coupon_data") . " d";
+	            	$sql .= " left join " . tablename("ewei_shop_coupon") . " c on d.couponid = c.id";
+	            	$sql .= " where d.id=:id and d.uniacid=:uniacid and d.openid=:openid and d.used=0  limit 1";
+	            	$coupondata = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $couponid, ":openid" => $openid ));
 
 			$deductcredit2 -= $coupon_deductprice;
 			$deductmoney -= $coupon_deductprice;
@@ -2016,7 +2019,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$return_array = array( );
 		$return_array["price"] = $dispatch_price + $seckill_dispatchprice;
 		$return_array["couponcount"] = (int) $couponcount;
-		$return_array["realprice"] = round($realprice, 2);
+		$return_array["realprice"] = $flag == true ? $dispatch_price :round($realprice, 2);
 		$return_array["deductenough_money"] = $deductenough_money;
 		$return_array["deductenough_enough"] = $deductenough_enough;
 		$return_array["deductcredit2"] = $deductcredit2;
@@ -2196,6 +2199,10 @@ class Create_EweiShopV2Page extends AppMobilePage
 				$goods = array_merge($goods, $gift);
 			}
 		}
+		$flag = false;
+		if(count($goods) == 1){
+		   $flag = $this->gift_check($openid,$goods[0]['id']);
+        	}
 		foreach( $goods as $g ) 
 		{
 			if( empty($g) ) 
@@ -2983,7 +2990,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$order["uniacid"] = $uniacid;
 		$order["openid"] = $openid;
 		$order["ordersn"] = $ordersn;
-		$order["price"] = $totalprice;
+		$order["price"] = $flag == true ? $dispatch_price : $totalprice;
 		$order["oldprice"] = $totalprice;
 		$order["grprice"] = $grprice;
 		$order["taskdiscountprice"] = $taskdiscountprice;
@@ -3567,6 +3574,61 @@ class Create_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $res = m('reward')->addReward($_GPC['openid']);
         var_dump($res);
+    }
+
+    /**
+     * 判断该商品是否符合领取礼包
+     * @param $openid
+     * @param $goods_id
+     * @return bool
+     */
+    public function gift_check($openid,$goods_id)
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        //查所有的礼包
+        $gifts = pdo_getall('ewei_shop_gift_bag',['status'=>1,'uniacid'=>$uniacid]);
+        //查找用户信息
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
+        //再查他的领取情况
+        $log = pdo_getall('ewei_shop_gift_log',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
+        $flag = false;
+        foreach ($gifts as $item){
+            //把每个礼包里面包含的商品解析成数组
+            $goods = explode(',',$item['goodsid']);
+            //判断该商品是不是在这个礼包里面
+            if(in_array($goods_id,$goods)){
+                //把这个礼包里面的允许领取等级解析成数组
+                $levels = explode(',',$item['levels']);
+                //判断用户身份等级在不在其中   这个做法是只允许当前等级领取对应的礼包
+                if(in_array($member['agentlevel'],$levels)){
+                    //查找是否领取过该等级的礼包   如果没有领取过 返回true  并结束循环
+                    if(!pdo_exists('ewei_shop_gift_log','openid="'.$openid.'"" and gift_id="'.$item['id'].'" and status > 0')){
+                        $flag = $item['id'];
+                        $gift = $item;
+                        break;
+                    }
+                }
+            }
+        }
+        $num = 0;
+        //如果他没领取过  需要邀请新人数量等于当前的领取礼包的数量
+        if(count($log) == 0){
+            $num += $gift['member'];
+        }else {
+            //如果领取过了  需要加上已经领取过的礼包需要的数量
+            foreach ($log as $item) {
+                $num += pdo_getcolumn('ewei_shop_gift_bag', ['id' => $item['gift_id'], 'uniacid' => $_W['uniacid']], 'member');
+            }
+            $num += $gift['member'];
+        }
+        //计算他在活动期间的邀请新人数量
+        $count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime > "'.$gift['starttime'].'"');
+        //如果邀请数量不足  则返回false
+        if($count < $num){
+            $flag = false;
+        }
+        return $flag;
     }
 }
 ?>

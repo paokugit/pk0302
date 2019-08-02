@@ -63,10 +63,10 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		else if ($level == 2) {
 			if (empty($levelcount1)) {
 				app_json(array(
-	'list'     => array(),
-	'total'    => 0,
-	'pagesize' => $psize
-	));
+				'list'     => array(),
+				'total'    => 0,
+				'pagesize' => $psize
+				));
 			}
 
 			$condition = ' and agentid in( ' . implode(',', array_keys($member['level1_agentids'])) . ')';
@@ -77,10 +77,10 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 			if ($level == 3) {
 				if (empty($levelcount2)) {
 					app_json(array(
-	'list'     => array(),
-	'total'    => 0,
-	'pagesize' => $psize
-	));
+						'list'     => array(),
+						'total'    => 0,
+						'pagesize' => $psize
+					));
 				}
 
 				$condition = ' and agentid in( ' . implode(',', array_keys($member['level2_agentids'])) . ')';
@@ -90,7 +90,7 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		}
 		//
 		if($_GPC['nickname']){
-			$condition .= ' and nickname like "%'.$_GPC['nickname'].'%"';
+			$condition .= ' and nickname like "%'.$_GPC['nickname'].'%" or mobile like "%'.$_GPC['nickname'].'%" or realname like "%'.$_GPC['nickname'].'%"';
 		}
 		$list = pdo_fetchall('select * from ' . tablename('ewei_shop_member') . ' where uniacid = ' . $_W['uniacid'] . (' ' . $condition . '  ORDER BY id desc,isagent desc limit ') . ($pindex - 1) * $psize . ',' . $psize);
 		if (!is_array($list) || empty($list)) {
