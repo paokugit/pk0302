@@ -32,12 +32,22 @@ class Level_EweiShopV2Page extends AppMobilePage
         $level = pdo_get('ewei_shop_level_record',['openid'=>$openid,'uniacid'=>$uniacid,'month'=>$month],['id','openid','level_name','level_id','goods_id','status','month','FROM_UNIXTIME(updatetime) as updatetime']);
         $good = pdo_get('ewei_shop_goods',['id'=>$level['goods_id'],'uniacid'=>$uniacid],['thumb','productprice']);
         $level = array_merge($level,['thumb'=>tomedia($good['thumb']),'price'=>$good['productprice']]);
-        $log = pdo_getall('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'status'=>1]);
+	//查询我的第一条记录
+        $log = pdo_get('ewei_shop_level_record','uniacid = "'.$uniacid.'" and level_id = "'.$level['id'].'" and openid = "'.$openid.'" order by month asc');
         //如果今天的年月份  大于记录中的 则更新他为失效   或者  月份相同  日期大于20  并把更新时间改成当月的21号为失效时间   并且状态为未领取
-        $record = pdo_getall('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and month <= "'.$year_month.'" order by id desc LIMIT '.$pindex.','.$pageSize);
+        $record = pdo_getall('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" order by id desc');
         foreach ($record as $key => $item){
-            if((date('Ym',time()) > $item['month'] || date('Ym',time()) == $item['month'] && date('d',time()) > 21) && $item['status'] == 0 && count($log) > 0){
-                pdo_update('ewei_shop_level_record',['status'=>2,'updatetime'=>strtotime($item['month']."21")],['uniacid'=>$uniacid,'id'=>$item['id']]);
+            //如果状态 == 0
+            if($item['status'] == 0){
+                //如果是第一个月  不更改状态  并继续
+                if($item['month'] == $log['month']){
+                    continue;
+                    //break;
+                }
+                //当前年月 大于循环的年月  则改变状态为失效
+                if(date('Ym',time()) > $item['month'] || (date('Ym',time()) == $item['month'] && date('d',time()) > 21)){
+                    pdo_update('ewei_shop_level_record',['status'=>2,'updatetime'=>strtotime($item['month']."21")],['uniacid'=>$uniacid,'id'=>$item['id']]);
+                }
             }
         }
         show_json(1,['member'=>$member,'coupon'=>$coupon,'goods'=>$goods,'level'=>$level]);
@@ -75,10 +85,10 @@ class Level_EweiShopV2Page extends AppMobilePage
         $pageSize = 10;
         $pindex = ($page - 1) * pageSize;
         //计算记录总数
-        $year_month = date('Ym',time());      //当前的年月份
-        $total = pdo_count('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and month <= "'.$year_month.'"');
+        $year_month = strtotime(date('Ym',time())."10");      //当前的年月份
+        $total = pdo_count('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and  (createtime < "'.$year_month.'" or status > 0)');
         //查询记录以及分页
-        $record = pdo_getall('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and month <= "'.$year_month.'" order by id desc LIMIT '.$pindex.','.$pageSize);
+        $record = pdo_getall('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and (createtime < "'.$year_month.'" or status > 0) order by id desc LIMIT '.$pindex.','.$pageSize);
         foreach ($record as $key=>$item) {
             $record[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             $record[$key]['updatetime'] = date('Y年m月d日',$item['updatetime']);
@@ -105,14 +115,17 @@ class Level_EweiShopV2Page extends AppMobilePage
         if($openid == "" || $money == "" || $level_id == ""){
             show_json(0,"参数不完整");
         }
+	//查找用户信息
+        $member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid]);
+        if($member['is_open'] == 1 && $member['expire_time'] - time() > 3600*10 ){
+            show_json(0,'您已是年卡会员');
+        }
         $level = pdo_get('ewei_shop_member_memlevel',['uniacid'=>$uniacid,'id'=>$level_id]);
         if($level['price'] != $money){
             show_json(0,"价格不正确");
         }
         //生成订单号
         $order_sn = "LEV".date('YmdHis').random(12);
-        //查找用户信息
-        $member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid]);
         //添加订单
         $this->addorder($openid,$order_sn,$money,$member,'','购买年卡id=5');
         //微信支付
@@ -134,7 +147,9 @@ class Level_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $uniacid = $_W['uniacid'];
         $openid = $_GPC['openid'];
-        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],['id','openid','nickname','avatar','realname','is_open','FROM_UNIXTIME(expire_time) as expire']);
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],['id','openid','nickname','avatar','realname','is_open','expire_time']);
+        $member['is_expire'] = $member['is_open'] == 1 && $member['expire_time'] - time() <= 3600*10 ? 1 : 0;
+	$member['expire'] = date('Y-m-d',$member['expire_time']);
         show_json(1,['member'=>$member]);
     }
 
@@ -155,8 +170,8 @@ class Level_EweiShopV2Page extends AppMobilePage
             show_json(0,"参数不完善");
         }
         //查询该记录的信息
-        $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id]);
-        $log = pdo_getall('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'status'=>1]);
+        $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id,'openid'=>$openid]);
+        $log = pdo_getall('ewei_shop_level_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'" and level_id = "'.$level_id.'" and status > 0');
         if(count($log) > 0 && (date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."21")){
             show_json(0,$record['month']."权益礼包不在领取日期");
         }
@@ -263,11 +278,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC['openid'];
         $uniacid = $_W['uniacid'];
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
-        if($member['is_open']){
-            show_json(1,['is_open'=>$member['is_open'],'expire_time'=>date('y年m月d日',$member['expire_time'])]);
-        }else{
-            show_json(0);
-        }
+        show_json(1,['is_open'=>$member['is_open'],'expire_time'=>date('Y年m月d日',$member['expire_time'])]);
     }
 }
 ?>

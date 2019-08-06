@@ -195,6 +195,7 @@ class Devote_EweiShopV2Model{
     //直推折扣宝
     //openid
     public function rewardfour($openid,$num,$order=array()){
+        global $_W;
         $member = m('member')->getMember($openid);
          $num=(int)$num;
         if (empty($member)||$member["agentid"]==0){
@@ -209,10 +210,11 @@ class Devote_EweiShopV2Model{
         $dd["keyword4"]="恭喜您获取折扣宝奖励，奖励已达到您的折扣宝账户，请注意查收";
         $this->notice($openid, $dd);
         //获取上级
-        $sparent = $parent=m('member')->getMember($member["agentid"]);
-        if(count($order)>0 && $order['share_id']>0){
+        $sparent = $parent = m('member')->getMember($member["agentid"]);
+        if(count($order)>0 && $order['share_id'] != $member['id']){
             $parent=m('member')->getMember($order["share_id"]);
         }
+        pdo_insert('log',['log'=>json_encode($parent),'createtime'=>date('Y-m-d H:i:s',time())]);
         if (empty($parent)){
             return false;
         }
@@ -221,7 +223,7 @@ class Devote_EweiShopV2Model{
         if (empty($parent["mobile"])||empty($parent["weixin"])){
             return false;
         }
-        
+          //fanbeibei之前写的 推荐会员直接送3000  贡献值
         if ($parent["agentlevel"]==2||$parent["agentlevel"]==5){
             //添加记录奖励
             m('member')->setCredit($parent["openid"], 'credit4', 3000*$num, "直推金主礼包");
@@ -232,6 +234,17 @@ class Devote_EweiShopV2Model{
             $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
             $this->notice($parent["openid"], $dd);
         }
+
+//        if ($parent["agentlevel"] == 2||$parent["agentlevel"]==5){
+//            pdo_insert('ewei_shop_devote_record',['openid'=>$parent['openid'],'uniacid'=>$_W['uniacid'],'status'=>1,'expire'=>strtotime('+300 days',strtotime(date('Y-m-d'))),'createtime'=>time()]);
+//            //消息提醒
+//            $dd["keyword1"]="300天贡献机*".$num."台";
+//            $dd["keyword2"]="直推金主礼包";
+//            $dd["keyword3"]=date("Y-m-d H:i:s");
+//            $dd["keyword4"]="恭喜您获取贡献机奖励，奖励已达到折扣宝页面，请每天及时收取贡献值";
+//            pdo_insert('log',['log'=>json_encode($dd),'createtime'=>$dd['keyword3']]);
+//            $this->notice($parent["openid"], $dd);
+//        }
         //获取上上级
         if ($sparent["agentid"]!=0){
             $pparent=m('member')->getMember($sparent["agentid"]);
