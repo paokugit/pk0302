@@ -1497,8 +1497,8 @@ class MerchModel extends PluginModel
             $list["commission"] = $commission;
         }
 
-        //$list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
-        $list["orderprice"] = $list["price"] + $list["dispatchprice"] + $list["changeprice"];
+        $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
+        //$list["orderprice"] = $list["price"] + $list["dispatchprice"] + $list["changeprice"];
         //$list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice - $list["seckilldiscountprice"];
         $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice - $list["seckilldiscountprice"]-$list["share_price"];
         
@@ -1575,8 +1575,8 @@ class MerchModel extends PluginModel
             }
 
             $list["commission"] = m("order")->getOrderCommission($list["id"], $list["agentid"]);
-          //  $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
-            $list["orderprice"] = $list["price"] + $list["dispatchprice"] + $list["changeprice"];
+            $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
+            //$list["orderprice"] = $list["price"] + $list["dispatchprice"] + $list["changeprice"];
             $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice;
             if( $deduct_commission ) 
             {

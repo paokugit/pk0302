@@ -88,9 +88,9 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 				$total_level = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member') . ' where agentid in( ' . implode(',', array_keys($member['level2_agentids'])) . ') and uniacid=:uniacid limit 1', array(':uniacid' => $_W['uniacid']));
 			}
 		}
-		//
+		//按手机号   昵称  真实姓名搜索好友 
 		if($_GPC['nickname']){
-			$condition .= ' and nickname like "%'.$_GPC['nickname'].'%" or mobile like "%'.$_GPC['nickname'].'%" or realname like "%'.$_GPC['nickname'].'%"';
+			$condition .= ' and (nickname like "%'.$_GPC['nickname'].'%" or mobile = "'.$_GPC['nickname'].'" or realname like "%'.$_GPC['nickname'].'%")';
 		}
 		$list = pdo_fetchall('select * from ' . tablename('ewei_shop_member') . ' where uniacid = ' . $_W['uniacid'] . (' ' . $condition . '  ORDER BY id desc,isagent desc limit ') . ($pindex - 1) * $psize . ',' . $psize);
 		if (!is_array($list) || empty($list)) {
@@ -98,10 +98,10 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		}
 
 		foreach ($list as &$row) {
-				$info = $this->model->getInfo($row['openid'], array('total'));
-				$row['commission_total'] = $info['commission_total'];//累计佣金
-				$row['agentcount'] = $this->getagentcount($row['openid']);
-				$row['agenttime'] = date('Y-m-d H:i', $row['agenttime']);
+			$info = $this->model->getInfo($row['openid'], array('total'));
+			$row['commission_total'] = $info['commission_total'];//累计佣金
+			$row['agentcount'] = $this->getagentcount($row['openid']);
+			$row['agenttime'] = date('Y-m-d H:i', $row['agenttime']);
 			//获取会员等级
 			$level = m("member")->agentlevel($row['openid']);
 			$row['levelname'] = $level['levelname']?$level['levelname']:'普通会员';
@@ -134,6 +134,33 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		if($agentCountInfo) return $agentCountInfo['agentcount'];
 		return 0;
 
+	}
+
+    /**
+     * 搜索好友
+     */
+	public function search(){
+		global $_W;
+		global $_GPC;
+		$uniacid = $_W['uniacid'];
+		$keyword = $_GPC['keywords'];
+		$openid = $_GPC['openid'];
+		$page = max(1,$_GPC['page']);
+		if($keyword == "" || $openid == "" || $page == "" ){
+			show_json(0,"参数不完整");
+		}
+		$pageSize = 10;
+		$pindex = ($page - 1) * $pageSize;
+		$member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid]);
+		$total = pdo_count('ewei_shop_member','uniacid = "'.$uniacid.'" and (mobile = "'.$keyword.'" or nickname like "%'.$keyword.'%" or realname like "%'.$keyword.'%")');
+		$list = pdo_getall('ewei_shop_member','uniacid = "'.$uniacid.'" and (mobile = "'.$keyword.'" or nickname like "%'.$keyword.'%" or realname like "%'.$keyword.'%") order by id desc LIMIT '.$pindex.','.$pageSize,['id','openid','nickname','realname','mobile','createtime','avatar','agentid','agentlevel']);
+		foreach ($list as $key => $item) {
+			$list[$key]['agentnickname'] = $item['agentid'] == 0 ? 0 :pdo_getcolumn('ewei_shop_member',['uniacid'=>$uniacid,'id'=>$item['agentid']],'nickname');
+			$list[$key]['is_push'] = $item['agentid'] == $member['id'] ? 1 : 0;
+			$list[$key]['createtime'] = date('Y-m-d H:i',$item['createtime']);
+			$list[$key]['agentname'] = $item['agentlevel'] == 0 ? "普通会员" : pdo_getcolumn('ewei_shop_commission_level',['id'=>$item['agentlevel'],'uniacid'=>$uniacid],'levelname');
+		}
+		show_json(0,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
 	}
 }
 

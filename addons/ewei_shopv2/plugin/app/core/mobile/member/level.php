@@ -278,11 +278,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC['openid'];
         $uniacid = $_W['uniacid'];
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
-        if($member['is_open']){
-            show_json(1,['is_open'=>$member['is_open'],'expire_time'=>date('Y年m月d日',$member['expire_time'])]);
-        }else{
-            show_json(0);
-        }
+        show_json(1,['is_open'=>$member['is_open'],'expire_time'=>date('Y年m月d日',$member['expire_time'])]);
     }
 }
 ?>

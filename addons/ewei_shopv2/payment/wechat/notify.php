@@ -1142,7 +1142,8 @@ class EweiShopWechatPay
                 'level_id'=>$level['id'],
                 'level_name'=>$level['level_name'],
                 'goods_id'=>iunserializer($level['goods_id'])[0],
-                'createtime'=>$i == 0 ? time() : strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
+                //'createtime'=>$i == 0 ? time() : strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
+		'createtime' => strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
             ];
             //如果已经加过发放记录   就继续结束
             if(pdo_exists('ewei_shop_level_record',['openid'=>$openid,'month'=>$data['month'],'level_id'=>$data['level_id']])){
