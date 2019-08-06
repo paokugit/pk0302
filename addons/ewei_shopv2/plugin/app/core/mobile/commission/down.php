@@ -155,7 +155,7 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		$total = pdo_count('ewei_shop_member','uniacid = "'.$uniacid.'" and (mobile = "'.$keyword.'" or nickname like "%'.$keyword.'%" or realname like "%'.$keyword.'%")');
 		$list = pdo_getall('ewei_shop_member','uniacid = "'.$uniacid.'" and (mobile = "'.$keyword.'" or nickname like "%'.$keyword.'%" or realname like "%'.$keyword.'%") order by id desc LIMIT '.$pindex.','.$pageSize,['id','openid','nickname','realname','mobile','createtime','avatar','agentid','agentlevel']);
 		foreach ($list as $key => $item) {
-			$list[$key]['agentnickname'] = $item['agentid'] == 0 ? 0 :pdo_getcolumn('ewei_shop_member',['uniacid'=>$uniacid,'id'=>$item['agentid']],'nickname');
+			$list[$key]['agentnickname'] = $item['agentid'] == 0 ? "暂无上级" :pdo_getcolumn('ewei_shop_member',['uniacid'=>$uniacid,'id'=>$item['agentid']],'nickname');
 			$list[$key]['is_push'] = $item['agentid'] == $member['id'] ? 1 : 0;
 			$list[$key]['createtime'] = date('Y-m-d H:i',$item['createtime']);
 			$list[$key]['agentname'] = $item['agentlevel'] == 0 ? "普通会员" : pdo_getcolumn('ewei_shop_commission_level',['id'=>$item['agentlevel'],'uniacid'=>$uniacid],'levelname');
