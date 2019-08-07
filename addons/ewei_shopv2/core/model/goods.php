@@ -198,7 +198,7 @@ class Goods_EweiShopV2Model
         {
             $condition .= ' and deduct_type='.$args['deduct_type'];
         }
-
+        
 		if (!($random)) 
 		{
 			$sql = 'SELECT id,title,issendfree,content,subtitle,deduct,deduct_type,thumb,agentlevel,thumb_url' . $officsql . ',marketprice,productprice,minprice,maxprice,isdiscount,isdiscount_time,isdiscount_discounts,sales,salesreal,total,description,bargain,`type`,ispresell,`virtual`,hasoption,video,bargain,hascommission,nocommission,commission,commission1_rate,commission1_pay' . "\r\n" . '            FROM ' . tablename('ewei_shop_goods') . ' where  ' . $condition . ' ORDER BY ' . $order . ' ' . $orderby . ' LIMIT ' . (($page - 1) * $pagesize) . ',' . $pagesize;
@@ -209,7 +209,6 @@ class Goods_EweiShopV2Model
 			$sql = 'SELECT id,title,content,agentlevel,thumb,thumb_url' . $officsql . ',marketprice,productprice,minprice,maxprice,isdiscount,isdiscount_time,isdiscount_discounts,sales,salesreal,total,description,bargain,`type`,ispresell,`virtual`,hasoption,bargain,hascommission,nocommission,commission,commission1_rate,commission1_pay' . "\r\n" . '            FROM ' . tablename('ewei_shop_goods') . ' where  ' . $condition . ' ORDER BY rand() LIMIT ' . $pagesize;
 			$total = $pagesize;
 		}
-
 
 		$level = $this->getLevel($_W['openid']);
 		$set = $this->getSet();

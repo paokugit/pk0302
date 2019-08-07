@@ -1139,18 +1139,23 @@ class Index_EweiShopV2Page extends WebPage
             $icon[0]["img"]=$_POST["icon1_img"];
             $icon[0]["title"]=$_POST["icon1_title"];
             $icon[0]["url"]=$_POST["icon1_url"];
+            $icon[0]["icon"]=save_media($_POST["icon1"]);
             
             $icon[1]["img"]=$_POST["icon2_img"];
             $icon[1]["title"]=$_POST["icon2_title"];
             $icon[1]["url"]=$_POST["icon2_url"];
+            $icon[1]["icon"]=save_media($_POST["icon2"]);
             
             $icon[2]["img"]=$_POST["icon3_img"];
             $icon[2]["title"]=$_POST["icon3_title"];
             $icon[2]["url"]=$_POST["icon3_url"];
+            $icon[2]["icon"]=save_media($_POST["icon3"]);
             
             $icon[3]["img"]=$_POST["icon4_img"];
             $icon[3]["title"]=$_POST["icon4_title"];
             $icon[3]["url"]=$_POST["icon4_url"];
+            $icon[3]["icon"]=save_media($_POST["icon4"]);
+            
             $data["icon"]=serialize($icon);
             if (pdo_update("ewei_shop_small_set",$data,array("id"=>1))){
             
@@ -1179,20 +1184,20 @@ class Index_EweiShopV2Page extends WebPage
             $data["backgroup"] = save_media($_POST["backgroup"]);
             $data["banner"] = save_media($_POST["banner"]);
             $icon[0]["img"]=$_POST["icon1_img"];
-            $icon[0]["title"]=$_POST["icon1_title"];
-            $icon[0]["url"]=$_POST["icon1_url"];
+//             $icon[0]["title"]=$_POST["icon1_title"];
+//             $icon[0]["url"]=$_POST["icon1_url"];
             
             $icon[1]["img"]=$_POST["icon2_img"];
-            $icon[1]["title"]=$_POST["icon2_title"];
-            $icon[1]["url"]=$_POST["icon2_url"];
+//             $icon[1]["title"]=$_POST["icon2_title"];
+//             $icon[1]["url"]=$_POST["icon2_url"];
             
             $icon[2]["img"]=$_POST["icon3_img"];
-            $icon[2]["title"]=$_POST["icon3_title"];
-            $icon[2]["url"]=$_POST["icon3_url"];
+//             $icon[2]["title"]=$_POST["icon3_title"];
+//             $icon[2]["url"]=$_POST["icon3_url"];
             
             $icon[3]["img"]=$_POST["icon4_img"];
-            $icon[3]["title"]=$_POST["icon4_title"];
-            $icon[3]["url"]=$_POST["icon4_url"];
+//             $icon[3]["title"]=$_POST["icon4_title"];
+//             $icon[3]["url"]=$_POST["icon4_url"];
             $data["icon"]=serialize($icon);
             if (pdo_update("ewei_shop_small_set",$data,array("id"=>2))){
                 

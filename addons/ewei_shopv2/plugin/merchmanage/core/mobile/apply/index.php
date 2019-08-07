@@ -12,7 +12,9 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 		global $_GPC;
 		$openid = $_W['openid'];
 		$merchid = $_W['merchmanage']['merchid'];
-		$item = p('merch')->getMerchPrice($merchid);
+		//$item = p('merch')->getMerchPrice($merchid);
+		$item = p('merch')->getMerchPrice($merchid,1);
+		//var_dump($item);
 		$list = p('merch')->getMerchPriceList($merchid);
 		$order_num = count($list);
 		$cansettle = true;
