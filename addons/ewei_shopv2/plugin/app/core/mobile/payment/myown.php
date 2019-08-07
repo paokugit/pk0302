@@ -345,5 +345,122 @@ class Myown_EweiShopV2Page extends AppMobilePage
         }
         show_json(1,['list'=>$list,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize]);
     }
+
+    /**
+     * 贡献机列表
+     */
+    public function devote()
+    {
+        global $_W;
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        if($openid == ""){
+            show_json(0,"用户的openid不能为空");
+        }
+        $uniacid = $_W['uniacid'];
+        //如果是贡献机用户
+        $devote = pdo_getall('ewei_shop_devote_record',['uniacid'=>$_W['uniacid'],'openid'=>$openid,'status'=>1]);
+        foreach ($devote as $key=>$item){
+            if($item['expire'] < time()){
+                pdo_update('ewei_shop_devote_record',['status'=>0],['id'=>$item['id']]);
+            }
+            //如果是我和郝艳萍同学 签到就给记录
+            if($openid == "sns_wa_owRAK44_gHTrMTJMVSxFy-jtNef8" || $openid == "sns_wa_owRAK43dDy1s6i0_rbVfZUqgx854"){
+                if(pdo_exists('ewei_shop_devote_log',['devote_id'=>$item['id'],'openid'=>$openid,'day'=>date('Y-m-d')])){
+                    continue;
+                }else{
+                    pdo_insert('ewei_shop_devote_log',['devote_id'=>$item['id'],'openid'=>$openid,'num'=>100,'day'=>date('Y-m-d'),'createtime'=>time()]);
+                }
+            }
+        }
+        $total = pdo_count('ewei_shop_devote_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'" and status = 1');
+        $count = pdo_count('ewei_shop_devote_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'"');
+        $list = $this->getlist($total,$uniacid,$openid);
+        foreach ($list as $key=>&$item){
+            $item['id'] = implode(',',$item['id']);
+            $num = array_count_values($item['log']);
+            $item['devote'] = ($item['count'] - $num[1]) * 100;
+            if($item['is_open'] != 0){
+                $item['is_open'] = $item['devote'] == 0 ? 2 : 1;
+            }
+            unset($item['log']);
+        }
+        show_json(1,['valid'=>$total,'no_valid'=>$count-$total,'list'=>$list]);
+    }
+
+    /**
+     * @param $total
+     * @param $uniacid
+     * @param $openid
+     * @return int
+     */
+    public function getlist($total,$uniacid,$openid)
+    {
+        $list = [];
+        $size = 1;
+        for ($i=1;$i<=$total;$i++){
+            $key = $i%8 != 0 ? $i%8 : 8;
+            $num = ceil(bcdiv($i,8,2));
+            $list[$key]['image'] = "https://paokucoin.com/img/backgroup/s-gxserve.gif";
+            $id = pdo_fetchcolumn('select id from '.tablename('ewei_shop_devote_record').'where openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and status = 1 LIMIT '.($i-1).','.$size);
+            $list[$key]['log'][] = pdo_get('ewei_shop_devote_log',['openid'=>$openid,'uniacid'=>$uniacid,'devote_id'=>$id,'status'=>1,'day'=>date('Y-m-d',time())])?1:0;
+            $list[$key]['id'][] = $id;
+            $list[$key]['count'] = $num;
+            $list[$key]['is_open'] = 1;
+        }
+        if($total < 8){
+            for ($i = 0 ; $i < 8-$total; $i++){
+                array_push($list,['image'=>"https://paokucoin.com/img/backgroup/n-gxserve@2x.png",'devote'=>0,'count'=>0,'is_open'=>0,'id'=>[]]);
+            }
+        }
+        return $list;
+    }
+
+    /**
+     * 领取贡献值
+     */
+    public function get_devote(){
+        global $_W;
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        $ids = $_GPC['ids'];
+        if($openid == "" || $ids == ""){
+            show_json(0,"参数不完整");
+        }
+        $uniacid = $_W['uniacid'];
+        $redis = redis();
+        if($redis->get($openid.$ids)){
+            show_json(0,"领取中，请稍候...");
+        }else{
+            $token = md5($openid.$ids.time());
+            $redis->set($openid.$ids,$token,60);
+        }
+        $ids = explode(',',$ids);
+        $log = $this->devotelog($ids,$openid,$uniacid);
+        show_json(1,"领取成功");
+    }
+
+    /**
+     * @param $ids
+     * @param $openid
+     * @param $uniacid
+     * @return bool
+     */
+    public function devotelog($ids,$openid,$uniacid)
+    {
+        $day = date('Y-m-d');
+	$i = 0;
+        foreach ($ids as $id){
+            $log = pdo_get('ewei_shop_devote_log',['devote_id'=>$id,'openid'=>$openid,'uniacid'=>$uniacid,'day'=>$day]);
+            if($log['status'] == 1){
+                continue;
+            }
+            pdo_update('ewei_shop_devote_log',['status'=>1],['devote_id'=>$id,'openid'=>$openid,'uniacid'=>$uniacid,'day'=>$day]);
+            $i+=100;
+        }
+	    //m('member')->setCredit($openid,'credit4',$i,"贡献机领取".$i."贡献值");
+	    m('member')->setCredit($openid,'credit4',$i,"贡献机领取");
+        return true;
+    }
 }
 ?>
