@@ -1061,14 +1061,17 @@ class Member_EweiShopV2Model
 		if( $open_redis ) 
 		{
 			$redis = redis();
-			$keysArr = $redis->keys("ewei_" . $_W["uniacid"] . "_member*");
-			if( !empty($keysArr) && is_array($keysArr) ) 
-			{
-				foreach( $keysArr as $k => $v ) 
-				{
-					$redis->del($v);
-				}
-			}
+			
+			$redis->del("ewei_" . $_W["uniacid"] . "_member_commission_first");
+			$redis->del("ewei_". $_W["uniacid"] ."_member_list");
+// 			$keysArr = $redis->keys("ewei_" . $_W["uniacid"] . "_member*");
+// 			if( !empty($keysArr) && is_array($keysArr) ) 
+// 			{
+// 				foreach( $keysArr as $k => $v ) 
+// 				{
+// 					$redis->del($v);
+// 				}
+// 			}
 		}
 	}
 

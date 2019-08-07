@@ -95,6 +95,11 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $id=$_GPC["id"];
         $list=pdo_get("ewei_shop_small_set",array("id"=>$id));
         $list["icon"]=unserialize($list["icon"]);
+        $list["backgroup"]=tomedia($list["backgroup"]);
+        foreach ($list["icon"] as $k=>$v){
+            $list["icon"][$k]["img"]=tomedia($v["img"]);
+            $list["icon"][$k]["icon"]=tomedia($v["icon"]);
+        }
         show_json(1,$list);
     }
     
@@ -108,6 +113,11 @@ class Index_EweiShopV2Page extends AppMobilePage{
         var_dump($count_list);
         $count=array_sum(array_column($count_list, 'num'));
         var_dump($count);
+        $order=array('26707','26773','27216','27866','27937','28285','28389','28399');
+        pdo_update("ewei_shop_merch_bill",array("orderids"=>iserializer($order)),array("id"=>169));
+        $d=pdo_get("ewei_shop_merch_bill",array("id"=>157));
+        var_dump(iunserializer($d["orderids"]));
+        
     }
 }
 
