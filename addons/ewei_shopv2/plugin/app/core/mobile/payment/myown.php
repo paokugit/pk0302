@@ -160,6 +160,13 @@ class Myown_EweiShopV2Page extends AppMobilePage
         if($money < 1){
             show_json(0,"最少提现1块");
         }
+        $redis = redis();
+        if($redis->get($openid.$money)){
+            show_json(0,"申请处理中，请稍后...");
+        }else{
+            $token = md5($openid.$money.time());
+            $redis->set($openid.$money,$token,30);
+        }
         $credit5 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],'credit5');
         //bccomp  比较 两个精确的小数的大小   == -1  是前者小于后者
         if(bccomp($credit5,$money,2) == -1){
@@ -365,13 +372,13 @@ class Myown_EweiShopV2Page extends AppMobilePage
                 pdo_update('ewei_shop_devote_record',['status'=>0],['id'=>$item['id']]);
             }
             //如果是我和郝艳萍同学 签到就给记录
-            if($openid == "sns_wa_owRAK44_gHTrMTJMVSxFy-jtNef8" || $openid == "sns_wa_owRAK43dDy1s6i0_rbVfZUqgx854"){
+            //if($openid == "sns_wa_owRAK44_gHTrMTJMVSxFy-jtNef8" || $openid == "sns_wa_owRAK43dDy1s6i0_rbVfZUqgx854"){
                 if(pdo_exists('ewei_shop_devote_log',['devote_id'=>$item['id'],'openid'=>$openid,'day'=>date('Y-m-d')])){
                     continue;
                 }else{
                     pdo_insert('ewei_shop_devote_log',['devote_id'=>$item['id'],'openid'=>$openid,'num'=>100,'day'=>date('Y-m-d'),'createtime'=>time()]);
                 }
-            }
+            //}
         }
         $total = pdo_count('ewei_shop_devote_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'" and status = 1');
         $count = pdo_count('ewei_shop_devote_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'"');

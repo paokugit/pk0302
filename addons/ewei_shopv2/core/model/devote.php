@@ -225,7 +225,7 @@ class Devote_EweiShopV2Model{
         }
 	
         //如果是我和郝艳萍同学  就送贡献机
-        if($parent['openid'] == "sns_wa_owRAK44_gHTrMTJMVSxFy-jtNef8" || $parent['openid'] == "sns_wa_owRAK43dDy1s6i0_rbVfZUqgx854"){
+        //if($parent['openid'] == "sns_wa_owRAK44_gHTrMTJMVSxFy-jtNef8" || $parent['openid'] == "sns_wa_owRAK43dDy1s6i0_rbVfZUqgx854"){
             if ($parent["agentlevel"] == 2||$parent["agentlevel"]==5){
                 for ($i = 0;$i<$num ;$i++){
                     pdo_insert('ewei_shop_devote_record',['openid'=>$parent['openid'],'uniacid'=>$_W['uniacid'],'status'=>1,'expire'=>strtotime('+30 days',strtotime(date('Y-m-d'))),'createtime'=>time()]);
@@ -238,19 +238,19 @@ class Devote_EweiShopV2Model{
                 pdo_insert('log',['log'=>json_encode($dd),'createtime'=>$dd['keyword3']]);
                 $this->notice($parent["openid"], $dd);
             }
-        }else{
+        //}else{
             //fanbeibei之前写的 推荐会员直接送3000  贡献值
-            if ($parent["agentlevel"]==2||$parent["agentlevel"]==5){
-                //添加记录奖励
-                m('member')->setCredit($parent["openid"], 'credit4', 3000*$num, "直推金主礼包");
-                //消息提醒
-                $dd["keyword1"]=3000*$num;
-                $dd["keyword2"]="直推金主礼包";
-                $dd["keyword3"]=date("Y-m-d H:i:s");
-                $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
-                $this->notice($parent["openid"], $dd);
-            }
-        }
+//            if ($parent["agentlevel"]==2||$parent["agentlevel"]==5){
+//                //添加记录奖励
+//                m('member')->setCredit($parent["openid"], 'credit4', 3000*$num, "直推金主礼包");
+//                //消息提醒
+//                $dd["keyword1"]=3000*$num;
+//                $dd["keyword2"]="直推金主礼包";
+//                $dd["keyword3"]=date("Y-m-d H:i:s");
+//                $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
+//                $this->notice($parent["openid"], $dd);
+//            }
+//        }
 	
         //获取上上级
         if ($sparent["agentid"]!=0){
