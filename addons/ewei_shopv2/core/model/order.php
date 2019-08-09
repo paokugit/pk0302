@@ -1994,6 +1994,7 @@ class Order_EweiShopV2Model
 				$dispatch_info[$dispatch_data["id"]]["price"] += $dprice;
 				$dispatch_info[$dispatch_data["id"]]["freeprice"] = intval($dispatch_data["freeprice"]);
 			}
+			//不包邮
 			if( !empty($dispatch_info) && !$sendfree)
 			{
 				foreach( $dispatch_info as $k => $v ) 
@@ -2006,11 +2007,16 @@ class Order_EweiShopV2Model
 				if( $dispatch_price < 0 ) 
 				{
 				    $dispatch_price = 0;
-				    $is_remote = 0;
 				}else{
 				    //如果是模板的话 加上偏远地区的差价
-                    $is_remote = 1;
-				    $dispatch_price += $g['remote_dispatchprice'];
+		                    $gareas = explode(';',$g['edareas']);
+		                    if(in_array($user_province_code, $gareas) || !empty($member['province']) && in_array($member['province'], $gareas)){
+		                        $is_remote = 0;
+		                        $dispatch_price += $g['dispatchprice'];
+		                    }else{
+		                        $is_remote = 1;
+		                        $dispatch_price += $g['remote_dispatchprice'] + $g['dispatchprice'];
+		                    }
 				}
 			}
 		}

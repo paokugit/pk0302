@@ -61,7 +61,10 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         $detail=pdo_get("ewei_shop_member_devote",array("id"=>1));
         app_error(0,$detail);
     }
-  //提现
+
+    /**
+     * 折扣宝提现
+     */
     public function withdrawal(){
         global $_W;
         global $_GPC;
@@ -82,7 +85,7 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         if ($money<1){
             app_error(1,"提现金额不可小于1元");
         }
-        if ($member["credit3"]<$money||$member["credit4"]<$money){
+        if ($member["credit3"] < $money || $member["credit4"] < $money){
             app_error(1,"提现余额或贡献值不足");
         }
         //添加提现记录
@@ -109,8 +112,10 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         }
         
     }
-    
-    //贡献值记录
+
+    /**
+     * 贡献值记录
+     */
     public function dovate_log(){
         global $_W;
         global $_GPC;
@@ -126,9 +131,9 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         $first=($page-1)*8;
         $list=pdo_fetchall("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype order by createtime desc limit ".$first.",8",array(":openid"=>$openid,":credittype"=>"credit4"));
         if (!empty($list)){
-        foreach ($list as $k=>$v){
-            $list[$k]["createtime"]=date("Y-m-d H:i:s",$v["createtime"]);
-        }
+            foreach ($list as $k=>$v){
+                $list[$k]["createtime"]=date("Y-m-d H:i:s",$v["createtime"]);
+            }
         }
         $re["list"]=$list;
         $re["pagesize"]=8;

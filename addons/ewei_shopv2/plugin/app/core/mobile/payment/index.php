@@ -98,6 +98,8 @@ class Index_EweiShopV2Page extends AppMobilePage
             'type'=>1,
             'merchid'=>$_GPC['merchid'],
         ];
+        //如果是折扣宝  就订单表 discount_price   否则  deductprice
+        $_GPC['cate'] == 2 ? $add['discount_price'] = $_GPC['rebate'] : $add['deductprice'] = $_GPC['rebate'];
         //加入订单记录
         $order = pdo_insert('ewei_shop_order',$add);
         $payinfo = array( "openid" => substr($_GPC['openid'],7), "title" => is_numeric($_GPC['merchid'])?"商家收款码收款":"个人收款码收款", "tid" => $order_sn, "fee" =>$_GPC["money"] );
