@@ -96,6 +96,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $list=pdo_get("ewei_shop_small_set",array("id"=>$id));
         $list["icon"]=unserialize($list["icon"]);
         $list["backgroup"]=tomedia($list["backgroup"]);
+        $list["banner"]=tomedia($list["banner"]);
         foreach ($list["icon"] as $k=>$v){
             $list["icon"][$k]["img"]=tomedia($v["img"]);
             $list["icon"][$k]["icon"]=tomedia($v["icon"]);
@@ -116,9 +117,25 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $order=array('26707','26773','27216','27866','27937','28285','28389','28399');
         pdo_update("ewei_shop_merch_bill",array("orderids"=>iserializer($order)),array("id"=>169));
         $d=pdo_get("ewei_shop_merch_bill",array("id"=>157));
-        var_dump(iunserializer($d["orderids"]));
-        
+        var_dump(iunserializer($d["orderids"])); 
     }
+    
+    public function mycenter(){
+        $list=pdo_get("ewei_shop_small_set",array("id"=>3));
+        $l=unserialize($list["icon"]);
+        foreach ($l["order"] as $k=>$v){
+            if (!empty($v)){
+            $l["order"][$k]=tomedia($v);
+            }
+        }
+        foreach ($l["server"] as $k=>$v){
+            if (!empty($v)){
+                $l["server"][$k]=tomedia($v);
+            }
+        }
+        show_json(1,$l);
+    }
+    
 }
 
 ?>

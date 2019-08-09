@@ -1196,7 +1196,11 @@ class System_EweiShopV2Model {
                             array(
                                 "title" => "达人中心",
                                 "route" => "daren"
-                            ) 
+                            ),
+                            array(
+                                "title"=>"我的",
+                                "route"=>"my"
+                            )
                         )
                     ) ,
                     array(

@@ -1307,6 +1307,42 @@ class Index_EweiShopV2Page extends WebPage
             }
         }
     }
+    //个人中心
+    public function my(){
+        
+        
+        global $_W;
+        global $_GPC;
+        
+        if( $_W["ispost"] )
+        {
+            $d["order"]["payment"] = save_media($_POST["payment"]);
+            $d["order"]["send"] = save_media($_POST["send"]);
+            $d["order"]["received"] = save_media($_POST["received"]);
+            $d["order"]["evaluated"] = save_media($_POST["evaluated"]);
+            
+            $d["server"]["fans"]=save_media($_POST["fans"]);
+            $d["server"]["recommend"]=save_media($_POST["recommend"]);
+            $d["server"]["coupon"]=save_media($_POST["coupon"]);
+            $d["server"]["coupon_center"]=save_media($_POST["coupon_center"]);
+            $d["server"]["cart"]=save_media($_POST["cart"]);
+            $d["server"]["concern"]=save_media($_POST["concern"]);
+            $d["server"]["track"]=save_media($_POST["track"]);
+            $d["server"]["addr"]=save_media($_POST["addr"]);
+            $data["icon"]=serialize($d);
+            if (pdo_update("ewei_shop_small_set",$data,array("id"=>3))){
+                
+                show_json(1);
+            }else{
+                show_json(0,"设置失败");
+            }
+        }
+        $l=pdo_get("ewei_shop_small_set",array("id"=>3));
+        $data=unserialize($l["icon"]);
+        include($this->template());
+        
+        
+    }
     
 }
 ?>
