@@ -118,7 +118,7 @@ class Log_EweiShopV2Page extends AppMobilePage
         if($_GPC['type']==1){// 收入
             $condition = ' and openid=:openid and type in (0,3)';
         }else{// 支出
-            $condition = ' and openid=:openid and type in (1,2)';
+            $condition = ' and openid=:openid and type in (1,2) and (title="余额提现" or title="小程序商城消费")';
         }
         $params = array( ':openid' => $_W['openid']);
         $list = pdo_fetchall('select * from ' . tablename('ewei_shop_member_log') . (' where 1 ' . $condition . ' order by createtime desc LIMIT ') . ($pindex - 1) * $psize . ',' . $psize, $params);
@@ -130,7 +130,7 @@ class Log_EweiShopV2Page extends AppMobilePage
                     $row['money'] = -$row['money'];
                     $row['realmoney'] = -$row['realmoney'];
                 }
-                $newList[] = array('id' => $row['id'], 'title'=>$row['title'],'type' => $row['type'], 'money' => $row['money'], 'typestr' => $apply_type[$row['applytype']], 'status' => $row['status'], 'deductionmoney' => $row['deductionmoney'], 'realmoney' => $row['realmoney'], 'rechargetype' => $row['rechargetype'], 'createtime' => date('Y-m-d H:i', $row['createtime']));
+                $newList[] = array('id' => $row['id'], 'title'=>$row['title'],'type' => $row['type'], 'money' => $row['money'], 'typestr' => $apply_type[$row['applytype']], 'status' => $row['status'], 'deductionmoney' => $row['deductionmoney'], 'realmoney' => $row['realmoney'], 'rechargetype' => $row['rechargetype'], 'createtime' => date('Y-m-d H:i', $row['createtime']),'refuse_reason'=>$row["refuse_reason"]);
             }
         }
         app_json(array('list' => $newList, 'total' => $total, 'pagesize' => $psize, 'page' => $pindex, 'type' => $type, 'isopen' => $_W['shopset']['trade']['withdraw'], 'moneytext' => $_W['shopset']['trade']['moneytext']));
