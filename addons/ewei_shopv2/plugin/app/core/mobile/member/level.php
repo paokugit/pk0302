@@ -33,8 +33,9 @@ class Level_EweiShopV2Page extends AppMobilePage
         $good = pdo_get('ewei_shop_goods',['id'=>$level['goods_id'],'uniacid'=>$uniacid],['thumb','productprice']);
         $level = array_merge($level,['thumb'=>tomedia($good['thumb']),'price'=>$good['productprice']]);
 	//查询我的第一条记录
-        $log = pdo_get('ewei_shop_level_record','uniacid = "'.$uniacid.'" and level_id = "'.$level['id'].'" and openid = "'.$openid.'" order by month asc');
+        $log = pdo_get('ewei_shop_level_record','uniacid = "'.$uniacid.'" and level_id = "'.$level['level_id'].'" and openid = "'.$openid.'" order by month asc');
         //如果今天的年月份  大于记录中的 则更新他为失效   或者  月份相同  日期大于20  并把更新时间改成当月的21号为失效时间   并且状态为未领取
+        $level['month'] = $level['month'] == $log['month'] ? date("Y年m月d日",strtotime($month."01"."+1 month -1 day")) : date("Y年m月20日",strtotime($month."01"));
         $record = pdo_getall('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" order by id desc');
         foreach ($record as $key => $item){
             //如果状态 == 0
@@ -61,12 +62,15 @@ class Level_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $uniacid = $_W['uniacid'];
-        $level_id = $_GPC['id'];
+        $level_id = empty($_GPC['id']) ? 5 : $_GPC['id'];
+	//var_dump($level_id);exit;
         if($level_id == ""){
             show_json(0,"年卡礼包id不能为空");
         }
         $level = pdo_get('ewei_shop_member_memlevel',['id'=>$level_id,'uniacid'=>$uniacid]);
-        show_json(1,['level'=>$level]);
+        $good = unserialize($level['goods_id']);
+        $goods = pdo_get('ewei_shop_goods','uniacid="'.$uniacid.'" and id="'.$good[0].'" and status = 1 and total > 0',['id','thumb','title','marketprice']);
+        show_json(1,['goods'=>$goods,'goods_id'=>$good[0]]);
     }
 
     /**
@@ -83,7 +87,7 @@ class Level_EweiShopV2Page extends AppMobilePage
             show_json(0,"参数不完整");
         }
         $pageSize = 10;
-        $pindex = ($page - 1) * pageSize;
+        $pindex = ($page - 1) * $pageSize;
         //计算记录总数
         $year_month = strtotime(date('Ym',time())."10");      //当前的年月份
         $total = pdo_count('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and  (createtime < "'.$year_month.'" or status > 0)');
@@ -127,7 +131,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         //生成订单号
         $order_sn = "LEV".date('YmdHis').random(12);
         //添加订单
-        $this->addorder($openid,$order_sn,$money,$member,'','购买年卡id=5');
+        $order_id = $this->addorder($openid,$order_sn,$money,$member,'','购买年卡id=5');
         //微信支付
         $payinfo = array( "openid" => substr($openid,7), "title" => "购买年卡", "tid" => $order_sn, "fee" =>$money );
         $res = $this->model->wxpay($payinfo, 32);
@@ -135,6 +139,7 @@ class Level_EweiShopV2Page extends AppMobilePage
             show_json(0,$res);
         }
         $this->addmemberlog($openid,$order_sn,$money,$level_id."购买年卡");
+        $res['order_id'] = $order_id;
         show_json(1,$res);
     }
 
@@ -164,10 +169,15 @@ class Level_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC['openid'];
         $level_id = $_GPC['level_id'];
         $address_id = $_GPC['address_id'];
+        $money = $_GPC['money'];
         //记录id
         $record_id = $_GPC['record_id'];
-        if($openid == "" || $level_id == "" || $record_id == "" || $address_id == ""){
+        if($openid == "" || $level_id == "" || $record_id == "" || $address_id == "" || $money == ""){
             show_json(0,"参数不完善");
+        }
+        $price = $this->change_address($address_id,$openid,$uniacid);
+        if($price['price'] != $money){
+            show_json(0,"支付金额不正确");
         }
         //查询该记录的信息
         $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id,'openid'=>$openid]);
@@ -181,13 +191,37 @@ class Level_EweiShopV2Page extends AppMobilePage
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         //生成订单号
-        $order_sn = "LQ".date('YmdHis').random(12);
-        //更新领取记录的状态
-        pdo_update('ewei_shop_level_record',['status'=>1,'updatetime'=>time()],['id'=>$record_id,'level_id'=>$level_id,'uniacid'=>$uniacid]);
-        //因为领取的权益是实物产品
-        $address = serialize(pdo_get('ewei_shop_member_address',['id'=>$address_id,'uniacid'=>$uniacid]));
-        $this->addorder($openid,$order_sn,0,$member,$address,"领取年卡".$record["month"]."权益");
-        show_json(1,"领取成功");
+        $order_sn = "LQ".$level_id.date('YmdHis').random(12);
+        //把年里礼包的商品给查出来
+        $goods = pdo_get('ewei_shop_goods','uniacid="'.$uniacid.'" and id="'.$record['goods_id'].'" and status = 1 and total > 0',['id','thumb','title','marketprice']);
+        //添加订单
+        $order_id = $this->addorder($openid,$order_sn,$money,$member,$address_id,"领取年卡".$record["month"]."权益",$goods);
+        //唤起微信支付
+        $payinfo = array( "openid" => substr($openid,7), "title" => "领取年卡".$record["month"]."权益", "tid" => $order_sn, "fee" =>$money );
+        $res = $this->model->wxpay($payinfo, 33);
+        $res['order_id'] = $order_id;
+        show_json(1,$res);
+    }
+
+    /**
+     * 取消订单
+     */
+    public function cancel()
+    {
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $openid = $_GPC['openid'];
+        $order_id = $_GPC['order_id'];
+        if($openid == "" || $order_id == ""){
+            show_json(-1,"参数信息不完整");
+        }
+        if(pdo_exists('ewei_shop_order',['uniacid'=>$uniacid,'openid'=>$openid,'id'=>$order_id])){
+            pdo_update('ewei_shop_order',['status'=>-1,'canceltime'=>time()],['id'=>$order_id]);
+            show_json(1,"取消支付成功");
+        }else{
+            show_json(0,"订单信息错误");
+        }
     }
 
     /**
@@ -202,11 +236,53 @@ class Level_EweiShopV2Page extends AppMobilePage
         if($openid == ""){
             show_json(0,"用户openid不能为空");
         }
-        $list = pdo_getall('ewei_shop_member_address',['uniacid'=>$uniacid,'openid'=>$openid,'deleted'=>0]);
+        $list = pdo_getall('ewei_shop_member_address','uniacid="'.$uniacid.'" and openid ="'.$openid.'" and deleted = 0 order by isdefault desc,id desc');
         if(!$list){
             show_json(-1,"暂无地址，请去添加地址");
         }
-        show_json(1,['list'=>$list]);
+        $data = $this->change_address($list[0]['id'],$openid,$uniacid);
+        show_json(1,['list'=>$list,'data'=>$data]);
+    }
+
+    /**
+     * 地址切换接口
+     */
+    public function change()
+    {
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $address_id = $_GPC['address_id'];
+        $openid = $_GPC['openid'];
+        $data = $this->change_address($address_id,$openid,$uniacid);
+        show_json(1,['data'=>$data]);
+    }
+
+    /**
+     * @param $address_id
+     * @param $openid
+     * @param $uniacid
+     * @return int
+     */
+    public function change_address($address_id,$openid,$uniacid)
+    {
+        $user_address = pdo_get('ewei_shop_member_address',['openid'=>$openid,'uniacid'=>$uniacid,'id'=>$address_id,'deleted'=>0]);
+        if(empty($user_address)){
+            show_json(0,"用户地址错误");
+        }
+        $base_address = pdo_getcolumn('ewei_shop_express_set',['uniacid'=>$uniacid,'id'=>1],'express_set');
+        $base_express = explode(';',$base_address);
+        if(in_array($user_address['province'],$base_express)){
+            //$data['price'] = 10;
+            $data['price'] = 0.01;
+	        $data['is_remote'] = 0;
+        }else{
+            //$data['price'] = 20;
+            $data['price'] = 0.02;
+	        $data['is_remote'] = 1;
+        }
+        return $data;
+
     }
 
     /**
@@ -215,31 +291,53 @@ class Level_EweiShopV2Page extends AppMobilePage
      * @param $order_sn
      * @param $money
      * @param $member
-     * @param $address
+     * @param $address_id
      * @param $remark
+     * @param $goods
      * @return bool
      */
-    public function addorder($openid,$order_sn,$money,$member,$address = "",$remark = "")
+    public function addorder($openid,$order_sn,$money,$member,$address_id = "",$remark = "",$goods = [])
     {
         global $_W;
         $uniacid = $_W['uniacid'];
+        //因为领取的权益是实物产品  所以需要地址
+        $address = empty($address_id)?null:serialize(pdo_get('ewei_shop_member_address',['id'=>$address_id,'uniacid'=>$uniacid]));
         $data = [
             'uniacid'=>$uniacid,
             'openid'=>$openid,
             'ordersn'=>$order_sn,
-            'goodsprice'=>$money,
+            'goodsprice'=>$goods['marketprice']?:0,
             'price'=>$money,
             'status'=>0,
             'createtime'=>time(),
             'agentid'=>$member['agent_id'],
-            'address'=>$address?:null,
+            'addressid'=>$address_id?:0,
+            'address'=>$address,
+            'dispatchprice'=>$money,
             'remark'=>$remark,
         ];
         //查找订单号  里面有没有LQ  是不是  不等于false
-        if(strpos('LQ',$order_sn) !== false){
-            $data['status'] = 1;
+//        if(strpos('LQ',$order_sn) !== false){
+//            $data['status'] = 1;
+//        }
+        pdo_insert('ewei_shop_order',$data);
+        $orderid = pdo_insertid();
+        if(!empty($goods)){
+            $add = [
+                'uniacid'=>$uniacid,
+                'goodsid'=>$goods['id'],
+                'orderid'=>$orderid,
+                'price'=>$money,
+                'total'=>1,
+                'createtime'=>time(),
+                'realprice'=>0,
+                'changeprice'=>$goods['marketprice'],
+                'oldprice'=>$goods['marketprice'],
+                'openid'=>$openid,
+            ];
+            pdo_insert('ewei_shop_order_goods',$add);
         }
-        return pdo_insert('ewei_shop_order',$data);
+        return $orderid;
     }
 
     /**
@@ -279,6 +377,24 @@ class Level_EweiShopV2Page extends AppMobilePage
         $uniacid = $_W['uniacid'];
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         show_json(1,['is_open'=>$member['is_open'],'expire_time'=>date('Y年m月d日',$member['expire_time'])]);
+    }
+
+    /**
+     * 年卡弹窗
+     */
+    public function level_alert(){
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        //no_id 的1是年卡
+        $no_id = empty($_GPC['no_id']) ? 1 : $_GPC['no_id'];
+        $openid = $_GPC['openid'];
+        if(pdo_exists('notice',['uniacid'=>$uniacid,'openid'=>$openid,'status'=>1,'no_id'=>$no_id])){
+            show_json(0,"已查看");
+        }else{
+            pdo_insert('notice',['uniacid'=>$uniacid,'openid'=>$openid,'status'=>1,'no_id'=>$no_id,'createtime'=>time()]);
+            show_json(1);
+        }
     }
 }
 ?>
