@@ -81,11 +81,15 @@ class Index_EweiShopV2Page extends AppMobilePage{
     
     //首页广告位
     public function adsense(){
-        $list=pdo_fetchall("select * from ".tablename("ewei_shop_adsense")." order by sort desc");
+        global $_W;
+        global $_GPC;
+        $type=$_GPC["type"];
+        $list=pdo_fetchall("select * from ".tablename("ewei_shop_adsense")." where type=:type order by sort desc",array(":type"=>$type));
         foreach ($list as $k=>$v){
             $list[$k]["thumb"]=tomedia($v["thumb"]);
         }
-        show_json(1,$list);
+        $l["list"]=$list;
+        show_json(1,$l);
     }
     
     //页面优化
