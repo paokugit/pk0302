@@ -84,9 +84,12 @@ class Index_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $type=$_GPC["type"];
+        $openid = $_GPC['openid'];
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid]);
         $list=pdo_fetchall("select * from ".tablename("ewei_shop_adsense")." where type=:type order by sort desc",array(":type"=>$type));
         foreach ($list as $k=>$v){
             $list[$k]["thumb"]=tomedia($v["thumb"]);
+            $list[$k]['url'] = strpos($v['url'],"member_card") == false ? : $member['is_open'] == 1 ? $v['url'] : "/pages/annual_card/equity/equity";
         }
         $l["list"]=$list;
         show_json(1,$l);

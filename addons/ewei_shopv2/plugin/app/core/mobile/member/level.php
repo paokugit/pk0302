@@ -273,12 +273,10 @@ class Level_EweiShopV2Page extends AppMobilePage
         $base_address = pdo_getcolumn('ewei_shop_express_set',['uniacid'=>$uniacid,'id'=>1],'express_set');
         $base_express = explode(';',$base_address);
         if(in_array($user_address['province'],$base_express)){
-            //$data['price'] = 10;
-            $data['price'] = 0.01;
+            $data['price'] = 10;
 	        $data['is_remote'] = 0;
         }else{
-            //$data['price'] = 20;
-            $data['price'] = 0.02;
+            $data['price'] = 20;
 	        $data['is_remote'] = 1;
         }
         return $data;
