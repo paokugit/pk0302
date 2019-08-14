@@ -194,6 +194,11 @@ class EweiShopWechatPay
                                                                                             if($this->type == "32"){
                                                                                                 $this->level();
                                                                                             }
+                                                                                            else{
+                                                                                                if($this->type == "33"){
+                                                                                                    $this->level_express();
+                                                                                                }
+                                                                                            }
                                                                                         }
                                                                                     }
                                                                                 }
@@ -1070,6 +1075,9 @@ class EweiShopWechatPay
         preg_match_all('/\d+/',$order['remark'],$arr);
         $level = pdo_get('ewei_shop_member_memlevel',['id'=>$arr[0][0]]);
         pdo_insert('log',['log'=>json_encode($level).$arr[0][0].$order['remark'],'createtime'=>date('Y-m-d H:i:s',time())]);
+        if($member['agentid'] != 0){
+            $father = pdo_get('ewei_shop_member',['id'=>$member['agentid']]);
+        }
         if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
             pdo_begin();
             try {
@@ -1088,6 +1096,8 @@ class EweiShopWechatPay
                 $a = $this->add_record($order['openid'],$expire_time,$level);
                 $b = pdo_update('ewei_shop_member',['is_open'=>1,'expire_time'=>$endtime],['openid'=>$order['openid']]);
                 pdo_insert('log',['log'=>$a.$b,'createtime'=>date('Y-m-d H:i:s',time())]);
+                //给购买年卡的会员的上级加150贡献值
+                m('member')->setCredit($father['openid'],'credit4',150,'下级购买年卡奖励');
                 pdo_commit();
             }catch(Exception $exception){
                 pdo_rollback();
@@ -1143,7 +1153,7 @@ class EweiShopWechatPay
                 'level_name'=>$level['level_name'],
                 'goods_id'=>iunserializer($level['goods_id'])[0],
                 //'createtime'=>$i == 0 ? time() : strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
-		'createtime' => strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
+		        'createtime' => strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
             ];
             //如果已经加过发放记录   就继续结束
             if(pdo_exists('ewei_shop_level_record',['openid'=>$openid,'month'=>$data['month'],'level_id'=>$data['level_id']])){
@@ -1221,6 +1231,36 @@ class EweiShopWechatPay
         }
         $res = p("app")->mysendNotice($openid, $postdata,'', "qN-Wi2Jw8HnheTTuJRFivIKrevwk70m8lvH4mnf_ad0");
         pdo_insert('log',['log'=>$openid.json_encode($res),'createtime'=>date('Y-m-d H:i:s')]);
+    }
+
+    /**
+     * 年卡的物品的领取支付回调
+     */
+    public function level_express()
+    {
+        $input = file_get_contents('php://input');
+        $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $data = json_decode(json_encode($obj), true);
+        if (!$data) {
+            exit("FAIL");
+        }
+        $res = $this->check_sign($data);
+        if (!$res) {
+            exit("FAIL");
+        }
+        $ordersn = $data['out_trade_no'];  //获得订单信息
+        //用ordersn订单号 查订单信息
+        $order = pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
+        $month = date('Ym');
+        $level_id = mb_substr($ordersn,2,1);
+        $record = pdo_get('ewei_shop_level_record',['openid'=>$order['openid'],'month'=>$month,'level_id'=>$level_id]);
+        if($record['status'] == 0){
+            //更新领取记录的状态
+            pdo_update('ewei_shop_level_record',['status'=>1,'updatetime'=>time()],['openid'=>$order['openid'],'level_id'=>$level_id,'month'=>$month]);
+            //更新订单表信息
+            pdo_update('ewei_shop_order',['status'=>1,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
+        }
+        //m('member')->setCredit($order['openid'],'credit2',$order['price'],'年卡".$record["month"]."权益');
     }
 }
 ?>
