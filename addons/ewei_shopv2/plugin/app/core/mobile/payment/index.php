@@ -517,8 +517,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $uniacid = $_W['uniacid'];
         $openid = $_GPC['openid'];
-        $mobile = $_GPC['mobile'];
-        $money = $_GPC['money'];
+        $mobile = trim($_GPC['mobile']);
+        $money = trim($_GPC['money']);
         if($openid == "" || $mobile == "" || $money == ""){
             show_json(0,"请完善参数信息");
         }

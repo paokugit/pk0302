@@ -21,7 +21,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         //用户的信息
         $member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid],['nickname','realname','is_open',"FROM_UNIXTIME(expire_time) as expire"]);
         //待领取的优惠券  两个
-        $coupon = pdo_fetchall('select cd.id,cd.used,co.deduct,co.enough,co.couponname from '.tablename('ewei_shop_coupon_data').'cd join '.tablename('ewei_shop_coupon').'co on co.id=cd.couponid'.' where cd.gettype = 1 and cd.openid = "'.$openid.'" order by id desc LIMIT 0,2');
+        $coupon = pdo_fetchall('select cd.id,cd.used,co.deduct,co.enough,co.couponname from '.tablename('ewei_shop_coupon_data').'cd join '.tablename('ewei_shop_coupon').'co on co.id=cd.couponid'.' where cd.gettype = 1 and cd.openid = "'.$openid.'" and co.timeend > "'.time().'" order by id desc LIMIT 0,2');
         //特权产品列表
         $goods = pdo_getall('ewei_shop_goods','status = 1 and is_right = 1 and total > 0 order by id desc LIMIT 0,8',['id','title','thumb','total','productprice','marketprice','bargain']);
         foreach ($goods as $key=>$item){
@@ -334,6 +334,7 @@ class Level_EweiShopV2Page extends AppMobilePage
                 'changeprice'=>$goods['marketprice'],
                 'oldprice'=>$goods['marketprice'],
                 'openid'=>$openid,
+                'optionname'=>'',
             ];
             pdo_insert('ewei_shop_order_goods',$add);
         }
