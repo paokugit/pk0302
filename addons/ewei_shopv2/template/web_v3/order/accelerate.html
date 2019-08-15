@@ -1,0 +1,56 @@
+{template '_header'}
+<meta charset="UTF-8">
+<div class="page-header">当前位置：<span class="text-primary">加速宝订单</span></div>
+
+<div class="page-content">
+    
+    {if empty($list)}
+        <div class="panel panel-default">
+            <div class="panel-body empty-data">未查询到相关数据</div>
+        </div>
+    {else}
+        <form action="" method="post">
+           
+            <table class="table table-responsive table-hover" >
+                <thead class="navbar-inner">
+                    <tr>
+                        <th style="width:25px;" ></th>
+                        <th style='width:50px'>id</th>
+                        <th style='width:50px'>用户</th>
+                        <th style='width:50px'>订单金额</th>
+                      <th style='width:50px'>加速日期</th>
+                      <th style='width:50px'>每天可兑换</th>
+                       <th style='width:50px'>时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $list $row}
+                        <tr>
+                            <td>
+                                <input type='checkbox'   value="{$row['id']}"/>
+                            </td>
+                            <td>
+                                {$row['id']}
+                            </td>
+                            <td>{$row['nickname']}</td>
+                            <td>{$row["money"]}</td>
+                           <td>{$row["accelerate_day"]}</td>
+                           <td>{$row["duihuan"]}</td>
+                           <td>{$row["create_time"]}</td>
+                        </tr>
+                    {/loop}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        
+                        <td colspan="7" style="text-align: right">
+                            {$pager}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </form>
+    {/if}
+</div>
+{template '_footer'}
+<!--NDAwMDA5NzgyNw==-->
