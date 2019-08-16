@@ -799,6 +799,16 @@ class System_EweiShopV2Model {
                         "permmust" => "order.list.main"
                     ) ,
                     array(
+                        "title" => "加速宝订单",
+                        "items" => array(
+                            array(
+                                "title" => "列表",
+                                "route" => "accelerate",
+                                "desc" => "加速宝订单"
+                            ) 
+                        )
+                    ),
+                    array(
                         "title" => "维权",
                         "route" => "list",
                         "items" => array(

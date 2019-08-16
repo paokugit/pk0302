@@ -612,8 +612,11 @@ if (!class_exists("AppModel")) {
                         $newGoodsList[$key]['issendfree'] = $goods['issendfree'];
                         //添加广告表示
                         $newGoodsList[$key]['adv']=0;
+                        $newGoodsList[$key]['main_target']="";
+                        $newGoodsList[$key]['substandard']="";
                     }else{
-                        $gd=pdo_get("ewei_shop_goods",array("id"=>$gid));
+                        $a=pdo_get("ewei_shop_goodtop",array("id"=>$gid));
+                        $gd=pdo_get("ewei_shop_goods",array("id"=>$a["goodid"]));
                         $newGoodsList[$key]['gid'] = $gd['id'];
                         $newGoodsList[$key]['deduct'] = $gd['deduct'];
                         $newGoodsList[$key]['deduct_type'] = $gd['deduct_type'];
@@ -634,6 +637,8 @@ if (!class_exists("AppModel")) {
                         $newGoodsList[$key]['issendfree'] = $gd['issendfree'];
                         //添加广告表示
                         $newGoodsList[$key]['adv']=1;
+                        $newGoodsList[$key]['main_target']=$a["main_target"];
+                        $newGoodsList[$key]['substandard']=$a["substandard"];
                     }
                 }
                 
@@ -659,6 +664,8 @@ if (!class_exists("AppModel")) {
                     $newGoodsList[$key]['issendfree'] = $goods['issendfree'];
                     //添加广告表示
                     $newGoodsList[$key]['adv']=0;
+                    $newGoodsList[$key]['main_target']="";
+                    $newGoodsList[$key]['substandard']="";
                 }
             }
             return $newGoodsList;
@@ -668,7 +675,7 @@ if (!class_exists("AppModel")) {
         public function inarray($arary,$key){
             foreach ($arary as $k=>$v){
                if ($v["sort"]==$key){
-                   return $v["goodid"];
+                   return $v["id"];
                } 
             }
             return 0;
