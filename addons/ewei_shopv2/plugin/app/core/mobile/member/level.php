@@ -172,6 +172,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         $money = $_GPC['money'];
         //记录id
         $record_id = $_GPC['record_id'];
+        $good_id = $_GPC['goods_id'];
         if($openid == "" || $level_id == "" || $record_id == "" || $address_id == "" || $money == ""){
             show_json(0,"参数不完善");
         }
@@ -179,6 +180,13 @@ class Level_EweiShopV2Page extends AppMobilePage
         if($price['price'] != $money){
             show_json(0,"支付金额不正确");
         }
+        $level = pdo_get('ewei_shop_member_memlevel',['id'=>$level_id,'uniacid'=>$uniacid]);
+        $goods_id = unserialize($level['goods_id']);
+        if(!in_array($good_id,$goods_id)){
+            show_json(0,"领取商品有误");
+        }
+        //把年里礼包的商品给查出来
+        $goods = pdo_get('ewei_shop_goods','uniacid="'.$uniacid.'" and id="'.$goods_id.'" and status = 1 and total > 0',['id','thumb','title','marketprice']);
         //查询该记录的信息
         $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id,'openid'=>$openid]);
         $log = pdo_getall('ewei_shop_level_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'" and level_id = "'.$level_id.'" and status > 0');
@@ -192,8 +200,6 @@ class Level_EweiShopV2Page extends AppMobilePage
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         //生成订单号
         $order_sn = "LQ".$level_id.date('YmdHis').random(12);
-        //把年里礼包的商品给查出来
-        $goods = pdo_get('ewei_shop_goods','uniacid="'.$uniacid.'" and id="'.$record['goods_id'].'" and status = 1 and total > 0',['id','thumb','title','marketprice']);
         //添加订单
         $order_id = $this->addorder($openid,$order_sn,$money,$member,$address_id,"领取年卡".$record["month"]."权益",$goods);
         //唤起微信支付
@@ -266,6 +272,7 @@ class Level_EweiShopV2Page extends AppMobilePage
      */
     public function change_address($address_id,$openid,$uniacid)
     {
+        $record = pdo_get('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" order by id asc');
         $user_address = pdo_get('ewei_shop_member_address',['openid'=>$openid,'uniacid'=>$uniacid,'id'=>$address_id,'deleted'=>0]);
         if(empty($user_address)){
             show_json(0,"用户地址错误");
@@ -273,11 +280,13 @@ class Level_EweiShopV2Page extends AppMobilePage
         $base_address = pdo_getcolumn('ewei_shop_express_set',['uniacid'=>$uniacid,'id'=>1],'express_set');
         $base_express = explode(';',$base_address);
         if(in_array($user_address['province'],$base_express)){
-            $data['price'] = 10;
 	        $data['is_remote'] = 0;
+	        //这个人的第一条记录为0的话  说明是第一次领取
+            $data['price'] = $record['status'] == 0 ? 0 :10;
         }else{
-            $data['price'] = 20;
-	        $data['is_remote'] = 1;
+            $data['is_remote'] = 1;
+            //这个人的第一条记录为0的话  说明是第一次领取
+	        $data['price'] = $record['status'] == 0 ? 0 : 20;
         }
         return $data;
 
@@ -394,6 +403,30 @@ class Level_EweiShopV2Page extends AppMobilePage
             pdo_insert('notice',['uniacid'=>$uniacid,'openid'=>$openid,'status'=>1,'no_id'=>$no_id,'createtime'=>time()]);
             show_json(1);
         }
+    }
+
+    /**
+     * 商品列表
+     */
+    public function goods_list()
+    {
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $openid = $_GPC['openid'];
+        $level_id = $_GPC['level_id'];
+        if($openid == "" || $level_id == "") show_json(0,"参数不完整");
+        $is_open = pdo_getcolumn('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],'is_open');
+        if($is_open == 0) show_json(0,"您无权查看");
+        $level = pdo_get('ewei_shop_member_memlevel',['id'=>$level_id,'uniacid'=>$uniacid]);
+        $goods_id = unserialize($level['goods_id']);
+        $goods = [];
+        foreach ($goods_id as $item){
+            $good = pdo_get('ewei_shop_goods',['uniacid'=>$uniacid,'id'=>$item],['id','title','thumb','total','productprice','marketprice','bargain']);
+            $good['thumb'] = tomedia($good['thumb']);
+            $goods[] = $good;
+        }
+        show_json(1,['goods'=>$goods]);
     }
 }
 ?>

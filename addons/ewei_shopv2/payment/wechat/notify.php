@@ -1151,7 +1151,6 @@ class EweiShopWechatPay
                 'openid'=>$openid,
                 'level_id'=>$level['id'],
                 'level_name'=>$level['level_name'],
-                'goods_id'=>iunserializer($level['goods_id'])[0],
                 //'createtime'=>$i == 0 ? time() : strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
 		        'createtime' => strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
             ];

@@ -150,9 +150,9 @@ class Refund_EweiShopV2Page extends AppMobilePage
 		$rtype = intval($_GPC['rtype']);
 
 		if ($rtype != 2) {
-			if (empty($price) && $order['deductprice'] == 0) {
-				app_error(AppError::$OrderCanNotRefund, '退款金额不能为0元');
-			}
+//			if (empty($price) && $order['deductprice'] == 0) {
+//				app_error(AppError::$OrderCanNotRefund, '退款金额不能为0元');
+//			}
 
 			if ($order['refundprice'] < $price) {
 				app_error(AppError::$OrderCanNotRefund, '退款金额不能超过' . $order['refundprice'] . '元');
