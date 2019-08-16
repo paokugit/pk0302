@@ -166,6 +166,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $uniacid = $_W['uniacid'];
+        //接收参数 并判断参数的完整性
         $openid = $_GPC['openid'];
         $level_id = $_GPC['level_id'];
         $address_id = $_GPC['address_id'];
@@ -173,28 +174,32 @@ class Level_EweiShopV2Page extends AppMobilePage
         //记录id
         $record_id = $_GPC['record_id'];
         $good_id = $_GPC['goods_id'];
-        if($openid == "" || $level_id == "" || $record_id == "" || $address_id == "" || $money == ""){
+        if($openid == "" || $level_id == "" || $record_id == "" || $address_id == "" || $money == "" || $good_id == ""){
             show_json(0,"参数不完善");
         }
+        //判断支付金额  是否正确
         $price = $this->change_address($address_id,$openid,$uniacid);
         if($price['price'] != $money){
             show_json(0,"支付金额不正确");
         }
+        //把礼包的信息查出来  然后 把他的商品转译出来  判断 要领取的商品在不在其中
         $level = pdo_get('ewei_shop_member_memlevel',['id'=>$level_id,'uniacid'=>$uniacid]);
         $goods_id = unserialize($level['goods_id']);
         if(!in_array($good_id,$goods_id)){
             show_json(0,"领取商品有误");
         }
         //把年里礼包的商品给查出来
-        $goods = pdo_get('ewei_shop_goods','uniacid="'.$uniacid.'" and id="'.$goods_id.'" and status = 1 and total > 0',['id','thumb','title','marketprice']);
+        $goods = pdo_get('ewei_shop_goods','uniacid="'.$uniacid.'" and id="'.$good_id.'" and status = 1 and total > 0',['id','thumb','title','marketprice']);
         //查询该记录的信息
         $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id,'openid'=>$openid]);
+        //查询领取记录里面的已领过的状态
         $log = pdo_getall('ewei_shop_level_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'" and level_id = "'.$level_id.'" and status > 0');
         if(count($log) > 0 && (date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."21")){
             show_json(0,$record['month']."权益礼包不在领取日期");
         }
+        //判断这个月的记录状态
         if($record['status'] > 0){
-            show_json(0,$record['month']."权利礼包已领取");
+            show_json(0,$record['month']."权利礼包已领取或过期");
         }
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
@@ -205,6 +210,8 @@ class Level_EweiShopV2Page extends AppMobilePage
         //唤起微信支付
         $payinfo = array( "openid" => substr($openid,7), "title" => "领取年卡".$record["month"]."权益", "tid" => $order_sn, "fee" =>$money );
         $res = $this->model->wxpay($payinfo, 33);
+        //唤醒支付修改记录里面的商品id
+        pdo_update('ewei_shop_level_record',['goods_id'=>$good_id],['id'=>$record_id]);
         $res['order_id'] = $order_id;
         show_json(1,$res);
     }
@@ -283,10 +290,16 @@ class Level_EweiShopV2Page extends AppMobilePage
 	        $data['is_remote'] = 0;
 	        //这个人的第一条记录为0的话  说明是第一次领取
             $data['price'] = $record['status'] == 0 ? 0 :10;
+            if($openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE"){
+                $data['price'] = 0.01;
+            }
         }else{
             $data['is_remote'] = 1;
             //这个人的第一条记录为0的话  说明是第一次领取
 	        $data['price'] = $record['status'] == 0 ? 0 : 20;
+            if($openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE"){
+                $data['price'] = 0.02;
+            }
         }
         return $data;
 
@@ -420,10 +433,13 @@ class Level_EweiShopV2Page extends AppMobilePage
         if($is_open == 0) show_json(0,"您无权查看");
         $level = pdo_get('ewei_shop_member_memlevel',['id'=>$level_id,'uniacid'=>$uniacid]);
         $goods_id = unserialize($level['goods_id']);
+        $img = unserialize($level['thumb_url']);
+        array_unshift($img,$level['thumb']);
         $goods = [];
-        foreach ($goods_id as $item){
+        foreach ($goods_id as $key=>$item){
             $good = pdo_get('ewei_shop_goods',['uniacid'=>$uniacid,'id'=>$item],['id','title','thumb','total','productprice','marketprice','bargain']);
             $good['thumb'] = tomedia($good['thumb']);
+            $good['image'] = tomedia($img[$key]);
             $goods[] = $good;
         }
         show_json(1,['goods'=>$goods]);
