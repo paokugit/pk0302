@@ -192,14 +192,14 @@ class Level_EweiShopV2Page extends AppMobilePage
         $goods = pdo_get('ewei_shop_goods','uniacid="'.$uniacid.'" and id="'.$good_id.'" and status = 1 and total > 0',['id','thumb','title','marketprice']);
         //查询该记录的信息
         $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id,'openid'=>$openid]);
+        //判断这个月的记录状态
+        if($record['status'] > 0){
+            show_json(0,$record['month']."权利礼包已领取或过期");
+        }
         //查询领取记录里面的已领过的状态
         $log = pdo_getall('ewei_shop_level_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'" and level_id = "'.$level_id.'" and status > 0');
         if(count($log) > 0 && (date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."21")){
             show_json(0,$record['month']."权益礼包不在领取日期");
-        }
-        //判断这个月的记录状态
-        if($record['status'] > 0){
-            show_json(0,$record['month']."权利礼包已领取或过期");
         }
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
@@ -207,6 +207,11 @@ class Level_EweiShopV2Page extends AppMobilePage
         $order_sn = "LQ".$level_id.date('YmdHis').random(12);
         //添加订单
         $order_id = $this->addorder($openid,$order_sn,$money,$member,$address_id,"领取年卡".$record["month"]."权益",$goods);
+        //如果是第一次支付   金额为零 不用唤醒支付  直接改变状态   然后 架订单的时候 也判断了  让status=1
+        if($money == 0){
+             pdo_update('ewei_shop_level_record',['goods_id'=>$good_id,'status'=>1,'updatetime'=>time()],['id'=>$record_id]);
+            show_json(2,"领取成功");
+        }
         //唤起微信支付
         $payinfo = array( "openid" => substr($openid,7), "title" => "领取年卡".$record["month"]."权益", "tid" => $order_sn, "fee" =>$money );
         $res = $this->model->wxpay($payinfo, 33);
@@ -289,17 +294,11 @@ class Level_EweiShopV2Page extends AppMobilePage
         if(in_array($user_address['province'],$base_express)){
 	        $data['is_remote'] = 0;
 	        //这个人的第一条记录为0的话  说明是第一次领取
-            $data['price'] = $record['status'] == 0 ? 0 :10;
-            if($openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE"){
-                $data['price'] = 0.01;
-            }
+            $data['price'] = $record['status'] > 0 ? $openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE" ? 0.01 : 10 : 0;
         }else{
             $data['is_remote'] = 1;
             //这个人的第一条记录为0的话  说明是第一次领取
-	        $data['price'] = $record['status'] == 0 ? 0 : 20;
-            if($openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE"){
-                $data['price'] = 0.02;
-            }
+            $data['price'] = $record['status'] > 0 ? $openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE" ? 0.02 : 20  : 0;
         }
         return $data;
 
@@ -328,7 +327,6 @@ class Level_EweiShopV2Page extends AppMobilePage
             'ordersn'=>$order_sn,
             'goodsprice'=>$goods['marketprice']?:0,
             'price'=>$money,
-            'status'=>0,
             'createtime'=>time(),
             'agentid'=>$member['agent_id'],
             'addressid'=>$address_id?:0,
@@ -336,6 +334,7 @@ class Level_EweiShopV2Page extends AppMobilePage
             'dispatchprice'=>$money,
             'remark'=>$remark,
         ];
+        $data['status'] = $money == 0 ? 1 :0;
         //查找订单号  里面有没有LQ  是不是  不等于false
 //        if(strpos('LQ',$order_sn) !== false){
 //            $data['status'] = 1;
@@ -436,13 +435,16 @@ class Level_EweiShopV2Page extends AppMobilePage
         $img = unserialize($level['thumb_url']);
         array_unshift($img,$level['thumb']);
         $goods = [];
+        $month = date('Ym');
+        $record = pdo_get('ewei_shop_level_record',['openid'=>$openid,'month'=>$month,'status'=>1]);
         foreach ($goods_id as $key=>$item){
             $good = pdo_get('ewei_shop_goods',['uniacid'=>$uniacid,'id'=>$item],['id','title','thumb','total','productprice','marketprice','bargain']);
             $good['thumb'] = tomedia($good['thumb']);
             $good['image'] = tomedia($img[$key]);
+            $good['is_get'] = !empty($record) ? $record['goods_id'] == $item ? 1 :2 : 0;
             $goods[] = $good;
         }
-        show_json(1,['goods'=>$goods]);
+        show_json(1,['get'=>empty($record)?0:1,'goods'=>$goods]);
     }
 }
 ?>
