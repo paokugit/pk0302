@@ -586,34 +586,36 @@ if (!class_exists("AppModel")) {
         public function getGoodsList($goodsList,$pages){
             $newGoodsList = array();
             $day=date("Y-m-d");
-            $adv=pdo_fetchall("select * from ".tablename("ewei_shop_goodtop")." where is_del=0 and start_date<=:start_date and end_date<=:end_date",array(":start_date"=>$day,":end_date"=>$day));
-            if ($pages==0){
+            $adv=pdo_fetchall("select * from ".tablename("ewei_shop_goodtop")." where is_del=0 and start_date<=:start_date and end_date>=:end_date",array(":start_date"=>$day,":end_date"=>$day));
+            if ($pages==1){
                 foreach ($goodsList['list'] as $key=>$goods){
                     //判断是否包含
+                   
                     $gid=$this->inarray($adv, $key);
                     if ($gid==0){
-                        $newGoodsList[$key]['gid'] = $goods['id'];
-                        $newGoodsList[$key]['deduct'] = $goods['deduct'];
-                        $newGoodsList[$key]['deduct_type'] = $goods['deduct_type'];
-                        $newGoodsList[$key]['title'] = $goods['title'];
-                        $newGoodsList[$key]['subtitle'] = $goods['subtitle'];
-                        $newGoodsList[$key]['price'] = $goods['minprice'];
-                        $newGoodsList[$key]['productprice'] = $goods['productprice'];
-                        $newGoodsList[$key]['thumb'] = $goods['thumb'];
-                        $newGoodsList[$key]['total'] = $goods['total'];
-                        $newGoodsList[$key]['ctype'] = $goods['type'];
-                        $newGoodsList[$key]['sales'] = $goods['sales'];
-                        $newGoodsList[$key]['video'] = $goods['video'];
-                        $newGoodsList[$key]['seecommission'] = $goods['seecommission'];
-                        $newGoodsList[$key]['cansee'] = $goods['cansee'];
-                        $newGoodsList[$key]['seetitle'] = $goods['seetitle'];
-                        $newGoodsList[$key]['bargain'] = $goods['bargain'];
-                        $newGoodsList[$key]['showprice'] = round($goods['minprice']-$goods['deduct'],2);
-                        $newGoodsList[$key]['issendfree'] = $goods['issendfree'];
-                        //添加广告表示
-                        $newGoodsList[$key]['adv']=0;
-                        $newGoodsList[$key]['main_target']="";
-                        $newGoodsList[$key]['substandard']="";
+                            $newGoodsList[$key]['gid'] = $goods['id'];
+                            $newGoodsList[$key]['deduct'] = $goods['deduct'];
+                            $newGoodsList[$key]['deduct_type'] = $goods['deduct_type'];
+                            $newGoodsList[$key]['title'] = $goods['title'];
+                            $newGoodsList[$key]['subtitle'] = $goods['subtitle'];
+                            $newGoodsList[$key]['price'] = $goods['minprice'];
+                            $newGoodsList[$key]['productprice'] = $goods['productprice'];
+                            $newGoodsList[$key]['thumb'] = $goods['thumb'];
+                            $newGoodsList[$key]['total'] = $goods['total'];
+                            $newGoodsList[$key]['ctype'] = $goods['type'];
+                            $newGoodsList[$key]['sales'] = $goods['sales'];
+                            $newGoodsList[$key]['video'] = $goods['video'];
+                            $newGoodsList[$key]['seecommission'] = $goods['seecommission'];
+                            $newGoodsList[$key]['cansee'] = $goods['cansee'];
+                            $newGoodsList[$key]['seetitle'] = $goods['seetitle'];
+                            $newGoodsList[$key]['bargain'] = $goods['bargain'];
+                            $newGoodsList[$key]['showprice'] = round($goods['minprice']-$goods['deduct'],2);
+                            $newGoodsList[$key]['issendfree'] = $goods['issendfree'];
+                            //添加广告表示
+                            $newGoodsList[$key]['adv']=0;
+                            $newGoodsList[$key]['main_target']="";
+                            $newGoodsList[$key]['substandard']="";
+                        
                     }else{
                         $a=pdo_get("ewei_shop_goodtop",array("id"=>$gid));
                         $gd=pdo_get("ewei_shop_goods",array("id"=>$a["goodid"]));
@@ -624,7 +626,7 @@ if (!class_exists("AppModel")) {
                         $newGoodsList[$key]['subtitle'] = $gd['subtitle'];
                         $newGoodsList[$key]['price'] = $gd['minprice'];
                         $newGoodsList[$key]['productprice'] = $gd['productprice'];
-                        $newGoodsList[$key]['thumb'] = $gd['thumb'];
+                        $newGoodsList[$key]['thumb'] = tomedia($gd['thumb']);
                         $newGoodsList[$key]['total'] = $gd['total'];
                         $newGoodsList[$key]['ctype'] = $gd['type'];
                         $newGoodsList[$key]['sales'] = $gd['sales'];

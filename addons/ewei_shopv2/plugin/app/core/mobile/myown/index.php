@@ -143,6 +143,60 @@ class Index_EweiShopV2Page extends AppMobilePage{
         show_json(1,$l);
     }
     
+    function GetTeamMember($members, $mid) {
+       
+        $mids=array($mid);//第一次执行时候的用户id
+        $agentallcount=0;
+        $shopkeeperallcount=0;
+        do {
+            $othermids=array();
+            $state=false;
+            foreach ($mids as $valueone) {
+                foreach ($members as $key => $valuetwo) {
+                    if($valuetwo['agentid']==$valueone){
+                        $agentallcount+=1;//所有的推荐
+                        if ($valuetwo["agentlevel"]==5){
+                            $shopkeeperallcount+=1;
+                        }
+                        $othermids[]=$valuetwo['id'];//将我的下级id保存起来用来下轮循环他的下级
+                        array_splice($members,$key,1);//从所有会员中删除他
+                        $state=true;
+                    }
+                }
+            }
+            $mids=$othermids;//foreach中找到的我的下级集合,用来下次循环
+        } while ($state==true);
+        $data["agentallcount"]=$agentallcount;
+        $data["shopkeeperallcount"]=$shopkeeperallcount;
+        return $data;
+    }
+    
+    public function membercount(){
+        $member=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." order by id asc");
+        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<7000 and id>=3000 order by id asc ");
+        
+        foreach ($m as $k=>$v){
+           //获取直推数据
+            
+//            $data["agentcount"]=pdo_getcolumn("select count(*) from ".tablename("ewei_shop_member")." where agentid=:agentid", array(":agentid"=>$v["id"]));
+//            $data["shopkeepercount"]=pdo_getcolumn("select count(*) from ".tablename("ewei_shop_member")." where agentid=:agentid and agentlevel=5", array(":agentid"=>$v["id"]));
+//            $data["starshinecount"]=pdo_getcolumn("select count(*) from ".tablename("ewei_shop_member")." where agentid=:agentid and agentlevel=3", array(":agentid"=>$v["id"]));
+            $data=$this->GetTeamMember($member,$v["id"]);
+          //  $data["agentallcount"]= m('member')->allAgentCount($v['id']);
+            $data["update_time"]=date("Y-m-d H:i:s");
+            $c=pdo_get("ewei_shop_member_agentcount",array("openid"=>$v["openid"]));
+           if ($c){
+               pdo_update("ewei_shop_member_agentcount",$data,array("openid"=>$v["openid"]));
+           }else{
+               $data["openid"]=$v["openid"];
+               pdo_insert("ewei_shop_member_agentcount",$data);
+           }
+           var_dump($v["openid"]);
+           var_dump($data);
+           
+        }
+    }
+   
 }
 
 ?>

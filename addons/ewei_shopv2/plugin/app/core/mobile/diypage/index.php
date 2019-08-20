@@ -429,7 +429,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $res = $this->model->zktGoodsList($select,$page);
             m('cache')->set('zktgoodslist'.$page.$select, $res);
             app_json(array('goods' => $res));
-        }
+         }
     }
 }
 ?>

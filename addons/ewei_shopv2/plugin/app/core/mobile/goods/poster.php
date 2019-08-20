@@ -270,7 +270,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
 			$image = imagecreatefromstring($imgurl);
 		}
 		$sizes = $sizes_default = array( "width" => imagesx($image), "height" => imagesy($image) );
-		$sizes = array( "width" => 98, "height" => 98 );
+		$sizes = array( "width" => 70, "height" => 70 );
 		if( $data["style"] == "radius" || $data["style"] == "circle" ) 
 		{
 			$image = $this->imageZoom($image, 4);
@@ -294,12 +294,12 @@ class Poster_EweiShopV2Page extends AppMobilePage
             load()->func("file");
             mkdirs($path);
         }
-        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "openid" => $member["openid"])));
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "openid" => $member["openid"],"code"=>10)));
         $filename = $md5 . ".png";
         $filepath = $path . $filename;
         if( is_file($filepath) )
         {
-            return $_W["siteroot"] . "addons/ewei_shopv2/data/helpposter/".$filename;
+           return $_W["siteroot"] . "addons/ewei_shopv2/data/helpposter/".$filename;
         }
         $target = imagecreatetruecolor(550, 978);
         $white = imagecolorallocate($target, 255, 255, 255);
@@ -317,7 +317,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         imagettftext($target, 26, 0, 32, 782, $black, $font, '快来帮我助力一下');
         imagettftext($target, 16, 0, 32, 820, $black, $font, '微信步数兑现金，收入可提现！');
         //lihanwen
-        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $mid,"page" => "pages/helphand/helpshare/helpshare" ));
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $mid,"page" => "packageA/pages/helphand/helpshare/helpshare" ));
 
         //var_dump($qrcode);
         if( !is_error($qrcode) )
@@ -333,7 +333,8 @@ class Poster_EweiShopV2Page extends AppMobilePage
         $memberthumb = tomedia($member["avatar"]);
         $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
         $image = $this->mergeImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
-        imagecopyresized($target, $image, 32, 860, 0, 0, 70, 70, imagesx($image), imagesy($image));
+        imagecopyresized($target, $image, 32, 860, 0, 0, 70, 70, 70, 70);
+        
         imagettftext($target, 16, 0, 110, 875 , $black, $font, $this->subtext($member["nickname"],8));
         $nameColor = imagecolorallocate($target, 102, 102, 102);
         imagettftext($target, 12, 0, 110, 900 , $nameColor, $font, '每一步，都值得鼓励');
