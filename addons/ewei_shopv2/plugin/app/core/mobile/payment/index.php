@@ -28,9 +28,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(is_numeric($mid)){
             //折扣宝收款码
             $rebate_url = 'pages/discount/zkbscancode/zkbscancode';
+            //$rebate_url = 'packageA/pages/discount/zkbscancode/zkbscancode';
         }else{
             //折扣宝收款码
             $rebate_url = 'pages/personalcode/scancode';
+            //$rebate_url = 'packageA/pages/personalcode/scancode';
         }
         //$rebate_back= 'zhekoubao';
         $rebate_back= 'kaluli';

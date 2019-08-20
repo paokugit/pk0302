@@ -1343,6 +1343,36 @@ class Index_EweiShopV2Page extends WebPage
         
         
     }
+
+
+    /**
+     * 分享页缩略图设置
+     */
+    public function share_help(){
+        global $_W;
+
+        if( $_W["ispost"] )
+        {
+            $id = intval($_POST['id']);
+            $add['uniacid'] = $_W['uniacid'];
+            $add['title'] = trim($_POST['title']);
+            $add['thumb'] = save_media($_POST['thumb']);
+            $add['createtime'] = time();
+            if(empty($id)){
+                $res = pdo_insert('ewei_shop_share_help',$add);
+            }else{
+                $res = pdo_update('ewei_shop_share_help',$add,['id'=>$id]);
+            }
+            if($res){
+                show_json(1);
+            }else{
+                show_json(0,"操作失败");
+            }
+        }
+
+        $data = pdo_get('ewei_shop_share_help',['id'=>1]);
+        include($this->template());
+    }
     
 }
 ?>
