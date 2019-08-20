@@ -166,39 +166,57 @@ class Level_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $uniacid = $_W['uniacid'];
+        //接收参数 并判断参数的完整性
         $openid = $_GPC['openid'];
         $level_id = $_GPC['level_id'];
         $address_id = $_GPC['address_id'];
         $money = $_GPC['money'];
         //记录id
         $record_id = $_GPC['record_id'];
-        if($openid == "" || $level_id == "" || $record_id == "" || $address_id == "" || $money == ""){
+        $good_id = $_GPC['goods_id'];
+        if($openid == "" || $level_id == "" || $record_id == "" || $address_id == "" || $money == "" || $good_id == ""){
             show_json(0,"参数不完善");
         }
+        //判断支付金额  是否正确
         $price = $this->change_address($address_id,$openid,$uniacid);
         if($price['price'] != $money){
             show_json(0,"支付金额不正确");
         }
+        //把礼包的信息查出来  然后 把他的商品转译出来  判断 要领取的商品在不在其中
+        $level = pdo_get('ewei_shop_member_memlevel',['id'=>$level_id,'uniacid'=>$uniacid]);
+        $goods_id = unserialize($level['goods_id']);
+        if(!in_array($good_id,$goods_id)){
+            show_json(0,"领取商品有误");
+        }
+        //把年里礼包的商品给查出来
+        $goods = pdo_get('ewei_shop_goods','uniacid="'.$uniacid.'" and id="'.$good_id.'" and status = 1 and total > 0',['id','thumb','title','marketprice']);
         //查询该记录的信息
         $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id,'openid'=>$openid]);
+        //判断这个月的记录状态
+        if($record['status'] > 0){
+            show_json(0,$record['month']."权利礼包已领取或过期");
+        }
+        //查询领取记录里面的已领过的状态
         $log = pdo_getall('ewei_shop_level_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'" and level_id = "'.$level_id.'" and status > 0');
         if(count($log) > 0 && (date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."21")){
             show_json(0,$record['month']."权益礼包不在领取日期");
-        }
-        if($record['status'] > 0){
-            show_json(0,$record['month']."权利礼包已领取");
         }
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         //生成订单号
         $order_sn = "LQ".$level_id.date('YmdHis').random(12);
-        //把年里礼包的商品给查出来
-        $goods = pdo_get('ewei_shop_goods','uniacid="'.$uniacid.'" and id="'.$record['goods_id'].'" and status = 1 and total > 0',['id','thumb','title','marketprice']);
         //添加订单
         $order_id = $this->addorder($openid,$order_sn,$money,$member,$address_id,"领取年卡".$record["month"]."权益",$goods);
+        //如果是第一次支付   金额为零 不用唤醒支付  直接改变状态   然后 架订单的时候 也判断了  让status=1
+        if($money == 0){
+             pdo_update('ewei_shop_level_record',['goods_id'=>$good_id,'status'=>1,'updatetime'=>time()],['id'=>$record_id]);
+            show_json(2,"领取成功");
+        }
         //唤起微信支付
         $payinfo = array( "openid" => substr($openid,7), "title" => "领取年卡".$record["month"]."权益", "tid" => $order_sn, "fee" =>$money );
         $res = $this->model->wxpay($payinfo, 33);
+        //唤醒支付修改记录里面的商品id
+        pdo_update('ewei_shop_level_record',['goods_id'=>$good_id],['id'=>$record_id]);
         $res['order_id'] = $order_id;
         show_json(1,$res);
     }
@@ -266,6 +284,7 @@ class Level_EweiShopV2Page extends AppMobilePage
      */
     public function change_address($address_id,$openid,$uniacid)
     {
+        $record = pdo_get('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" order by id asc');
         $user_address = pdo_get('ewei_shop_member_address',['openid'=>$openid,'uniacid'=>$uniacid,'id'=>$address_id,'deleted'=>0]);
         if(empty($user_address)){
             show_json(0,"用户地址错误");
@@ -273,11 +292,13 @@ class Level_EweiShopV2Page extends AppMobilePage
         $base_address = pdo_getcolumn('ewei_shop_express_set',['uniacid'=>$uniacid,'id'=>1],'express_set');
         $base_express = explode(';',$base_address);
         if(in_array($user_address['province'],$base_express)){
-            $data['price'] = 10;
 	        $data['is_remote'] = 0;
+	        //这个人的第一条记录为0的话  说明是第一次领取
+            $data['price'] = $record['status'] > 0 ? $openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE" ? 0.01 : 10 : 0;
         }else{
-            $data['price'] = 20;
-	        $data['is_remote'] = 1;
+            $data['is_remote'] = 1;
+            //这个人的第一条记录为0的话  说明是第一次领取
+            $data['price'] = $record['status'] > 0 ? $openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE" ? 0.02 : 20  : 0;
         }
         return $data;
 
@@ -306,7 +327,6 @@ class Level_EweiShopV2Page extends AppMobilePage
             'ordersn'=>$order_sn,
             'goodsprice'=>$goods['marketprice']?:0,
             'price'=>$money,
-            'status'=>0,
             'createtime'=>time(),
             'agentid'=>$member['agent_id'],
             'addressid'=>$address_id?:0,
@@ -314,6 +334,7 @@ class Level_EweiShopV2Page extends AppMobilePage
             'dispatchprice'=>$money,
             'remark'=>$remark,
         ];
+        $data['status'] = $money == 0 ? 1 :0;
         //查找订单号  里面有没有LQ  是不是  不等于false
 //        if(strpos('LQ',$order_sn) !== false){
 //            $data['status'] = 1;
@@ -394,6 +415,36 @@ class Level_EweiShopV2Page extends AppMobilePage
             pdo_insert('notice',['uniacid'=>$uniacid,'openid'=>$openid,'status'=>1,'no_id'=>$no_id,'createtime'=>time()]);
             show_json(1);
         }
+    }
+
+    /**
+     * 商品列表
+     */
+    public function goods_list()
+    {
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $openid = $_GPC['openid'];
+        $level_id = $_GPC['level_id'];
+        if($openid == "" || $level_id == "") show_json(0,"参数不完整");
+        $is_open = pdo_getcolumn('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],'is_open');
+        if($is_open == 0) show_json(0,"您无权查看");
+        $level = pdo_get('ewei_shop_member_memlevel',['id'=>$level_id,'uniacid'=>$uniacid]);
+        $goods_id = unserialize($level['goods_id']);
+        $img = unserialize($level['thumb_url']);
+        array_unshift($img,$level['thumb']);
+        $goods = [];
+        $month = date('Ym');
+        $record = pdo_get('ewei_shop_level_record',['openid'=>$openid,'month'=>$month,'status'=>1]);
+        foreach ($goods_id as $key=>$item){
+            $good = pdo_get('ewei_shop_goods',['uniacid'=>$uniacid,'id'=>$item],['id','title','thumb','total','productprice','marketprice','bargain']);
+            $good['thumb'] = tomedia($good['thumb']);
+            $good['image'] = tomedia($img[$key]);
+            $good['is_get'] = !empty($record) ? $record['goods_id'] == $item ? 1 :2 : 0;
+            $goods[] = $good;
+        }
+        show_json(1,['get'=>empty($record)?0:1,'goods'=>$goods]);
     }
 }
 ?>
