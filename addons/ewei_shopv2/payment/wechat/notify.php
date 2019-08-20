@@ -1152,7 +1152,7 @@ class EweiShopWechatPay
                 'level_id'=>$level['id'],
                 'level_name'=>$level['level_name'],
                 //'createtime'=>$i == 0 ? time() : strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
-		        'createtime' => strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
+		'createtime' => strtotime(date('Ym',strtotime('+'.$i.' month',$time))."10"),
             ];
             //如果已经加过发放记录   就继续结束
             if(pdo_exists('ewei_shop_level_record',['openid'=>$openid,'month'=>$data['month'],'level_id'=>$data['level_id']])){
@@ -1188,14 +1188,14 @@ class EweiShopWechatPay
             //order表的price是交易金额  乘以0.01是爸爸的奖励  加到爸爸的贡献者
             pdo_update('ewei_shop_member',['credit4'=>bcadd($father['credit4'],bcmul($price,0.01,2),2)],['openid'=>$father['openid']]);
             //写入爸爸的收入日志
-            m('game')->addCreditLog($father['openid'],4,$price*0.01,"下级付款奖励贡献值");
+            m('game')->addCreditLog($father['openid'],4,$price*0.01,"下级付款奖励贡献值".$price*0.01);
         }
         //如果爷爷存在 给爷爷奖励
        if($grandpa && $price * 0.01 > 0){
            //order表的price是交易金额  乘以0.01是爷爷的奖励  加到爷爷的贡献者
            pdo_update('ewei_shop_member',['credit4'=>bcadd($grandpa['credit4'],bcmul($price,0.01,2),2)],['openid'=>$grandpa['openid']]);
            //写入爷爷的收入日志
-           m('game')->addCreditLog($grandpa['openid'],4,$price*0.01,"下级付款奖励贡献值");
+           m('game')->addCreditLog($grandpa['openid'],4,$price*0.01,"下级付款奖励贡献值".$price*0.01);
        }
     }
 

@@ -184,7 +184,9 @@ class Qrcode_EweiShopV2Model
 			load()->func("file");
 			mkdirs($path);
 		}
+		//$qrcode = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $mid , 'url'=>$member['url'] , 'merchname'=>$merch['merchname'],'back'=>$member['back'],'cate'=>$member['cate'],'type'=>'qrcode')));
 		$qrcode = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $mid , 'merchname'=>$merch['merchname'],'back'=>$member['back'],'cate'=>$member['cate'],'type'=>'qrcode')));
+		//$qr = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $mid ,'url'=>$member['url'] ,'merchname'=>$merch['merchname'], 'back'=>$member['back'],'cate'=>$member['cate'])));
 		$qr = md5(json_encode(array( "siteroot" => $_W["siteroot"], "mid" => $mid ,'merchname'=>$merch['merchname'], 'back'=>$member['back'],'cate'=>$member['cate'])));
 		$filename = $qrcode . ".png";
 		$qr_filename = $qr . ".png";

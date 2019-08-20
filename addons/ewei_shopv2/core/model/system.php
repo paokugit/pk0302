@@ -1214,7 +1214,11 @@ class System_EweiShopV2Model {
                             array(
                                 "title"=>"我的",
                                 "route"=>"my"
-                            )
+                            ),
+                            array(
+                                "title"=>"助力海报",
+                                "route"=>"share_help"
+                            ),
                         )
                     ) ,
                     array(
