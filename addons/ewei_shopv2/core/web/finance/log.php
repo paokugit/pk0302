@@ -560,5 +560,14 @@ class Log_EweiShopV2Page extends WebPage
 	{
 		$this->main(1);
 	}
+
+	/**
+     * 今日提现账单
+     */
+	public function todayinfo()
+    {
+        $data = m('finance')->todayinfo();
+        include($this->template());
+    }
 }
 ?>

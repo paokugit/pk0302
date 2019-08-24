@@ -644,11 +644,29 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
-        $data = pdo_get('ewei_shop_share_help',['id'=>1],['title','thumb']);
+        $data = pdo_get('ewei_shop_share_help',['id'=>1],['title','thumb','image']);
         $data['thumb'] = tomedia($data['thumb']);
+        $data['image'] = tomedia($data['image']);
         !empty($data)?show_json(1,$data):show_json(0);
     }
-    
+
+
+    /**
+     * 测试
+     */
+    public function ceshi(){
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $openid = $_GPC['openid'];
+        $ids = [44,89,90,4164,41683];
+        $id = pdo_getcolumn('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],'id');
+        if(in_array($id,$ids)){
+            show_json(1);
+        }else{
+            show_json(0);
+        }
+    }
 }
 
 //签到消息
