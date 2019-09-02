@@ -1519,4 +1519,105 @@ class Finance_EweiShopV2Model
 		$public["sign"] = $signature;
 		return $public;
 	}
+	
+	/**
+	 * 获取今日提现信息
+	 */
+	public function todayinfo(){
+	    //获取今天的开始结束时间
+		$startoday = strtotime(date('Y-m-d'));
+		$endtoday = $startoday+3600*24;
+		//今天余额提现的已处理金额
+		$ssql = pdo_fetch("SELECT sum(money) as wmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='余额提现' and draw_type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		//今天余额提现的待处理金额
+		$wsql = pdo_fetch("SELECT sum(money) as wmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='余额提现' and draw_type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$data['swmoney'] = $ssql['wmoney']?$ssql['wmoney']:0;
+		$data['wwmoney'] = $wsql['wmoney']?$wsql['wmoney']:0;
+		//今日余额提现的已处理的条数
+		$cssql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='余额提现' and draw_type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		//今天余额提现的待处理的条数   S是已处理   W是待处理
+		$cwsql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='余额提现' and draw_type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$data['scount'] = $cssql['cwmoney']?$cssql['cwmoney']:0;
+		$data['wcount'] = $cwsql['cwmoney']?$cwsql['cwmoney']:0;
+		//今天余额提现的已处理人数
+		$rcssql = pdo_fetch("SELECT count(distinct openid) as rcwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='余额提现' and draw_type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		// 今天余额提现的待处理的人数
+		$rcwsql = pdo_fetch("SELECT count(distinct openid) as rcwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='余额提现' and draw_type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$data['srcount'] = $rcssql['rcwmoney']?$rcssql['rcwmoney']:0;
+		$data['wsrcount'] = $rcwsql['rcwmoney']?$rcwsql['rcwmoney']:0;
+
+		//折扣宝提现
+		$zssql = pdo_fetch("SELECT sum(money) as wmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zwsql = pdo_fetch("SELECT sum(money) as wmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zdata['swmoney'] = $zssql['wmoney']?$zssql['wmoney']:0;
+		$zdata['wwmoney'] = $zwsql['wmoney']?$zwsql['wmoney']:0;
+		$zcssql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zcwsql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zdata['scount'] = $zcssql['cwmoney']?$zcssql['cwmoney']:0;
+		$zdata['wcount'] = $zcwsql['cwmoney']?$zcwsql['cwmoney']:0;
+		$zrcssql = pdo_fetch("SELECT count(distinct openid) as rcwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zrcwsql = pdo_fetch("SELECT count(distinct openid) as rcwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zdata['srcount'] = $zrcssql['rcwmoney']?$zrcssql['rcwmoney']:0;
+		$zdata['wsrcount'] = $zrcwsql['rcwmoney']?$zrcwsql['rcwmoney']:0;
+
+		//商户收款码提现
+		$sssql = pdo_fetch("SELECT sum(realprice) as wmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=3 and type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$swsql = pdo_fetch("SELECT sum(realprice) as wmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=0 and type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$sdata['swmoney'] = $sssql['wmoney']?$sssql['wmoney']:0;
+		$sdata['wwmoney'] = $swsql['wmoney']?$swsql['wmoney']:0;
+		$scssql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=3 and type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$scwsql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=0 and type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$sdata['scount'] = $scssql['cwmoney']?$scssql['cwmoney']:0;
+		$sdata['wcount'] = $scwsql['cwmoney']?$scwsql['cwmoney']:0;
+		$srcssql = pdo_fetch("SELECT count(distinct merchid) as rcwmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=3 and type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$srcwsql = pdo_fetch("SELECT count(distinct merchid) as rcwmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=0 and type=1", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$sdata['srcount'] = $srcssql['rcwmoney']?$srcssql['rcwmoney']:0;
+		$sdata['wsrcount'] = $srcwsql['rcwmoney']?$srcwsql['rcwmoney']:0;
+
+
+		//个人收款码提现
+		$gzssql = pdo_fetch("SELECT sum(money) as wmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and draw_type=3", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$gzwsql = pdo_fetch("SELECT sum(money) as wmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and draw_type=3", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$gzdata['swmoney'] = $gzssql['wmoney']?$gzssql['wmoney']:0;
+		$gzdata['wwmoney'] = $gzwsql['wmoney']?$gzwsql['wmoney']:0;
+		$gzcssql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and draw_type=3", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$gzcwsql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and draw_type=3", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$gzdata['scount'] = $gzcssql['cwmoney']?$gzcssql['cwmoney']:0;
+		$gzdata['wcount'] = $gzcwsql['cwmoney']?$gzcwsql['cwmoney']:0;
+		$gzrcssql = pdo_fetch("SELECT count(distinct openid) as rcwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and draw_type=3", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$gzrcwsql = pdo_fetch("SELECT count(distinct openid) as rcwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and draw_type=3", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$gzdata['srcount'] = $gzrcssql['rcwmoney']?$gzrcssql['rcwmoney']:0;
+		$gzdata['wsrcount'] = $gzrcwsql['rcwmoney']?$gzrcwsql['rcwmoney']:0;
+
+
+		//商户店铺收益提现
+		$hsssql = pdo_fetch("SELECT sum(realprice) as wmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=3 and type=0", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$hswsql = pdo_fetch("SELECT sum(realprice) as wmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=0 and type=0", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$hsdata['swmoney'] = $hsssql['wmoney']?$hsssql['wmoney']:0;
+		$hsdata['wwmoney'] = $hswsql['wmoney']?$hswsql['wmoney']:0;
+		$hscssql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=3 and type=0", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$hscwsql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=0 and type=0", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$hsdata['scount'] = $hscssql['cwmoney']?$hscssql['cwmoney']:0;
+		$hsdata['wcount'] = $hscwsql['cwmoney']?$hscwsql['cwmoney']:0;
+		$hsrcssql = pdo_fetch("SELECT count(distinct merchid) as rcwmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=3 and type=0", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$hsrcwsql = pdo_fetch("SELECT count(distinct merchid) as rcwmoney FROM " . tablename("ewei_shop_merch_bill") . " WHERE applytime >=:startoday AND applytime<=:endtoday AND status=0 and type=0", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$hsdata['srcount'] = $hsrcssql['rcwmoney']?$hsrcssql['rcwmoney']:0;
+		$hsdata['wsrcount'] = $hsrcwsql['rcwmoney']?$hsrcwsql['rcwmoney']:0;
+
+		//总计今天已处理提现金额
+		$allcount['countmoney'] = $data['swmoney']+$zdata['swmoney']+$sdata['swmoney']+$gzdata['swmoney']+$hsdata['swmoney'];
+		//总计今天待处理提现金额
+		$allcount['wcountmoney'] = $data['wwmoney']+$zdata['wwmoney']+$sdata['wwmoney']+$gzdata['wwmoney']+$hsdata['wwmoney'];
+
+		//总计今天已处理提现申请条数
+		$allcount['sumcount'] = $data['scount']+$zdata['scount']+$sdata['scount']+$gzdata['scount']+$hsdata['scount'];
+		//总计今天待处理提现申请条数
+		$allcount['wsumcount'] = $data['wcount']+$zdata['wcount']+$sdata['wcount']+$gzdata['wcount']+$hsdata['wcount'];
+
+		//总计今天已处理提现申请人数
+		$allcount['rsumcount'] = $data['srcount']+$zdata['srcount']+$sdata['srcount']+$gzdata['srcount']+$hsdata['srcount'];
+        	//总计今天待处理提现申请人数
+		$allcount['rwsumcount'] = $data['wsrcount']+$zdata['wsrcount']+$sdata['wsrcount']+$gzdata['wsrcount']+$hsdata['wsrcount'];
+		return array('data'=>$data,'zdata'=>$zdata,'sdata'=>$sdata,'gzdata'=>$gzdata,'hsdata'=>$hsdata,'allcount'=>$allcount);
+	}
 }

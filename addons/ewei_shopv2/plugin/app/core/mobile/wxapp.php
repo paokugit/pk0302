@@ -235,7 +235,19 @@ class Wxapp_EweiShopV2Page extends Page
         app_json(array("agentid"=>$member['agentid'],"merchInfo"=>$merchInfo,"uniacid" => $member["uniacid"], "openid" => $member["openid"], "id" => $member["id"], "nickname" => $member["nickname"], "avatarUrl" => tomedia($member["avatar"]), "isblack" => $member["isblack"],'is_own'=>$member['is_own'],'is_open'=>$member['is_open'],'agentlevel'=>$member['agentlevel']), $member["openid"]);
     }
     
-   
+    /**
+     * 判断是否是第一次登陆
+     */
+    public function is_login()
+    {
+        global $_W;
+        global $_GPC;
+        $openid = "sns_wa_".$_GPC['openid'];
+        $uniacid = $_W['uniacid'];
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
+        $data['is_login'] = empty($member) ? 0 : 1;
+        show_json(1,$data);
+    }
 }
 
     function app_error($errcode = 0, $message = "")

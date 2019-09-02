@@ -1357,6 +1357,7 @@ class Index_EweiShopV2Page extends WebPage
             $add['uniacid'] = $_W['uniacid'];
             $add['title'] = trim($_POST['title']);
             $add['thumb'] = save_media($_POST['thumb']);
+            $add['image'] = save_media($_POST['image']);
             $add['createtime'] = time();
             if(empty($id)){
                 $res = pdo_insert('ewei_shop_share_help',$add);

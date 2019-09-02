@@ -25,6 +25,7 @@
                         <li class="fui-cell">商城名称：<span class="text">{$shop_data['name']}</span></li>
                         <!--<li class="fui-cell">商城介绍：<span class="text">{$shop_data['description']}</span></li>-->
                         <li class="fui-cell">待提现金额：<span class='text-no'>{php echo bcsub($credit2_all,$credit2,2)}</span>元&nbsp;&nbsp;&nbsp;测试人员 : <span class='text-no'>{$credit2}</span>元</li>
+                        <!--<li class="fui-cell"><a href="{php echo webUrl('finance/log/todayinfo')}" class="text-primary">查看今日提现账单</a></li>-->
                         <li class="fui-cell">使用应用：<span class='text-no'>{$pluginnum}</span>个 <a href="{php echo webUrl('plugins')}" class="text-primary">查看</a></li>
                     </ul>
                 </div>
@@ -331,6 +332,49 @@
     </div>
     {/if}
     {/if}
+
+
+    <div class="row">
+        <div class="col-md-10">
+            <div class="ibox h300">
+                <div class="ibox-title">
+                    <h5><i class="icow icow-shop"></i>今日提现统计</h5>
+                </div>
+                <div class="ibox-content">
+                    <ul class="fui-cell-group">
+                        <li class="fui-cell">余额提现总金额（成功）：<span class="text-warning">{$withdraw['data']['swmoney']}</span>&nbsp;&nbsp;&nbsp;余额提现总金额（待审核）：<span class="text">{$withdraw['data']['wwmoney']}</span>
+                        |&nbsp;&nbsp;&nbsp;余额提现笔数（成功）：<span class="text-warning">{$withdraw['data']['scount']}</span>&nbsp;&nbsp;&nbsp;余额提现笔数（待审核）：<span class="text">{$withdraw['data']['wcount']}</span>
+                        |&nbsp;&nbsp;&nbsp;余额提现人数（成功）：<span class="text-warning">{$withdraw['data']['srcount']}</span>&nbsp;&nbsp;&nbsp;余额提现人数（待审核）：<span class="text">{$withdraw['data']['wsrcount']}</span>
+                        </li>
+                        <li class="fui-cell">折扣宝提现总金额（成功）：<span class="text-warning">{$withdraw['zdata']['swmoney']}</span>&nbsp;&nbsp;&nbsp;折扣宝提现总金额（待审核）：<span class="text">{$withdraw['zdata']['wwmoney']}</span>
+                            |&nbsp;&nbsp;&nbsp;折扣宝提现笔数（成功）：<span class="text-warning">{$withdraw['zdata']['scount']}</span>&nbsp;&nbsp;&nbsp;折扣宝提现笔数（待审核）：<span class="text">{$withdraw['zdata']['wcount']}</span>
+                            |&nbsp;&nbsp;&nbsp;折扣宝提现人数（成功）：<span class="text-warning">{$withdraw['zdata']['srcount']}</span>&nbsp;&nbsp;&nbsp;折扣宝提现人数（待审核）：<span class="text">{$withdraw['zdata']['wsrcount']}</span>
+                        </li>
+                        <li class="fui-cell">商家收款码提现总金额（成功）：<span class="text-warning">{$withdraw['sdata']['swmoney']}</span>&nbsp;&nbsp;&nbsp;商家收款码提现总金额（待审核）：<span class="text">{$withdraw['sdata']['wwmoney']}</span>
+                            |&nbsp;&nbsp;&nbsp;商家收款码提现笔数（成功）：<span class="text-warning">{$withdraw['sdata']['scount']}</span>&nbsp;&nbsp;&nbsp;商家收款码提现笔数（待审核）：<span class="text">{$withdraw['sdata']['wcount']}</span>
+                            |&nbsp;&nbsp;&nbsp;商家收款码提现人数（成功）：<span class="text-warning">{$withdraw['sdata']['srcount']}</span>&nbsp;&nbsp;&nbsp;商家收款码提现人数（待审核）：<span class="text">{$withdraw['sdata']['wsrcount']}</span>
+                        </li>
+                        <li class="fui-cell">个人收款码提现总金额（成功）：<span class="text-warning">{$withdraw['gzdata']['swmoney']}</span>&nbsp;&nbsp;&nbsp;个人收款码提现总金额（待审核）：<span class="text">{$withdraw['gzdata']['wwmoney']}</span>
+                            |&nbsp;&nbsp;&nbsp;个人收款码提现笔数（成功）：<span class="text-warning">{$withdraw['gzdata']['scount']}</span>&nbsp;&nbsp;&nbsp;个人收款码提现笔数（待审核）：<span class="text">{$withdraw['gzdata']['wcount']}</span>
+                            |&nbsp;&nbsp;&nbsp;个人收款码提现人数（成功）：<span class="text-warning">{$withdraw['gzdata']['srcount']}</span>&nbsp;&nbsp;&nbsp;个人收款码提现人数（待审核）：<span class="text">{$withdraw['gzdata']['wsrcount']}</span>
+                        </li>
+
+                        <li class="fui-cell">商户提现总金额（成功）：<span class="text-warning">{$withdraw['hsdata']['swmoney']}</span>&nbsp;&nbsp;&nbsp;商户提现总金额（待审核）：<span class="text">{$withdraw['hsdata']['wwmoney']}</span>
+                            |&nbsp;&nbsp;&nbsp;商户提现笔数（成功）：<span class="text-warning">{$withdraw['hsdata']['scount']}</span>&nbsp;&nbsp;&nbsp;商户提现笔数（待审核）：<span class="text">{$withdraw['hsdata']['wcount']}</span>
+                            |&nbsp;&nbsp;&nbsp;商户提现人数（成功）：<span class="text-warning">{$withdraw['hsdata']['srcount']}</span>&nbsp;&nbsp;&nbsp;商户提现人数（待审核）：<span class="text">{$withdraw['hsdata']['wsrcount']}</span>
+                        </li>
+
+                        <li class="fui-cell" style="font-weight: bold;">提现总金额（成功）：<span class="text-warning">{$withdraw['allcount']['countmoney']}</span>&nbsp;&nbsp;&nbsp;提现总金额（待审核）：<span class="text">{$withdraw['allcount']['wcountmoney']}</span>
+                            |&nbsp;&nbsp;&nbsp;提现笔数（成功）：<span class="text-warning">{$withdraw['allcount']['sumcount']}</span>&nbsp;&nbsp;&nbsp;提现笔数（待审核）：<span class="text">{$withdraw['allcount']['wsumcount']}</span>
+                            |&nbsp;&nbsp;&nbsp;提现人数（成功）：<span class="text-warning">{$withdraw['allcount']['rsumcount']}</span>&nbsp;&nbsp;&nbsp;提现人数（待审核）：<span class="text">{$withdraw['allcount']['rwsumcount']}</span>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 

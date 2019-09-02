@@ -120,4 +120,27 @@ class Game_EweiShopV2Model{
           pdo_insert('mc_credits_record',$add);
           pdo_insert('ewei_shop_member_credit_record',$add);
       }
+
+    /**
+     * 加领取日志
+     * @param $openid
+     * @param $goods_id
+     * @return bool
+     */
+    public function add_log($openid,$goods_id)
+    {
+        global $_W;
+        //查找所有开启状态的礼包
+        $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$_W['uniacid'].'"');
+        //该用户对应的礼包
+        $gift = $this->get_gift($gifts,$openid);
+        $data = [
+            'openid'=>$openid,
+            'gift_id'=>$gift['id'],
+            'goods_id'=>$goods_id,
+            'uniacid'=>$_W['uniacid'],
+            'createtime'=>time(),
+        ];
+        return pdo_insert('ewei_shop_gift_log',$data);
+    }
 }

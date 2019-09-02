@@ -2990,6 +2990,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$order["uniacid"] = $uniacid;
 		$order["openid"] = $openid;
 		$order["ordersn"] = $ordersn;
+		//如果是礼包活动  就。。。。
 		$order["price"] = $flag == true ? $dispatch_price : $totalprice;
 		$order["oldprice"] = $totalprice;
 		$order["grprice"] = $grprice;
@@ -3111,6 +3112,10 @@ class Create_EweiShopV2Page extends AppMobilePage
             $couponid_id = $coupon_info['couponid'];
         }
 		pdo_insert("ewei_shop_order", $order);
+        //如果符合领取礼包 就给他加日志
+        if($flag){
+            m('game')->add_log($openid,$goodsid);
+        }
 		$orderid = pdo_insertid();
 		if( !empty($goods[0]["bargain_id"]) && p("bargain") ) 
 		{
@@ -3237,6 +3242,10 @@ class Create_EweiShopV2Page extends AppMobilePage
 					}
 				}
 				pdo_insert("ewei_shop_order", $order);
+				//如果符合领取礼包 就给他加日志
+                if($flag){
+                    m('game')->add_log($openid,$goodsid);
+                }
 				$ch_orderid = pdo_insertid();
 				$merch_array[$merchid]["orderid"] = $ch_orderid;
 				if( 0 < $couponmerchid && $merchid == $couponmerchid ) 
