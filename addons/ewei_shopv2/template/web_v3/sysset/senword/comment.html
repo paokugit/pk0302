@@ -1,0 +1,89 @@
+{template '_header'}
+<meta charset="UTF-8">
+<div class="page-header">当前位置：<span class="text-primary">达人圈</span></div>
+
+<div class="page-content">
+    <form action="./index.php" method="get" class="form-horizontal  ">
+        <input type="hidden" name="c" value="site" />
+        <input type="hidden" name="a" value="entry" />
+        <input type="hidden" name="m" value="ewei_shopv2" />
+        <input type="hidden" name="do" value="web" />
+        <input type="hidden" name="r"  value="sysset.senword.comment" />
+
+       
+    </form>
+
+    {if empty($list)}
+        <div class="panel panel-default">
+            <div class="panel-body empty-data">未查询到相关数据</div>
+        </div>
+    {else}
+        <form action="" method="post">
+           
+            <table class="table table-responsive table-hover" >
+                <thead class="navbar-inner">
+                    <tr>
+                        
+                        <th class='th-sortable' data-sort-name='title'>评论人</th>
+                        <th class='th-sortable' data-sort-name='title'>内容</th>
+                       
+                        <th class='th-sortable' data-sort-name='title'>时间</th>
+                        
+                      
+                        <th style="width: 85px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $list $row}
+                        <tr>
+                           
+                            <td>
+                                {$row['nickname']}
+                            </td>
+                            
+                            <td>{$row['content']}</td>
+                        
+                             <td>{$row['create_time']}</td>
+                            
+                           
+                            <td style="text-align:left;">
+                               
+                               
+                                    <a href="{php echo webUrl('sysset/senword/detail_comment',array('id' => $row['id']))}" class="btn btn-op btn-operation" >
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="详情">
+                                                <i class='icow icow-bianji2'></i>
+                                            </span>
+                                    </a>
+                                   
+                               
+                                    <a data-toggle='ajaxRemove' href="{php echo webUrl('sysset/senword/delete_comment', array('id' => $row['id']))}"class="btn btn-op btn-operation" data-confirm='确认要删除此信息吗?'>
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="删除">
+                                               <i class='icow icow-shanchu1'></i>
+                                            </span>
+                                    </a>
+                                    
+                                    {if empty($row["classA_id"])}
+                                     <a href="{php echo webUrl('sysset/senword/comment',array('id' => $row['id'],'type'=>2))}" class="btn btn-op btn-operation" >
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="评论">
+                                                <i class='icow icow-bianji2'></i>
+                                            </span>
+                                    </a>
+                                    {/if}
+                            </td>
+                        </tr>
+                    {/loop}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        
+                        <td colspan="4" style="text-align: right">
+                            {$pager}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </form>
+    {/if}
+</div>
+{template '_footer'}
+<!--NDAwMDA5NzgyNw==-->

@@ -173,7 +173,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
     
     public function membercount(){
         $member=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." order by id asc");
-        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<7000 and id>=3000 order by id asc ");
+        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<7500 and id>=7000 order by id asc ");
         
         foreach ($m as $k=>$v){
            //获取直推数据

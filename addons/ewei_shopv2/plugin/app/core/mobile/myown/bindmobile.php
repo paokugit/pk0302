@@ -12,7 +12,7 @@ class Bindmobile_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $mobile=$_GPC["mobile"];
-        $country_id=$_GPC["country_id"];
+         $country_id=$_GPC["id"];
         
 //         if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
 //             app_error(1,"手机号格式不正确");

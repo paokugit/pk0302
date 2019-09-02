@@ -1239,6 +1239,20 @@ class System_EweiShopV2Model {
                         )
                     ) ,
                     array(
+                        "title" => "达人圈",
+                        "items" => array(
+                            array(
+                                "title" => "敏感词",
+                                "route" => "senword"
+                            ),
+                            array(
+                                "title" => "列表",
+                                "route" => "senword.circle"
+                            )
+                        ),
+                    ) ,
+                    
+                    array(
                         "title" => "交易",
                         "items" => array(
                             array(

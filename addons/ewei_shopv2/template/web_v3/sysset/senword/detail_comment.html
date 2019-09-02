@@ -1,0 +1,38 @@
+{template '_header'}
+<meta charset="utf-8"/>
+<div class="page-header">当前位置：<span class="text-primary">达人圈</span></div>
+
+    <div class="page-content">
+        <form action="" method="post" class="form-horizontal form-validate" enctype="multipart/form-data" >
+           <input name="id" value="{$detail['id']}" type="hidden">
+            <div class="form-group">
+                <label class="col-lg control-label">评论</label>
+                <div class="col-sm-9 col-xs-12">
+                 
+                  <textarea rows="12" cols="90" readonly> {$detail['content']}</textarea>
+                </div>
+            </div>
+            
+             
+            <div class="form-group">
+            <label class="col-lg control-label must">下架原因</label>
+            <div class="col-sm-9 col-xs-12">
+               <textarea rows="8" cols="90" name="request">{$detail["request"]}</textarea>
+            </div>
+             </div>
+           
+            
+    
+           
+            <div class="form-group">
+                <label class="col-lg control-label"></label>
+                <div class="col-sm-9 col-xs-12">
+                  
+                    <input type="submit" value="提交" class="btn btn-primary"  />
+                  
+                </div>
+            </div>
+        </form>
+    </div>
+ 
+{template '_footer'}
