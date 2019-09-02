@@ -647,18 +647,18 @@ class Merch_EweiShopV2Page extends AppMobilePage
         $list = pdo_fetchall('select sum(l.money) as sum_money,m.nickname from '.tablename('ewei_shop_member_log').'l join '.tablename('ewei_shop_member').'m on m.openid=l.openid'.' where l.uniacid = "'.$uniacid.'" and type = 1 and l.status = 1 group by l.openid order by sum_money desc');
         $total = count($list);
         //取出来前三名
-        $third = array_slice($list,0,3);
+        //$third = array_slice($list,0,3);
         //设置每页数
-        $pageSize = 20;
+        $pageSize = 100;
         //随机获取第几页  以及每页的第几个
         $page = rand(1,floor($total/$pageSize));
         $psize = ($page-1)*$pageSize;
         //分页显示
-        $log = pdo_fetchall('select sum(l.money) as sum_money,m.nickname from '.tablename('ewei_shop_member_log').'l join '.tablename('ewei_shop_member').'m on m.openid=l.openid'.' where l.uniacid = "'.$uniacid.'" and type = 1 and l.status = 1 group by l.openid order by sum_money desc LIMIT '.$psize.','.$pageSize);
+        $log = pdo_fetchall('select sum(l.money) as sum_money,m.nickname,m.id from '.tablename('ewei_shop_member_log').'l join '.tablename('ewei_shop_member').'m on m.openid=l.openid'.' where l.uniacid = "'.$uniacid.'" and type = 1 and l.status = 1 and m.id NOT IN (4350,9851,9861) group by l.openid order by sum_money desc LIMIT '.$psize.','.$pageSize);
         //如果不是第一页 就把前三名合并到分页的
-        if($page != 1){
-            $log = array_merge($third,$log);
-        }
+        //if($page != 1){
+        //    $log = array_merge($third,$log);
+        //}
         foreach ($log as &$item){
             //计算昵称的长度
             $length = mb_strlen($item['nickname']);
