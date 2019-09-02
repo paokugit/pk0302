@@ -741,7 +741,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		unset($goods["costprice"]);
 		unset($goods["originalprice"]);
 		unset($goods["totalcnf"]);
-		unset($goods["salesreal"]);
+		//unset($goods["salesreal"]);
 		unset($goods["score"]);
 		unset($goods["taobaoid"]);
 		unset($goods["taotaoid"]);
@@ -1151,9 +1151,9 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		           $reward=pdo_get("ewei_shop_merch_reward",array("merch_id"=>$merchid,"is_end"=>0,"type"=>2));
 		           if ($reward){
 		               $goods["reward"]=1;
-		               $goods["share_price"]=$reward["share_price"];
-		               $goods["click_price"]=$reward["click_price"];
-		               $goods["commission"]=$$reward["commission"]*$goods["maxprice"]/100;
+		               $goods["share_price"] = $reward["share_price"];
+		               $goods["click_price"] = $reward["click_price"];
+		               $goods["commission"] = $reward["commission"]*$goods["maxprice"]/100;
 		           }else{
 		               $goods["reward"]=0;
 		               $goods["share_price"]=0;
@@ -1164,8 +1164,11 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		    }
 		}
 
-        $goods['showshare'] = 0;
-        $goods['showprice'] = sprintf('%.2f',$minprice-$goods['deduct']);
+	        $goods['showshare'] = 0;
+	        $goods['showprice'] = sprintf('%.2f',$minprice-$goods['deduct']);
+	        $goods['sales'] = intval($goods['sales']);
+	        $goods['salesreal'] = intval($goods['salesreal']);
+	        $goods['total'] = intval($goods['total']);
 		app_json(array( "goods" => $goods ));
 	}
 	public function getCommission($goods, $level, $set) 
@@ -2072,6 +2075,32 @@ class Goods_EweiShopV2Page extends AppMobilePage
             if($res['app_version']>1) return 1;
         }
         return 0;
+    }
+
+    /**
+     * 获得倒计时 结束时间
+     */
+    public function get_end()
+    {
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $id = $_GPC['id'];
+        $goods = pdo_get('ewei_shop_goods',['id'=>$id,'uniacid'=>$uniacid]);
+        if($id == "" || empty($goods)){
+            show_json(0,['msg'=>'商品信息错误']);
+        }
+        if($goods['istime'] == 1 ){
+            if($goods['timestart'] > time()){
+                show_json(1,['start'=>$goods['timestart'],'msg'=>"秒杀尚未开始"]);
+            }elseif($goods['timeend'] > time()){
+                show_json(2,['end'=>$goods['timeend'],'msg'=>"秒杀进行中"]);
+            }elseif($goods['timeend'] < time()){
+                show_json(3,['msg'=>"秒杀结束"]);
+            }
+        }else{
+            show_json(4,['msg'=>"不是秒杀商品"]);
+        }
     }
 }
 ?>

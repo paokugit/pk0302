@@ -403,7 +403,7 @@ class Level_EweiShopV2Page extends AppMobilePage
     }
 
     /**
-     * 年卡弹窗
+     * 年卡弹窗  折扣宝弹窗  所有消息弹窗
      */
     public function level_alert(){
         global $_W;
