@@ -3114,7 +3114,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		pdo_insert("ewei_shop_order", $order);
         //如果符合领取礼包 就给他加日志
         if($flag){
-            m('game')->add_log($openid,$goodsid);
+            m('game')->add_log($openid,$goodsid,$order["ordersn"]);
         }
 		$orderid = pdo_insertid();
 		if( !empty($goods[0]["bargain_id"]) && p("bargain") ) 
@@ -3244,7 +3244,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 				pdo_insert("ewei_shop_order", $order);
 				//如果符合领取礼包 就给他加日志
                 if($flag){
-                    m('game')->add_log($openid,$goodsid);
+                    m('game')->add_log($openid,$goodsid,$order["ordersn"]);
                 }
 				$ch_orderid = pdo_insertid();
 				$merch_array[$merchid]["orderid"] = $ch_orderid;
@@ -3582,6 +3582,7 @@ class Create_EweiShopV2Page extends AppMobilePage
     public function reward(){
         global $_GPC;
         $res = m('reward')->addReward($_GPC['openid']);
+        $res = $this->gift_check($_GPC['openid'],$_GPC['goods_id']);
         var_dump($res);
     }
 
@@ -3595,12 +3596,14 @@ class Create_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         $uniacid = $_W['uniacid'];
+        $week = m('util')->week(time());
         //查所有的礼包
         $gifts = pdo_getall('ewei_shop_gift_bag',['status'=>1,'uniacid'=>$uniacid]);
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         //再查他的领取情况
-        $log = pdo_getall('ewei_shop_gift_log',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
+        $log = pdo_getall('ewei_shop_gift_log','openid = "'.$openid.'" and status = 1 and uniacid = "'.$uniacid.'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
+        //设置$flag  为 false
         $flag = false;
         foreach ($gifts as $item){
             //把每个礼包里面包含的商品解析成数组
@@ -3620,19 +3623,21 @@ class Create_EweiShopV2Page extends AppMobilePage
                 }
             }
         }
+        //设置需要的人数为0  然后 按要求加数量
         $num = 0;
-        //如果他没领取过  需要邀请新人数量等于当前的领取礼包的数量
         if(count($log) == 0){
+            //如果他没领取过  需要邀请新人数量等于当前的领取礼包的数量
             $num += $gift['member'];
         }else {
-            //如果领取过了  需要加上已经领取过的礼包需要的数量
             foreach ($log as $item) {
+                //如果领取过了  需要加上已经领取过的礼包需要的数量
                 $num += pdo_getcolumn('ewei_shop_gift_bag', ['id' => $item['gift_id'], 'uniacid' => $_W['uniacid']], 'member');
             }
+            //然后加上的这次领的礼包需要的人数
             $num += $gift['member'];
         }
         //计算他在活动期间的邀请新人数量
-        $count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime > "'.$gift['starttime'].'"');
+        $count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
         //如果邀请数量不足  则返回false
         if($count < $num){
             $flag = false;

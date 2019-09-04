@@ -78,7 +78,7 @@ class Index_EweiShopV2Page extends WebPage
 				$activity = intval($_GPC['activitytype']);
 			}
 
-			$data = array('uniacid' => $uniacid, 'displayorder' => intval($_GPC['displayorder']), 'title' => trim($_GPC['title']),'member'=>trim($_GPC['member']),'levels'=>$_GPC['levels'], 'activity' => $activity,  'orderprice' => floatval($_GPC['orderprice']), 'goodsid' => $_GPC['goodsid'],  'starttime' => strtotime($_GPC['starttime']), 'endtime' => strtotime($_GPC['endtime']), 'status' => intval($_GPC['status']), 'share_title' => trim($_GPC['share_title']), 'share_icon' => trim($_GPC['share_icon']), 'share_desc' => trim($_GPC['share_desc']));
+			$data = array('uniacid' => $uniacid, 'displayorder' => intval($_GPC['displayorder']), 'title' => trim($_GPC['title']),'desc'=>$_GPC['desc'],'member'=>trim($_GPC['member']),'levels'=>$_GPC['levels'], 'activity' => $activity,  'orderprice' => floatval($_GPC['orderprice']), 'goodsid' => $_GPC['goodsid'],  'starttime' => strtotime($_GPC['starttime']), 'endtime' => strtotime($_GPC['endtime']), 'status' => intval($_GPC['status']), 'share_title' => trim($_GPC['share_title']), 'share_icon' => trim($_GPC['share_icon']), 'share_desc' => trim($_GPC['share_desc']));
 			if ($activity == 1 && empty($data['orderprice'])) {
 				show_json(0, '订单金额不能为空！');
 			}

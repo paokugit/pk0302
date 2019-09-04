@@ -243,6 +243,26 @@ class Util_EweiShopV2Model
 		$data = json_decode($contents, true);
 		return $data;
 	}
+
+    /**
+     * 计算周开始 和  周结束
+     * @param $time
+     * @return array
+     */
+	public function week($time)
+	{
+		//今天星期几
+		$week = date('w',$time);
+		//如果是周日  是0  然后  减6  否则  减去  周几 - 1
+		$w = $week  == 0 ? 6 : $week - 1;
+		$week_days = 7 - $w;
+		//今天的0点时间戳
+		$today = date('Ymd',$time);
+		//计算本周的开始和结束时间
+		$week_start = strtotime('-'.$w.'days',strtotime($today));
+		$week_end = strtotime('+'.$week_days.'days',strtotime($today));
+		return ['start'=>$week_start,'end'=>$week_end];
+	}
 }
 
 if (!defined('IN_IA')) {

@@ -502,8 +502,21 @@ class Index_EweiShopV2Page extends AppMobilePage
         if(!$id || !$openid) show_json(0,"请完善参数");
         $data = pdo_fetch('select openid,num,createtime,remark,merchid from '.tablename('mc_credits_record').' where id = "'.$id.'" and openid  = "'.$openid.'"');
         $data['createtime'] = date('Y-m-d H:i:s',$data['createtime']);
-        $data['merch_name'] = pdo_getcolumn('ewei_shop_merch_user',['id'=>$data['merchid']],'merchname');
-        if(mb_substr($data['remark'],0,2) == "跑库") $data['remark'] = "商城订单";
+        if($data['merchid'] != 0){
+            $data['merch_name'] = pdo_getcolumn('ewei_shop_merch_user',['id'=>$data['merchid']],'merchname');
+        }else{
+            if(mb_substr($data['remark'],0,2) == "跑库"){
+                $data['merch_name'] = "跑库";
+                $data['remark'] = "商城订单";
+            }elseif(mb_substr($data['remark'],0,2) == "转帐"){
+                $mobile = preg_replace('/\D/s','',$data['remark']);
+                $data['merch_name'] = pdo_getcolumn('ewei_shop_member',['mobile'=>$mobile],'nickname');
+            }elseif (mb_substr($data['remark'],0,2) == "RV" || mb_substr($data['remark'],0,2) == "外部"){
+                $data['merch_name'] = "RV钱包";
+            }else{
+                $data['merch_name'] = pdo_getcolumn('ewei_shop_member',['openid'=>$data['openid']],'nickname');
+            }
+        }
         if(!$data){
             show_json(0,"暂无信息");
         }
@@ -617,6 +630,114 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         pdo_insert('mc_credits_record',$data);
         pdo_insert('ewei_shop_member_credit_record',$data);
+    }
+
+    /**
+     * 设置支付密码
+     */
+    public function set_pwd(){
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        //接收参数
+        $openid = $_GPC['openid'];
+        $password = $_GPC['password'];
+        $pwd = $_GPC['pwd'];
+        //type  1 设置密码   2修改密码  忘记密码的话 也是设置密码
+        $type = $_GPC['type'];
+        //判断参数完整性
+        if($openid == "" || $password == "" || $pwd == "" || $type == ""){
+            show_json(0,"参数不完整");
+        }
+        //判断两次密码的一致性
+        if($password != $pwd){
+            show_json(0,"两次密码不一致");
+        }
+        //查看用户的信息
+        $member = pdo_getcolumn('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
+        if(!$member){
+            show_json(0,"用户信息不正确");
+        }
+        //如果是修改密码   判断原密码的正确性
+        if($type == 2){
+            $old_pwd = $_GPC['old_pwd'];
+            if(MD5(base64_encode($old_pwd)) != $member['rv_pwd']){
+                show_json(0,"旧密码不正确");
+            }
+        }
+        //更新支付密码
+        pdo_update('ewei_shop_member',['rv_pwd'=>$password],['openid'=>$openid]);
+        show_json(1,"修改成功");
+    }
+
+    /**
+     * 发送短信
+     */
+    public function sms_send()
+    {
+        global $_W;
+        global $_GPC;
+        $mobile=$_GPC["mobile"];
+        $openid = $_GPC['openid'];
+        $country_id=$_GPC["country_id"];
+        if($mobile == ""  || $openid == ""){
+            show_json(0,"参数信息不完整");
+        }
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
+        if(!$member){
+            show_json(0,"用户信息错误");
+        }
+        //生成短信验证码
+        $code=rand(100000,999999);
+        if (empty($country_id) || $country_id == 44){
+            $tp_id = 5;
+            if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
+                show_json(0,"手机号格式不正确");
+            }
+            $resault=com_run("sms::mysend", array('mobile'=>$mobile,'tp_id'=>$tp_id,'code'=>$code));
+        }else{
+            $tp_id = 7;
+            $country=pdo_get("sms_country",array("id"=>$country_id));
+            $resault=com_run("sms::mysend", array('mobile'=>$country["phonecode"].$mobile,'tp_id'=>$tp_id,'code'=>$code));
+        }
+        if ($resault["status"]==1){
+            pdo_insert('core_sendsms_log',['uniacid'=>$_W['uniacid'],'mobile'=>$mobile,'tp_id'=>5,'content'=>$code,'createtime'=>time(),'ip'=>CLIENT_IP]);
+            show_json(1,"发送成功");
+        }else{
+            show_json(0,$resault["message"]);
+        }
+    }
+
+    /**
+     * 验证短信的下一步
+     */
+    public function valid_sms()
+    {
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $openid = $_GPC['openid'];
+        $mobile = $_GPC['mobile'];
+        $code = $_GPC['code'];
+        if($openid == "" || $mobile == "" || $code == ""){
+            show_json(0,"参数不完整");
+        }
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
+        if(!$member){
+            show_json(0,"用户信息错误");
+        }
+        if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
+            show_json(0,"手机号格式不正确");
+        }
+        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>5]);
+        if(!$sms){
+            show_json(0,"短信验证码不正确");
+        }
+        if($sms['result'] == 1){
+            show_json(0,"该短信已验证");
+        }
+        pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
+        show_json(1,"短信验证成功");
     }
 }
 ?>
