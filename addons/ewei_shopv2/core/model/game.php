@@ -132,8 +132,8 @@ class Game_EweiShopV2Model{
     {
         global $_W;
         //查找所有开启状态的礼包
-        //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$_W['uniacid'].'"');
-        $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$_W['uniacid'].'"');
+        $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$_W['uniacid'].'"');
+        //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$_W['uniacid'].'"');
         foreach ($gifts as $item){
             $goods = explode(',',$item['goodsid']);
             if(in_array($goods_id,$goods)){

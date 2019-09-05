@@ -1184,6 +1184,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$result["seckill_payprice"] = intval($seckill_payprice);
 		$result['isdispatcharea'] = $isdispatcharea;
 		$result['remote_dispatchprice'] = $remote_dispatchprice;
+		$result['is_gift'] = $flag ? 1 : 0;
 		if( $hasinvoice ) 
 		{
 			$result["invoice_info"] = $invoice_arr;
@@ -2042,6 +2043,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$return_array["gifts"] = $gifts;
 		$return_array['isdispatcharea'] = $isdispatcharea;
 		$return_array['remote_dispatchprice'] = $remote_dispatchprice;
+		$return_array['is_gift'] = $flag ? 1 : 0;
 		if( !empty($nodispatch_array["isnodispatch"]) )
 		{
 			$return_array["isnodispatch"] = 1;
@@ -3599,8 +3601,8 @@ class Create_EweiShopV2Page extends AppMobilePage
         $uniacid = $_W['uniacid'];
         $week = m('util')->week(time());
         //查所有的礼包
-        //$gifts = pdo_getall('ewei_shop_gift_bag',['status'=>1,'uniacid'=>$uniacid]);
-        $gifts = pdo_getall('ewei_shop_gift_bag',['uniacid'=>$uniacid]);
+        $gifts = pdo_getall('ewei_shop_gift_bag',['status'=>1,'uniacid'=>$uniacid]);
+        //$gifts = pdo_getall('ewei_shop_gift_bag',['uniacid'=>$uniacid]);
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         //再查他的领取情况

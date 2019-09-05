@@ -106,8 +106,8 @@ class Index_EweiShopV2Page extends AppMobilePage
             show_json(0,"openid不能为空");
         }
         $uniacid = $_W['uniacid'];
-        //$gift = pdo_fetchall(' select id,title,levels from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
-        $gift = pdo_fetchall(' select id,title,levels from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$uniacid.'"');
+        $gift = pdo_fetchall(' select id,title,levels from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
+        //$gift = pdo_fetchall(' select id,title,levels from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$uniacid.'"');
         $res = $this->get_gift($gift,$openid);
         //show_json(1,['is_show'=>$res?:0]);
         show_json(1,['is_show'=>$res?1:0]);
@@ -127,8 +127,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         $week = m('util')->week(time());
         //礼包总和
-        //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
-        $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$uniacid.'"');
+        $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
+        //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$uniacid.'"');
         //礼包商品
         $goods = $this->gift($gifts,$openid);
         //该用户对应的礼包
@@ -147,7 +147,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         //如果用户身份是店主的话   检测他成为 店主时  是否获得了  免费兑换
         $count = pdo_count('ewei_shop_coupon_data',['openid'=>$openid,'uniacid'=>$_W['uniacid'],'couponid'=>2]);
         $is_get = $count > 0 && $member['agentlevel'] == 5 ? 0 :1;
-        $agentlevel = pdo_getcolumn('ewei_shop_commission_level',['id'=>$member['agentlevel'],'uniacid'=>$uniacid],'levelname');
+        $agentlevel = $member['agentlevel'] == 0 ? "普通会员" : pdo_getcolumn('ewei_shop_commission_level',['id'=>$member['agentlevel'],'uniacid'=>$uniacid],'levelname');
         //累计助力人数
         $all = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime > "'.$gift['starttime'].'"');
         //目标人数
@@ -161,7 +161,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $get_all = 1;
         }
         $get = pdo_count('ewei_shop_gift_log','openid = "'.$openid.'" and status = 2 and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
-        show_json(1,['goods'=>$goods,'all'=>$all,'desc'=>$gift['desc'],'help_count'=>$help_count,'new_member'=>$new,'remain'=>bcsub($target,$help_count)?:0,'agent_level'=>$member['agentlevel'],'agentlevel'=>$agentlevel,'avatar'=>$member['avatar'],'gift'=>$gift['title'],'is_get'=>$is_get,'start'=>date('Y-m-d',$gift['starttime']),'end'=>date('Y-m-d',$gift['endtime']),'get_all'=>$get_all,'gets'=>$get,'week_start'=>date('m.d',$week['start']),'week_end'=>date('m.d',$week['end'])]);
+        show_json(1,['goods'=>$goods,'all'=>$all,'desc'=>$gift['desc'],'help_count'=>$help_count,'new_member'=>$new,'remain'=>bcsub($target,$help_count) > 0 ? bcsub($target,$help_count) :0,'agent_level'=>$member['agentlevel'],'agentlevel'=>$agentlevel,'avatar'=>$member['avatar'],'gift'=>$gift['title'],'is_get'=>$is_get,'start'=>date('Y-m-d',$gift['starttime']),'end'=>date('Y-m-d',$gift['endtime']),'get_all'=>$get_all,'gets'=>$get,'week_start'=>date('m.d',$week['start']),'week_end'=>date('m.d',$week['end'])]);
     }
 
     /**
@@ -261,8 +261,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_W;
         $week = m('util')->week(time());
         //查找所有开启状态的礼包
-        //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$_W['uniacid'].'"');
-        $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$_W['uniacid'].'"');
+        $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$_W['uniacid'].'"');
+        //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$_W['uniacid'].'"');
         //该用户对应的礼包
         $gift = $this->get_gifts($gifts,$openid,$goods_id);
         if(!is_array($gift)){

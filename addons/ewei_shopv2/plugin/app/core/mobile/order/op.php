@@ -69,6 +69,7 @@ class Op_EweiShopV2Page extends AppMobilePage
 		}
 
 		pdo_update('ewei_shop_order', array('status' => -1, 'canceltime' => time(), 'closereason' => trim($_GPC['remark'])), array('id' => $order['id'], 'uniacid' => $_W['uniacid']));
+		pdo_update('ewei_shop_gift_log',['status'=>0],['order_sn'=>$order['ordersn']]);
 		m('notice')->sendOrderMessage($orderid);
 		app_json();
 	}
