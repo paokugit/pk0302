@@ -257,16 +257,16 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			}
             //礼包商品的支付
             if(pdo_exists('ewei_shop_gift_log',['order_sn'=>$order['ordersn']])){
-               $gift = pdo_get('ewei_shop_gift_log',['order_sn'=>$order['ordersn']]);
-               //查看这个礼包记录的周始末
-               $week = m('util')->week($gift['createtime']);
-               //如果当前时间在周始末  则可以领取  并更新状态为2 领取成功 如果不在也更新状态  为0 取消
-               if(time() >= $week['start'] && $week['end'] >= time()){
-                    pdo_update('ewei_shop_gift_log',['status'=>2],['order_sn'=>$order['ordersn']]);
-               }else{
-                   pdo_update('ewei_shop_gift_log',['status'=>0],['order_sn'=>$order['ordersn']]);
-                   app_error(AppError::$OrderPayFail, "该订单是".$week['start']."--".$week['end']."礼包的商品，已经过了购买期");
-               }
+                $gift = pdo_get('ewei_shop_gift_log',['order_sn'=>$order['ordersn']]);
+                //查看这个礼包记录的周始末
+                $week = m('util')->week($gift['createtime']);
+                //如果当前时间在周始末  则可以领取  并更新状态为2 领取成功 如果不在也更新状态  为0 取消
+                if(time() >= $week['start'] && $week['end'] >= time()){
+                        pdo_update('ewei_shop_gift_log',['status'=>2],['order_sn'=>$order['ordersn']]);
+                }else{
+                    pdo_update('ewei_shop_gift_log',['status'=>0],['order_sn'=>$order['ordersn']]);
+                    app_error(AppError::$OrderPayFail, "该订单是".$week['start']."--".$week['end']."礼包的商品，已经过了购买期");
+                }
             }
 			$fee = floatval($ps["fee"]);
 			$shopset = m("common")->getSysset("shop");
