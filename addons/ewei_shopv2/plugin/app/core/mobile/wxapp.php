@@ -60,7 +60,7 @@ class Wxapp_EweiShopV2Page extends Page
                 $arr['merchInfo'] = false;
             }
             if($arr['login'] == 0){
-                pdo_update('ewei_shop_member',['credit3'=>100],['openid'=>$member['openid']]);
+                pdo_update('ewei_shop_member',['credit3'=>0],['openid'=>$member['openid']]);
             }
         }else{
             //第一次登录

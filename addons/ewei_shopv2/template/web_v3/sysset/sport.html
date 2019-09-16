@@ -292,6 +292,75 @@ function fileUpload4(){
 
 </script>
             
+            
+            
+             <div class="form-group">
+                <label class="col-lg control-label">栏目ICON-5</label>
+                <div class="col-sm-9 col-xs-12">
+                    
+    <img src="{php echo tomedia($data['icon'][4]['img'])}" id="icon5_img" style="width:100px;height:100px">
+     <input name="icon5_img" value="{$data['icon'][4]['img']}" id="icon5_value" type="hidden">
+     <div style="margin-top:20px;margin-left:5%;">
+     <input type="file" name="file" id="file5" onchange="fileUpload5()" style="display:none">
+     <input type="button"  onclick="select_file5()" value="上传"  style="background: #44abf7 !important; border-color: #44abf7 !important;color: #fff !important;width:150px;height:30px;">
+     </div>
+     
+                   标题：<input type="text" name="icon5_title" class="form-control" value="{$data['icon'][4]['title']}" />
+          链接：<input type="text" name="icon5_url" class="form-control" value="{$data['icon'][4]['url']}" />
+      
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-lg control-label">栏目ICON-5 角标</label>
+                <div class="col-sm-9 col-xs-12">
+                  
+                    {php echo tpl_form_field_image2('icon5', $data['icon'][4]['icon'])}
+                    
+                </div>
+            </div>
+            
+            
+<script>
+
+function select_file5(){
+    $("#file5").trigger("click");
+}
+
+function fileUpload5(){
+    var formData = new FormData();
+    formData.append('file', $('#file5')[0].files[0]);
+    $.ajax({
+                url : "{$submitUrl}",//这里写你的url
+                type : 'POST',
+                data : formData,
+                contentType: false,// 当有文件要上传时，此项是必须的，否则后台无法识别文件流的起始位置
+                processData: false,// 是否序列化data属性，默认true(注意：false时type必须是post)
+                dataType: 'json',//这里是返回类型，一般是json,text等
+                clearForm: true,//提交后是否清空表单数据
+                success: function(data) {   //提交成功后自动执行的处理函数，参数data就是服务器返回的数据。
+                	console.log(data);
+                    console.log(data.status);
+                    var video=data.message;
+                    
+                    if(data.status==0){
+                    	//添加数据库
+                    	
+                    				var _videoPlay = document.getElementById("icon5_img");
+                    				 
+                    				_videoPlay.src = data.addr;
+                    				document.getElementById("icon5_value").value=data.message
+                    				
+                    	//alert('上传成功');
+                    }else{
+                    	alert(data.message);
+                    }
+                }
+            });
+}
+
+
+</script>
            
             <div class="form-group">
                 <label class="col-lg control-label"></label>

@@ -111,6 +111,26 @@ class Index_EweiShopV2Page extends AppMobilePage{
         show_json(1,$list);
     }
     
+    //页面优化ceshi
+    public function optt(){
+        global $_W;
+        global $_GPC;
+        $id=$_GPC["id"];
+        $list=pdo_get("ewei_shop_small_set",array("id"=>$id));
+        $list["icon"]=unserialize($list["icon"]);
+        $list["backgroup"]=tomedia($list["backgroup"]);
+        $list["banner"]=tomedia($list["banner"]);
+        foreach ($list["icon"] as $k=>$v){
+            $list["icon"][$k]["img"]=tomedia($v["img"]);
+            $list["icon"][$k]["icon"]=tomedia($v["icon"]);
+        }
+        $list["icon"][4]["title"]="达人圈";
+        $list["icon"][4]["img"]="https://paokucoin.com/img/backgroup/gif-kt@2x.png";
+        $list["icon"][4]["url"]="/pages/expert/circle/circle";
+        $list["icon"][4]["icon"]="";
+        show_json(1,$list);
+    }
+    
     public function cd(){
         $openid="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
         //卡路里

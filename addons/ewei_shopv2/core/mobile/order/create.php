@@ -3658,6 +3658,7 @@ class Create_EweiShopV2Page extends MobileLoginPage
 		$order["quickid"] = intval($_GPC["fromquick"]);
 		$order["officcode"] = intval($_GPC["officcode"]);
 		$order["liveid"] = $liveid;
+       
 		if( !empty($ccard) )
 		{
 			$order["ccard"] = 1;

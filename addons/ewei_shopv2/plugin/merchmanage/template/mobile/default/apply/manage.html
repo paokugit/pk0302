@@ -1,14 +1,28 @@
 {template '_header'}
 {template 'commission/common'}
+<style>
+	.tixian{
+		
+		height:1.5rem !important;
+		
+		line-height:1.5rem !important;
+		border-radius:3px;
+		background-color:#ff9000;
+		margin-top:0.3rem !important;
+	}
+</style>
 <div class="fui-page fui-page-current page-commission-log">
     <div class="fui-header">
         <div class="fui-header-left">
             <a class="back"></a>
         </div>
         <div class="title">结算记录</div>
+        
         <div class="fui-header-right">
-            <a href="{php echo mobileUrl('merchmanage/apply')}" style="color:red">申请提现</a>
+            <a href="{php echo mobileUrl('merchmanage/apply')}" class="tixian" style="color:#fff">提现</a>
         </div>
+        
+        
     </div>
     <div class="fui-content navbar">
        

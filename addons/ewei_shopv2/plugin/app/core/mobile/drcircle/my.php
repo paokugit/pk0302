@@ -402,6 +402,9 @@ class My_EweiShopV2Page extends AppMobilePage{
         if (empty($comment)){
             app_error(1,"评论id不正确");
         }
+        if ($comment["openid"]!=$openid){
+            app_error(1,"无权限删除");
+        }
         if (pdo_update("ewei_shop_member_drcomment",array("is_del"=>1),array("id"=>$comment_id))){
             //更新上级评论数目
             $count=$comment["comment_count"]+1;
@@ -515,12 +518,16 @@ class My_EweiShopV2Page extends AppMobilePage{
         $page=$_GPC["page"];
         $first=($page-1)*8;
         $list=pdo_fetchall("select id,openid,content,is_del,is_view,create_time,comment_openid,type,classA_id,parent_id from ".tablename("ewei_shop_member_drcomment")." where comment_openid=:comment_openid order by create_time desc limit ".$first.",8",array(":comment_openid"=>$openid));
+        $a=pdo_fetch("select count(*) as a from ".tablename("ewei_shop_member_drcomment")." where comment_openid=:comment_openid",array(":comment_openid"=>$openid));
         foreach ($list as $k=>$v){
             $list[$k]["create_time"]=$this->timeFormat($v["create_time"]);
             //获取评论人信息
             $member=pdo_get("ewei_shop_member",array("openid"=>$v["openid"]));
             $list[$k]["comment_nickname"]=$member["nickname"];
             $list[$k]["comment_avatar"]=$member["avatar"];
+            //获取被回复
+            $c=pdo_get("ewei_shop_member",array("openid"=>$v["comment_openid"]));
+            $list[$k]["bcommnet_openid"]=$c["nickname"];
             if ($v["type"]==1){
                 //达人圈
                 $circle=pdo_get("ewei_shop_member_drcircle",array("id"=>$v["parent_id"]));
@@ -529,15 +536,12 @@ class My_EweiShopV2Page extends AppMobilePage{
                 $list[$k]["circle"]["circle_id"]=$circle["id"];
                 $list[$k]["circle"]["content"]=$circle["content"];
                 $img=unserialize($circle["img"]);
-                $list[$k]["circle"]["img"]=$img[0];
+                $list[$k]["circle"]["img"]=tomedia($img[0]);
                 $circle_member=pdo_get("ewei_shop_member",array("openid"=>$circle["openid"]));
                 $list[$k]["circle"]["nickname"]=$circle_member["nickname"];
                 //获取回复内容
-                $list[$k]["comment"]["comment_nickname"]="";
-                $list[$k]["comment"]["bcomment_nickname"]="";
-                $list[$k]["comment"]["content"]="";
-                $list[$k]["comment"]["is_view"]="";
-                $list[$k]["comment"]["is_del"]="";
+                $list[$k]["comment"]=array();
+               
                 
             }else{
                 //获取达人圈
@@ -548,7 +552,7 @@ class My_EweiShopV2Page extends AppMobilePage{
                 $list[$k]["circle"]["circle_id"]=$circle["id"];
                 $list[$k]["circle"]["content"]=$circle["content"];
                 $img=unserialize($circle["img"]);
-                $list[$k]["circle"]["img"]=$img[0];
+                $list[$k]["circle"]["img"]=tomedia($img[0]);
                 $circle_member=pdo_get("ewei_shop_member",array("openid"=>$circle["openid"]));
                 $list[$k]["circle"]["nickname"]=$circle_member["nickname"];
                 //获取回复内容
@@ -574,7 +578,9 @@ class My_EweiShopV2Page extends AppMobilePage{
                 $list[$k]["reply"]=0;
             }
         }
-        app_error(0,$list);
+        $l["list"]=$list;
+        $l["total"]=$a["a"];
+        app_error(0,$l);
     }
     
     function timeFormat( $timestamp ) {
@@ -630,10 +636,17 @@ class My_EweiShopV2Page extends AppMobilePage{
         if (pdo_insert("ewei_shop_member_drsupport",$data)){
             //更新点赞的信息’
             if ($type==1){
-                pdo_query('update '.tablename("ewei_shop_member_drcircle").' set zan_count=zan_count+1  where id='.$content_id);
+                $l=pdo_get("ewei_shop_member_drcircle",array("id"=>$content_id));
+                $zan_count=$l["zan_count"]+1;
+                $d["zan_count"]=$zan_count;
+                pdo_update("ewei_shop_member_drcircle",$d,array("id"=>$content_id));
+              //  pdo_query('update '.tablename("ewei_shop_member_drcircle").' set zan_count=zan_count+1  where id='.$content_id);
                 
             }else {
-                pdo_query('update '.tablename("ewei_shop_member_drcomment").' set zan_count=zan_count+1  where id='.$content_id); 
+                $l=pdo_get("ewei_shop_member_drcomment",array("id"=>$content_id));
+                $d["zan_count"]=$l["zan_count"]+1;
+                pdo_update("ewei_shop_member_drcomment",$d,array("id"=>$content_id));
+//                 pdo_query('update '.tablename("ewei_shop_member_drcomment").' set zan_count=zan_count+1  where id='.$content_id); 
             }
             app_error(0,"点赞成功");
         }else{
@@ -660,10 +673,22 @@ class My_EweiShopV2Page extends AppMobilePage{
         if (pdo_delete("ewei_shop_member_drsupport",array("id"=>$log["id"]))){
             //更新点赞的信息’
             if ($type==1){
-                pdo_query('update '.tablename("ewei_shop_member_drcircle").' set zan_count=zan_count-1  where id='.$content_id);
-                
+                $l=pdo_get("ewei_shop_member_drcircle",array("id"=>$content_id));
+                $zan_count=$l["zan_count"]-1;
+                if ($zan_count<0){
+                    $zan_count=0;
+                }
+                $d["zan_count"]=$zan_count;
+               // pdo_query('update '.tablename("ewei_shop_member_drcircle").' set zan_count=zan_count-1  where id='.$content_id);
+                pdo_update("ewei_shop_member_drcircle",$d,array("id"=>$content_id));
             }else {
-                pdo_query('update '.tablename("ewei_shop_member_drcomment").' set zan_count=zan_count-1  where id='.$content_id);
+                $l=pdo_get("ewei_shop_member_drcomment",array("id"=>$content_id));
+                $d["zan_count"]=$l["zan_count"]-1;
+                 if ($d["zan_count"]<0){
+                     $d["zan_count"]=0;
+                 }
+                 pdo_update("ewei_shop_member_drcomment",$d,array("id"=>$content_id));
+                // pdo_query('update '.tablename("ewei_shop_member_drcomment").' set zan_count=zan_count-1  where id='.$content_id);
             }
             app_error(0,"取消成功");
         }else{

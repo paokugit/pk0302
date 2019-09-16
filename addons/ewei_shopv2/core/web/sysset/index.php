@@ -1156,6 +1156,11 @@ class Index_EweiShopV2Page extends WebPage
             $icon[3]["url"]=$_POST["icon4_url"];
             $icon[3]["icon"]=save_media($_POST["icon4"]);
             
+            $icon[4]["img"]=$_POST["icon5_img"];
+            $icon[4]["title"]=$_POST["icon5_title"];
+            $icon[4]["url"]=$_POST["icon5_url"];
+            $icon[4]["icon"]=save_media($_POST["icon5"]);
+            
             $data["icon"]=serialize($icon);
             if (pdo_update("ewei_shop_small_set",$data,array("id"=>1))){
             
