@@ -3008,7 +3008,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$order["cash"] = $cash;
 		$order["status"] = 0;
 		$order["iswxappcreate"] = 1;
-		$order["remark"] = trim($_GPC["remark"]);
+		$order["remark"] = $flag == true ? "免费领10人礼包____".trim($_GPC["remark"]) : trim($_GPC["remark"]);
 		$order["addressid"] = (empty($dispatchtype) ? $addressid : 0);
 		$order["goodsprice"] = $goodsprice;
 		$order["dispatchtype"] = $dispatchtype;

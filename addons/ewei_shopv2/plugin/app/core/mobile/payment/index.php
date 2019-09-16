@@ -632,6 +632,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         pdo_insert('ewei_shop_member_credit_record',$data);
     }
 
+/*********************************************************************************************************************************************************************************/
     /**
      * 设置支付密码
      */
@@ -641,7 +642,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         $uniacid = $_W['uniacid'];
         //接收参数
         $openid = $_GPC['openid'];
+        //密码
         $password = $_GPC['password'];
+        //二次确认密码
         $pwd = $_GPC['pwd'];
         //type  1 设置密码   2修改密码  忘记密码的话 也是设置密码
         $type = $_GPC['type'];
@@ -661,12 +664,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         //如果是修改密码   判断原密码的正确性
         if($type == 2){
             $old_pwd = $_GPC['old_pwd'];
-            if(MD5(base64_encode($old_pwd)) != $member['rv_pwd']){
+            if(md5(base64_encode($old_pwd)) != $member['rv_pwd']){
                 show_json(0,"旧密码不正确");
             }
         }
         //更新支付密码
-        pdo_update('ewei_shop_member',['rv_pwd'=>$password],['openid'=>$openid]);
+        pdo_update('ewei_shop_member',['rv_pwd'=>md5(base64_encode($password))],['openid'=>$openid]);
         show_json(1,"修改成功");
     }
 
@@ -677,12 +680,16 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
+        //接受参数
         $mobile=$_GPC["mobile"];
+        //用户的openid
         $openid = $_GPC['openid'];
+        //国家id
         $country_id=$_GPC["country_id"];
         if($mobile == ""  || $openid == ""){
             show_json(0,"参数信息不完整");
         }
+        //查找用户的信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
         if(!$member){
             show_json(0,"用户信息错误");
@@ -690,6 +697,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         //生成短信验证码
         $code=rand(100000,999999);
         if (empty($country_id) || $country_id == 44){
+            //阿里云的短信 在我们平台的模板id
             $tp_id = 5;
             if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
                 show_json(0,"手机号格式不正确");
@@ -701,6 +709,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $resault=com_run("sms::mysend", array('mobile'=>$country["phonecode"].$mobile,'tp_id'=>$tp_id,'code'=>$code));
         }
         if ($resault["status"]==1){
+            //添加短信记录
             pdo_insert('core_sendsms_log',['uniacid'=>$_W['uniacid'],'mobile'=>$mobile,'tp_id'=>5,'content'=>$code,'createtime'=>time(),'ip'=>CLIENT_IP]);
             show_json(1,"发送成功");
         }else{
@@ -716,19 +725,23 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $uniacid = $_W['uniacid'];
+        //接受用户的openid   和  手机号  和验证码
         $openid = $_GPC['openid'];
         $mobile = $_GPC['mobile'];
         $code = $_GPC['code'];
         if($openid == "" || $mobile == "" || $code == ""){
             show_json(0,"参数不完整");
         }
+        //查找用户的信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         if(!$member){
             show_json(0,"用户信息错误");
         }
+        //正则验证手机号的格式
         if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
             show_json(0,"手机号格式不正确");
         }
+        //查找短息的发送的记录
         $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>5]);
         if(!$sms){
             show_json(0,"短信验证码不正确");
@@ -736,6 +749,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         if($sms['result'] == 1){
             show_json(0,"该短信已验证");
         }
+        //更改短信验证码的验证状态
         pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
         show_json(1,"短信验证成功");
     }
