@@ -59,9 +59,9 @@ class Wxapp_EweiShopV2Page extends Page
             }else{
                 $arr['merchInfo'] = false;
             }
-            if($arr['login'] == 0){
-                pdo_update('ewei_shop_member',['credit3'=>0],['openid'=>$member['openid']]);
-            }
+//             if($arr['login'] == 0){
+//                 pdo_update('ewei_shop_member',['credit3'=>100],['openid'=>$member['openid']]);
+//             }
         }else{
             //第一次登录
             $arr["login"]=0;
