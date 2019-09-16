@@ -107,6 +107,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         $uniacid = $_W['uniacid'];
         $gift = pdo_fetchall(' select id,title,levels from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
+        //$gift = pdo_fetchall(' select id,title,levels from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$uniacid.'"');
         $res = $this->get_gift($gift,$openid);
         //show_json(1,['is_show'=>$res?:0]);
         show_json(1,['is_show'=>$res?1:0]);
@@ -124,18 +125,20 @@ class Index_EweiShopV2Page extends AppMobilePage
         if($openid == ""){
             show_json(0,"openid不能为空");
         }
+        $week = m('util')->week(time());
         //礼包总和
         $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
+        //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$uniacid.'"');
         //礼包商品
-        $goods = $this->gift($gifts);
+        $goods = $this->gift($gifts,$openid);
         //该用户对应的礼包
         $gift = $this->get_gift($gifts,$openid);
         //该用户的用户ID
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         //已助力的人数
-        $help_count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime > "'.$gift['starttime'].'"');
+        $help_count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
         //邀请新人记录
-        $new = pdo_fetchall('select id,nickname,avatar,openid from '.tablename('ewei_shop_member').' where agentid = "'.$member['id'].'" and createtime > "'.$gift['starttime'].'" order by createtime desc LIMIT 10');
+        $new = pdo_fetchall('select id,nickname,avatar,openid from '.tablename('ewei_shop_member').' where agentid = "'.$member['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'" order by createtime desc LIMIT 10');
         $new_count = count($new);
         //如果新邀请的人数  不达需要邀请的人数  追加空数据
         if($new_count < $gift['member']){
@@ -144,8 +147,21 @@ class Index_EweiShopV2Page extends AppMobilePage
         //如果用户身份是店主的话   检测他成为 店主时  是否获得了  免费兑换
         $count = pdo_count('ewei_shop_coupon_data',['openid'=>$openid,'uniacid'=>$_W['uniacid'],'couponid'=>2]);
         $is_get = $count > 0 && $member['agentlevel'] == 5 ? 0 :1;
-        $agentlevel = pdo_getcolumn('ewei_shop_commission_level',['id'=>$member['agentlevel'],'uniacid'=>$uniacid],'levelname');
-        show_json(1,['goods'=>$goods,'all'=>$gift['member'],'help_count'=>$help_count,'new_member'=>$new,'remain'=>bcsub($gift['member'],$help_count)?:0,'agent_level'=>$member['agentlevel'],'agentlevel'=>$agentlevel,'avatar'=>$member['avatar'],'gift'=>$gift['title'],'is_get'=>$is_get,'start'=>date('Y-m-d',$gift['starttime']),'end'=>date('Y-m-d',$gift['endtime'])]);
+        $agentlevel = $member['agentlevel'] == 0 ? "普通会员" : pdo_getcolumn('ewei_shop_commission_level',['id'=>$member['agentlevel'],'uniacid'=>$uniacid],'levelname');
+        //累计助力人数
+        $all = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime > "'.$gift['starttime'].'"');
+        //目标人数
+        $target = $this->count($member['agentlevel'],$gifts);
+        //show_json(1,['goods'=>$goods,'all'=>$gift['member'],'help_count'=>$help_count,'new_member'=>$new,'remain'=>bcsub($gift['member'],$help_count)?:0,'agent_level'=>$member['agentlevel'],'agentlevel'=>$agentlevel,'avatar'=>$member['avatar'],'gift'=>$gift['title'],'is_get'=>$is_get,'start'=>date('Y-m-d',$gift['starttime']),'end'=>date('Y-m-d',$gift['endtime'])]);
+        if($member['agentlevel'] == 5){
+            $get_all = 3;
+        }elseif ($member['agentlevel'] == 2){
+            $get_all = 2;
+        }else{
+            $get_all = 1;
+        }
+        $get = pdo_count('ewei_shop_gift_log','openid = "'.$openid.'" and status = 2 and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
+        show_json(1,['goods'=>$goods,'all'=>$all,'desc'=>$gift['desc'],'help_count'=>$help_count,'new_member'=>$new,'remain'=>bcsub($target,$help_count) > 0 ? bcsub($target,$help_count) :0,'agent_level'=>$member['agentlevel'],'agentlevel'=>$agentlevel,'avatar'=>$member['avatar'],'gift'=>$gift['title'],'is_get'=>$is_get,'start'=>date('Y-m-d',$gift['starttime']),'end'=>date('Y-m-d',$gift['endtime']),'get_all'=>$get_all,'gets'=>$get,'week_start'=>date('m.d',$week['start']),'week_end'=>date('m.d',$week['end'])]);
     }
 
     /**
@@ -155,12 +171,12 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         $openid = $_GPC['openid'];
-        $goods_id = $_GPC['goods_id'];
-        if($openid == "" ){
+        $goods_id = $_GPC['goodsid'];
+        if($openid == "" || $goods_id == "" ){
             show_json(0,"参数不完善");
         }
         //检测用户的情况
-        $reason = $this->check($openid);
+        $reason = $this->check($openid,$goods_id);
         if($reason !== true){
             show_json(0,$reason);
         }else{
@@ -190,7 +206,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $pageSize = 20;
         $pindex = ($page - 1) * $pageSize;
         //礼包总和
-        $gifts = pdo_fetchall(' select id,title,levels,starttime from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
+        $gifts = pdo_fetchall(' select id,title,levels,starttime from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$uniacid.'"');
         //该用户对应的礼包
         $gift = $this->get_gift($gifts,$openid);
         $total = pdo_count('ewei_shop_member_getstep','openid = "'.$openid.'" and timestamp > "'.$gift['starttime'].'" and type = 1');
@@ -201,36 +217,73 @@ class Index_EweiShopV2Page extends AppMobilePage
         }else{
             show_json(0,"暂无信息");
         }
+    }
 
+    /**
+     * 领取记录
+     */
+    public function record()
+    {
+        global $_W;
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        $uniacid = $_W['uniacid'];
+        $page = max(1,$_GPC['page']);
+        if($openid == "" || $page == ""){
+            show_json(0,"参数不完整");
+        }
+        $pageSize = 10;
+        $pindex = ($page - 1) * $pageSize;
+        $total = pdo_count('ewei_shop_gift_log',['uniacid'=>$uniacid,'openid'=>$openid,"status"=>2]);
+        $list = pdo_fetchall('select g.thumb,l.gift_id,l.createtime,l.status from '.tablename('ewei_shop_gift_log').'l join '.tablename('ewei_shop_goods').'g on g.id = l.goods_id'.' where l.uniacid = "'.$uniacid.'" and l.openid = "'.$openid.'" and l.status = 2 LIMIT '.$pindex.','.$pageSize);
+        foreach($list as $key => $item){
+            $week = m('util')->week($item['createtime']);
+            $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
+            $gift = m('game')->check($item['gift_id']);
+            $list[$key]['title'] = date('m.d',$week['start'])."--".date('m.d',$week['end'])."周领取".$gift;
+            $list[$key]['thumb'] = tomedia($item['thumb']);
+        }
+        if(!empty($list)){
+            show_json(1,['total'=>$total,'page'=>$page,'pageSize'=>$pageSize,'list'=>$list]);
+        }else{
+            show_json(0,"暂无记录");
+        }
     }
 
     /**
      * 检测用户领取礼包的情况
      * @param $openid
+     * @param $goods_id
      * @return bool|string
      */
-    public function check($openid)
+    public function check($openid,$goods_id)
     {
         global $_W;
+        $week = m('util')->week(time());
         //查找所有开启状态的礼包
         $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$_W['uniacid'].'"');
+        //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$_W['uniacid'].'"');
         //该用户对应的礼包
-        $gift = $this->get_gift($gifts,$openid);
+        $gift = $this->get_gifts($gifts,$openid,$goods_id);
+        if(!is_array($gift)){
+            return $gift;
+        }
         //查看会员信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
-        $levels = explode(',',$gift['levels']);
-        if(!in_array($member['agentlevel'],$levels)){
-            return "您的会员身份不符合领取礼包";
-        }
         //查看当前时间  是否在礼包的有效期
         if(time() < $gift['starttime'] || time() > $gift['endtime']){
             return "不在活动期间";
         }
-        //再查他的领取情况
-        $log = pdo_getall('ewei_shop_gift_log',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
+        //再查他的领取情况  在本周内  且领状态  是 领了未支付
+        $log = pdo_getall('ewei_shop_gift_log','openid = "'.$openid.'" and uniacid = "'.$_W['uniacid'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'" and status > 0');
         $ids = array_column($log,'gift_id');
         if(in_array($gift['id'],$ids)){
-            return "您已经领过".$gift['title'];
+            $glog = pdo_get('ewei_shop_gift_log','openid = "'.$openid.'" and gift_id = "'.$gift['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'" and status > 0');
+            if($glog['status'] == 1){
+                return "您已经领".$gift['title']."待支付";
+            }else{
+                return "您已成功领取".$gift['title'];
+            }
         }
         $num = 0;
         //如果他没领取过  需要邀请新人数量等于当前的领取礼包的数量
@@ -243,16 +296,35 @@ class Index_EweiShopV2Page extends AppMobilePage
             }
             $num += $gift['member'];
         }
-        $count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime > "'.$gift['starttime'].'"');
+        $count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
         if($count < $num){
             return "邀请新人数不足";
         }
         //计算用户有没有店主权益兑换券
-        $count = pdo_count('ewei_shop_coupon_data',['openid'=>$openid,'uniacid'=>$_W['uniacid'],'couponid'=>2]);
-        if($count != 0 && $member['agentlevel'] == 5){
-            return "您已领取过店主权益，不能领取高级礼包";
-        }
+//        $quan_count = pdo_count('ewei_shop_coupon_data',['openid'=>$openid,'uniacid'=>$_W['uniacid'],'couponid'=>2]);
+//        if($quan_count != 0 && $member['agentlevel'] == 5){
+//            return "您已领取过店主权益，不能领取高级礼包";
+//        }
         return true;
+    }
+
+    /**
+     * 计算目标数
+     * @param $level
+     * @param $gifts
+     * @return int
+     */
+    public function count($level,$gifts)
+    {
+        $num = 0;
+        foreach ($gifts as $key=>$item){
+            $lev = explode(',',$item['levels']);
+            $l = min($lev);
+            if($level >= $l){
+                $num += $item['member'];
+            }
+        }
+        return $num;
     }
 
     /**
@@ -273,6 +345,39 @@ class Index_EweiShopV2Page extends AppMobilePage
             if(in_array($member['agentlevel'],$level)){
                 return $item;
                 break;
+            }
+        }
+    }
+
+    /**
+     * 获得该用户应该获得的礼包
+     * @param $gift
+     * @param $openid
+     * @param $goods_id
+     * @return mixed
+     */
+    public function get_gifts($gift,$openid,$goods_id)
+    {
+        global $_W;
+        $levels = [];
+        $data = [];
+        //获得用户的信息
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
+        foreach ($gift as $key=>$item){
+            //每个礼包的等级分解下
+            $lev = explode(',',$item['levels']);
+            //每个礼包的商品分解下
+            $goods = explode(',',$item['goodsid']);
+            //获得每个等级的最小项
+            $l = min($lev);
+            //如果的商品在其内  就返回循环项
+            if(in_array($goods_id,$goods)){
+                //用户等级大于当前的最小的值   然后  合并等级
+                if($member['agentlevel'] >= $l){
+                    return $item;
+                }else{
+                    return "不可领取该礼包";
+                }
             }
         }
     }
@@ -317,11 +422,28 @@ class Index_EweiShopV2Page extends AppMobilePage
 
     /**
      * @param $gifts
+     * @param $openid
      * @return array
      */
-    public function gift($gifts)
+    public function gift($gifts,$openid)
     {
         $goods = [];
+//        //获取本周的始末
+//        $week = m('util')->week(time());
+//        //获得本周的领取记录
+//        $log = pdo_getall('ewei_shop_gift_log',"openid = '".$openid."' and createtime between '".$week['start']."' and '".$week['end']."'");
+//        //把领取礼包的id组成一维数组
+//        $log_ids = array_column($log,'gift_id','id');
+//        //获得用户的id
+//        $id = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'id');
+//        //计算本周的邀请人数
+//        $num = pdo_count('ewei_shop_member','agentid = "'.$id.'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
+//        $num = 23;
+//        $count = 0;
+//        //计算领取过的  已经需要多少人
+//        foreach ($log_ids as $item){
+//            $count += pdo_getcolumn('ewei_shop_gift_bag',['id'=>$item],'member');
+//        }
         foreach ($gifts as $key=>$item){
             $ids = explode(',',$item['goodsid']);
             $levels = explode(',',$item['levels']);
@@ -336,8 +458,29 @@ class Index_EweiShopV2Page extends AppMobilePage
                 }
                 $goods[$key]['level_name'] .= pdo_getcolumn('ewei_shop_commission_level',['id'=>$level],'levelname');
             }
+//            //如果领取过的人数  大于
+//            if($count > $num){
+//                $goods[$key]['is_get'] = 0;
+//            }else{
+//                $goods[$key]['is_get'] = in_array($item['id'],$log_ids) ? 0 : 1;
+//            }
         }
         return $goods;
+    }
+
+    /**
+     * 领取快报
+     */
+    public function notice()
+    {
+        global $_W;
+        global $_GPC;
+        $uniacid = $_W['uniacid'];
+        $list = pdo_fetchall('select m.nickname,m.avatar,l.gift_id from '.tablename('ewei_shop_gift_log')."l join ".tablename('ewei_shop_member').'m on l.openid = m.openid '.' where l.uniacid = "'.$uniacid.'" and l.status = 2 order by l.id desc LIMIT 66');
+        foreach ($list as $key=>$item){
+            $list[$key]['gift'] = m('game')->check($item['gift_id']);
+        }
+        if(!empty($list)) show_json(1,['list'=>$list]);
     }
 }
 ?>

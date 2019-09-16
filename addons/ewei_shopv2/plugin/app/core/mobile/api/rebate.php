@@ -53,7 +53,9 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         //查看短息信息
         $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'content'=>$msg,'result'=>0]);
         if($sms){
-            pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
+            if($sms['result'] == 0){
+                pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
+            }
         }else{
             //show_json(206,"短信验证码不正确");
             $this->addlog($add,206,"短信验证码不正确");
@@ -64,7 +66,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $res = pdo_update('ewei_shop_member',$data,['openid'=>$member['openid'],'mobile'=>$mobile]);
         if($res){
             //show_json(200,"支付成功");
-            m('game')->addCreditlog($member['openid'],3,-$money,"外部网站消费折扣宝");
+            m('game')->addCreditlog($member['openid'],3,-$money,"RV钱包充值");
             $this->addlog($add,200,"支付成功");
             exit(json_encode(['code'=>200,'msg'=>"支付成功"]));
         }
@@ -98,13 +100,15 @@ class Rebate_EweiShopV2Page extends AppMobilePage
                 //app_error(203,"手机号格式不正确");
                 exit(json_encode(['code'=>203,'msg'=>'手机号格式不正确']));
             }
-            $resault=com_run("sms::mysend", array('mobile'=>$mobile,'tp_id'=>1,'code'=>$code));
+            $tp_id = 4;
+            $resault=com_run("sms::mysend", array('mobile'=>$mobile,'tp_id'=>$tp_id,'code'=>$code));
         }else{
+            $tp_id = 6;
             $country=pdo_get("sms_country",array("id"=>$country_id));
-            $resault=com_run("sms::mysend", array('mobile'=>$country["phonecode"].$mobile,'tp_id'=>3,'code'=>$code));
+            $resault=com_run("sms::mysend", array('mobile'=>$country["phonecode"].$mobile,'tp_id'=>$tp_id,'code'=>$code));
         }
         if ($resault["status"]==1){
-            pdo_insert('core_sendsms_log',['uniacid'=>$_W['uniacid'],'mobile'=>$mobile,'content'=>$code,'createtime'=>time(),'ip'=>CLIENT_IP]);
+            pdo_insert('core_sendsms_log',['uniacid'=>$_W['uniacid'],'mobile'=>$mobile,'tp_id'=>$tp_id,'content'=>$code,'createtime'=>time(),'ip'=>CLIENT_IP]);
             $token = md5(md5(base64_encode($mobile.$code.$member['openid'])));
             exit(json_encode(['code'=>200,'msg'=>"发送成功",'token'=>$token]));
         }else{

@@ -125,22 +125,46 @@ class Game_EweiShopV2Model{
      * 加领取日志
      * @param $openid
      * @param $goods_id
+     * @param $order_sn
      * @return bool
      */
-    public function add_log($openid,$goods_id)
+    public function add_log($openid,$goods_id,$order_sn)
     {
         global $_W;
         //查找所有开启状态的礼包
         $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$_W['uniacid'].'"');
-        //该用户对应的礼包
-        $gift = $this->get_gift($gifts,$openid);
+        //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$_W['uniacid'].'"');
+        foreach ($gifts as $item){
+            $goods = explode(',',$item['goodsid']);
+            if(in_array($goods_id,$goods)){
+                $gift = $item;
+                break;
+            }
+        }
         $data = [
             'openid'=>$openid,
             'gift_id'=>$gift['id'],
             'goods_id'=>$goods_id,
             'uniacid'=>$_W['uniacid'],
+            'order_sn'=>$order_sn,
             'createtime'=>time(),
         ];
         return pdo_insert('ewei_shop_gift_log',$data);
+    }
+
+    /**
+     * @param $gift_id
+     * @return string
+     */
+    public function check($gift_id)
+    {
+        if($gift_id == 1){
+            $gift = "初级礼包";
+        }elseif ($gift_id == 2){
+            $gift = "中级礼包";
+        }else{
+            $gift = "高级礼包";
+        }
+        return $gift;
     }
 }

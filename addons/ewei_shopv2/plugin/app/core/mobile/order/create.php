@@ -96,7 +96,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$diyformdata = $this->diyformData($member);
 			extract($diyformdata);
 			$id = intval($_GPC["id"]);
-            		$flag = $this->gift_check($openid,$id);
+			$flag = $this->gift_check($openid,$id);
 			$bargain_id = intval($_GPC["bargainid"]);
 			$_SESSION["bargain_id"] = NULL;
 			if( p("bargain") && !empty($bargain_id) ) 
@@ -1184,6 +1184,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$result["seckill_payprice"] = intval($seckill_payprice);
 		$result['isdispatcharea'] = $isdispatcharea;
 		$result['remote_dispatchprice'] = $remote_dispatchprice;
+		$result['is_gift'] = $flag ? 1 : 0;
 		if( $hasinvoice ) 
 		{
 			$result["invoice_info"] = $invoice_arr;
@@ -2042,6 +2043,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$return_array["gifts"] = $gifts;
 		$return_array['isdispatcharea'] = $isdispatcharea;
 		$return_array['remote_dispatchprice'] = $remote_dispatchprice;
+		$return_array['is_gift'] = $flag ? 1 : 0;
 		if( !empty($nodispatch_array["isnodispatch"]) )
 		{
 			$return_array["isnodispatch"] = 1;
@@ -2083,7 +2085,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		{
 			$packageid = 0;
 		}
-		if( !empty($packageid) ) 
+		if( !empty($packageid) )
 		{
 			$package = pdo_fetch("SELECT id,title,price,freight,cash,starttime,endtime,dispatchtype FROM " . tablename("ewei_shop_package") . "\r\n                    WHERE uniacid = " . $uniacid . " and id = " . $packageid . " and deleted = 0 and status = 1  ORDER BY id DESC");
 			if( empty($package) )
@@ -2202,14 +2204,15 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$flag = false;
 		if(count($goods) == 1){
 		   $flag = $this->gift_check($openid,$goods[0]['id']);
-        	}
+		}
 		foreach( $goods as $g ) 
 		{
 			if( empty($g) ) 
 			{
 				continue;
 			}
-			$goodsid = intval($g["goodsid"]);
+			//$goodsid = intval($g["goodsid"]);
+			$goodsid = intval($g["id"]);
 			$optionid = intval($g["optionid"]);
 			$goodstotal = intval($g["total"]);
 			if( $goodstotal < 1 ) 
@@ -2218,7 +2221,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			}
 			if( empty($goodsid) ) 
 			{
-				app_error(AppError::$ParamsError);
+				app_error(AppError::$ParamsError,"\"ID=". $goodsid ."\"不存在!");
 			}
 			$sql = "SELECT id as goodsid,title,type, weight,total,issendfree,isnodiscount, thumb,marketprice,cash,isverify,isforceverifystore,verifytype," . " goodssn,productsn,sales,istime,timestart,timeend,isendtime,usetime,endtime,ispresell,presellprice,preselltimeend," . " usermaxbuy,minbuy,maxbuy,unit,buylevels,buygroups,deleted," . " status,deduct,deduct_type,manydeduct,`virtual`,discounts,deduct2,ednum,edmoney,edareas,diyformtype,diyformid,diymode," . " dispatchtype,dispatchid,dispatchprice,remote_dispatchprice,merchid,merchsale,cates," . " isdiscount,isdiscount_time,isdiscount_discounts, virtualsend," . " buyagain,buyagain_islong,buyagain_condition, buyagain_sale,verifygoodsdays,verifygoodslimittype,verifygoodslimitdate" . " FROM " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid  limit 1";
 			$data = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $goodsid ));
@@ -3112,12 +3115,12 @@ class Create_EweiShopV2Page extends AppMobilePage
             $couponid_id = $coupon_info['couponid'];
         }
 		pdo_insert("ewei_shop_order", $order);
+        $orderid = pdo_insertid();
         //如果符合领取礼包 就给他加日志
         if($flag){
-            m('game')->add_log($openid,$goodsid);
+            m('game')->add_log($openid,$goodsid,$order["ordersn"]);
         }
-		$orderid = pdo_insertid();
-		if( !empty($goods[0]["bargain_id"]) && p("bargain") ) 
+		if( !empty($goods[0]["bargain_id"]) && p("bargain") )
 		{
 			pdo_update("ewei_shop_bargain_actor", array( "order" => $orderid ), array( "id" => $goods[0]["bargain_id"], "openid" => $_W["openid"] ));
 		}
@@ -3242,11 +3245,11 @@ class Create_EweiShopV2Page extends AppMobilePage
 					}
 				}
 				pdo_insert("ewei_shop_order", $order);
+                $ch_orderid = pdo_insertid();
 				//如果符合领取礼包 就给他加日志
                 if($flag){
-                    m('game')->add_log($openid,$goodsid);
+                    m('game')->add_log($openid,$goodsid,$order["ordersn"]);
                 }
-				$ch_orderid = pdo_insertid();
 				$merch_array[$merchid]["orderid"] = $ch_orderid;
 				if( 0 < $couponmerchid && $merchid == $couponmerchid ) 
 				{
@@ -3582,6 +3585,7 @@ class Create_EweiShopV2Page extends AppMobilePage
     public function reward(){
         global $_GPC;
         $res = m('reward')->addReward($_GPC['openid']);
+        //$res = $this->gift_check($_GPC['openid'],$_GPC['goods_id']);
         var_dump($res);
     }
 
@@ -3595,12 +3599,15 @@ class Create_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         $uniacid = $_W['uniacid'];
+        $week = m('util')->week(time());
         //查所有的礼包
         $gifts = pdo_getall('ewei_shop_gift_bag',['status'=>1,'uniacid'=>$uniacid]);
+        //$gifts = pdo_getall('ewei_shop_gift_bag',['uniacid'=>$uniacid]);
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         //再查他的领取情况
-        $log = pdo_getall('ewei_shop_gift_log',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
+        $log = pdo_getall('ewei_shop_gift_log','openid = "'.$openid.'" and status > 0 and uniacid = "'.$uniacid.'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
+        //设置$flag  为 false
         $flag = false;
         foreach ($gifts as $item){
             //把每个礼包里面包含的商品解析成数组
@@ -3609,30 +3616,34 @@ class Create_EweiShopV2Page extends AppMobilePage
             if(in_array($goods_id,$goods)){
                 //把这个礼包里面的允许领取等级解析成数组
                 $levels = explode(',',$item['levels']);
-                //判断用户身份等级在不在其中   这个做法是只允许当前等级领取对应的礼包
-                if(in_array($member['agentlevel'],$levels)){
-                    //查找是否领取过该等级的礼包   如果没有领取过 返回true  并结束循环
-                    if(!pdo_exists('ewei_shop_gift_log','openid="'.$openid.'"" and gift_id="'.$item['id'].'" and status > 0')){
+                //查看本周是否领取过该礼包
+                if(!pdo_exists('ewei_shop_gift_log','openid = "'.$openid.'" and status > 0 and gift_id = "'.$item['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"')){
+                    //当前等级够不够格领取该礼包
+                    if($member['agentlevel'] >= min($levels)){
                         $flag = $item['id'];
                         $gift = $item;
                         break;
+                    }else{
+                        $flag = false;
                     }
                 }
             }
         }
+        //设置需要的人数为0  然后 按要求加数量
         $num = 0;
-        //如果他没领取过  需要邀请新人数量等于当前的领取礼包的数量
         if(count($log) == 0){
+            //如果他没领取过  需要邀请新人数量等于当前的领取礼包的数量
             $num += $gift['member'];
         }else {
-            //如果领取过了  需要加上已经领取过的礼包需要的数量
             foreach ($log as $item) {
+                //如果领取过了  需要加上已经领取过的礼包需要的数量
                 $num += pdo_getcolumn('ewei_shop_gift_bag', ['id' => $item['gift_id'], 'uniacid' => $_W['uniacid']], 'member');
             }
+            //然后加上的这次领的礼包需要的人数
             $num += $gift['member'];
         }
         //计算他在活动期间的邀请新人数量
-        $count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime > "'.$gift['starttime'].'"');
+        $count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
         //如果邀请数量不足  则返回false
         if($count < $num){
             $flag = false;

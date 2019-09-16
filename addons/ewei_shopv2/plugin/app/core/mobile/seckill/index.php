@@ -15,33 +15,42 @@ class Index_EweiShopV2Page extends AppMobilePage
 			app_error(1, "请联系管理员开启 redis 支持，才能使用秒杀应用");
 			exit();
 		}
+		//秒杀id
 		$taskid = intval($_GPC["taskid"]);
 		if( empty($taskid) ) 
 		{
+		    //秒杀id为空先查查有没有今天的秒杀
 			$taskid = $this->getTodaySeckill();
 		}
+		//如果既没有传的秒杀任务  今日的秒杀任务也没有  那么提示  没有秒杀任务
 		if( empty($taskid) ) 
 		{
 			app_error(1, "今日没有秒杀，请明天再来吧~");
 			exit();
 		}
+		//秒杀任务详情
 		$task = $this->getTaskInfo($taskid);
 		if( empty($task) ) 
 		{
 			app_error(1, "未找到秒杀任务");
 			exit();
 		}
+		//秒杀会场
 		$rooms = $this->getRooms($taskid);
 		if( empty($rooms) ) 
 		{
 			app_error(1, "未找到秒杀会场");
 			exit();
 		}
+		//先加入会场为false
 		$room = false;
+		//会场的键是0
 		$roomindex = 0;
+		//获取会场id
 		$roomid = intval($_GPC["roomid"]);
 		if( empty($roomid) ) 
 		{
+		    //如果会场的id为空   把所有的会场都循环出来  再把第一个有效会场赋值给她
 			foreach( $rooms as $row ) 
 			{
 				$room = $row;
@@ -50,6 +59,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 		}
 		else 
 		{
+		    //如果会场id存在  取出当前会场信息
 			foreach( $rooms as $index => $row ) 
 			{
 				if( $row["id"] == $roomid ) 
@@ -60,11 +70,13 @@ class Index_EweiShopV2Page extends AppMobilePage
 				}
 			}
 		}
+		//如果还没查到会场信息  就报错找不到会场
 		if( empty($room) ) 
 		{
 			app_error(1, "未找到秒杀会场");
 			exit();
 		}
+		//把会场信息中取出   id   赋值给会场id
 		$roomid = $room["id"];
 		$timeid = 0;
 		$currenttime = time();
@@ -72,6 +84,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 		$alltimes = $this->getTaskTimes($taskid);
 		$times = array( );
 		$validtimes = array( );
+		//所有的秒杀时间
 		foreach( $alltimes as $key => $time ) 
 		{
 			$oldshow = true;
