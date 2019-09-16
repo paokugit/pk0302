@@ -425,7 +425,6 @@ class Level_EweiShopV2Page extends AppMobilePage
      */
     public function goods_list()
     {
-        var_dump(0.04*0.01 > 0);exit;
         global $_W;
         global $_GPC;
         $uniacid = $_W['uniacid'];

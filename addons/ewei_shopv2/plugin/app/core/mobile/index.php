@@ -661,11 +661,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC['openid'];
         $ids = [44,89,90,4164,41683];
         $id = pdo_getcolumn('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],'id');
-        if(in_array($id,$ids)){
+        //if(in_array($id,$ids)){
             show_json(1);
-        }else{
-            show_json(0);
-        }
+        //}else{
+        //    show_json(0);
+        //}
     }
 }
 

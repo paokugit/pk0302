@@ -120,8 +120,10 @@ class Index_EweiShopV2Page extends AppMobilePage{
      * 获取平台用户活跃量
      */
    public function get_member_count(){
-       $memberid = pdo_fetchcolumn("select id from " . tablename('ewei_shop_member') .'where 1=1  order by id desc limit 1');
-       show_json(0, $memberid*11);
+       //$memberid = pdo_fetchcolumn("select id from " . tablename('ewei_shop_member') .'where 1=1  order by id desc limit 1');
+       $id = 61779;
+       $new_count = pdo_count('ewei_shop_member','id > "'.$id.'"');
+       show_json(0, $id*11+$new_count*7);
    }
 }
 ?>
