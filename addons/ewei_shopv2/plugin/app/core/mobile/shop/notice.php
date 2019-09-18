@@ -35,10 +35,10 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		global $_W;
 		global $_GPC;
 		$id = intval($_GPC['id']);
-		//$merchid = intval($_GPC['merchid']);
+		$merchid = intval($_GPC['merchid']);
 		$merch_plugin = p('merch');
-		if ($merch_plugin) {
-			$notice = pdo_fetch('select * from ' . tablename('ewei_shop_merch_notice') . ' where id=:id and uniacid=:uniacid and status=1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
+		if ($merch_plugin && !empty($merchid)) {
+			$notice = pdo_fetch('select * from ' . tablename('ewei_shop_merch_notice') . ' where id=:id and uniacid=:uniacid and merchid=:merchid and status=1', array(':id' => $id, ':uniacid' => $_W['uniacid'], ':merchid' => $merchid));
 		}
 		else {
 			$notice = pdo_fetch('select * from ' . tablename('ewei_shop_notice') . ' where id=:id and uniacid=:uniacid and status=1', array(':id' => $id, ':uniacid' => $_W['uniacid']));

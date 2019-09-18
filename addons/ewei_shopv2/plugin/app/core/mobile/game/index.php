@@ -128,9 +128,6 @@ class Index_EweiShopV2Page extends AppMobilePage
         if($openid == ""){
             show_json(0,"openid不能为空");
         }
-        if($openid == $new_openid){
-            show_json(0,"立即邀请好友助力吧");
-        }
         $week = m('util')->week(time());
         //该用户的用户ID
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
@@ -187,7 +184,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }else{
             $get_all = 1;
         }
-        $get = pdo_fetch('select count(1) from '.tablename('ewei_shop_gift_log').'where openid = :openid and status = 2 and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid]);
+        $get = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_gift_log').'where openid = :openid and status = 2 and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid]);
         $share = ['title'=>'免费领礼包啦，商品免费领到手','thumb'=>"https://paokucoin.com/img/backgroup/free.jpg"];
         show_json(1,['share'=>$share,'goods'=>$goods,'all'=>$all,'desc'=>$gift['desc'],'help_count'=>$help_count,'new_member'=>$new,'remain'=>bcsub($target,$help_count) > 0 ? bcsub($target,$help_count) :0,'agent_level'=>$member['agentlevel'],'agentlevel'=>$agentlevel,'avatar'=>$member['avatar'],'gift'=>$gift['title'],'is_get'=>$is_get,'start'=>date('Y-m-d',$gift['starttime']),'end'=>date('Y-m-d',$gift['endtime']),'get_all'=>$get_all,'gets'=>$get,'week_start'=>date('m.d',$week['start']),'week_end'=>date('m.d',strtotime("-1s",$week['end']))]);
     }

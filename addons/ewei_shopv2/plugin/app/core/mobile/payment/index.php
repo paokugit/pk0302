@@ -761,7 +761,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         $uniacid = $_W['uniacid'];
-        $list = pdo_getall('ewei_shop_member_limit',['uniacid' => $uniacid],['id','money','limit']);
+        $list = pdo_getall('ewei_shop_member_limit',['uniacid' => $uniacid,'status'=>1],['id','money','limit']);
         foreach ($list as $key=>$item){
             $list[$key]['limit'] = $item['limit'] >= 10000 ? $item['limit'] / 10000 ."万" : $item['limit'];
         }
