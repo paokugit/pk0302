@@ -21,7 +21,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         //用户的信息
         $member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid],['nickname','realname','is_open',"FROM_UNIXTIME(expire_time) as expire"]);
         //待领取的优惠券  两个
-        $coupon = pdo_fetchall('select cd.id,cd.used,co.deduct,co.enough,co.couponname from '.tablename('ewei_shop_coupon_data').'cd join '.tablename('ewei_shop_coupon').'co on co.id=cd.couponid'.' where cd.gettype = 1 and cd.openid = "'.$openid.'" and co.timeend > "'.time().'" order by id desc LIMIT 0,2');
+        $coupon = pdo_fetchall('select cd.id,cd.used,co.deduct,co.enough,co.couponname from '.tablename('ewei_shop_coupon_data').'cd join '.tablename('ewei_shop_coupon').'co on co.id=cd.couponid'.' where cd.gettype = 1 and cd.openid = :openid and co.timeend > "'.time().'" order by id desc LIMIT 0,2',[':openid'=>$openid]);
         //特权产品列表
         $goods = pdo_getall('ewei_shop_goods','status = 1 and is_right = 1 and total > 0 order by id desc LIMIT 0,8',['id','title','thumb','total','productprice','marketprice','bargain']);
         foreach ($goods as $key=>$item){
@@ -33,10 +33,10 @@ class Level_EweiShopV2Page extends AppMobilePage
         $good = pdo_get('ewei_shop_goods',['id'=>$level['goods_id'],'uniacid'=>$uniacid],['thumb','productprice']);
         $level = array_merge($level,['thumb'=>tomedia($good['thumb']),'price'=>$good['productprice']]);
 	//查询我的第一条记录
-        $log = pdo_get('ewei_shop_level_record','uniacid = "'.$uniacid.'" and level_id = "'.$level['level_id'].'" and openid = "'.$openid.'" order by month asc');
+        $log = pdo_fetch('select * from '.tablename('ewei_shop_level_record').' where uniacid = "'.$uniacid.'" and level_id = "'.$level['level_id'].'" and openid = :openid order by month asc',[':openid'=>$openid]);
         //如果今天的年月份  大于记录中的 则更新他为失效   或者  月份相同  日期大于20  并把更新时间改成当月的21号为失效时间   并且状态为未领取
         $level['month'] = $level['month'] == $log['month'] ? date("Y年m月d日",strtotime($month."01"."+1 month -1 day")) : date("Y年m月20日",strtotime($month."01"));
-        $record = pdo_getall('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" order by id desc');
+        $record = pdo_fetchall('select * from '.tablename('ewei_shop_level_record').'where openid = :openid and uniacid = "'.$uniacid.'" order by id desc',[':openid'=>$openid]);
         foreach ($record as $key => $item){
             //如果状态 == 0
             if($item['status'] == 0){
@@ -90,9 +90,9 @@ class Level_EweiShopV2Page extends AppMobilePage
         $pindex = ($page - 1) * $pageSize;
         //计算记录总数
         $year_month = strtotime(date('Ym',time())."10");      //当前的年月份
-        $total = pdo_count('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and  (createtime < "'.$year_month.'" or status > 0)');
+        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_level_record').'where openid = :openid and uniacid = "'.$uniacid.'" and  (createtime < "'.$year_month.'" or status > 0)',[':openid'=>$openid]);
         //查询记录以及分页
-        $record = pdo_getall('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and (createtime < "'.$year_month.'" or status > 0) order by id desc LIMIT '.$pindex.','.$pageSize);
+        $record = pdo_fetchall('select * from '.tablename('ewei_shop_level_record').' where openid = :openid and uniacid = "'.$uniacid.'" and (createtime < "'.$year_month.'" or status > 0) order by id desc LIMIT '.$pindex.','.$pageSize,[':openid'=>$openid]);
         foreach ($record as $key=>$item) {
             $record[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             $record[$key]['updatetime'] = date('Y年m月d日',$item['updatetime']);
@@ -200,7 +200,7 @@ class Level_EweiShopV2Page extends AppMobilePage
             show_json(0,$record['month']."权利礼包已领取或过期");
         }
         //查询领取记录里面的已领过的状态
-        $log = pdo_getall('ewei_shop_level_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'" and level_id = "'.$level_id.'" and status > 0');
+        $log = pdo_fetchall('select * from '.tablename('ewei_shop_level_record').'where uniacid = "'.$uniacid.'" and openid = :openid and level_id = "'.$level_id.'" and status > 0',[':openid'=>$openid]);
         if(count($log) > 0 && (date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."21")){
             show_json(0,$record['month']."权益礼包不在领取日期");
         }
@@ -257,7 +257,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         if($openid == ""){
             show_json(0,"用户openid不能为空");
         }
-        $list = pdo_getall('ewei_shop_member_address','uniacid="'.$uniacid.'" and openid ="'.$openid.'" and deleted = 0 order by isdefault desc,id desc');
+        $list = pdo_fetchall('select * from '.tablename('ewei_shop_member_address').'where uniacid="'.$uniacid.'" and openid = :openid and deleted = 0 order by isdefault desc,id desc',[':openid'=>$openid]);
         if(!$list){
             show_json(-1,"暂无地址，请去添加地址");
         }
@@ -287,7 +287,7 @@ class Level_EweiShopV2Page extends AppMobilePage
      */
     public function change_address($address_id,$openid,$uniacid)
     {
-        $record = pdo_get('ewei_shop_level_record','openid = "'.$openid.'" and uniacid = "'.$uniacid.'" order by id asc');
+        $record = pdo_fetch('select * from '.tablename('ewei_shop_level_record').'where openid = :openid and uniacid = "'.$uniacid.'" order by id asc',[':openid'=>$openid]);
         $user_address = pdo_get('ewei_shop_member_address',['openid'=>$openid,'uniacid'=>$uniacid,'id'=>$address_id,'deleted'=>0]);
         if(empty($user_address)){
             show_json(0,"用户地址错误");
@@ -297,11 +297,11 @@ class Level_EweiShopV2Page extends AppMobilePage
         if(in_array($user_address['province'],$base_express)){
 	        $data['is_remote'] = 0;
 	        //这个人的第一条记录为0的话  说明是第一次领取
-            $data['price'] = $record['status'] > 0 ? $openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE" ? 0.01 : 10 : 0;
+            $data['price'] = $record['status'] > 0 ? 10 : 0;
         }else{
             $data['is_remote'] = 1;
             //这个人的第一条记录为0的话  说明是第一次领取
-            $data['price'] = $record['status'] > 0 ? $openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE" ? 0.02 : 20  : 0;
+            $data['price'] = $record['status'] > 0 ? 20 : 0;
         }
         return $data;
 

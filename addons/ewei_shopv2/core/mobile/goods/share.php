@@ -666,7 +666,7 @@ class Share_EweiShopV2Page extends MobilePage
             $openid=$resault["openid"];
         }
         $fields = 'price,createtime,id,commission1_pay,commission2_pay,addressid,carrier';
-        $list = pdo_fetchall('select '.$fields.' from '.tablename('ewei_shop_order').' where openid = "'.$openid.'" and uniacid="'.$_W['uniacid'].'" and status > 1');
+        $list = pdo_fetchall('select '.$fields.' from '.tablename('ewei_shop_order').' where openid = :openid and uniacid="'.$_W['uniacid'].'" and status > 1',[':openid'=>$openid]);
         foreach ($list as $key=>$item){
             $goods_id = pdo_getcolumn('ewei_shop_order_goods',['orderid'=>$item['id']],'goodsid');
             $goods = pdo_get('ewei_shop_goods',['id'=>$goods_id]);

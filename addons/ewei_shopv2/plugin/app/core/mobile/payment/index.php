@@ -275,7 +275,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             //有$id 修改 没有添加
             if($id){
                 //判断$money金额的满减条件是否存在
-                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where openid="'.$openid.'" and money="'.$money.'" and cate="'.$cate.'" and id!="'.$id.'"');
+                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where openid=:openid and money="'.$money.'" and cate="'.$cate.'" and id!="'.$id.'"',[':openid'=>$openid]);
                 if($res){
                     show_json(0,$money.'的满减条件已存在，请前往修改或者更换满减条件');
                 }
@@ -472,13 +472,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit3');
         $fields = "id,num,createtime,remark,openid";
         if($type == 1){
-            //$condition = 'and credittype = "credit3" and openid = "'.$openid.'" and num > 0';
             $condition = ' and num > 0';
         }elseif ($type == 2){
             $condition = ' and num < 0';
         }
-        $list = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype ="credit3" and openid = "'.$openid.'" '.$condition  .' order by createtime desc LIMIT '.$psize .','.$pageSize);
-        $total = pdo_fetchcolumn('select count(*) from '.tablename('mc_credits_record').' where credittype = "credit3" and openid = "'.$openid.'" '.$condition);
+        $list = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype ="credit3" and openid = :openid '.$condition  .' order by createtime desc LIMIT '.$psize .','.$pageSize,[':openid'=>$openid]);
+        $total = pdo_fetchcolumn('select count(*) from '.tablename('mc_credits_record').' where credittype = "credit3" and openid = :openid '.$condition,[':openid'=>$openid]);
         foreach ($list as $key=>$item){
             $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             if(mb_substr($item['remark'],0,2) == "跑库"){
@@ -500,7 +499,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $id = $_GPC['id'];
         $openid = $_GPC['openid'];
         if(!$id || !$openid) show_json(0,"请完善参数");
-        $data = pdo_fetch('select openid,num,createtime,remark,merchid from '.tablename('mc_credits_record').' where id = "'.$id.'" and openid  = "'.$openid.'"');
+        $data = pdo_fetch('select openid,num,createtime,remark,merchid from '.tablename('mc_credits_record').' where id=:id and openid=:openid',[':id'=>$id,':openid'=>$openid]);
         $data['createtime'] = date('Y-m-d H:i:s',$data['createtime']);
         if($data['merchid'] != 0){
             $data['merch_name'] = pdo_getcolumn('ewei_shop_merch_user',['id'=>$data['merchid']],'merchname');
@@ -752,6 +751,67 @@ class Index_EweiShopV2Page extends AppMobilePage
         //更改短信验证码的验证状态
         pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
         show_json(1,"短信验证成功");
+    }
+
+/**********************************************************折扣宝限额宝*************************************************************/
+    /**
+     * 限额宝列表
+     */
+    public function limit()
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $list = pdo_getall('ewei_shop_member_limit',['uniacid' => $uniacid],['id','money','limit']);
+        foreach ($list as $key=>$item){
+            $list[$key]['limit'] = $item['limit'] >= 10000 ? $item['limit'] / 10000 ."万" : $item['limit'];
+        }
+        if(empty($list)){
+            show_json(0,"暂无数据");
+        }
+        show_json(1,['list'=>$list]);
+    }
+
+    /**
+     * 限额购买
+     */
+    public function limit_order()
+    {
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        $id = $_GPC['id'];
+        $ordersn = "LIM".date('YmdHis').random(12);
+        //查找限额
+        $limit = pdo_get('ewei_shop_member_limit',['id'=>$id]);
+        //唤醒微信支付
+        $add = ['title'=>"购买折扣宝限额", "openid" => substr($openid,7), "tid" => $ordersn, "fee" =>$limit["money"]];
+        $res = $this->model->wxpay($add,34);
+        if(is_error($res)){
+            show_json(0,$res);
+        }
+        $order = $this->limit_add($ordersn,$openid,$limit);
+        if($order){
+            show_json(1,$res);
+        }
+    }
+
+    /**
+     * 加日志
+     * @param $ordersn
+     * @param $openid
+     * @param $limit
+     * @return bool
+     */
+    public function limit_add($ordersn,$openid,$limit)
+    {
+        $data = [
+            'ordersn'=>$ordersn,
+            'openid'=>$openid,
+            'lim_id'=>$limit['id'],
+            'price'=>$limit['money'],
+            'limit'=>$limit['limit'],
+            'createtime'=>time(),
+        ];
+        return pdo_insert('ewei_shop_member_limit_order',$data);
     }
 }
 ?>

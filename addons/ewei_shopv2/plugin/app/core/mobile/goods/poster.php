@@ -255,23 +255,23 @@ class Poster_EweiShopV2Page extends AppMobilePage
 		}
 		return $img;
 	}
-	private function mergeImage($target = false, $data = array( ), $imgurl = "", $local = false) 
+	private function mergeImage($target = false, $data = array( ), $imgurl = "", $local = false)
 	{
-		if( empty($data) || empty($imgurl) ) 
+		if( empty($data) || empty($imgurl) )
 		{
 			return $target;
 		}
-		if( !$local ) 
+		if( !$local )
 		{
 			$image = $this->createImage($imgurl);
 		}
-		else 
+		else
 		{
 			$image = imagecreatefromstring($imgurl);
 		}
 		$sizes = $sizes_default = array( "width" => imagesx($image), "height" => imagesy($image) );
 		$sizes = array( "width" => 70, "height" => 70 );
-		if( $data["style"] == "radius" || $data["style"] == "circle" ) 
+		if( $data["style"] == "radius" || $data["style"] == "circle" )
 		{
 			$image = $this->imageZoom($image, 4);
 			$image = $this->imageRadius($image, $data["style"] == "circle");
@@ -332,7 +332,7 @@ class Poster_EweiShopV2Page extends AppMobilePage
         imagefill($avatartarget, 0, 0, $avatarwhite);
         $memberthumb = tomedia($member["avatar"]);
         $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
-        $image = $this->mergeImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
+        $image = m('qrcode')->mergeImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
         imagecopyresized($target, $image, 32, 860, 0, 0, 70, 70, 70, 70);
         
         imagettftext($target, 16, 0, 110, 875 , $black, $font, $this->subtext($member["nickname"],8));
@@ -343,6 +343,12 @@ class Poster_EweiShopV2Page extends AppMobilePage
         return $_W["siteroot"] . "addons/ewei_shopv2/data/helpposter/".$filename . "?v=1.0";
     }
 
+    /**
+     * 作废了
+     * @param $text
+     * @param $length
+     * @return string
+     */
     public function subtext($text, $length)
     {
         if(mb_strlen($text, 'utf8') > $length) {
@@ -364,7 +370,8 @@ class Poster_EweiShopV2Page extends AppMobilePage
         {
             $member = array( );
         }
-        $imgurl = $this->createHelpPoster( $member,$mid);
+        //$imgurl = $this->createHelpPoster( $member,$mid);
+        $imgurl = m('qrcode')->HelpPoster($member,$mid,['back'=>'/addons/ewei_shopv2/static/images/1.png','type'=>"helpposter",'title'=>'快来帮我助力一下','desc'=>'微信步数兑现金，收入可提现！','con'=>'每一步，都值得鼓励','url'=>'packageA/pages/helphand/helpshare/helpshare']);
         if( empty($imgurl))
         {
             app_error(AppError::$PosterCreateFail, "海报生成失败");

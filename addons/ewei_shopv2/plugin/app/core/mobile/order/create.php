@@ -3606,9 +3606,10 @@ class Create_EweiShopV2Page extends AppMobilePage
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         //再查他的领取情况
-        $log = pdo_getall('ewei_shop_gift_log','openid = "'.$openid.'" and status > 0 and uniacid = "'.$uniacid.'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
+        $log = pdo_fetchall('select * from '.tablename('ewei_shop_gift_log').'where openid = :openid and status > 0 and uniacid = "'.$uniacid.'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid]);
         //设置$flag  为 false
         $flag = false;
+        $gift = [];
         foreach ($gifts as $item){
             //把每个礼包里面包含的商品解析成数组
             $goods = explode(',',$item['goodsid']);
@@ -3617,7 +3618,7 @@ class Create_EweiShopV2Page extends AppMobilePage
                 //把这个礼包里面的允许领取等级解析成数组
                 $levels = explode(',',$item['levels']);
                 //查看本周是否领取过该礼包
-                if(!pdo_exists('ewei_shop_gift_log','openid = "'.$openid.'" and status > 0 and gift_id = "'.$item['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"')){
+                if(!pdo_fetch('select * from '.tablename('ewei_shop_gift_log').' where openid = :openid and status > 0 and gift_id = "'.$item['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid])){
                     //当前等级够不够格领取该礼包
                     if($member['agentlevel'] >= min($levels)){
                         $flag = $item['id'];

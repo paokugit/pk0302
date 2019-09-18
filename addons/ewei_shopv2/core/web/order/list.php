@@ -169,6 +169,11 @@ class List_EweiShopV2Page extends WebPage
 																	$condition .= " AND (locate(:keyword,store.storename)>0)";
 																	$sqlcondition = " left join " . tablename("ewei_shop_store") . " store on store.id = o.storeid and store.uniacid=o.uniacid";
 																}
+																else{
+																    if($searchfield == "remark"){
+								                                                                        $condition .= " AND (locate(:keyword,remark)>0)";
+								                                                                    }
+								                                                                }
 															}
 														}
 													}
@@ -323,7 +328,7 @@ class List_EweiShopV2Page extends WebPage
 		}
 		if( $condition != " o.uniacid = :uniacid and o.ismr=0 and o.deleted=0 and o.isparent=0 and o.istrade=0 " || !empty($sqlcondition) ) 
 		{
-			if( $searchfield == "member" ) 
+			if( $searchfield == "member")
 			{
 				$paras[":keyword"] = htmlspecialchars_decode($_GPC["keyword"], ENT_QUOTES);
 				if( empty($_GPC["isprecise"]) ) 

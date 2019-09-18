@@ -213,9 +213,9 @@ class Myown_EweiShopV2Page extends AppMobilePage
         //分页以及算总数
         $pageSize = 20;
         $psize = ($page - 1)*$pageSize;
-        $total = pdo_count('ewei_shop_member_log',"openid = '".$openid."' and title = '个人资金提现'");
+        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_member_log')." where openid = :openid and title = '个人资金提现'",[':openid'=>$openid]);
         //查询提现记录  FROM_UNIXTIIME()    sql语句中 时间戳转换成时间格式
-        $list = pdo_fetchall('select id,title,money,FROM_UNIXTIME(createtime) as createtime,status,refuse_reason from '.tablename('ewei_shop_member_log').' where openid = "'.$openid.'" and title = "个人资金提现" order by id desc LIMIT '.$psize.','.$pageSize);
+        $list = pdo_fetchall('select id,title,money,FROM_UNIXTIME(createtime) as createtime,status,refuse_reason from '.tablename('ewei_shop_member_log').' where openid = :openid and title = "个人资金提现" order by id desc LIMIT '.$psize.','.$pageSize,[':openid'=>$openid]);
         if(!$list){
             show_json(-1,"暂无信息");
         }
@@ -380,8 +380,8 @@ class Myown_EweiShopV2Page extends AppMobilePage
                 }
             //}
         }
-        $total = pdo_count('ewei_shop_devote_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'" and status = 1');
-        $count = pdo_count('ewei_shop_devote_record','uniacid = "'.$uniacid.'" and openid = "'.$openid.'"');
+        $total = pdo_count('ewei_shop_devote_record','uniacid = "'.$uniacid.'" and openid = :openid and status = 1',[':openid'=>$openid]);
+        $count = pdo_count('ewei_shop_devote_record','uniacid = "'.$uniacid.'" and openid = :openid',[':openid'=>$openid]);
         $list = $this->getlist($total,$uniacid,$openid);
         foreach ($list as $key=>&$item){
             $item['id'] = implode(',',$item['id']);
@@ -409,7 +409,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
             $key = $i%8 != 0 ? $i%8 : 8;
             $num = ceil(bcdiv($i,8,2));
             $list[$key]['image'] = "https://paokucoin.com/img/backgroup/s-gxserve.gif";
-            $id = pdo_fetchcolumn('select id from '.tablename('ewei_shop_devote_record').'where openid = "'.$openid.'" and uniacid = "'.$uniacid.'" and status = 1 LIMIT '.($i-1).','.$size);
+            $id = pdo_fetchcolumn('select id from '.tablename('ewei_shop_devote_record').'where openid =:openid and uniacid = "'.$uniacid.'" and status = 1 LIMIT '.($i-1).','.$size,[':openid'=>$openid]);
             $list[$key]['log'][] = pdo_get('ewei_shop_devote_log',['openid'=>$openid,'uniacid'=>$uniacid,'devote_id'=>$id,'status'=>1,'day'=>date('Y-m-d',time())])?1:0;
             $list[$key]['id'][] = $id;
             $list[$key]['count'] = $num;

@@ -251,6 +251,192 @@ class Qrcode_EweiShopV2Model
 		}
 		return "";
 	}
+
+    public function HelpPoster($member = array(),$mid,$content = [])
+    {
+        global $_W;
+        set_time_limit(0);
+        @ini_set("memory_limit", "256M");
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/".$content['type']."/";
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "openid" => $member["openid"],"code"=>10)));
+        $filename = $md5 . ".png";
+        $filepath = $path . $filename;
+        if( is_file($filepath) )
+        {
+            return $_W["siteroot"] . "addons/ewei_shopv2/data/".$content['type']."/".$filename;
+        }
+        $target = imagecreatetruecolor(550, 978);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+        //$thumb = "/addons/ewei_shopv2/static/images/1.png";
+        $thumb = $this->createImage(tomedia($content['back']));
+        imagecopyresized($target, $thumb, 0, 0, 0, 0, 550, 978, imagesx($thumb), imagesy($thumb));
+
+        $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/pingfang.ttf";
+        if( !is_file($font) )
+        {
+            $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
+        }
+        $black = imagecolorallocate($target, 51, 51, 51);
+        imagettftext($target, 22, 0, 32, 782, $black, $font, $content['title']);
+        imagettftext($target, 16, 0, 32, 820, $black, $font, $content['desc']);
+        //lihanwen
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" => "&mid=" . $mid ,"page" => $content['url'] ));
+
+        //var_dump($qrcode);exit;
+        if( !is_error($qrcode) )
+        {
+            $qrcode = imagecreatefromstring($qrcode);
+            imagecopyresized($target, $qrcode, 400, 785, 0, 0, 110, 110, imagesx($qrcode), imagesy($qrcode));
+        }
+
+        //微信头像显示
+        $avatartarget = imagecreatetruecolor(70, 70);
+        $avatarwhite = imagecolorallocate($avatartarget, 255, 255, 255);
+        imagefill($avatartarget, 0, 0, $avatarwhite);
+        $memberthumb = tomedia($member["avatar"]);
+        $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
+        $image = $this->mergeImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
+        imagecopyresized($target, $image, 32, 850, 0, 0, 70, 70, 70, 70);
+
+        imagettftext($target, 16, 0, 110, 875 , $black, $font, $this->subtext($member["nickname"],8));
+        $nameColor = imagecolorallocate($target, 102, 102, 102);
+        imagettftext($target, 12, 0, 110, 900 , $nameColor, $font, $content['con']);
+        imagepng($target, $filepath);
+        imagedestroy($target);
+        return $_W["siteroot"] . "addons/ewei_shopv2/data/".$content['type']."/".$filename . "?v=1.0";
+    }
+
+    /**
+     * @param bool $image
+     * @param int $zoom
+     * @return resource
+     */
+    public function imageZoom($image = false, $zoom = 2)
+    {
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $target = imagecreatetruecolor($width * $zoom, $height * $zoom);
+        imagecopyresampled($target, $image, 0, 0, 0, 0, $width * $zoom, $height * $zoom, $width, $height);
+        imagedestroy($image);
+        return $target;
+    }
+
+    /**
+     * @param bool $target
+     * @param bool $circle
+     * @param bool $rounded
+     * @return resource
+     */
+    public function imageRadius($target = false, $circle = false,$rounded=false)
+    {
+        $w = imagesx($target);
+        $h = imagesy($target);
+        $w = min($w, $h);
+        $h = $w;
+        $img = imagecreatetruecolor($w, $h);
+        imagesavealpha($img, true);
+        $bg = imagecolorallocatealpha($img, 255, 255, 255, 127);
+        imagefill($img, 0, 0, $bg);
+        if($rounded){
+            $radius = 180;
+        }else{
+            $radius = ($circle ? $w / 2 : 20);
+        }
+        $r = $radius;
+        for( $x = 0; $x < $w; $x++ )
+        {
+            for( $y = 0; $y < $h; $y++ )
+            {
+                $rgbColor = imagecolorat($target, $x, $y);
+                if( $radius <= $x && $x <= $w - $radius || $radius <= $y && $y <= $h - $radius )
+                {
+                    imagesetpixel($img, $x, $y, $rgbColor);
+                }
+                else
+                {
+                    $y_x = $r;
+                    $y_y = $r;
+                    if( ($x - $y_x) * ($x - $y_x) + ($y - $y_y) * ($y - $y_y) <= $r * $r )
+                    {
+                        imagesetpixel($img, $x, $y, $rgbColor);
+                    }
+                    $y_x = $w - $r;
+                    $y_y = $r;
+                    if( ($x - $y_x) * ($x - $y_x) + ($y - $y_y) * ($y - $y_y) <= $r * $r )
+                    {
+                        imagesetpixel($img, $x, $y, $rgbColor);
+                    }
+                    $y_x = $r;
+                    $y_y = $h - $r;
+                    if( ($x - $y_x) * ($x - $y_x) + ($y - $y_y) * ($y - $y_y) <= $r * $r )
+                    {
+                        imagesetpixel($img, $x, $y, $rgbColor);
+                    }
+                    $y_x = $w - $r;
+                    $y_y = $h - $r;
+                    if( ($x - $y_x) * ($x - $y_x) + ($y - $y_y) * ($y - $y_y) <= $r * $r )
+                    {
+                        imagesetpixel($img, $x, $y, $rgbColor);
+                    }
+                }
+            }
+        }
+        return $img;
+    }
+
+    /**
+     * @param bool $target
+     * @param array $data
+     * @param string $imgurl
+     * @param bool $local
+     * @return bool
+     */
+    public function mergeImage($target = false, $data = array( ), $imgurl = "", $local = false)
+    {
+        if( empty($data) || empty($imgurl) )
+        {
+            return $target;
+        }
+        if( !$local )
+        {
+            $image = $this->createImage($imgurl);
+        }
+        else
+        {
+            $image = imagecreatefromstring($imgurl);
+        }
+        $sizes = $sizes_default = array( "width" => imagesx($image), "height" => imagesy($image) );
+        $sizes = array( "width" => 70, "height" => 70 );
+        if( $data["style"] == "radius" || $data["style"] == "circle" )
+        {
+            $image = $this->imageZoom($image, 4);
+            $image = $this->imageRadius($image, $data["style"] == "circle");
+            $sizes_default = array( "width" => $sizes_default["width"] * 4, "height" => $sizes_default["height"] * 4 );
+        }
+        imagecopyresampled($target, $image, intval($data["left"]) * 2, intval($data["top"]) * 2, 0, 0, $sizes["width"], $sizes["height"], $sizes_default["width"], $sizes_default["height"]);
+        imagedestroy($image);
+        return $target;
+    }
+
+    /**
+     * @param $text
+     * @param $length
+     * @return string
+     */
+    public function subtext($text, $length)
+    {
+        if(mb_strlen($text, 'utf8') > $length) {
+            return mb_substr($text, 0, $length, 'utf8').'...';
+        } else {
+            return $text;
+        }
+    }
 }
 
 if (!defined('IN_IA')) {
