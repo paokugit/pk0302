@@ -41,7 +41,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $log[$key]['mobile'] = $item['mobile'] == "" ? "" : $mobile;
         }
         $credit1 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit1');
-        show_json(1,['list'=>$list,'log'=>$log,'num'=>count($user)-count($free) > 0 ? count($user)-count($free) : 0,'credit1'=>$credit1]);
+        show_json(1,['list'=>$list,'log'=>$log,'num'=>count($user)-count($free) > 0 ? :0,'credit1'=>$credit1]);
     }
 
     /**
@@ -82,10 +82,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         //抽奖的结果
         $res = m('game')->prize($game,$type,$openid,$money);
-        $num = count($user)-count($log) > 0 ? count($user)-count($log) : 0;
+        $num = count($user)-count($log)>0?:0;
         if($type == 2) {
             //如果是免费抽奖 他的记录就又加了一条  所以 再减一
-            $num = count($user) - count($log) - 1 > 0 ? count($user) - count($log) - 1 : 0;
+            $num = count($user) - count($log) - 1 > 0 ?: 0;
         }
         $res['remain'] = $num;
         $res['credit1'] = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit1');
@@ -141,7 +141,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $data = array("uniacid" => $_W["uniacid"],"uid" => 0,'agentid'=>$member['id'], "openid" => $new_openid, 'agentlevel'=>0 ,"openid_wa" => mb_substr($new_openid,7), "comefrom" => "sns_wa","createtime" => time(), "status" => 0);
                 pdo_insert('ewei_shop_member',$data);
                 $add['status'] = 1;
-            } elseif ($new_member && $new_member['agentid'] == 0 && $member['agentid'] != $new_member['id']){
+            } elseif ($new_member && $new_member['agentid'] == 0){
                 //如果老用户  但是上级   更改上级  但是  老用户
                 pdo_update('ewei_shop_member',['agentid'=>$member['id']],['id'=>$new_member['id']]);
                 $add['status'] = 0;
@@ -260,8 +260,6 @@ class Index_EweiShopV2Page extends AppMobilePage
             show_json(0,"参数不完善");
         }
         $week = m('util')->week(time());
-        //用户信息
-        $member = pdo_get('ewei_shop_member',['openid'=>$openid]);
         $pageSize = 20;
         $pindex = ($page - 1) * $pageSize;
         //礼包总和
@@ -269,10 +267,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         //该用户对应的礼包
         $gift = $this->get_gift($gifts,$openid);
         $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_gift_record').' where bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid]);
-        //$record = pdo_fetchall('select * from '.tablename('ewei_shop_gift_record').' where bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'" order by id desc LIMIT '.$pindex.','.$pageSize,[':openid'=>$openid]);
-        $new = pdo_fetchall('select id,nickname,avatar,openid,createtime from '.tablename('ewei_shop_member').' where agentid = "'.$member['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'" order by createtime desc LIMIT 10');
-        //$record = array_merge($record,$new);
-        $list = $this->isvalid($new,$week['start'],$member['id']);
+        $record = pdo_fetchall('select * from '.tablename('ewei_shop_gift_record').' where bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'" order by id desc LIMIT '.$pindex.','.$pageSize,[':openid'=>$openid]);
+        $list = $this->isvalid($record,$week['start']);
         if(count($list) > 0){
             show_json(1,['list'=>$list,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize]);
         }else{
@@ -446,10 +442,9 @@ class Index_EweiShopV2Page extends AppMobilePage
     /**
      * @param $list
      * @param $time
-     * @param $uid
      * @return mixed
      */
-    public function isvalid($list,$time,$uid)
+    public function isvalid($list,$time)
     {
         foreach($list as $key=>$item){
 	        //$member = pdo_get('ewei_shop_member',['openid'=>$item['bang']]);
@@ -458,7 +453,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $list[$key]['avatar'] = $member['avatar'];
             $list[$key]['timestamp'] = date('Y-m-d H:i',$item['createtime']);
             //如果用户的注册时间大于活动开始时间  就有效
-            $list[$key]['is_valid'] = $member['createtime'] > $time && $member['agentid'] == $uid ? 1 :0;
+            $list[$key]['is_valid'] = $member['createtime'] > $time ? 1 :0;
         }
         return $list;
     }

@@ -75,9 +75,6 @@ class Log_EweiShopV2Page extends AppMobilePage
         foreach ($list as &$row) {
             $row['createtime'] = date('Y-m-d H:i', $row['createtime']);
             $row['type']=0;
-            if(mb_substr($row['remark'],0,4) == "跑库购物"){
-                $row['remark'] = "商城购物";
-            }
         }
         unset($row);
         $newList=$list;
