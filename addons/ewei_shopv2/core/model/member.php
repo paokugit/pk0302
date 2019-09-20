@@ -1515,12 +1515,14 @@ class Member_EweiShopV2Model
             'uniacid'=>1,
             'credittype'=>'credit3',
             'module'=>'ewei_shopv2',
-            'num'=>2000,
+           // 'num'=>2000,
+            'num'=>9900,
             'createtime'=>time(),
             'remark'=>'智能员工(店主)',
             'openid'=>$openid,
         ];
-        $credit = bcadd($user['credit3'],2000,2);
+       // $credit = bcadd($user['credit3'],2000,2);
+        $credit = bcadd($user['credit3'],9900,2);
         pdo_update('ewei_shop_member',['credit3'=>$credit],['openid'=>$openid]);
         pdo_insert('mc_credits_record',$data);
         pdo_insert('ewei_shop_member_credit_record',$data);

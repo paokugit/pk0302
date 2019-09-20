@@ -2106,14 +2106,19 @@ if( !class_exists("CommissionModel") )
 			        //会员卡路里奖励
 			        if ($goods['agentlevel']==1||$goods['agentlevel']==2){
 			            if ($goods['agentlevel']==1){
-			                $credit=9.9;
+                          //$credit=9.9;
+                            //折扣宝
+			                $credit=99;
 			                $info="购买健康达人会员赠送";
 			            }else{
-			                $credit=99;
+			                //$credit=99;
+			                //折扣宝
+			                $credit=990;
 			                $info="购买星选达人会员赠送";
 			            }
 			            
-			            m('member')->setCredit($openid, 'credit1', $credit, $info);
+			            //m('member')->setCredit($openid, 'credit1', $credit, $info);
+			            m('member')->setCredit($openid, 'credit3', $credit, $info);
 			        }
 			        //fbb
 			        //升级提醒
