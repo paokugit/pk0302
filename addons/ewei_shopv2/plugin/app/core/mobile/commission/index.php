@@ -54,7 +54,7 @@ class Index_EweiShopV2Page extends Base_EweiShopV2Page
 		$posercount = pdo_fetchcolumn("SELECT COUNT(id) FROM " . tablename("ewei_shop_wxapp_poster") . " WHERE uniacid=:uniacid AND status=1", array( ":uniacid" => $_W["uniacid"] ));
 		$return_set = array( "texts" => $this->set["texts"], "closed_qrcode" => (int) $this->set["closed_qrcode"], "postercount" => intval($posercount), "hideicode" => intval($this->set["hideicode"]), "commissionshow" => intval($commissionshow) );
 		$return_member = array( "id" => intval($member["id"]), "avatar" => (string) $member["avatar"], "nickname" => (string) $member["nickname"], "commission_pay" => (double) $member["commission_pay"], "commission_ok" => (double) $member["commission_ok"], "commission_total" => (double) $member["commission_total"], "ordercount0" => (double) $member["ordercount0"], "applycount" => (double) $member["applycount"], "downcount" => (double) $member["downcount"] );
-		$data = array( "set" => $return_set, "member" => $return_member, "levelname" => (empty($level) ? (empty($this->set["levelname"]) ? "普通等级" : $this->set["levelname"]) : $level["levelname"]), "agentname" => (empty($up) ? "总店" : $up["nickname"]), "cansettle" => $cansettle, "menu" => p("app")->diyMenu("commission") );
+		$data = array( "set" => $return_set, "member" => $return_member, "levelname" => (empty($level) ? (empty($this->set["levelname"]) ? "普通等级" : $this->set["levelname"]) : $level["levelname"]), "agentname" => (empty($up) ? "跑库" : $up["nickname"]), "cansettle" => $cansettle, "menu" => p("app")->diyMenu("commission") );
 		app_json($data);
 	}
 	public function withdraw() 
