@@ -144,7 +144,6 @@ class AppMobilePage extends PluginMobilePage
 			$iswxapp = true;
 			$this->iswxapp = true;
 		}
-
 		$member = m('member')->getMember($_GPC['openid']);
 		$this->member = $member;
         

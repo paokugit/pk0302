@@ -198,6 +198,11 @@ class EweiShopWechatPay
                                                                                                 if($this->type == "33"){
                                                                                                     $this->level_express();
                                                                                                 }
+                                                                                                else{
+                                                                                                    if($this->type == "34"){
+                                                                                                        $this->limit();
+                                                                                                    }
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
@@ -1260,6 +1265,27 @@ class EweiShopWechatPay
             pdo_update('ewei_shop_order',['status'=>1,'paytime'=>strtotime($data['time_end'])],['ordersn'=>$ordersn]);
         }
         //m('member')->setCredit($order['openid'],'credit2',$order['price'],'年卡".$record["month"]."权益');
+    }
+
+    /**
+     * 购买限额宝的回调
+     */
+    public function limit()
+    {
+        $input = file_get_contents('php://input');
+        $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $data = json_decode(json_encode($obj), true);
+        if (!$data) {
+            exit("FAIL");
+        }
+        $res = $this->check_sign($data);
+        if (!$res) {
+            exit("FAIL");
+        }
+        $ordersn = $data['out_trade_no'];  //获得订单信息
+        //用ordersn订单号 查订单信息
+        $order = pdo_fetch('select * from '.tablename('ewei_shop_member_limit_order').' where ordersn = "'.$ordersn.'"');
+        pdo_update('ewei_shop_member_limit_order',['status'=>1],['id'=>$order['id']]);
     }
 }
 ?>

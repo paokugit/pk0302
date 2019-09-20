@@ -275,7 +275,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             //有$id 修改 没有添加
             if($id){
                 //判断$money金额的满减条件是否存在
-                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where openid="'.$openid.'" and money="'.$money.'" and cate="'.$cate.'" and id!="'.$id.'"');
+                $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where openid=:openid and money="'.$money.'" and cate="'.$cate.'" and id!="'.$id.'"',[':openid'=>$openid]);
                 if($res){
                     show_json(0,$money.'的满减条件已存在，请前往修改或者更换满减条件');
                 }
@@ -472,13 +472,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit3');
         $fields = "id,num,createtime,remark,openid";
         if($type == 1){
-            //$condition = 'and credittype = "credit3" and openid = "'.$openid.'" and num > 0';
             $condition = ' and num > 0';
         }elseif ($type == 2){
             $condition = ' and num < 0';
         }
-        $list = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype ="credit3" and openid = "'.$openid.'" '.$condition  .' order by createtime desc LIMIT '.$psize .','.$pageSize);
-        $total = pdo_fetchcolumn('select count(*) from '.tablename('mc_credits_record').' where credittype = "credit3" and openid = "'.$openid.'" '.$condition);
+        $list = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype ="credit3" and openid = :openid '.$condition  .' order by createtime desc LIMIT '.$psize .','.$pageSize,[':openid'=>$openid]);
+        $total = pdo_fetchcolumn('select count(*) from '.tablename('mc_credits_record').' where credittype = "credit3" and openid = :openid '.$condition,[':openid'=>$openid]);
         foreach ($list as $key=>$item){
             $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             if(mb_substr($item['remark'],0,2) == "跑库"){
@@ -500,7 +499,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $id = $_GPC['id'];
         $openid = $_GPC['openid'];
         if(!$id || !$openid) show_json(0,"请完善参数");
-        $data = pdo_fetch('select openid,num,createtime,remark,merchid from '.tablename('mc_credits_record').' where id = "'.$id.'" and openid  = "'.$openid.'"');
+        $data = pdo_fetch('select openid,num,createtime,remark,merchid from '.tablename('mc_credits_record').' where id=:id and openid=:openid',[':id'=>$id,':openid'=>$openid]);
         $data['createtime'] = date('Y-m-d H:i:s',$data['createtime']);
         if($data['merchid'] != 0){
             $data['merch_name'] = pdo_getcolumn('ewei_shop_merch_user',['id'=>$data['merchid']],'merchname');
@@ -632,6 +631,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         pdo_insert('ewei_shop_member_credit_record',$data);
     }
 
+/*********************************************************************************************************************************************************************************/
     /**
      * 设置支付密码
      */
@@ -641,7 +641,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         $uniacid = $_W['uniacid'];
         //接收参数
         $openid = $_GPC['openid'];
+        //密码
         $password = $_GPC['password'];
+        //二次确认密码
         $pwd = $_GPC['pwd'];
         //type  1 设置密码   2修改密码  忘记密码的话 也是设置密码
         $type = $_GPC['type'];
@@ -661,12 +663,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         //如果是修改密码   判断原密码的正确性
         if($type == 2){
             $old_pwd = $_GPC['old_pwd'];
-            if(MD5(base64_encode($old_pwd)) != $member['rv_pwd']){
+            if(md5(base64_encode($old_pwd)) != $member['rv_pwd']){
                 show_json(0,"旧密码不正确");
             }
         }
         //更新支付密码
-        pdo_update('ewei_shop_member',['rv_pwd'=>$password],['openid'=>$openid]);
+        pdo_update('ewei_shop_member',['rv_pwd'=>md5(base64_encode($password))],['openid'=>$openid]);
         show_json(1,"修改成功");
     }
 
@@ -677,12 +679,16 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
+        //接受参数
         $mobile=$_GPC["mobile"];
+        //用户的openid
         $openid = $_GPC['openid'];
+        //国家id
         $country_id=$_GPC["country_id"];
         if($mobile == ""  || $openid == ""){
             show_json(0,"参数信息不完整");
         }
+        //查找用户的信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$_W['uniacid']]);
         if(!$member){
             show_json(0,"用户信息错误");
@@ -690,6 +696,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         //生成短信验证码
         $code=rand(100000,999999);
         if (empty($country_id) || $country_id == 44){
+            //阿里云的短信 在我们平台的模板id
             $tp_id = 5;
             if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
                 show_json(0,"手机号格式不正确");
@@ -701,6 +708,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $resault=com_run("sms::mysend", array('mobile'=>$country["phonecode"].$mobile,'tp_id'=>$tp_id,'code'=>$code));
         }
         if ($resault["status"]==1){
+            //添加短信记录
             pdo_insert('core_sendsms_log',['uniacid'=>$_W['uniacid'],'mobile'=>$mobile,'tp_id'=>5,'content'=>$code,'createtime'=>time(),'ip'=>CLIENT_IP]);
             show_json(1,"发送成功");
         }else{
@@ -716,19 +724,23 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $uniacid = $_W['uniacid'];
+        //接受用户的openid   和  手机号  和验证码
         $openid = $_GPC['openid'];
         $mobile = $_GPC['mobile'];
         $code = $_GPC['code'];
         if($openid == "" || $mobile == "" || $code == ""){
             show_json(0,"参数不完整");
         }
+        //查找用户的信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         if(!$member){
             show_json(0,"用户信息错误");
         }
+        //正则验证手机号的格式
         if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
             show_json(0,"手机号格式不正确");
         }
+        //查找短息的发送的记录
         $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>5]);
         if(!$sms){
             show_json(0,"短信验证码不正确");
@@ -736,8 +748,70 @@ class Index_EweiShopV2Page extends AppMobilePage
         if($sms['result'] == 1){
             show_json(0,"该短信已验证");
         }
+        //更改短信验证码的验证状态
         pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
         show_json(1,"短信验证成功");
+    }
+
+/**********************************************************折扣宝限额宝*************************************************************/
+    /**
+     * 限额宝列表
+     */
+    public function limit()
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $list = pdo_getall('ewei_shop_member_limit',['uniacid' => $uniacid,'status'=>1],['id','money','limit']);
+        foreach ($list as $key=>$item){
+            $list[$key]['limit'] = $item['limit'] >= 10000 ? $item['limit'] / 10000 ."万" : $item['limit'];
+        }
+        if(empty($list)){
+            show_json(0,"暂无数据");
+        }
+        show_json(1,['list'=>$list]);
+    }
+
+    /**
+     * 限额购买
+     */
+    public function limit_order()
+    {
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        $id = $_GPC['id'];
+        $ordersn = "LIM".date('YmdHis').random(12);
+        //查找限额
+        $limit = pdo_get('ewei_shop_member_limit',['id'=>$id]);
+        //唤醒微信支付
+        $add = ['title'=>"购买折扣宝限额", "openid" => substr($openid,7), "tid" => $ordersn, "fee" =>$limit["money"]];
+        $res = $this->model->wxpay($add,34);
+        if(is_error($res)){
+            show_json(0,$res);
+        }
+        $order = $this->limit_add($ordersn,$openid,$limit);
+        if($order){
+            show_json(1,$res);
+        }
+    }
+
+    /**
+     * 加日志
+     * @param $ordersn
+     * @param $openid
+     * @param $limit
+     * @return bool
+     */
+    public function limit_add($ordersn,$openid,$limit)
+    {
+        $data = [
+            'ordersn'=>$ordersn,
+            'openid'=>$openid,
+            'lim_id'=>$limit['id'],
+            'price'=>$limit['money'],
+            'limit'=>$limit['limit'],
+            'createtime'=>time(),
+        ];
+        return pdo_insert('ewei_shop_member_limit_order',$data);
     }
 }
 ?>

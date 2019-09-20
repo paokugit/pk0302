@@ -730,6 +730,10 @@ class System_EweiShopV2Model {
                         "route" => "acceleration"
                     ) ,
                     array(
+                        "title" => "限额宝",
+                        "route" => "limit"
+                    ) ,
+                    array(
                         "title" => "贡献值解读",
                         "route" => "devote"
                     ) ,

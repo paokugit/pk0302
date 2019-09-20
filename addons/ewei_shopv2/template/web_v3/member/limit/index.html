@@ -1,0 +1,113 @@
+{temp{template '_header'}
+<meta charset="utf-8"/>
+<div class="page-header">当前位置：<span class="text-primary">加速宝</span></div>
+
+<div class="page-content">
+
+    <form action="./index.php" method="get" class="form-horizontal form-search" role="form">
+        <input type="hidden" name="c" value="site" />
+        <input type="hidden" name="a" value="entry" />
+        <input type="hidden" name="m" value="ewei_shopv2" />
+        <input type="hidden" name="do" value="web" />
+        <input type="hidden" name="r"  value="member.limit" />
+
+        <div class="page-toolbar">
+            <div class="pull-left">
+                {ifp 'member.limit.add'}
+                    <a class='btn btn-primary btn-sm' href="{php echo webUrl('member/limit/add')}"><i class='fa fa-plus'></i> 添加</a>
+                {/if}
+            </div>
+            
+        </div>
+    </form>
+
+    {if empty($list)}
+        <div class="panel panel-default">
+            <div class="panel-body empty-data">未查询到相关数据</div>
+        </div>
+    {else}
+        <form action="" method="post">
+          
+            <table class="table table-responsive table-hover" >
+                <thead class="navbar-inner">
+                    <tr>
+                        <th style="width:66px;"></th>
+                        <th style="width:88px;">排序</th>
+                        <th style="width:250px;">支付金额</th>
+                        <th style="width:250px;">限定额度</th>
+                        <th style="width:250px;">状态</th>
+                        <th style="width:250px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $list $row}
+                        <tr>
+                            <td>
+                                <input type='checkbox'   value="{$row['id']}"/>
+                            </td>
+                            <td>
+                                {$row['id']}
+                            </td>
+                            <td>
+                             {$row['money']}
+                            </td>
+                            <td>
+                            {$row['limit']}
+                            </td>
+                            <td>
+                                <span class='label {if $row['status']==1}label-primary{else}label-default{/if}'
+                                {ifp 'member.limit'}
+                                data-toggle='ajaxSwitch'
+                                data-confirm = "确认是{if $row['status']==1}关闭{else}开启{/if}？"
+                                data-switch-refresh='true'
+                                data-switch-value='{$row['status']}'
+                                data-switch-value0='0|关闭|label label-default|{php echo webUrl('member/limit/status',array('status'=>1,'id'=>$row['id']))}'
+                                data-switch-value1='1|开启|label label-primary|{php echo webUrl('member/limit/status',array('status'=>0,'id'=>$row['id']))}'
+                                {/if}>
+                                {if $row['status']==1}开启{else}关闭{/if}</span>
+                            </td>
+                            
+                            <td style="text-align:left;">
+                                {ifp 'member.limit.edit'}
+                                    <a href="{php echo webUrl('member/limit/edit', array('id' => $row['id']))}" class="btn btn-op btn-operation" >
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="修改">
+                                                <i class='icow icow-bianji2'></i>
+                                            </span>
+                                    </a>
+                                {/if}
+                                {ifp 'member.limit.delete'}
+                                    <a data-toggle='ajaxRemove' href="{php echo webUrl('member/limit/delete', array('id' => $row['id']))}"class="btn btn-op btn-operation" data-confirm='确认要删除此模板吗?删除后将无法恢复'>
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="删除">
+                                               <i class='icow icow-shanchu1'></i>
+                                            </span>
+                                    </a>
+                                {/if}
+                            </td>
+                        </tr>
+                    {/loop}
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td colspan="2">
+                        <div class="btn-group">
+                           
+                            {ifp 'member.limit.delete'}
+                                <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch-remove' data-confirm="确认要删除?" data-href="{php echo webUrl('member/limit/delete')}">
+                                    <i class='icow icow-shanchu1'></i> 删除</button>
+                            {/if}
+                        </div>
+                    </td>
+                    <td colspan="2" style="text-align: right">
+                        {$pager}
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </form>
+    {/if}
+
+</div>
+
+{template '_footer'}
+<!--6Z2S5bKb5piT6IGU5LqS5Yqo572R57uc56eR5oqA5pyJ6ZmQ5YWs5Y+4-->

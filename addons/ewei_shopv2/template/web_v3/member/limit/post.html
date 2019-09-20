@@ -1,0 +1,57 @@
+{template '_header'}
+<meta charset="utf-8"/>
+<div class="page-header">
+    当前位置：<span class="text-primary">{if !empty($item['id'])}编辑{else}添加{/if}</span>
+</div>
+
+<div class="page-content">
+    <div class="page-sub-toolbar">
+         <span class=''>
+            {ifp 'member.acceleration.add'}
+                <a class="btn btn-primary btn-sm" href="{php echo webUrl('member/limit/add')}">添加</a>
+            {/if}
+        </span>
+    </div>
+    <form {ife 'member.limit' $item}action="" method="post"{/if} class="form-horizontal form-validate" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="{$item['id']}"/>
+        
+        <div class="form-group">
+            <label class="col-lg control-label must">支付金额</label>
+            <div class="col-sm-9 col-xs-12 ">
+              
+                    <input type="text" id='advname' name="money" class="form-control" value="{$item['money']}" />
+               
+            </div>
+        </div>
+        
+         <div class="form-group">
+            <label class="col-lg control-label must">额度</label>
+            <div class="col-sm-9 col-xs-12 ">
+                <input type="text" id='advname' name="limit" class="form-control" value="{$item['limit']}" />
+               
+            </div>
+        </div>
+        
+        
+        
+        <div class="form-group">
+            <label class="col-lg control-label"></label>
+            <div class="col-sm-9 col-xs-12">
+                
+                <input type="submit" value="提交" class="btn btn-primary"/>
+           
+                <a class="btn btn-default  btn-sm" href="{php echo webUrl('member/limit')}">返回列表</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script language='javascript'>
+    function formcheck() {
+        
+        return true;
+    }
+</script>
+
+{template '_footer'}
+<!--6Z2S5bKb5piT6IGU5LqS5Yqo572R57uc56eR5oqA5pyJ6ZmQ5YWs5Y+454mI5p2D5omA5pyJ-->

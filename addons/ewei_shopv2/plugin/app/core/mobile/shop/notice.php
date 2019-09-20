@@ -35,10 +35,10 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		global $_W;
 		global $_GPC;
 		$id = intval($_GPC['id']);
-		//$merchid = intval($_GPC['merchid']);
+		$merchid = intval($_GPC['merchid']);
 		$merch_plugin = p('merch');
-		if ($merch_plugin) {
-			$notice = pdo_fetch('select * from ' . tablename('ewei_shop_merch_notice') . ' where id=:id and uniacid=:uniacid and status=1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
+		if ($merch_plugin && !empty($merchid)) {
+			$notice = pdo_fetch('select * from ' . tablename('ewei_shop_merch_notice') . ' where id=:id and uniacid=:uniacid and merchid=:merchid and status=1', array(':id' => $id, ':uniacid' => $_W['uniacid'], ':merchid' => $merchid));
 		}
 		else {
 			$notice = pdo_fetch('select * from ' . tablename('ewei_shop_notice') . ' where id=:id and uniacid=:uniacid and status=1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
@@ -88,7 +88,7 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		//查用户信息
 		$member = pdo_get('ewei_shop_member',['openid'=>$openid]);
 		//查用户的私信的全部
-		$list = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where uniacid = "'.$uniacid.'" and openid="'.$openid.'"');
+		$list = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where uniacid = "'.$uniacid.'" and openid=:openid',[":openid"=>$openid]);
 		//如果没 私信  也就是后台没发 就是第一次进入
 		if(count($list) <= 0){
 			//加入第一次进去的欢迎语
@@ -113,8 +113,8 @@ class Notice_EweiShopV2Page extends AppMobilePage
 			$list[$key]['createtime'] = $this->transform_time($item['createtime']);
 		}
 		$notice = pdo_fetchall('select * from '.tablename('ewei_shop_notice').' where `uniacid` ="'.$uniacid.'" and status=1');
-		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid="'.$_GPC['openid'].'" and uniacid="'.$_W['uniacid'].'"');
-		$email = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where openid="'.$_GPC['openid'].'" and num=0 and uniacid="'.$_W['uniacid'].'"');
+		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid=:openid and uniacid="'.$uniacid.'"',[':openid'=>$openid]);
+		$email = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where openid=:openid and num=0 and uniacid="'.$uniacid.'"',[':openid'=>$openid]);
 		show_json(1,['list'=>$list,'notice'=>bcsub(count($notice),count($log)),'email'=>count($email)]);
 	}
 

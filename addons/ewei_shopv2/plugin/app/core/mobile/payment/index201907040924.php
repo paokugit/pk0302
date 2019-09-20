@@ -480,9 +480,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit3');
         $fields = "id,num,createtime,remark,openid";
         //收入(也就是充值)  只有 后台充值和卡路里转换两种方式  和商家没关系
-        $income = pdo_fetchall(' select '.$fields.' from '.tablename('mc_credits_record').' where credittype = "credit3" and num > 0 and openid = "'.$openid.'"');
+        $income = pdo_fetchall(' select '.$fields.' from '.tablename('mc_credits_record').' where credittype = "credit3" and num > 0 and openid = :openid',[':openid'=>$openid]);
         //支出  只有扫码折扣付支出   和商家有关 所以在回调时  加入merchid
-        $pay = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype = "credit3" and num < 0 and openid = "'.$openid.'"');
+        $pay = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype = "credit3" and num < 0 and openid = :openid',[':openid'=>$openid]);
         foreach ($income as $key=>$item){
             $income[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
         }
@@ -509,13 +509,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         $credit3 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit3');
         $fields = "id,num,createtime,remark,openid";
         if($type == 1){
-            //$condition = 'and credittype = "credit3" and openid = "'.$openid.'" and num > 0';
             $condition = ' and num > 0';
         }elseif ($type == 2){
             $condition = ' and num < 0';
         }
-        $list = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype ="credit3" and openid = "'.$openid.'" '.$condition  .' order by createtime desc LIMIT '.$psize .','.$pageSize);
-        $total = pdo_fetchcolumn('select count(*) from '.tablename('mc_credits_record').' where credittype = "credit3" and openid = "'.$openid.'" '.$condition);
+        $list = pdo_fetchall('select '.$fields.' from '.tablename('mc_credits_record').' where credittype ="credit3" and openid = :openid '.$condition  .' order by createtime desc LIMIT '.$psize .','.$pageSize,[':openid'=>$openid]);
+        $total = pdo_fetchcolumn('select count(*) from '.tablename('mc_credits_record').' where credittype = "credit3" and openid = :openid '.$condition,[':openid'=>$openid]);
         foreach ($list as $key=>$item){
             $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             if(mb_substr($item['remark'],0,2) == "跑库"){
@@ -537,7 +536,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $id = $_GPC['id'];
         $openid = $_GPC['openid'];
         if(!$id || !$openid) show_json(0,"请完善参数");
-        $data = pdo_fetch('select openid,num,createtime,remark,merchid from '.tablename('mc_credits_record').' where id = "'.$id.'" and openid  = "'.$openid.'"');
+        $data = pdo_fetch('select openid,num,createtime,remark,merchid from '.tablename('mc_credits_record').' where id = "'.$id.'" and openid  = :openid',[':openid'=>$openid]);
         $data['createtime'] = date('Y-m-d H:i:s',$data['createtime']);
         $data['merch_name'] = pdo_getcolumn('ewei_shop_merch_user',['id'=>$data['merchid']],'merchname');
         if(mb_substr($data['remark'],0,2) == "跑库") $data['remark'] = "商城订单";

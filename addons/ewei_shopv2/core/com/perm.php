@@ -687,6 +687,18 @@ class Perm_EweiShopV2ComModel extends ComModel {
                 "delete" => "删除",
                 "stock" => "修改库存",
                 "active" => "激活设置"
+            ),
+            "memlevel" => array(
+                "text" => "等级年卡",
+                "add" => "添加",
+                "edit" => "修改",
+                "delete" => "删除",
+            ),
+            "acceleration" => array(
+                "text" => "加速宝",
+                "add" => "添加",
+                "edit" => "修改",
+                "delete" => "删除",
             )
         );
     }
@@ -895,6 +907,14 @@ class Perm_EweiShopV2ComModel extends ComModel {
                 "text" => "绑定送卡路里",
                 "main" => "查看",
                 "edit" => "编辑"
+            ),
+            "giftbag" => array(
+                "text" => "礼包管理",
+                "main" => "查看",
+                "add" => "添加",
+                "edit" => "编辑",
+                "status" => "开关",
+                "delete" => "删除"
             )
         );
         if ($this->isopen("sale", true) && $this->is_perm_plugin("sale", true)) {
