@@ -1,0 +1,74 @@
+{template '_header'}
+<meta charset="UTF-8">
+<div class="page-header">当前位置：<span class="text-primary">每日必读</span></div>
+
+<div class="page-content">
+    <form action="./index.php" method="get" class="form-horizontal  ">
+        <input type="hidden" name="c" value="site" />
+        <input type="hidden" name="a" value="entry" />
+        <input type="hidden" name="m" value="ewei_shopv2" />
+        <input type="hidden" name="do" value="web" />
+        <input type="hidden" name="r"  value="sysset.reading" />
+
+        
+    </form>
+
+    {if empty($list)}
+        <div class="panel panel-default">
+            <div class="panel-body empty-data">未查询到相关数据</div>
+        </div>
+    {else}
+        <form action="" method="post">
+           
+            <table class="table table-responsive table-hover" >
+                <thead class="navbar-inner">
+                    <tr>
+                        <th style="width:25px;" ></th>
+                        <th style='width:50px'>ID</th>
+                        <th class='th-sortable' data-sort-name='title'>回复内容</th>
+                        
+                      
+                        <th style="width: 105px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $list $row}
+                        <tr>
+                            <td>
+                                <input type='checkbox'   value="{$row['id']}"/>
+                            </td>
+                            <td>
+                                {$row['id']}
+                            </td>
+                            <td>{$row['reply']}</td>
+                            
+                           
+                            <td style="text-align:left;">
+                               
+                                  
+                                   
+                                    <a data-toggle='ajaxRemove' href="{php echo webUrl('sysset/reading/delete_reply', array('id' => $row['id']))}"class="btn btn-op btn-operation" data-confirm='确认要删除此信息吗?'>
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="删除">
+                                               <i class='icow icow-shanchu1'></i>
+                                            </span>
+                                    </a>
+                                    
+                                   
+                            </td>
+                        </tr>
+                    {/loop}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        
+                        <td colspan="3" style="text-align: right">
+                            {$pager}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </form>
+    {/if}
+</div>
+{template '_footer'}
+<!--NDAwMDA5NzgyNw==-->

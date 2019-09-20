@@ -169,10 +169,10 @@ class Acceleration_EweiShopV2Page extends AppMobilePage{
         $order=pdo_get("ewei_shop_member_acceleration_order",array("ordersn"=>$order_sn));
         if ($order&&$order["status"]==0){
            if (pdo_update("ewei_shop_member_acceleration_order",array("status"=>1),array("ordersn"=>$order_sn))){
-           $data["accelerate_start"]=date("Y-m-d");
-           $data["accelerate_end"]=date("Y-m-d",strtotime("+".$order["accelerate_day"]." day"));
-           $data["duihuan"]=$order["duihuan"];
-           pdo_update("ewei_shop_member",$data,array("openid"=>$order["openid"]));
+           $da["accelerate_start"]=date("Y-m-d");
+           $da["accelerate_end"]=date("Y-m-d",strtotime("+".$order["accelerate_day"]." day"));
+           $da["duihuan"]=$order["duihuan"];
+           pdo_update("ewei_shop_member",$da,array("openid"=>$order["openid"]));
                echo success;
            }else {
                echo false;

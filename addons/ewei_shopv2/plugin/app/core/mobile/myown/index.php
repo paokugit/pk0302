@@ -128,6 +128,10 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $list["icon"][4]["img"]="https://paokucoin.com/img/backgroup/gif-kt@2x.png";
         $list["icon"][4]["url"]="/pages/expert/circle/circle";
         $list["icon"][4]["icon"]="";
+        $list["icon"][5]["title"]="每日必读";
+        $list["icon"][5]["img"]="https://paokucoin.com/img/backgroup/quan-kt@2x.png";
+        $list["icon"][5]["url"]="/packageA/pages/skyread/read/read";
+        $list["icon"][5]["icon"]="";
         show_json(1,$list);
     }
     

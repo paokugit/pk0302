@@ -1257,6 +1257,16 @@ class System_EweiShopV2Model {
                     ) ,
                     
                     array(
+                        "title" => "每日必读",
+                        "items" => array(
+                            array(
+                                "title" => "列表",
+                                "route" => "reading"
+                            )
+                        ),
+                    ) ,
+                    
+                    array(
                         "title" => "交易",
                         "items" => array(
                             array(

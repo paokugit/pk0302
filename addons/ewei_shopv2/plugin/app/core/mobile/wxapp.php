@@ -178,11 +178,19 @@ class Wxapp_EweiShopV2Page extends Page
                     m("member")->memberRadisCountDelete();
                 }
             } else {
+                //新用户奖励贡献值
+//                 if ($member["agentid"]!=0&&empty($member["nickname"])){
+//                     $agent=pdo_get("ewei_shop_member",array("id"=>$member["agentid"]));
+//                     if ($agent){
+//                     m('member')->setCredit($agent["openid"], 'credit4', 1, "推荐新用户");
+//                     }
+//                 }
                 $updateData = array("nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"),"unionid"=> (!empty($data["unionid"]) ? $data["unionid"] : ""));
                 pdo_update("ewei_shop_member", $updateData, array("id" => $member["id"], "uniacid" => $member["uniacid"]));
                 $data["id"] = $member["id"];
                 $data["uniacid"] = $member["uniacid"];
                 $data["isblack"] = $member["isblack"];
+                
             }
             if (p("commission")) {
                 p("commission")->checkAgent($member["openid"]);

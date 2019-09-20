@@ -332,7 +332,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
             app_error(1,"该动态已被删除");
         }
         //获取热评
-        $comemnt=pdo_fetchall("select id,openid,content,comment_count,zan_count,create_time from ".tablename("ewei_shop_member_drcomment")." where is_view=0 and is_del=0 and type=1 and parent_id=:parent_id order by comment_count desc limit 3",array(":parent_id"=>$ciclre_id));
+        $comemnt=pdo_fetchall("select id,openid,content,comment_count,zan_count,create_time from ".tablename("ewei_shop_member_drcomment")." where is_view=0 and is_del=0 and type=1 and comment_count>=10 and parent_id=:parent_id order by comment_count desc limit 3",array(":parent_id"=>$ciclre_id));
         if ($comemnt){
         $detail["hot"]=$comemnt;
         }else{

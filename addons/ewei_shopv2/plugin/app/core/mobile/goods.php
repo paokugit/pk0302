@@ -177,6 +177,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 			app_error(AppError::$GoodsNotFound);
 		}
 		$merchid = $goods["merchid"];
+		var_dump($is_openmerch);var_dump($merchid);var_dump($goods["checked"]);
 		if( !empty($is_openmerch) && 0 < $merchid && $goods["checked"] == 1 ) 
 		{
 			app_error(AppError::$GoodsNotChecked);

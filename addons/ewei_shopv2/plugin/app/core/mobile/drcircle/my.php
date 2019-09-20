@@ -23,7 +23,7 @@ class My_EweiShopV2Page extends AppMobilePage{
         $page=$_GPC["page"];
         $first=($page-1)*10;
         $good_id=$_GPC["goods_id"];
-        $goods=pdo_fetchall("select id,title,thumb,productprice,marketprice from ".tablename("ewei_shop_goods")." where status=1 and deleted=0 and merchid=:merchid order by id desc limit ".$first." , 10",array(":merchid"=>$merch["id"]));
+        $goods=pdo_fetchall("select id,title,thumb,productprice,marketprice from ".tablename("ewei_shop_goods")." where status=1 and deleted=0 and merchid=:merchid and checked=0 order by id desc limit ".$first." , 10",array(":merchid"=>$merch["id"]));
         foreach ($goods as $k=>$v){
             $goods[$k]["thumb"]=tomedia($v["thumb"]);
             if ($good_id){
@@ -338,7 +338,7 @@ class My_EweiShopV2Page extends AppMobilePage{
         $z["list"]=$l;
         $total=pdo_fetch("select count(*) as a from ".tablename("ewei_shop_member_drcircle")." where is_view=0 and is_del=0 and openid=:openid order by create_time desc",array(":openid"=>$openid));;
         $z["total"]=$total["a"];
-        app_error(1,$z);
+        app_error(0,$z);
     }
     //判断时间阶段
     public function judge_day($time){
@@ -620,15 +620,16 @@ class My_EweiShopV2Page extends AppMobilePage{
         $type=$_GPC["type"];
         $content_id=$_GPC["content_id"];
         if (empty($type)){
-            app_error(1,"type不可为空");
+            app_error(2,"type不可为空");
         }
         if (empty($openid)||empty($content_id)){
-            app_error(1,"openid|content_id不可为空");
+            app_error(2,"openid|content_id不可为空");
         }
         $log=pdo_get("ewei_shop_member_drsupport",array("openid"=>$openid,"type"=>$type,"content_id"=>$content_id));
         if ($log){
             app_error(1,"不可重复点赞");
         }
+        $m=pdo_get("ewei_shop_member",array("openid"=>$openid));
         $data["openid"]=$openid;
         $data["type"]=$type;
         $data["content_id"]=$content_id;
@@ -648,9 +649,11 @@ class My_EweiShopV2Page extends AppMobilePage{
                 pdo_update("ewei_shop_member_drcomment",$d,array("id"=>$content_id));
 //                 pdo_query('update '.tablename("ewei_shop_member_drcomment").' set zan_count=zan_count+1  where id='.$content_id); 
             }
-            app_error(0,"点赞成功");
+            $mes["avatar"]=$m["avatar"];
+            $mes["message"]="点赞成功";
+            app_error(0,$mes);
         }else{
-            app_error(1,"点赞失败");
+            app_error(2,"点赞失败");
         }
     }
     //取消点赞
@@ -661,10 +664,10 @@ class My_EweiShopV2Page extends AppMobilePage{
         $type=$_GPC["type"];
         $content_id=$_GPC["content_id"];
         if (empty($type)){
-            app_error(1,"type不可为空");
+            app_error(2,"type不可为空");
         }
         if (empty($openid)||empty($content_id)){
-            app_error(1,"openid|content_id不可为空");
+            app_error(2,"openid|content_id不可为空");
         }
         $log=pdo_get("ewei_shop_member_drsupport",array("openid"=>$openid,"type"=>$type,"content_id"=>$content_id));
         if (empty($log)){
@@ -692,7 +695,7 @@ class My_EweiShopV2Page extends AppMobilePage{
             }
             app_error(0,"取消成功");
         }else{
-            app_error(0,"取消失败");
+            app_error(2,"取消失败");
         }
         
     }
