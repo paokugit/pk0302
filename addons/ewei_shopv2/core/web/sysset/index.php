@@ -1133,35 +1133,33 @@ class Index_EweiShopV2Page extends WebPage
        
         if( $_W["ispost"] )
         {
-            
-           
             $data["backgroup"] = save_media($_POST["backgroup"]);
-            $icon[0]["img"]=$_POST["icon1_img"];
-            $icon[0]["title"]=$_POST["icon1_title"];
-            $icon[0]["url"]=$_POST["icon1_url"];
-            $icon[0]["icon"]=save_media($_POST["icon1"]);
+//             $icon[0]["img"]=$_POST["icon1_img"];
+//             $icon[0]["title"]=$_POST["icon1_title"];
+//             $icon[0]["url"]=$_POST["icon1_url"];
+//             $icon[0]["icon"]=save_media($_POST["icon1"]);
             
-            $icon[1]["img"]=$_POST["icon2_img"];
-            $icon[1]["title"]=$_POST["icon2_title"];
-            $icon[1]["url"]=$_POST["icon2_url"];
-            $icon[1]["icon"]=save_media($_POST["icon2"]);
+//             $icon[1]["img"]=$_POST["icon2_img"];
+//             $icon[1]["title"]=$_POST["icon2_title"];
+//             $icon[1]["url"]=$_POST["icon2_url"];
+//             $icon[1]["icon"]=save_media($_POST["icon2"]);
             
-            $icon[2]["img"]=$_POST["icon3_img"];
-            $icon[2]["title"]=$_POST["icon3_title"];
-            $icon[2]["url"]=$_POST["icon3_url"];
-            $icon[2]["icon"]=save_media($_POST["icon3"]);
+//             $icon[2]["img"]=$_POST["icon3_img"];
+//             $icon[2]["title"]=$_POST["icon3_title"];
+//             $icon[2]["url"]=$_POST["icon3_url"];
+//             $icon[2]["icon"]=save_media($_POST["icon3"]);
             
-            $icon[3]["img"]=$_POST["icon4_img"];
-            $icon[3]["title"]=$_POST["icon4_title"];
-            $icon[3]["url"]=$_POST["icon4_url"];
-            $icon[3]["icon"]=save_media($_POST["icon4"]);
+//             $icon[3]["img"]=$_POST["icon4_img"];
+//             $icon[3]["title"]=$_POST["icon4_title"];
+//             $icon[3]["url"]=$_POST["icon4_url"];
+//             $icon[3]["icon"]=save_media($_POST["icon4"]);
             
-            $icon[4]["img"]=$_POST["icon5_img"];
-            $icon[4]["title"]=$_POST["icon5_title"];
-            $icon[4]["url"]=$_POST["icon5_url"];
-            $icon[4]["icon"]=save_media($_POST["icon5"]);
+//             $icon[4]["img"]=$_POST["icon5_img"];
+//             $icon[4]["title"]=$_POST["icon5_title"];
+//             $icon[4]["url"]=$_POST["icon5_url"];
+//             $icon[4]["icon"]=save_media($_POST["icon5"]);
             
-            $data["icon"]=serialize($icon);
+//             $data["icon"]=serialize($icon);
             if (pdo_update("ewei_shop_small_set",$data,array("id"=>1))){
             
             show_json(1);
@@ -1379,6 +1377,71 @@ class Index_EweiShopV2Page extends WebPage
         $data = pdo_get('ewei_shop_share_help',['id'=>1]);
         include($this->template());
     }
-    
+    //首页icon
+    public function sportindex(){
+        global $_W;
+        global $_GPC;
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 20;
+        $condition = ' and uniacid=:uniacid';
+        $params = array(':uniacid' =>$_W['uniacid']);
+        
+        
+        $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_small_setindex') . (' WHERE 1 ' . $condition.'  ORDER BY sort  asc limit ') . ($pindex - 1) * $psize . ',' . $psize, $params);
+        
+        $total = pdo_fetchcolumn('SELECT count(*) FROM ' . tablename('ewei_shop_small_setindex') . (' WHERE 1 ' . $condition), $params);
+        $pager = pagination2($total, $pindex, $psize);
+        foreach ($list as $k=>$v){
+            $list[$k]["img"]=tomedia($v["img"]);
+        }
+        include($this->template());
+    }
+    //首页icon--添加
+    public function addsport(){
+        $this->postsport();
+    }
+    //首页icon--编辑
+    public function editsport(){
+        $this->postsport();
+    }
+    public function postsport(){
+        
+        global $_W;
+        global $_GPC;
+        $id = intval($_GPC['id']);
+        
+        if ($_W['ispost']) {
+            $data = array('uniacid' => $_W['uniacid'], 'sort' => intval($_GPC['sort']), 'title' => trim($_GPC['title']),'img'=>save_media($_GPC["img"]),'icon'=>save_media($_GPC["icon"]),'url'=>$_GPC["url"],'status'=>intval($_GPC["status"]));
+            if (!empty($id)) {
+                pdo_update('ewei_shop_small_setindex', $data, array('id' => $id));
+                
+            }
+            else {
+                pdo_insert('ewei_shop_small_setindex', $data);
+                $id = pdo_insertid();
+                
+            }
+            
+            show_json(1, array('url' => webUrl('sysset/sportindex')));
+        }
+        
+        $notice = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_small_setindex') . ' WHERE id =:id and uniacid=:uniacid  limit 1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
+        include $this->template();
+        
+    }
+    //删除
+    public function deletesport(){
+        
+        global $_W;
+        global $_GPC;
+        $id = intval($_GPC['id']);
+        
+       if (pdo_delete("ewei_shop_small_setindex",array("id"=>$id))){
+            show_json(1, array('url' => referer()));
+        }else{
+            show_json(0,"删除失败");
+        }
+        
+    }
 }
 ?>

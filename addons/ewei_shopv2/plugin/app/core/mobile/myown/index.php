@@ -110,6 +110,23 @@ class Index_EweiShopV2Page extends AppMobilePage{
         }
         show_json(1,$list);
     }
+    //首页
+    public function optindex(){
+        global $_W;
+        global $_GPC;
+        $list=pdo_get("ewei_shop_small_set",array("id"=>1));
+        $l["backgroup"]=tomedia($list["backgroup"]);
+        $l["banner"]=tomedia($list["banner"]);
+        //获取icon
+        $l["icon"]=pdo_fetchall("select * from ".tablename("ewei_shop_small_setindex")." where status=0 order by sort asc");
+        foreach ($l["icon"] as $k=>$v){
+            $l["icon"][$k]["img"]=tomedia($v["img"]);
+            if ($v["icon"]){
+            $l["icon"][$k]["icon"]=tomedia($v["icon"]);
+            }
+        }
+        show_json(1,$l);
+    }
     
     //页面优化ceshi
     public function optt(){

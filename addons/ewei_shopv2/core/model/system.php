@@ -1208,8 +1208,12 @@ class System_EweiShopV2Model {
                         "title" => "页面优化",
                         "items" => array(
                             array(
-                                "title" => "运动首页",
+                                "title" => "首页背景图",
                                 "route" => "sport"
+                            ) ,
+                            array(
+                                "title" => "首页icon",
+                                "route" => "sportindex"
                             ) ,
                             array(
                                 "title" => "达人中心",
