@@ -28,6 +28,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         }
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['mobile'=>$mobile,'uniacid'=>$uniacid]);
+        $limit = $this->checklimit($member['openid'],$member['agentlevel']);
         if($token != md5(md5(base64_encode($mobile.$msg.$member['openid'])))){
             $this->addlog($add,202,'折扣宝充值鉴权验证失败');
             exit(json_encode(['code'=>202,'msg'=>'折扣宝充值鉴权验证失败']));
@@ -131,6 +132,16 @@ class Rebate_EweiShopV2Page extends AppMobilePage
             'createtime'=>time()
         ];
         return pdo_insert('core_rebate_log',$data);
+    }
+
+    /**
+     * 检测会员的额度
+     * @param $openid
+     * @param $level
+     */
+    public function checklimit($openid,$level)
+    {
+
     }
 }
 ?>
