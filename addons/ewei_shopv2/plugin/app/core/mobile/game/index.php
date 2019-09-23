@@ -141,8 +141,8 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $data = array("uniacid" => $_W["uniacid"],"uid" => 0,'agentid'=>$member['id'], "openid" => $new_openid, 'agentlevel'=>0 ,"openid_wa" => mb_substr($new_openid,7), "comefrom" => "sns_wa","createtime" => time(), "status" => 0);
                 pdo_insert('ewei_shop_member',$data);
                 //添加绑定日志
-                $add = ['openid'=>$new_openid,'item'=>'system','value'=>'绑定上级:'.$new_openid.'/'.$member['nickname'].'绑定上级id:'.$data['agentid'].'-'.$member['nickname'],'createtime'=>date('Y-m-d H:i:s',time())];
-                m('memberoperate')->addlog($add);
+                $add1 = ['openid'=>$new_openid,'item'=>'system','value'=>'绑定上级:'.$new_openid.'/'.$member['nickname'].'绑定上级id:'.$data['agentid'].'-'.$member['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                m('memberoperate')->addlog($add1);
                 $add['status'] = 1;
             } elseif ($new_member && $new_member['agentid'] == 0 && $member['agentid'] != $new_member['id']){
                 //如果老用户  但是上级   更改上级  但是  老用户

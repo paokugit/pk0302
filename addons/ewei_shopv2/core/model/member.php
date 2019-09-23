@@ -1369,7 +1369,7 @@ class Member_EweiShopV2Model
             pdo_update("ewei_shop_member",$data,$where);
             //如果agentID不为0  就添加绑定上级日志
             if($data['agentid'] != 0){
-                $add = ['openid'=>$info['openid'],'item'=>'system','value'=>'绑定上级:'.$info['openid'].'/'.$memberinfo['nickname'].'绑定上级id:'.$data['agentid'].'-'.$agentinfo['nickname'],'createtime'=>date('Y-m-d H:i:s',time())];
+                $add = ['openid'=>$info['openid'],'item'=>'system','value'=>'绑定上级:'.$info['openid'].'/'.$memberinfo['nickname'].'绑定上级id:'.$data['agentid'].'-'.$agentinfo['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
                 m('memberoperate')->addlog($add);
             }
             $this->bindFromMerch($info['openid'],$data['agentid']);
