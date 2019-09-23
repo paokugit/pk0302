@@ -22,6 +22,7 @@
                    <!--     {if $set['level']>=1}<th>一级佣金比例</th>{/if}
                         {if $set['level']>=2}<th>二级佣金比例</th>{/if}
                         {if $set['level']>=3}<th>三级佣金比例</th>{/if}-->
+                        <th>等级限额</th>
                         <th>每日兑换卡路里</th>
                         <th>加速天数</th>
                         <th>极差奖</th>
@@ -34,6 +35,7 @@
                     {loop $list $row}
                     <tr {if $row['id']=='default'}style='background:#f2f2f2'{/if}>
                     <td>{$row['levelname']}</td>
+                    <td>{$row['limit']}</td>
                     <td>{$row['duihuan']}</td>
                     {if $row['id']=='default'}
                   <td>  0天</td>

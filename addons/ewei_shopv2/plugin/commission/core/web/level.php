@@ -38,7 +38,7 @@ class Level_EweiShopV2Page extends PluginWebPage
         $id = trim($_GPC['id']);
 
         if ($id == 'default') {
-            $level = array('id' => 'default', 'levelname' => empty($set['levelname']) ? '默认等级' : $set['levelname'], 'commission1' => $set['commission1'], 'commission2' => $set['commission2'], 'commission3' => $set['commission3']);
+            $level = array('id' => 'default', 'levelname' => empty($set['levelname']) ? '默认等级' : $set['levelname'], 'limit'=>$_GPC['limit'],'commission1' => $set['commission1'], 'commission2' => $set['commission2'], 'commission3' => $set['commission3']);
             $level['duihuan']=$set['duihuan'];
             //获取步数设置
             $set=pdo_get('ewei_setting',array('type'=>"level",'type_id'=>0));
@@ -50,7 +50,7 @@ class Level_EweiShopV2Page extends PluginWebPage
         }
         
         if ($_W['ispost']) {
-            $data = array('uniacid' => $_W['uniacid'], 'levelname' => trim($_GPC['levelname']), 'commission1' => trim(trim($_GPC['commission1']), '%'), 'commission2' => trim(trim($_GPC['commission2']), '%'), 'commission3' => trim(trim($_GPC['commission3']), '%'), 'commissionmoney' => trim($_GPC['commissionmoney'], '%'), 'ordermoney' => $_GPC['ordermoney'], 'ordercount' => intval($_GPC['ordercount']), 'downcount' => intval($_GPC['downcount']));
+            $data = array('uniacid' => $_W['uniacid'], 'levelname' => trim($_GPC['levelname']),'limit'=>$_GPC['limit'], 'commission1' => trim(trim($_GPC['commission1']), '%'), 'commission2' => trim(trim($_GPC['commission2']), '%'), 'commission3' => trim(trim($_GPC['commission3']), '%'), 'commissionmoney' => trim($_GPC['commissionmoney'], '%'), 'ordermoney' => $_GPC['ordermoney'], 'ordercount' => intval($_GPC['ordercount']), 'downcount' => intval($_GPC['downcount']));
 
             $data['duihuan'] = $_GPC['duihuan'];
             $data['subscription_ratio']=$_GPC['subscription_ratio'];

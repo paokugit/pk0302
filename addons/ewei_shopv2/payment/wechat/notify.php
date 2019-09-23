@@ -986,7 +986,11 @@ class EweiShopWechatPay
                 }
                 //查找收款码的拥有者的信息
                 $own = pdo_get('ewei_shop_member',['id'=>$own_id]);
-                pdo_insert('log',['log'=>json_encode($own),'createtime'=>date('Y-m-d H:i:s',time())]);
+                //如果绑定的用户信息不为空   添加绑定日志
+                if(!empty($own)){
+                    $add = ['openid'=>$member['openid'],'item'=>'system','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].'绑定上级id:'.$own['id'].'-'.$own['nickname'],'createtime'=>date('Y-m-d H:i:s',time())];
+                    m('memberoperate')->addlog($add);
+                }
                 //查找爸爸信息  如果有使用折扣宝
                 if($member['agentid']){
                     $father = pdo_get('ewei_shop_member',['id'=>$member['agentid']]);

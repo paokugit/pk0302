@@ -1364,9 +1364,14 @@ class Member_EweiShopV2Model
         if($memberinfo['agentid']==0 || $memberinfo['agentid']==''){
             $agentinfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where openid=:openid limit 1", array(":openid" => $info['agentopenid'] ));
             //附 被助力人的信息，来源信息
-            $data['agentid'] = $agentinfo['id']?$agentinfo['id']:1;
+            $data['agentid'] = $agentinfo['id']?$agentinfo['id']:0;
             $where['openid'] = $info['openid'];
             pdo_update("ewei_shop_member",$data,$where);
+            //如果agentID不为0  就添加绑定上级日志
+            if($data['agentid'] != 0){
+                $add = ['openid'=>$info['openid'],'item'=>'system','value'=>'绑定上级:'.$info['openid'].'/'.$memberinfo['nickname'].'绑定上级id:'.$data['agentid'].'-'.$agentinfo['nickname'],'createtime'=>date('Y-m-d H:i:s',time())];
+                m('memberoperate')->addlog($add);
+            }
             $this->bindFromMerch($info['openid'],$data['agentid']);
             
             //fbb 贡献值
