@@ -140,6 +140,9 @@ class Index_EweiShopV2Page extends AppMobilePage
                 //新用户不存在  插入新的用户的openid
                 $data = array("uniacid" => $_W["uniacid"],"uid" => 0,'agentid'=>$member['id'], "openid" => $new_openid, 'agentlevel'=>0 ,"openid_wa" => mb_substr($new_openid,7), "comefrom" => "sns_wa","createtime" => time(), "status" => 0);
                 pdo_insert('ewei_shop_member',$data);
+                //添加绑定日志
+                $add = ['openid'=>$new_openid,'item'=>'system','value'=>'绑定上级:'.$new_openid.'/'.$member['nickname'].'绑定上级id:'.$data['agentid'].'-'.$member['nickname'],'createtime'=>date('Y-m-d H:i:s',time())];
+                m('memberoperate')->addlog($add);
                 $add['status'] = 1;
             } elseif ($new_member && $new_member['agentid'] == 0 && $member['agentid'] != $new_member['id']){
                 //如果老用户  但是上级   更改上级  但是  老用户
@@ -269,10 +272,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         //该用户对应的礼包
         $gift = $this->get_gift($gifts,$openid);
         $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_gift_record').' where bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid]);
-        //$record = pdo_fetchall('select * from '.tablename('ewei_shop_gift_record').' where bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'" order by id desc LIMIT '.$pindex.','.$pageSize,[':openid'=>$openid]);
+        $record = pdo_fetchall('select * from '.tablename('ewei_shop_gift_record').' where bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'" order by id desc LIMIT '.$pindex.','.$pageSize,[':openid'=>$openid]);
         $new = pdo_fetchall('select id,nickname,avatar,openid,createtime from '.tablename('ewei_shop_member').' where agentid = "'.$member['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'" order by createtime desc LIMIT 10');
-        //$record = array_merge($record,$new);
-        $list = $this->isvalid($new,$week['start'],$member['id']);
+        $record = array_merge($record,$new);
+        $list = $this->isvalid($record,$week['start'],$member['id']);
+        $list = m('util')->array_unique_unset($list,"openid");
         if(count($list) > 0){
             show_json(1,['list'=>$list,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize]);
         }else{

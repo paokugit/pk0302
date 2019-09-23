@@ -263,6 +263,31 @@ class Util_EweiShopV2Model
 		$week_end = strtotime('+'.$week_days.'days',strtotime($today));
 		return ['start'=>$week_start,'end'=>$week_end];
 	}
+
+    /**
+     * 二维数组根据某个值的进行去重
+     * @param $arr
+     * @param $key
+     * @return array
+     */
+	public function array_unique_unset($arr,$key)
+	{
+		$res = [];
+		foreach ($arr as $value) {
+			//查看有没有重复项
+			if($value['is_valid'] == 1){
+				if(isset($res[$value[$key]])){
+					//有：销毁
+					unset($value[$key]);
+				} else{
+					$res[$value[$key]] = $value;
+				}
+			}else{
+				$res[$value[$key]] = $value;
+			}
+		}
+		return $res;
+	}
 }
 
 if (!defined('IN_IA')) {
