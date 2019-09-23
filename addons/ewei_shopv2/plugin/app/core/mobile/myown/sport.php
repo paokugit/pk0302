@@ -554,7 +554,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                     $parent=m("member")->getmember($parent_id);
 
                     //添加绑定日志
-                    $add = ['openid'=>$member['openid'],'item'=>'system','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].'绑定上级id:'.$parent_id.'-'.$parent['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                    $add = ['openid'=>$member['openid'],'item'=>'system','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].',绑定上级id:'.$parent_id.'-'.$parent['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
                     m('memberoperate')->addlog($add);
                     if (!empty($parent)){
                         //                     $cd=$this->prize();

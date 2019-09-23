@@ -147,7 +147,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $add['status'] = 0;
             }
 	    //添加绑定日志
-            $add1 = ['openid'=>$new_openid,'item'=>'system','value'=>'绑定上级:'.$new_openid.'/'.$new_member['nickname'].'绑定上级id:'.$member['id'].'-'.$member['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+            $add1 = ['openid'=>$new_openid,'item'=>'system','value'=>'绑定上级:'.$new_openid.'/'.$new_member['nickname'].',绑定上级id:'.$member['id'].'-'.$member['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
             m('memberoperate')->addlog($add1);
             if(!pdo_fetch('select * from '.tablename('ewei_shop_gift_record').'where openid = :new_openid and bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':new_openid'=>$new_openid,':openid'=>$openid])){
                 if($new_openid != $openid){
