@@ -550,7 +550,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                 if ($parent_id!=0&&!empty($parent_id)){
                     
                     pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
-
+                    
                     $parent=m("member")->getmember($parent_id);
 
                     //添加绑定日志

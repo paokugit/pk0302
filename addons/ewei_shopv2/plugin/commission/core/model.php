@@ -1626,9 +1626,9 @@ if( !class_exists("CommissionModel") )
 				{
 					pdo_update("ewei_shop_member", array( "agentid" => $parent["id"], "childtime" => $time ), array( "uniacid" => $_W["uniacid"], "id" => $member["id"] ));
 				}
-                //添加绑定日志
-                $add = ['openid'=>$member['openid'],'item'=>'system','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].'绑定上级id:'.$parent['id'].'-'.$parent['nickname'],'createtime'=>date('Y-m-d H:i:s',time())];
-                m('memberoperate')->addlog($add);
+		                //添加绑定日志
+		                $add = ['openid'=>$member['openid'],'item'=>'system','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].'绑定上级id:'.$parent['id'].'-'.$parent['nickname'],'createtime'=>date('Y-m-d H:i:s',time())];
+		                m('memberoperate')->addlog($add);
 				if( p("dividend") ) 
 				{
 					$this->saveRelation($member["id"], $parent["id"], 1);

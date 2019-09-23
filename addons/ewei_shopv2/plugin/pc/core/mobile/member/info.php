@@ -62,7 +62,7 @@ class Info_EweiShopV2Page extends PcMobileLoginPage
 			$data = array();
 			$m_data = array();
 			$mc_data = array();
-			$insert_data = $diyform_plugin->getInsertData($fields, $memberdata);//添加绑定日志
+			$insert_data = $diyform_plugin->getInsertData($fields, $memberdata);
 			$data = $insert_data['data'];
 			$m_data = $insert_data['m_data'];
 			$mc_data = $insert_data['mc_data'];
