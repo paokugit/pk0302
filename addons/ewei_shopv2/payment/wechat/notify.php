@@ -988,7 +988,7 @@ class EweiShopWechatPay
                 $own = pdo_get('ewei_shop_member',['id'=>$own_id]);
                 //如果绑定的用户信息不为空   添加绑定日志
                 if(!empty($own)){
-                    $add = ['openid'=>$member['openid'],'item'=>'system','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].',绑定上级id:'.$own['id'].'-'.$own['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                    $add = ['openid'=>$member['openid'],'item'=>'notify','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].',绑定上级id:'.$own['id'].'-'.$own['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
                     m('memberoperate')->addlog($add);
                 }
                 //查找爸爸信息  如果有使用折扣宝

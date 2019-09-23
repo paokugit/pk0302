@@ -336,7 +336,7 @@ class PosterProcessor extends PluginProcessor
 						pdo_update("ewei_shop_member", array( "agentid" => $qrmember["id"], "childtime" => $time ), array( "id" => $member["id"] ));
 					}
                     //添加绑定日志
-                    $add = ['openid'=>$member['openid'],'item'=>'system','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].',绑定上级id:'.$qrmember['id'].'-'.$qrmember['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                    $add = ['openid'=>$member['openid'],'item'=>'poster','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].',绑定上级id:'.$qrmember['id'].'-'.$qrmember['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
                     m('memberoperate')->addlog($add);
 					if( p("dividend") ) 
 					{
