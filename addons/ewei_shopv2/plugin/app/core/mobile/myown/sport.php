@@ -552,6 +552,10 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                     pdo_update("ewei_shop_member",array('agentid'=>$parent_id),array('openid'=>"sns_wa_".$openid));
                     
                     $parent=m("member")->getmember($parent_id);
+
+                    //添加绑定日志
+                    $add = ['openid'=>$member['openid'],'item'=>'myown','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].',绑定上级id:'.$parent_id.'-'.$parent['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                    m('memberoperate')->addlog($add);
                     if (!empty($parent)){
                         //                     $cd=$this->prize();
                         //                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");

@@ -15,8 +15,9 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $mid = $_GPC['mids'];
         if (!empty($mid) && !empty($_GPC["openid"])) {
             $pid = m('member')->getMember($mid);
+            m('member')->setagent(array('agentopenid'=>trim($pid["openid"]),'openid'=>$_GPC['openid']));
             $iset = pdo_get('ewei_shop_member_getstep', array('bang' => $_GPC['openid'], 'type' => 1, 'day' => date('Y-m-d'), 'openid' => $pid['openid']));
-            if($iset) app_error(0,'助力成功');
+            if($iset) app_error(0,'已助力');
             if($pid["openid"]==$_GPC['openid']) app_error(1,'自己不能给自己助力哦，赶快去邀请好友助力吧！');
             if (!empty($pid)) {
                 $data = array(
@@ -30,7 +31,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
                     'remark'=>$_GPC['message']
                 );
                pdo_insert('ewei_shop_member_getstep', $data);
-               m('member')->setagent(array('agentopenid'=>trim($pid["openid"]),'openid'=>$_GPC['openid']));
+               //m('member')->setagent(array('agentopenid'=>trim($pid["openid"]),'openid'=>$_GPC['openid']));
                app_json('助力成功啦！');
             }else{
                 app_error(2,'哎呀，助力人数太多啦，稍后再试哦');
