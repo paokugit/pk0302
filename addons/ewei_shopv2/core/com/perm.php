@@ -1076,6 +1076,40 @@ class Perm_EweiShopV2ComModel extends ComModel {
                 "main" => "查看",
                 "edit" => "修改-log"
             ) ,
+            "notive"=>array(
+                "text"=>"热点关注",
+                "add"=>"添加文章",
+                "edit"=>"修改",
+                "delete"=>"删除",
+            ),
+            "question"=>array(
+                "text"=>"问题反馈",
+                "detail"=>"详情",
+                "delete"=>"删除",
+            ),
+            "help"=>array(
+                "text"=>"帮助指南",
+                "add"=>"添加文章",
+                "edit"=>"修改",
+                "delete"=>"删除",
+            ),
+            "senword"=>array(
+                "text"=>"达人圈",
+                "main"=>"敏感词",
+                "circle"=>"列表",
+                "audit"=>"审核",
+                "detail"=>"详情",
+                "delete"=>"删除",
+                "comment"=>"评论",
+            ),
+            "reading"=>array(
+                "text"=>"每日必读",
+                "main"=>"列表",
+                "add"=>"添加",
+                "edit"=>"修改",
+                "delete"=>"删除",
+                "comment"=>"评论列表",
+            ),
             "follow" => array(
                 "text" => "分享及关注",
                 "main" => "查看",
