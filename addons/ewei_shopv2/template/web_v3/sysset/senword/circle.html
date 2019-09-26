@@ -1,7 +1,7 @@
 {template '_header'}
 <meta charset="UTF-8">
 <div class="page-header">当前位置：<span class="text-primary">达人圈</span></div>
-
+<div>总数量：<span class="text-primary">{$total}</span> 已下架数量：<span class="text-primary">{$is_view}</span></div>
 <div class="page-content">
     <form action="./index.php" method="get" class="form-horizontal  ">
         <input type="hidden" name="c" value="site" />
@@ -30,8 +30,9 @@
                         <th class='th-sortable' data-sort-name='title'>评论数</th>
                         <th class='th-sortable' data-sort-name='title'>时间</th>
                         
-                      
-                        <th style="width: 105px;">操作</th>
+                      <th class='th-sortable' data-sort-name='title'>状态</th>
+                        
+                        <th style="width: 115px;">操作</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,10 +46,22 @@
                             <td>{$row['zan_count']}</td>
                             <td>{$row['comment_count']}</td>
                              <td>{$row['create_day']}</td>
-                            
+                            <td>
+                            {if $row['audit']==0}
+                            待审核
+                            {else}已审核
+                            {/if}
+                            </td>
                            
                             <td style="text-align:left;">
                                
+                               {if $row['audit']==0}
+                               <a data-toggle='ajaxRemove'  href="{php echo webUrl('sysset/senword/audit', array('id' => $row['id']))}" class="btn btn-op btn-operation" data-confirm='确认要审核此信息吗?'>
+                                <span data-toggle="tooltip" data-placement="top" data-original-title="审核">
+                                    <i class='icow icow-icon19'></i>
+                                </span>
+                               </a>
+                              {/if}
                                
                                     <a href="{php echo webUrl('sysset/senword/detail',array('id' => $row['id']))}" class="btn btn-op btn-operation" >
                                         <span data-toggle="tooltip" data-placement="top" data-original-title="详情">

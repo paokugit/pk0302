@@ -14,7 +14,7 @@ class Question_EweiShopV2Page extends WebPage
         $params = array(':uniacid' => $_W['uniacid']);
         
         
-        $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_notive_question') . ('limit ') . ($pindex - 1) * $psize . ',' . $psize, $params);
+        $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_notive_question') . ('order by create_time desc limit ') . ($pindex - 1) * $psize . ',' . $psize, $params);
         foreach ($list as $k=>$v){
             $member=m("member")->getMember($v["openid"]);
             $list[$k]["nickname"]=$member["nickname"];
@@ -49,6 +49,7 @@ class Question_EweiShopV2Page extends WebPage
                 show_json(0);
             }
             $data["answer"]=$answer;
+            $data["is_answer"]=1;
             if (pdo_update("ewei_shop_notive_question",$data,array("id"=>$id))){
                 //消息提醒
                 $member=m("member")->getMember($detail["openid"]);

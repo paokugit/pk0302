@@ -352,6 +352,10 @@
                     </div>
                 </div>
                 {/if}
+                
+               
+                
+                
                 <!--系统更新-->
                 {if $_W['isfounder'] && $_W['routes']!='system.auth.upgrade' && $_W['role'] !='vice_founder'}
                 <div class="panel panel-default">
@@ -378,6 +382,58 @@
                     </div>
                 </div>
                 {/if}
+                
+                 {if !$system['merch']}
+                 
+                
+                   
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingSex" data-toggle="collapse" data-parent="#panel-accordion" href="#collapseSex" aria-expanded="false" aria-controls="collapseSex">
+                            <h4 class="panel-title">
+                                <i class="icow icow-gonggao"></i> <a>达人圈</a> <span></span>
+                            </h4>
+                        </div>
+                        <div id="collapseSex" class="panel-collapse collapse {if $_W['routes']=='sysset.senword'}in{/if}" role="tabpanel" aria-labelledby="headingTwo">
+                            <ul class="panel-body">
+                                
+                               <!--  <li class="panel-list small" style="padding: 10px;">
+                                    <a class="panel-list-text text-center" href="{php echo webUrl('sysset/senword')}"><span class="text-primary">敏感词</span></a>
+                                </li> -->
+                                
+                                <li class="panel-list small" style="padding: 10px;">
+
+                                  <a class="panel-list-text" href="{php echo webUrl('sysset/senword/circle')}">待审核 <span class="pull-right text-warning">({$system['drcircle']})</span> </a>
+                                </li>
+                                
+                            </ul>
+                        </div>
+                    </div>
+                  
+                   <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingSeven" data-toggle="collapse" data-parent="#panel-accordion" href="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                            <h4 class="panel-title">
+                                <i class="icow icow-gonggao"></i> <a>问题反馈</a> <span></span>
+                            </h4>
+                        </div>
+                        <div id="collapseSeven" class="panel-collapse collapse {if $_W['routes']=='sysset.question'}in{/if}" role="tabpanel" aria-labelledby="headingSeven">
+                            <ul class="panel-body">
+                                
+                               <!--  <li class="panel-list small" style="padding: 10px;">
+                                    <a class="panel-list-text text-center" href="{php echo webUrl('sysset/senword')}"><span class="text-primary">敏感词</span></a>
+                                </li> -->
+                                
+                                <li class="panel-list small" style="padding: 10px;">
+
+                                  <a class="panel-list-text" href="{php echo webUrl('sysset/question')}">待处理 <span class="pull-right text-warning">({$system['question']})</span> </a>
+                                </li>
+                                
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    
+                {/if}
+                
             </div>
         </div>
         <div class="wb-panel-fold {if empty($system['foldpanel'])}in{/if}">{if !empty($system['foldpanel'])}<i class="icow icow-info"></i> 消息提醒{else}<i class="fa fa-angle-double-right"></i> 收起面板{/if}</div>

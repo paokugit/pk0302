@@ -27,7 +27,7 @@
                        <th class='th-sortable' data-sort-name='title'>提问者</th>
                         <th class='th-sortable' data-sort-name='title'>问题描述</th>
                           <th class='th-sortable' data-sort-name='title'>故障时间</th>
-                      
+                      <th class='th-sortable' data-sort-name='title'>状态</th>
                         <th style="width: 65px;">操作</th>
                     </tr>
                 </thead>
@@ -40,7 +40,12 @@
                             <td>{$row['nickname']}</td>
                             <td>{$row['content']}</td>
                             <td>{$row['time']}</td>
-                           
+                             <td>
+                             {if $row["answer"]==""}
+                             待处理
+                             {else}已处理
+                             {/if}
+                             </td>
                             <td style="text-align:left;">
                                
                                    

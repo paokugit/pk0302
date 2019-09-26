@@ -1911,6 +1911,9 @@ class System_EweiShopV2Model {
         if (!empty($history_url)) {
             $arr["history"] = json_decode($history_url, true);
         }
+        //获取未审核的数目
+        $arr["drcircle"]=pdo_fetchcolumn("select count(1) from ".tablename("ewei_shop_member_drcircle")." where audit=0 and is_view=0 and is_del=0");
+        $arr["question"]=pdo_fetchcolumn("select count(1) from ".tablename("ewei_shop_notive_question")."where is_answer=0");
         return $arr;
     }
     protected function getOrderTotal($status = 0) {

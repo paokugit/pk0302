@@ -43,6 +43,10 @@ class Senword_EweiShopV2Page extends WebPage
         }
         $total = pdo_fetchcolumn('SELECT count(*) FROM ' . tablename('ewei_shop_member_drcircle') . (' WHERE 1 ' . $condition), $params);
         $pager = pagination2($total, $pindex, $psize);
+        
+        //已下架处理的数量
+        $is_view=pdo_fetchcolumn("select count(1) from ".tablename("ewei_shop_member_drcircle")." where is_view=1");
+        
         include $this->template();
     }
     //删除
@@ -246,5 +250,19 @@ class Senword_EweiShopV2Page extends WebPage
         );
         p("app")->mysendNotice($openid, $postdata, "", "idavg36TbDRU-xrLW7-5ULrHV14T2z6RJ66DX4xtkz8");
         return true;
+    }
+    //审核
+    public function audit(){
+        global $_W;
+        global $_GPC;
+        $id = intval($_GPC['id']);
+    
+        if (pdo_update("ewei_shop_member_drcircle",array("audit"=>1),array("id"=>$id))){
+            show_json(1,array("url"=>webUrl('senword/circle')));
+        }else{
+            show_json(0,"失败");
+        }
+      
+       
     }
 }
