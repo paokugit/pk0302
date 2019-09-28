@@ -25,7 +25,14 @@
         </div>
     {else}
         <form action="" method="post">
-           
+            <div class="page-table-header">
+                <input type='checkbox' />
+                <div class="btn-group">
+                    
+                    <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch' data-href="{php echo webUrl('sysset/online')}"><i class='icow icow-xianshi'></i> 上线</button>
+                    
+                </div>
+            </div>
             <table class="table table-responsive table-hover" >
                 <thead class="navbar-inner">
                     <tr>

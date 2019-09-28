@@ -118,12 +118,17 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $l["backgroup"]=tomedia($list["backgroup"]);
         $l["banner"]=tomedia($list["banner"]);
         //获取icon
-        $l["icon"]=pdo_fetchall("select * from ".tablename("ewei_shop_small_setindex")." where status=0 order by sort asc");
+        $l["icon"]=pdo_fetchall("select id,olddata from ".tablename("ewei_shop_small_setindex")." where status=0 order by sort asc");
         foreach ($l["icon"] as $k=>$v){
-            $l["icon"][$k]["img"]=tomedia($v["img"]);
+            $d=unserialize($v["olddata"]);
+            $l["icon"][$k]["img"]=tomedia($d["img"]);
             if ($v["icon"]){
-            $l["icon"][$k]["icon"]=tomedia($v["icon"]);
+            $l["icon"][$k]["icon"]=tomedia($d["icon"]);
+            }else{
+                $l["icon"][$k]["icon"]="";
             }
+            $l["icon"][$k]["url"]=$d["url"];
+            $l["icon"][$k]["title"]=$d["title"];
         }
         show_json(1,$l);
     }
@@ -214,15 +219,17 @@ class Index_EweiShopV2Page extends AppMobilePage{
     
     public function membercount(){
         $member=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." order by id asc");
-        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<7500 and id>=7000 order by id asc ");
+        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<4000 and  id>=3500 order by id asc ");
         
         foreach ($m as $k=>$v){
            //获取直推数据
-            
-//            $data["agentcount"]=pdo_getcolumn("select count(*) from ".tablename("ewei_shop_member")." where agentid=:agentid", array(":agentid"=>$v["id"]));
-//            $data["shopkeepercount"]=pdo_getcolumn("select count(*) from ".tablename("ewei_shop_member")." where agentid=:agentid and agentlevel=5", array(":agentid"=>$v["id"]));
+            $data=array();
+            $data["agentcount"]=pdo_fetchcolumn("select count(1) from ".tablename("ewei_shop_member")." where agentid=:agentid", array(":agentid"=>$v["id"]));
+            $data["shopkeepercount"]=pdo_fetchcolumn("select count(1) from ".tablename("ewei_shop_member")." where agentid=:agentid and agentlevel=5", array(":agentid"=>$v["id"]));
 //            $data["starshinecount"]=pdo_getcolumn("select count(*) from ".tablename("ewei_shop_member")." where agentid=:agentid and agentlevel=3", array(":agentid"=>$v["id"]));
-            $data=$this->GetTeamMember($member,$v["id"]);
+             $d=$this->GetTeamMember($member,$v["id"]);
+             $data["agentallcount"]=$d["agentallcount"];
+             $data["shopkeeperallcount"]=$d["shopkeeperallcount"];
           //  $data["agentallcount"]= m('member')->allAgentCount($v['id']);
             $data["update_time"]=date("Y-m-d H:i:s");
             $c=pdo_get("ewei_shop_member_agentcount",array("openid"=>$v["openid"]));

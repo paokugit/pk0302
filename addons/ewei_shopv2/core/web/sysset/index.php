@@ -1443,5 +1443,27 @@ class Index_EweiShopV2Page extends WebPage
         }
         
     }
+    //上线
+    public function online(){
+        global $_W;
+        global $_GPC;
+        $id = intval($_GPC['id']);
+        
+        if (empty($id)) {
+            $id = is_array($_GPC['ids']) ? implode(',', $_GPC['ids']) : 0;
+        }
+        $items = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_small_setindex') . (' WHERE id in( ' . $id . ' ) AND uniacid=') . $_W['uniacid']);
+        foreach ($items as $k=>$v){
+            $d["icon"]=$v["icon"];
+            $d["title"]=$v["title"];
+            $d["url"]=$v["url"];
+            $d["img"]=$v["img"];
+            $data["olddata"]=serialize($d);
+            $data["online"]=1;
+            pdo_update("ewei_shop_small_setindex",$data,array("id"=>$v["id"]));
+        }
+        show_json(1, array('url' => referer()));
+//         var_dump($id);
+    }
 }
 ?>
