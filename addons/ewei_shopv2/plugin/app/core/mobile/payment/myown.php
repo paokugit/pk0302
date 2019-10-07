@@ -380,8 +380,8 @@ class Myown_EweiShopV2Page extends AppMobilePage
                 }
             //}
         }
-        $total = pdo_count('ewei_shop_devote_record','uniacid = "'.$uniacid.'" and openid = :openid and status = 1',[':openid'=>$openid]);
-        $count = pdo_count('ewei_shop_devote_record','uniacid = "'.$uniacid.'" and openid = :openid',[':openid'=>$openid]);
+        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_devote_record').' where uniacid = "'.$uniacid.'" and openid = :openid and status = 1',[':openid'=>$openid]);
+        $count = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_devote_record').'where uniacid = "'.$uniacid.'" and openid = :openid',[':openid'=>$openid]);
         $list = $this->getlist($total,$uniacid,$openid);
         foreach ($list as $key=>&$item){
             $item['id'] = implode(',',$item['id']);
@@ -456,7 +456,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
     public function devotelog($ids,$openid,$uniacid)
     {
         $day = date('Y-m-d');
-	$i = 0;
+	    $i = 0;
         foreach ($ids as $id){
             $log = pdo_get('ewei_shop_devote_log',['devote_id'=>$id,'openid'=>$openid,'uniacid'=>$uniacid,'day'=>$day]);
             if($log['status'] == 1){

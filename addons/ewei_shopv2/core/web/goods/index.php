@@ -97,13 +97,23 @@ class Index_EweiShopV2Page extends WebPage
 								{
 									$condition .= " AND `issendfree`=1 ";
 								}
-								else 
-								{
-									if( $_GPC["attribute"] == "nodiscount" ) 
-									{
-										$condition .= " AND `isdiscount`=1 ";
-									}
-								}
+                                else
+                                {
+                                    if( $_GPC["attribute"] == "nodiscount" )
+                                    {
+                                        $condition .= " AND `isdiscount`=1 ";
+                                    }
+                                    else{
+                                        if( $_GPC["attribute"] == "klldiscount"){
+                                            $condition .= " AND `deduct_type`=1 and deduct=marketprice and marketprice > 0";
+                                        }
+                                        else{
+                                            if( $_GPC["attribute"] == "zkbdiscount"){
+                                                $condition .= " AND `deduct_type`=2 and deduct=marketprice and marketprice > 0";
+                                            }
+                                        }
+                                    }
+                                }
 							}
 						}
 					}

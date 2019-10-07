@@ -52,7 +52,11 @@ class List_EweiShopV2Page extends AppMobilePage
     public function index_sale()
     {
         //查看有视频的  有库存的  在售的所有商品
-        $list = pdo_fetchall('select title,marketprice,productprice,total,sales,video from '.tablename('ewei_shop_goods').'where video!="" and total > 0 and status = 1');
+        $list = pdo_fetchall('select id,thumb,title,marketprice,productprice,total,sales,video from '.tablename('ewei_shop_goods').'where video!="" and total > 0 and status = 1 group by video order by id desc limit 10');
+        foreach ($list as $key=>$item){
+            $list[$key]['video'] = tomedia($item['video']);
+	    $list[$key]['thumb'] = tomedia($item['thumb']);
+        }
         if(empty($list)){
             show_json(0,"暂无信息");
         }else{
@@ -74,29 +78,64 @@ class List_EweiShopV2Page extends AppMobilePage
          if(!empty($id)){
              //没有上看下凑的类型  就是查看  点击进去的商品
              if(empty($type)){
-                 $detail = pdo_fetch('select title,marketprice,productprice,total,sales,salesreal,video from '.tablename('ewei_shop_goods').'where id = :id and video != "" and total > 0 and status = 1',[':id'=>$id]);
+                 $detail = pdo_fetch('select id,title,thumb,marketprice,productprice,total,sales,salesreal,video from '.tablename('ewei_shop_goods').'where id = :id and video != "" and total > 0 and status = 1',[':id'=>$id]);
              }else{
                  //如果是下一条  就取当前这个商品  倒序  id小于当前商品
+                 $now = pdo_fetch('select id,title,thumb,marketprice,productprice,total,sales,salesreal,video from '.tablename('ewei_shop_goods').'where id = :id and video != "" and total > 0 and status = 1',[':id'=>$id]);
                  if($type == "up"){
-                     $detail = pdo_fetch('select title,marketprice,productprice,total,sales,salesreal,video from '.tablename('ewei_shop_goods').'where video != "" and total > 0 and status = 1 and id < :id order by id desc',[':id'=>$id]);
+                     $detail = pdo_fetch('select id,title,thumb,marketprice,productprice,total,sales,salesreal,video from '.tablename('ewei_shop_goods').'where video != "" and total > 0 and status = 1 and id < :id and video != "'.$now["video"].'" order by id desc',[':id'=>$id]);
                  }elseif($type == "down"){
                      //如果是下一条  就取当前这个商品  倒序  id大于当前商品
-                     $detail = pdo_fetch('select title,marketprice,productprice,total,sales,salesreal,video from '.tablename('ewei_shop_goods').'where video != "" and total > 0 and status = 1 and id > :id order by id desc',[':id'=>$id]);
+                     $detail = pdo_fetch('select id,title,thumb,marketprice,productprice,total,sales,salesreal,video from '.tablename('ewei_shop_goods').'where video != "" and total > 0 and status = 1 and id > :id and video != "'.$now["video"].'" order by id asc',[':id'=>$id]);
                  }
              }
          }else{
              //如果商品id不存在  就倒序取第一个视频信息
-             $detail = pdo_fetch('select title,marketprice,productprice,total,sales,salesreal,video from '.tablename('ewei_shop_goods').'where video != "" and total > 0 and status = 1 order by id desc');
+             $detail = pdo_fetch('select id,title,thumb,marketprice,productprice,total,sales,salesreal,video from '.tablename('ewei_shop_goods').'where video != "" and total > 0 and status = 1 order by id desc');
          }
          if(empty($detail)){
              show_json(0,"信息获取失败");
          }else{
-             $comment = pdo_fetchall('select c.nickname,c.content,c.headimgurl from '.tablename('ewei_shop_order_comment').'c join'.tablename('ewei_shop_order_goods').('g on g.goodsid = c.goodsid').' where g.goods_id = :goods_id and c.level > 3',[':goods_id'=>$detail['goodsid']]);
-             $favorite = pdo_get('ewei_shop_member_favorite',['openid'=>$_GPC['openid'],'goodsid'=>$detail['goodsid'],'deleted'=>0]);
+             $comment = pdo_fetchall('select oc.nickname,oc.content,oc.headimgurl from '.tablename('ewei_shop_order_comment').'oc join '.tablename('ewei_shop_order_goods').('g on g.goodsid = oc.goodsid').' where oc.goodsid = :goods_id and oc.level > 3',[':goods_id'=>$detail['id']]);
+             $favorite = pdo_get('ewei_shop_goods_zan',['openid'=>$_GPC['openid'],'goodsid'=>$detail['id'],'status'=>1]);
              $detail['fav'] = empty($favorite) ? 0 : 1;
+             $detail['fav_count'] = pdo_count('ewei_shop_goods_zan',['goodsid'=>$detail['id'],'status'=>1]);
+             $detail['video'] = tomedia($detail['video']);
+             $detail['sale'] = $detail['sales'] + $detail['salesreal'];
+             if($detail['sale'] > 9999){
+                 $detail['sale'] = $detail['sale']/10000 ."万";
+             }
+	     if($detail['fav_count'] > 9999){
+                 $detail['fav_count'] = $detail['fav_count']/10000 ."W";
+             }
+	     $detail['thumb'] = tomedia($detail['thumb']);
              show_json(1,['detail'=>$detail,'comment'=>$comment]);
          }
      }
+
+    /**
+     * 点赞接口
+     */
+    public function zan()
+    {
+        global $_GPC;
+        $goods_id = $_GPC['goodsid'];
+        $openid = $_GPC['openid'];
+        //$status = $_GPC['status'];
+        if($openid == "" || $goods_id == ""){
+            show_json(0,"参数不完整");
+        }
+        $zan = pdo_get('ewei_shop_goods_zan',['openid'=>$openid,'goodsid'=>$goods_id]);
+        if(!empty($zan)){
+            $status = $zan['status'] == 1 ? 0 : 1;
+            $msg = $zan['status'] == 1 ? "取消点赞成功" : "点赞成功";
+            pdo_update('ewei_shop_goods_zan',['status'=>$status],['id'=>$zan['id']]);
+        }else{
+            $msg = "点赞成功";
+            pdo_insert('ewei_shop_goods_zan',['status'=>1,'openid'=>$openid,'uniacid'=>1,'goodsid'=>$goods_id,'createtime'=>time()]);
+        }
+        show_json(1,['msg'=>$msg,'status'=>$status]);
+    }
 
      /**
       * 通讯快报

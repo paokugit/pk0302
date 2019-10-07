@@ -126,5 +126,52 @@ class Index_EweiShopV2Page extends AppMobilePage{
        $new_count = pdo_count('ewei_shop_member','id > "'.$id.'"');
        show_json(0, $id*11+$new_count*7);
    }
+
+   /**
+    * 首页的礼包商品的入口
+    */
+   public function gift()
+   {
+       global $_W;
+       global $_GPC;
+       $openid = $_GPC['openid'];
+       $uniacid = $_W['uniacid'];
+       $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
+       if(!$member){
+           show_json(0,"用户信息错误");
+       }
+       $gift = pdo_fetch('select * from '.tablename('ewei_shop_gift_bag').'where status = 1 and levels like "%'.$member["agentlevel"].'%"');
+       //当前时间小于开始时间   当前时间大于结束时间
+       if($gift['starttime'] > time() || $gift['endtime'] < time()){
+            show_json(-1,"不在活动期内");
+       }
+       //把商品id  和  身份信息转译
+       $goodsid = explode(',',$gift['goodsid']);
+       $level = explode(',',$gift['levels']);
+       //获得身份信息
+       foreach ($level as $item){
+           if($item == 0){
+               $levels[] = "普通会员";
+           }else{
+               $levels[] = pdo_getcolumn('ewei_shop_commission_level',['id'=>$item],'levelname');
+           }
+       }
+       //获得全部商品
+       $key = 0;
+       foreach ($goodsid as $k => $item) {
+           $good = pdo_get('ewei_shop_goods',['id'=>$item],['id','title','thumb']);
+           $good['thumb'] = tomedia($good['thumb']);
+           $good['levels'] = implode(',',$levels);
+           if($key*4 <= $k && $k < ($key+1)*4){
+               $goods[$key][] = $good;
+           }else{
+               $key++;
+               $goods[$key][] = $good;
+           }
+       }
+       if(!empty($goods)){
+           show_json(1,['goods'=>$goods]);
+       }
+   }
 }
 ?>

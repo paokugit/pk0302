@@ -533,6 +533,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC['openid'];
         $mobile = trim($_GPC['mobile']);
         $money = trim($_GPC['money']);
+        if($money < 1){
+            show_json(0,"转账金额不能小于1折扣宝");
+        }
         if($openid == "" || $mobile == "" || $money == ""){
             show_json(0,"请完善参数信息");
         }
