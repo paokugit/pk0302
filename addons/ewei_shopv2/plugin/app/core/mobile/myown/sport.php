@@ -571,11 +571,16 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                         //贡献值奖励
                         m("devote")->rewardtwo($parent_id);
                     }
+                    //粉丝
+                    $my=pdo_get("ewei_shop_member",array("openid"=>$new_openid));
+                    m("member")->fans($member["id"],$parent_id);
+                    
                 }
             }elseif (empty($member)){
                 
                 $m = array("uniacid" => $_W["uniacid"],"agentid"=>$parent_id,"uid" => 0, "openid" =>"sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
                 pdo_insert("ewei_shop_member", $m);
+                $myid=pdo_insertid();
                 //推荐人
                 if ($parent_id!=0&&!empty($parent_id)){
                     $parent=m("member")->getmember($parent_id);
@@ -595,6 +600,12 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                         //贡献值奖励
                         m("devote")->rewardtwo($parent_id);
                     }
+                    
+                    //添加绑定日志
+                    $add = ['openid'=>"sns_wa_".$openid,'item'=>'myown','value'=>'绑定上级:'."sns_wa_".$openid.'/'."暂未获取".',绑定上级id:'.$parent_id.'-'.$parent['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                    m('memberoperate')->addlog($add);
+                    //粉丝
+                    m("member")->fans($myid,$parent_id);
                 }
             }
             

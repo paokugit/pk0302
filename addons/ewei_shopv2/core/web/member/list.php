@@ -405,7 +405,9 @@ class List_EweiShopV2Page extends WebPage
                             $datalog['item'] = 'member';
                             $datalog['value'] = "修改上级:  " . $member["openid"] . "/" . $member["nickname"] . "  上级ID: " . $member["agentid"].'-'.$laoagentInfo['nickname'] . " -> 新上级ID: " . $adata["agentid"].'-'.$agentInfo['nickname'];
                             m('memberoperate')->addlog($datalog);
-							plog("commission.agent.changeagent", "修改上级分销商 <br/> 会员信息:  " . $member["openid"] . "/" . $member["nickname"] . "/" . $member["realname"] . "/" . $member["mobile"] . " <br/>上级ID: " . $member["agentid"] . " -> 新上级ID: " . $adata["agentid"] . "; <br/> 固定上级: " . (($member["fixagentid"] ? "是" : "否")) . " -> " . (($adata["fixagentid"] ? "是" : "否")));
+							//粉丝
+                            m('member')->fans($member["id"],$adata["agentid"],1,$member["agentid"]);
+                            plog("commission.agent.changeagent", "修改上级分销商 <br/> 会员信息:  " . $member["openid"] . "/" . $member["nickname"] . "/" . $member["realname"] . "/" . $member["mobile"] . " <br/>上级ID: " . $member["agentid"] . " -> 新上级ID: " . $adata["agentid"] . "; <br/> 固定上级: " . (($member["fixagentid"] ? "是" : "否")) . " -> " . (($adata["fixagentid"] ? "是" : "否")));
 						}
 						else 
 						{

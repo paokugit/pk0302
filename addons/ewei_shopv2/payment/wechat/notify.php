@@ -947,7 +947,7 @@ class EweiShopWechatPay
         //计算付款者 是不是第一次给收款码付款
         $count = pdo_count('ewei_shop_member_log',['openid'=>$order['openid'],'rechargetype'=>"scan",'status'=>1]);
         //从order里面获得openID 查用户的卡路里和折扣宝余额
-        $member = pdo_fetch('select agentid,credit1,credit3 from '.tablename('ewei_shop_member').'where openid = "'.$order['openid'].'"');
+        $member = pdo_fetch('select id,agentid,credit1,credit3 from '.tablename('ewei_shop_member').'where openid = "'.$order['openid'].'"');
         if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
             pdo_begin();
             try {
@@ -990,6 +990,8 @@ class EweiShopWechatPay
                 if(!empty($own)){
                     $add = ['openid'=>$member['openid'],'item'=>'notify','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].',绑定上级id:'.$own['id'].'-'.$own['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
                     m('memberoperate')->addlog($add);
+                    //粉丝
+                    m("member")->fans($member["id"],$own_id);
                 }
                 //查找爸爸信息  如果有使用折扣宝
                 if($member['agentid']){

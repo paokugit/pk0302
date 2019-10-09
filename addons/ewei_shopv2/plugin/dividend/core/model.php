@@ -307,6 +307,9 @@ if( !class_exists("DividendModel") )
                 //添加绑定日志
                 $add = ['openid'=>$member['openid'],'item'=>'dividend','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].',绑定上级id:'.$parent['id'].'-'.$parent['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
                 m('memberoperate')->addlog($add);
+                //粉丝
+                m("member")->fans($member["id"],$parent["id"]);
+                
 				if( $author ) 
 				{
 					$author_set = $author->getSet();

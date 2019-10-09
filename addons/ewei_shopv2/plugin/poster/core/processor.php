@@ -338,6 +338,9 @@ class PosterProcessor extends PluginProcessor
                     //添加绑定日志
                     $add = ['openid'=>$member['openid'],'item'=>'poster','value'=>'绑定上级:'.$member['openid'].'/'.$member['nickname'].',绑定上级id:'.$qrmember['id'].'-'.$qrmember['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
                     m('memberoperate')->addlog($add);
+                    //粉丝
+                    m("member")->fans($member["id"],$qrmember['id']);
+                    
 					if( p("dividend") ) 
 					{
 						$this->saveRelation($member["id"], $qrmember["id"], 1);

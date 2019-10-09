@@ -144,11 +144,18 @@ class Index_EweiShopV2Page extends AppMobilePage
                 pdo_insert('ewei_shop_member',$data);                
                 $add['status'] = 1;//添加绑定日志
                 $add1 = ['openid'=>$new_openid,'item'=>'game','value'=>'绑定上级:'.$new_openid.'/'.'未获得昵称'.',绑定上级id:'.$member['id'].'-'.$member['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                //粉丝
+                $my=pdo_get("ewei_shop_member",array("openid"=>$new_openid));
+                m("member")->fans($my["id"],$member["id"]);
+                
             } elseif ($new_member && $new_member['agentid'] == 0 && $member['agentid'] != $new_member['id']){
                 //如果老用户  但是上级   更改上级  但是  老用户   
                 pdo_update('ewei_shop_member',['agentid'=>$member['id']],['id'=>$new_member['id']]);
                 $add['status'] = 0;
                 $add1 = ['openid'=>$new_openid,'item'=>'game','value'=>'绑定上级:'.$new_openid.'/'.$new_member['nickname'].',绑定上级id:'.$member['id'].'-'.$member['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                //粉丝
+                $my=pdo_get("ewei_shop_member",array("openid"=>$new_openid));
+                m("member")->fans($my["id"],$member["id"]);
             }
             m('memberoperate')->addlog($add1);
             if(!pdo_fetch('select * from '.tablename('ewei_shop_gift_record').'where openid = :new_openid and bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':new_openid'=>$new_openid,':openid'=>$openid])){

@@ -1371,6 +1371,9 @@ class Member_EweiShopV2Model
             if($data['agentid'] != 0){
                 $add = ['openid'=>$info['openid'],'item'=>'model.member','value'=>'绑定上级:'.$info['openid'].'/'.$memberinfo['nickname'].',绑定上级id:'.$data['agentid'].'-'.$agentinfo['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
                 m('memberoperate')->addlog($add);
+                //添加绑定粉丝
+                $my=pdo_get("ewei_shop_member",array("openid"=>$info["openid"]));
+                $this->fans($my["id"],$data["agentid"]);
             }
             $this->bindFromMerch($info['openid'],$data['agentid']);
             
@@ -1384,7 +1387,7 @@ class Member_EweiShopV2Model
                 }else{
                     $goodsid=0;
                 }
-                $this->memberAgentCount($goodsid,$agentinfo['id']);
+//                 $this->memberAgentCount($goodsid,$agentinfo['id']);
             }
         }
 
@@ -1575,6 +1578,120 @@ class Member_EweiShopV2Model
             }
         }
         return $res;
+    }
+    //会员粉丝数
+    //myid用户的id parentid上级id type 0表示绑定 1表示修改 oldparentid修改前的parentid
+    public function fans($myid="",$parentid="",$type=0,$oldparentid=""){
+        if (empty($myid)){
+            return false;
+        }
+        $my=pdo_get("ewei_shop_member",array("id"=>$myid));
+        if (empty($my)){
+            return false;
+        }
+        $parent=pdo_get("ewei_shop_member",array("id"=>$parentid));
+      
+            //更新用户
+            if (empty($parent["parent_id"])){
+               $parent_id[0]=$parentid;
+            }else{
+                $parent_id=unserialize($parent["parent_id"]);
+                $len=count($parent_id);
+                if (!in_array($parentid, $parent_id)){
+                    $parent_id[$len]=$parentid;
+                }
+            }
+            $data["parent_id"]=serialize($parent_id);
+            pdo_update("ewei_shop_member",$data,array("id"=>$myid));
+            //更新粉丝数量
+            foreach ($parent_id as $k=>$v){
+                $member=pdo_get("ewei_shop_member",array("id"=>$v));
+                if ($member){
+                    //获取粉丝总量中数据是否有
+                    $agentcount=pdo_get("ewei_shop_member_agentcount",array("openid"=>$member["openid"]));
+                    if ($agentcount){
+                        if ($v==$parentid){
+                            //上级为直推
+                            $data["agentcount"]=$agentcount["agentcount"]+1;
+                            $data["agentallcount"]=$agentcount["agentallcount"]+1;
+                            if ($my["agentlevel"]==5){
+                                $data["shopkeepercount"]=$agentcount["shopkeepercount"]+1;
+                                $data["shopkeeperallcount"]=$agentcount["shopkeeperallcount"]+1;
+                            }
+                        }else{
+                            $data["agentallcount"]=$agentcount["agentallcount"]+1;
+                            if ($my["agentlevel"]==5){
+                                $data["shopkeeperallcount"]=$agentcount["shopkeeperallcount"]+1;
+                            }
+                            
+                        }
+                        $data["update_time"]=date("Y-m-d H:i:s");
+                        pdo_update("ewei_shop_member_agentcount",$data,array("openid"=>$member["openid"]));
+                    }else{
+                        
+                        if ($v==$parentid){
+                            $data["agentcount"]=1;
+                            $data["agentallcount"]=1;
+                            if ($my["agentlevel"]==5){
+                                $data["shopkeepercount"]=1;
+                                $data["shopkeeperallcount"]=1;
+                            }
+                        }else{
+                            $data["agentallcount"]=1;
+                            if ($my["agentlevel"]==5){
+                                $data["shopkeeperallcount"]=1;
+                            }
+                            
+                        }
+                        $data["openid"]=$member["openid"];
+                        $data["create_time"]=date("Y-m-d H:i:s");
+                       pdo_insert("ewei_shop_member_agentcount",$data); 
+                    }
+                }
+            }
+        //更新老用户数据 
+        if ($type==1&&$oldparentid){
+            $oldagent=pdo_get("ewei_shop_member",array("id"=>$oldparentid));
+            if ($oldagent){
+               if ($oldagent["parent_id"]){
+                   $oldparent_id=unserialize($oldagent["parent_id"]);
+                   $len=count($oldparent_id);
+                   $oldparent_id[$len]=$oldparentid;
+               }else{
+                   $oldparent_id[0]=$oldparentid;
+               }
+               
+               //更新粉丝数量
+               foreach ($oldparent_id as $k=>$v){
+                   $member=pdo_get("ewei_shop_member",array("id"=>$v));
+                   if ($member){
+                       //获取粉丝总量中数据是否有
+                       $agentcount=pdo_get("ewei_shop_member_agentcount",array("openid"=>$member["openid"]));
+                       if ($agentcount){
+                           if ($v==$oldparentid){
+                               //上级为直推
+                               $data["agentcount"]=$agentcount["agentcount"]-1;
+                               $data["agentallcount"]=$agentcount["agentallcount"]-1;
+                               if ($my["agentlevel"]==5){
+                                   $data["shopkeepercount"]=$agentcount["shopkeepercount"]-1;
+                                   $data["shopkeeperallcount"]=$agentcount["shopkeeperallcount"]-1;
+                               }
+                           }else{
+                               $data["agentallcount"]=$agentcount["agentallcount"]-1;
+                               if ($my["agentlevel"]==5){
+                                   $data["shopkeeperallcount"]=$agentcount["shopkeeperallcount"]-1;
+                               }
+                               
+                           }
+                           $data["update_time"]=date("Y-m-d H:i:s");
+                           pdo_update("ewei_shop_member_agentcount",$data,array("openid"=>$member["openid"]));
+                       }
+                   }
+               }
+               
+            }
+        }
+        return true;
     }
 }
 ?>

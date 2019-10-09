@@ -219,7 +219,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
     
     public function membercount(){
         $member=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." order by id asc");
-        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<4000 and  id>=3500 order by id asc ");
+        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<50 and  id>=1 order by id asc ");
         
         foreach ($m as $k=>$v){
            //获取直推数据
@@ -244,7 +244,57 @@ class Index_EweiShopV2Page extends AppMobilePage{
            
         }
     }
-   
+    function Getparent($mid) {
+        $parent_id=array();
+        $i=0;
+        do {
+            $state=false;
+//             var_dump($mid);
+            $member=pdo_get("ewei_shop_member",array("id"=>$mid));
+//             var_dump($member);
+            if ($member["agentid"]!=0){
+                $agent=pdo_get("ewei_shop_member",array("id"=>$member["agentid"]));
+//                 if (empty($agent["parent_id"])){
+                   if (!in_array($member["agentid"], $parent_id)){
+                    $parent_id[$i]=$member["agentid"];
+                    $i+=1;
+//                     var_dump("11");
+//                     var_dump($member["agentid"]);
+                    $state=true;
+                   }
+//                 }
+//                 else{
+//                    //获取长度
+//                    $parent=unserialize($agent["parent_id"]);
+//                    $len=count($parent);
+//                    $parent_id=$parent;
+//                    $parent_id[$len]=$member["agentid"];
+                  
+//                 }
+            }
+           $mid=$member["agentid"];
+        } while ($state==true);
+        
+        return $parent_id;
+    }
+    
+    public function parent(){
+        $m=pdo_fetchall("select * from ".tablename("ewei_shop_member")." where id>=65603 order by id asc");
+        foreach ($m as $k=>$v){
+            if ($v["agentid"]!=0){
+            $parent_id=$this->Getparent($v["id"]);
+            if (!empty($parent_id)){
+                $data["parent_id"]=serialize($parent_id);
+                pdo_update("ewei_shop_member",$data,array("id"=>$v["id"]));
+            }
+            }
+            var_dump($v["id"]);
+            var_dump($parent_id);
+        }
+        
+    }
+    
+    
 }
 
 ?>
