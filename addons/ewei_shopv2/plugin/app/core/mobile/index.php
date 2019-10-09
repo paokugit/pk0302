@@ -1,7 +1,4 @@
 <?php
-
-use function Qiniu\json_decode;
-
 if (!defined("IN_IA")) {
     exit("Access Denied");
 }
@@ -644,7 +641,10 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
-        $data = pdo_get('ewei_shop_share_help',['id'=>1],['title','thumb','image']);
+        $idarray=pdo_fetchall("select id from ".tablename("ewei_shop_share_help"));
+        $k=array_rand($idarray);
+        $id=$idarray[$k]["id"];
+        $data = pdo_get('ewei_shop_share_help',['id'=>$id],['title','thumb','image']);
         $data['thumb'] = tomedia($data['thumb']);
         $data['image'] = tomedia($data['image']);
         !empty($data)?show_json(1,$data):show_json(0);

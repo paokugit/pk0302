@@ -219,7 +219,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
     
     public function membercount(){
         $member=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." order by id asc");
-        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<50 and  id>=1 order by id asc ");
+        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<=50000 and  id>40000 order by id asc ");
         
         foreach ($m as $k=>$v){
            //获取直推数据
@@ -279,7 +279,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
     }
     
     public function parent(){
-        $m=pdo_fetchall("select * from ".tablename("ewei_shop_member")." where id>=65603 order by id asc");
+        $m=pdo_fetchall("select * from ".tablename("ewei_shop_member")." where id>=65606 order by id asc");
         foreach ($m as $k=>$v){
             if ($v["agentid"]!=0){
             $parent_id=$this->Getparent($v["id"]);

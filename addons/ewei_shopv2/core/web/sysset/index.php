@@ -1352,8 +1352,32 @@ class Index_EweiShopV2Page extends WebPage
      * 分享页缩略图设置
      */
     public function share_help(){
+       
         global $_W;
-
+        global $_GPC;
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 20;
+        $condition = ' and uniacid=:uniacid';
+        $params = array(':uniacid' =>$_W['uniacid']);
+        
+        
+        $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_share_help') . (' WHERE 1 ' . $condition.'  ORDER BY id  asc limit ') . ($pindex - 1) * $psize . ',' . $psize, $params);
+        
+        $total = pdo_fetchcolumn('SELECT count(*) FROM ' . tablename('ewei_shop_share_help') . (' WHERE 1 ' . $condition), $params);
+        $pager = pagination2($total, $pindex, $psize);
+        foreach ($list as $k=>$v){
+            $list[$k]["image"]=tomedia($v["image"]);
+            $list[$k]["thumb"]=tomedia($v["thumb"]);
+        }
+        
+        include($this->template());
+    }
+    //助力海报
+    public function postshare(){
+        global $_W;
+        global $_GPC;
+        $id = intval($_GPC['id']);
+        
         if( $_W["ispost"] )
         {
             $id = intval($_POST['id']);
@@ -1368,14 +1392,39 @@ class Index_EweiShopV2Page extends WebPage
                 $res = pdo_update('ewei_shop_share_help',$add,['id'=>$id]);
             }
             if($res){
-                show_json(1);
+                show_json(1,array('url' => webUrl('sysset/share_help')));
             }else{
                 show_json(0,"操作失败");
             }
         }
-
-        $data = pdo_get('ewei_shop_share_help',['id'=>1]);
-        include($this->template());
+        if ($id){
+        $data=pdo_get("ewei_shop_share_help",array("id"=>$id));
+        }
+        include $this->template();
+    }
+    //助力--添加
+    public function addshare(){
+        $this->postshare();
+    }
+    //助力--编辑
+    public function editshare(){
+        $this->postshare();
+    }
+    //助力--删除
+    public function deleteshare(){
+        
+        
+        global $_W;
+        global $_GPC;
+        $id = intval($_GPC['id']);
+        
+        if (pdo_delete("ewei_shop_share_help",array("id"=>$id))){
+            show_json(1, array('url' => referer()));
+        }else{
+            show_json(0,"删除失败");
+        }
+        
+        
     }
     //首页icon
     public function sportindex(){
