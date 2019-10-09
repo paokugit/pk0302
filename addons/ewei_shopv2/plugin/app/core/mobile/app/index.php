@@ -83,5 +83,54 @@ class Index_EweiShopV2Page extends AppMobilePage
             show_json(0,$resault["message"]);
         }
     }
+
+    /**
+     * 首页
+     */
+    public function home()
+    {
+        global $_W;
+        global $_GPC;
+        $openid = $_GPC['openid'];
+    }
+
+    /**
+     * 商城
+     */
+    public function shop()
+    {
+
+    }
+
+    /**
+     * 折扣付
+     */
+    public function rebate()
+    {
+
+    }
+
+    /**
+     * 专享
+     */
+    public function exclusive()
+    {
+
+    }
+
+    /**
+     * 我的个人中心
+     */
+    public function my()
+    {
+
+    }
+
+    /**
+     * 订单加支付
+     */
+    public function order(){
+
+    }
 }
 ?>
