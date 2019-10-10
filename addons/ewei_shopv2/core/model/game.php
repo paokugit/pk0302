@@ -167,4 +167,18 @@ class Game_EweiShopV2Model{
         }
         return $gift;
     }
+
+    /**
+     * 检测会员的额度
+     * @param $openid
+     * @param $level
+     * @return bool|mixed
+     */
+    public function checklimit($openid,$level)
+    {
+        $limit = pdo_getcolumn('ewei_shop_commission_level',['id'=>$level],'limit');
+        $all = pdo_fetchall('select * from '.tablename('ewei_shop_member_limit_order').'where openid = :openid and status = 1',[':openid'=>$openid]);
+        $sum = array_sum(array_column($all,'limit'));
+        return $limit + $sum;
+    }
 }

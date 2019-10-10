@@ -29,9 +29,10 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['mobile'=>$mobile,'uniacid'=>$uniacid]);
         //计算用户的额度
-        $limit = $this->checklimit($member['openid'],$member['agentlevel']);
+        $limit = m('game')->checklimit($member['openid'],$member['agentlevel']);
         //计算用户已经消费的额度
-        $sale = pdo_fetchall('select * from '.tablename('mc_credits_record').' where openid = :openid and remark = "RV钱包充值"',[':openid'=>$member['openid']]);        $sale_sum = abs(array_sum(array_column($sale,'num')));
+        $sale = pdo_fetchall('select * from '.tablename('mc_credits_record').' where openid = :openid and remark = "RV钱包充值"',[':openid'=>$member['openid']]);
+        $sale_sum = abs(array_sum(array_column($sale,'num')));
         if($sale_sum + $money > $limit){
             exit(json_encode(['code'=>207,'msg'=>'您的充值额度'.$limit.'元,已使用'.$sale_sum.'元,请前往跑库提额或充值额不得超'.($limit-$sale_sum)]));
         }
@@ -138,20 +139,6 @@ class Rebate_EweiShopV2Page extends AppMobilePage
             'createtime'=>time()
         ];
         return pdo_insert('core_rebate_log',$data);
-    }
-
-    /**
-     * 检测会员的额度
-     * @param $openid
-     * @param $level
-     * @return bool|mixed
-     */
-    public function checklimit($openid,$level)
-    {
-        $limit = pdo_getcolumn('ewei_shop_commission_level',['id'=>$level],'limit');
-        $all = pdo_fetchall('select * from '.tablename('ewei_shop_member_limit_order').'where openid = :openid and status = 1',[':openid'=>$openid]);
-        $sum = array_sum(array_column($all,'limit'));
-        return $limit + $sum;
     }
 }
 ?>

@@ -52,7 +52,7 @@ class List_EweiShopV2Page extends AppMobilePage
     public function index_sale()
     {
         //查看有视频的  有库存的  在售的所有商品
-        $list = pdo_fetchall('select id,thumb,title,marketprice,productprice,total,sales,video from '.tablename('ewei_shop_goods').'where video!="" and total > 0 and status = 1 group by video order by id desc limit 10');
+        $list = pdo_fetchall('select id,thumb,title,marketprice,productprice,total,sales,video from '.tablename('ewei_shop_goods').'where video!="" and total > 0 and status = 1 group by video order by id desc limit 5');
         foreach ($list as $key=>$item){
             $list[$key]['video'] = tomedia($item['video']);
 	    $list[$key]['thumb'] = tomedia($item['thumb']);

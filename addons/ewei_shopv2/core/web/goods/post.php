@@ -322,6 +322,7 @@ if ($_W['ispost']) {
     $data['dispatchtype'] = intval($_GPC['dispatchtype']);
     $data['dispatchprice'] = trim($_GPC['dispatchprice']);
     $data['remote_dispatchprice'] = trim($_GPC['remote_dispatchprice']);
+    $data['is_remote'] = $_GPC['is_remote'];
     $data['dispatchid'] = intval($_GPC['dispatchid']);
     if ($data['total'] === -1) {
         $data['total'] = 0;
