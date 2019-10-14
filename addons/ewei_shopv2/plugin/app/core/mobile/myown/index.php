@@ -303,32 +303,42 @@ class Index_EweiShopV2Page extends AppMobilePage{
      */
     public function fix_refund()
     {
-        return pdo_insert('log',['log'=>'没有人帮他代付过,无需退款','createtime'=>time()]);
         //退换货的不处理  系统自动处理
         $refund = pdo_fetchall('select * from '.tablename('ewei_shop_order_refund').'where status in (0,3,4)');
+        if(empty($refund)){
+            pdo_insert('log',['log'=>'暂无待处理维权信息','createtime'=>date('Y-m-d H:i:s',time())]);
+        }
         foreach ($refund as $key=>$item){
             //等于0  申请中  7天商家不处理 无理由退款  等于3   商家处理    4 处理后  需要用户发货
             //rtype  0  退款  1  退款退货  2换货
             $order = pdo_fetch('select * from '.tablename('ewei_shop_order').'where id = :id',[':id'=>$item['orderid']]);
             if($item['status'] == 0){
                 //如果是退款  且  超过七天 直接 退款成功  status = 1  并且  维权时间改成当前时间
-                if($item['rtype'] == 0 && time() > $item['createtime'] + 3600*7){
+                if($item['rtype'] == 0 && time() > $item['createtime'] + 3600*7*24){
                     pdo_update('ewei_shop_order_refund',['status'=>1,'refundtime'=>time()],['id'=>$item['id']]);
                     pdo_update('ewei_shop_order',['refundstate'=>0],['id'=>$item['orderid']]);
                     $this->refund_money($order,$item);
-                }elseif($item['rtype'] != 0 && time() > $item['createtime'] + 3600 *3){
+                    pdo_insert('log',['log'=>'退款维权订单的orderid:'.$item['orderid'].',维权订单号refundno:'.$item['refundno'].',商家7天未处理，系统自动处理成已退款','createtime'=>date('Y-m-d H:i:s',time())]);
+                }elseif($item['rtype'] != 0 && time() > $item['createtime'] + 3600*3*24){
                     //如果不是退款  则 3天  改成  商家已处理  status  = 3
                     pdo_update('ewei_shop_order_refund',['status'=>3,'operatetime'=>time()],['id'=>$item['id']]);
+                    pdo_insert('log',['log'=>'退款退货或换货维权订单的orderid:'.$item['orderid'].',维权订单号refundno:'.$item['refundno'].',商家3天未处理，系统自动处理为商家已处理','createtime'=>date('Y-m-d H:i:s',time())]);
+                }else{
+                    pdo_insert('log',['log'=>'暂无可系统处理的退款维权信息','createtime'=>time()]);
                 }
-            }elseif ($item['status'] == 3 && time() > $item['operatetime'] + 3600*3){
+            }elseif ($item['status'] == 3 && time() > $item['operatetime'] + 3600*3*24){
                 //如果状态是3  也就是商家已处理  等待用户发货   如果超过三天  则默认维权申请取消  并且把订单表的refundstate字段改变 0
                 pdo_update('ewei_shop_order_refund',['status'=>-2,'refundtime'=>time()],['id'=>$item['id']]);
                 pdo_update('ewei_shop_order',['refundstate'=>0],['id'=>$item['orderid']]);
-            }elseif($item['status'] == 4 && time() > $item['sendtime'] + 3600 * 8 ){
+                pdo_insert('log',['log'=>'退款退货或换货维权订单的orderid:'.$item['orderid'].',维权订单号refundno:'.$item['refundno'].',用户3天未发货，系统自动处理为维权订单取消','createtime'=>date('Y-m-d H:i:s',time())]);
+            }elseif($item['status'] == 4 && time() > $item['sendtime'] + 3600*8*24 ){
                 //如果用户已发货  然后  当前时间 已经超过发货时间的7天  就只懂代表维权成功
                 pdo_update('ewei_shop_order_refund',['status'=>1,'refundtime'=>time()],['id'=>$item['id']]);
                 pdo_update('ewei_shop_order',['refundstate'=>0],['id'=>$item['orderid']]);
                 $this->refund_money($order,$item);
+                pdo_insert('log',['log'=>'退款退货或换货维权订单的orderid:'.$item['orderid'].',维权订单号refundno:'.$item['refundno'].',商家8天未处理，系统自动处理为退款','createtime'=>date('Y-m-d H:i:s',time())]);
+            }else{
+                pdo_insert('log',['log'=>'暂无可系统处理的维权信息','createtime'=>date('Y-m-d H:i:s',time())]);
             }
         }
     }

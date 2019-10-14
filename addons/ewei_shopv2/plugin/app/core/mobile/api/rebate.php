@@ -31,10 +31,10 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         //计算用户的额度
         $limit = m('game')->checklimit($member['openid'],$member['agentlevel']);
         //计算用户已经消费的额度
-        $sale = pdo_fetchall('select * from '.tablename('mc_credits_record').' where openid = :openid and remark = "RV钱包充值"',[':openid'=>$member['openid']]);
+        $sale = pdo_fetchall('select * from '.tablename('mc_credits_record').' where openid = :openid and remark = "RV钱包充值" and createtime > 1570776300',[':openid'=>$member['openid']]);
         $sale_sum = abs(array_sum(array_column($sale,'num')));
         if($sale_sum + $money > $limit){
-            exit(json_encode(['code'=>207,'msg'=>'您的充值额度'.$limit.'元,已使用'.$sale_sum.'元,请前往跑库提额或充值额不得超'.($limit-$sale_sum)]));
+            exit(json_encode(['code'=>207,'msg'=>'请前往跑库-折扣付-额度购买额度']));
         }
         if($token != md5(md5(base64_encode($mobile.$msg.$member['openid'])))){
             $this->addlog($add,202,'折扣宝充值鉴权验证失败');

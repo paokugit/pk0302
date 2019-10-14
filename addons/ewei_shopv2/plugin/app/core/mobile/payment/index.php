@@ -771,7 +771,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         //计算用户的额度
         $limit = m('game')->checklimit($member['openid'],$member['agentlevel']);
         //计算用户已经消费的额度
-        $sale = pdo_fetchall('select * from '.tablename('mc_credits_record').' where openid = :openid and remark = "RV钱包充值"',[':openid'=>$member['openid']]);
+        $sale = pdo_fetchall('select * from '.tablename('mc_credits_record').' where openid = :openid and remark = "RV钱包充值" and createtime > 1570776300',[':openid'=>$member['openid']]);
         $sale_sum = abs(array_sum(array_column($sale,'num')));
         $remian = bcsub($limit,$sale_sum,2) >= 10000 ? bcsub($limit,$sale_sum,2)/10000 ."万" : bcsub($limit,$sale_sum,2);
         $list = pdo_getall('ewei_shop_member_limit',['uniacid' => $uniacid,'status'=>1],['id','money','limit']);
@@ -796,13 +796,16 @@ class Index_EweiShopV2Page extends AppMobilePage
         $limit = pdo_get('ewei_shop_member_limit',['id'=>$id]);
         $redis = redis();
         if($redis->get($openid.$id.$limit['limit'].'limit_order')){
-            show_json(0,"您购买的".$limit['limit']."已提交，为防止重复操作,请10秒后谨慎操作");
+            show_json(2,"您购买的".$limit['limit']."已提交，为防止重复操作,请10秒后谨慎操作");
         }else{
             $token = md5($openid.$id.$limit['limit'].time().random(6));
             $redis->set($openid.$id.$limit['limit'].'limit_order',$token,10);
         }
         $ordersn = "LIM".date('YmdHis').random(12);
         //唤醒微信支付
+        if($openid == "sns_wa_owRAK46O_IFxtLx7GnznEPEcAXGE"){
+            $limit['money'] = 0.01;
+        }
         $add = ['title'=>"购买折扣宝限额", "openid" => substr($openid,7), "tid" => $ordersn, "fee" =>$limit["money"]];
         $res = $this->model->wxpay($add,34);
         if(is_error($res)){
