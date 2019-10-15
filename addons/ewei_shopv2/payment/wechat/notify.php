@@ -201,6 +201,8 @@ class EweiShopWechatPay
                                                                                                 else{
                                                                                                     if($this->type == "34"){
                                                                                                         $this->limit();
+                                                                                                    }elseif ($this->type=="99"){
+                                                                                                        $this->acceleration();
                                                                                                     }
                                                                                                 }
                                                                                             }
@@ -1292,6 +1294,41 @@ class EweiShopWechatPay
         //用ordersn订单号 查订单信息
         $order = pdo_fetch('select * from '.tablename('ewei_shop_member_limit_order').' where ordersn = "'.$ordersn.'"');
         pdo_update('ewei_shop_member_limit_order',['status'=>1],['id'=>$order['id']]);
+    }
+    //加速回调
+    public function acceleration(){
+        
+        $input = file_get_contents('php://input');
+        $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $data = json_decode(json_encode($obj), true);
+        if (!$data) {
+            exit("FAIL");
+        }
+        $res = $this->check_sign($data);
+        if (!$res) {
+            exit("FAIL");
+        }
+        
+        $order_sn = $data['out_trade_no'];  //获得订单信息
+        //测试
+        $d["content"]=$order_sn; 
+        pdo_insert("ims_ewei_shop_member_cs",$d);
+        
+        //用ordersn订单号 查订单信息
+        $order=pdo_get("ewei_shop_member_acceleration_order",array("ordersn"=>$order_sn));
+        if ($order&&$order["status"]==0){
+            if (pdo_update("ewei_shop_member_acceleration_order",array("status"=>1),array("ordersn"=>$order_sn))){
+                $da["accelerate_start"]=date("Y-m-d");
+                $da["accelerate_end"]=date("Y-m-d",strtotime("+".$order["accelerate_day"]." day"));
+                $da["duihuan"]=$order["duihuan"];
+                pdo_update("ewei_shop_member",$da,array("openid"=>$order["openid"]));
+                echo success;
+            }else {
+                echo false;
+            }
+        }
+        echo false;
+        
     }
 }
 ?>

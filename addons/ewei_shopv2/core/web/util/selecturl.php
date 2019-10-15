@@ -82,8 +82,8 @@ class Selecturl_EweiShopV2Page extends WebPage
 	                    array( "name" => "商城首页", "url" => mobileUrl(NULL, NULL, $full), "url_wxapp" => "/pages/index/index" ),
 	                    array( "name" => "分类导航", "url" => mobileUrl("shop/category", NULL, $full), "url_wxapp" => "/pages/shop/caregory/index" ),
 	                    array( "name" => "全部商品", "url" => mobileUrl("goods", NULL, $full), "url_wxapp" => "/pages/goods/index/index" ),
-	                    array( "name" => "公告页面", "url" => mobileUrl("shop/notice", NULL, $full), "url_wxapp" => "/pages/shop/notice/index/index" ),
-	                    array( "name" => "消息通知", "url" => mobileUrl("", NULL, $full), "url_wxapp" => "/pages/shop/notice/notification/notification" ),
+	                    array( "name" => "公告页面", "url" => mobileUrl("shop/notice", NULL, $full), "url_wxapp" => "/packageA/pages/shop/notice/index/index" ),
+	                    array( "name" => "消息通知", "url" => mobileUrl("", NULL, $full), "url_wxapp" => "/packageA/pages/shop/notice/notification/notification" ),
 	                    array( "name" => "购物车", "url" => mobileUrl("member/cart", NULL, $full), "url_wxapp" => "/pages/member/cart/index" ),
 	                )
 	            ),
