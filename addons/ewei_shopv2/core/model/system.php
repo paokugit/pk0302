@@ -957,6 +957,10 @@ class System_EweiShopV2Model {
                             array(
                                 "title" => "礼包管理",
                                 "route" => "giftbag"
+                            ),
+                            array(
+                                "title" => "边看边买",
+                                "route" => "lookbuy"
                             )
                         )
                     ) ,

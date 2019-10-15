@@ -137,10 +137,8 @@ class Index_EweiShopV2Page extends AppMobilePage{
        $openid = $_GPC['openid'];
        $uniacid = $_W['uniacid'];
        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
-       if(!$member){
-           show_json(0,"用户信息错误");
-       }
-       $gift = pdo_fetch('select * from '.tablename('ewei_shop_gift_bag').'where status = 1 and levels like "%'.$member["agentlevel"].'%"');
+       $agentlevel = !empty($member) ? $member["agentlevel"] : 0;
+       $gift = pdo_fetch('select * from '.tablename('ewei_shop_gift_bag').'where status = 1 and levels like "%'.$agentlevel.'%"');
        //当前时间小于开始时间   当前时间大于结束时间
        if($gift['starttime'] > time() || $gift['endtime'] < time()){
             show_json(-1,"不在活动期内");
