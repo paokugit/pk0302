@@ -117,6 +117,19 @@ class Op_EweiShopV2Page extends AppMobilePage
                 pdo_update("ewei_shop_member_credit2",array("frozen"=>1),array('orderid'=>$orderid));
             }
         }
+        //折扣宝订单  花多少钱给多少钱
+        $order_goods = pdo_fetchall('select id,orderid,goodsid from '.tablename('ewei_shop_order_goods').'where orderid = :orderid',[':orderid'=>$orderid]);
+		$zhekoubao = 0;
+		//如果该订单内  有折扣包商品  折扣金额为0  那么奖励该商品的价格数给用户的折扣宝
+		foreach ($order_goods as $item){
+           $good = pdo_get('ewei_shop_goods',['id'=>$item['goodsid']]);
+           if($good['deduct_type'] == 2 && $good['deduct'] == 0){
+               $zhekoubao = $zhekoubao + $good['marketprice'];
+		   }
+		}
+		if($zhekoubao > 0){
+			m('member')->setCredit($order['openid'],'credit3',$zhekoubao,"购买折扣宝商品奖励折扣宝");
+		}
 		pdo_update('ewei_shop_order', array('status' => 3, 'finishtime' => time(), 'refundstate' => 0), array('id' => $order['id'], 'uniacid' => $_W['uniacid']));
 		m('order')->setStocksAndCredits($orderid, 3);
 		m('member')->upgradeLevel($order['openid'], $orderid);

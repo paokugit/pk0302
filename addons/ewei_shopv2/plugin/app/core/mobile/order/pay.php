@@ -359,7 +359,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
 					{
 						$record = array( );
 						$record["status"] = "1";
-						$record["type"] = "wechat";
+						$record["type"] = "alipay";
 						pdo_update("core_paylog", $record, array( "plid" => $log["plid"] ));
 						$ret = array( );
 						$ret["result"] = "success";
