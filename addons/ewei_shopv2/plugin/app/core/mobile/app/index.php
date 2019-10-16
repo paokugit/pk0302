@@ -19,20 +19,26 @@ class Index_EweiShopV2Page extends AppMobilePage
         //$type == 1  注册   $type == 2 忘记密码
         //正则验证手机号的格式
         if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
-            show_json(0,"手机号格式不正确");
+            app_error(1,"手机号格式不正确");
         }
         //查找短息的发送的记录
         $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>5]);
         if(!$sms){
-            show_json(0,"短信验证码不正确");
+            app_error(1,"短信验证码不正确");
         }
         if($sms['result'] == 1){
-            show_json(0,"该短信已验证");
+            app_error(1,"该短信已验证");
         }
         //更改短信验证码的验证状态
         pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
         if($type == 1){
-
+            //注册
+            $member = pdo_get('ewei_shop_member',['mobile'=>$mobile]);
+            if(!empty($member)){
+                pdo_update('ewei_shop_member',['password'=>md5(base64_encode($pwd))],['mobile'=>$mobile]);
+            }else{
+                pdo_insert('ewei_shop_member',['mobile'=>$mobile,'password'=>md5(base64_encode($pwd)),'createtime'=>time(),'status'=>1]);
+            }
         }
     }
 

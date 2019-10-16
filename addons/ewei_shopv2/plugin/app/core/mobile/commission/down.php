@@ -160,7 +160,7 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 			$list[$key]['createtime'] = date('Y-m-d H:i',$item['createtime']);
 			$list[$key]['agentname'] = $item['agentlevel'] == 0 ? "普通会员" : pdo_getcolumn('ewei_shop_commission_level',['id'=>$item['agentlevel'],'uniacid'=>$uniacid],'levelname');
 		}
-		show_json(0,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
+		show_json(1,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
 	}
 }
 

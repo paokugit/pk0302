@@ -382,9 +382,11 @@ class Devote_EweiShopV2Model{
            }
         }
         //上级用户
-        if ($member["agentid"]!=0){
+       // if ($member["agentid"]!=0){
+        if ($order["share_id"]!=0 && $member['id'] != $order['share_id']){
           //  $agent=pdo_get("ewei_shop_member",array("id"=>$member["agentid"]));
-            $agent=m('member')->getMember($member["agentid"]);
+            //$agent=m('member')->getMember($member["agentid"]);
+            $agent=m('member')->getMember($order["share_id"]);
             if ($agent["mobile"]&&$agent["weixin"]){
                 //判断用户级别
                 if ($agent["agentlevel"]>=1){
@@ -392,7 +394,8 @@ class Devote_EweiShopV2Model{
                         m('member')->setCredit($agent["openid"], 'credit4',$agent_price, $member["nickname"]."下单,订单编号：".$order["ordersn"]);
                         //消息提醒
                         $dd["keyword1"]=$agent_price;
-                        $dd["keyword2"]="您推荐的用户购买商品获取贡献值奖励";
+                        //$dd["keyword2"]="您推荐的用户购买商品获取贡献值奖励";
+                        $dd["keyword2"]="您分享的商品被购买获取贡献值奖励";
                         $dd["keyword3"]=date("Y-m-d H:i:s");
                         $dd["keyword4"]="恭喜您获取贡献值奖励，奖励已达到您的贡献值账户，请注意查收";
                         $this->notice($agent["openid"], $dd);
