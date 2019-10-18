@@ -127,7 +127,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($country_id) || $country_id == 44){
             //阿里云的短信 在我们平台的模板i
             if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
-                show_json(0,"手机号格式不正确");
+                app_error(1,"手机号格式不正确");
             }
             $resault=com_run("sms::mysend", array('mobile'=>$mobile,'tp_id'=>$tp_id,'code'=>$code));
         }else{
@@ -138,9 +138,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         if ($resault["status"]==1){
             //添加短信记录
             pdo_insert('core_sendsms_log',['uniacid'=>$_W['uniacid'],'mobile'=>$mobile,'tp_id'=>5,'content'=>$code,'createtime'=>time(),'ip'=>CLIENT_IP]);
-            show_json(1,"发送成功");
+            app_error(0,"发送成功");
         }else{
-            show_json(0,$resault["message"]);
+            app_error(1,$resault["message"]);
         }
     }
 
