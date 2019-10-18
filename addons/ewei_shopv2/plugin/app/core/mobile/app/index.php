@@ -37,17 +37,40 @@ class Index_EweiShopV2Page extends AppMobilePage
             if(!empty($member)){
                 pdo_update('ewei_shop_member',['password'=>md5(base64_encode($pwd))],['mobile'=>$mobile]);
             }else{
-                pdo_insert('ewei_shop_member',['mobile'=>$mobile,'password'=>md5(base64_encode($pwd)),'createtime'=>time(),'status'=>1]);
+                $salt = random(16);
+                pdo_insert('ewei_shop_member',['mobile'=>$mobile,'password'=>md5(base64_encode($pwd)),'createtime'=>time(),'status'=>1,'salt'=>$salt]);
             }
+        }else{
+            //修改密码
+            pdo_update('ewei_shop_member',['password'=>md5(base64_encode($pwd))],['mobile'=>$mobile]);
         }
     }
 
     /**
-     * 登录
+     * 账号密码登录
      */
     public function login()
     {
         header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        //接受参数
+        $mobile = $_GPC['mobile'];
+        $pwd = $_GPC['password'];
+        //查找改手机号是否注册
+        $member = pdo_get('ewei_shop_member',['mobile'=>$mobile]);
+        if(!$member){
+            app_error(1,"手机号未注册");
+        }else{
+            if(md5(base64_encode($pwd)) == $member['password']){
+                //APP登录动态码  如果有人登录就更新
+                $app_salt = random(36);
+                pdo_update('ewei_shop_member',['app_salt'=>$app_salt],['id'=>$member['id']]);
+                $token = m('member')->setLoginToken($member['id'],$app_salt);
+                app_error(0,['token'=>$token,'msg'=>"登录成功"]);
+            }else{
+                app_error(1,"密码不正确");
+            }
+        }
     }
 
     /**
@@ -56,6 +79,36 @@ class Index_EweiShopV2Page extends AppMobilePage
     public function code_login()
     {
         header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        $mobile = $_GPC['mobile'];
+        //正则验证手机号的格式
+        if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
+            app_error(1,"手机号格式不正确");
+        }
+        $code = $_GPC['code'];
+        $member = pdo_get('ewei_shop_member',['mobile'=>$mobile]);
+        //查找短息的发送的记录
+        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>5]);
+        if(!$sms){
+            app_error(1,"短信验证码不正确");
+        }
+        if($sms['result'] == 1){
+            app_error(1,"该短信已验证");
+        }
+        $app_salt = random(36);
+        if(!$member){
+            //短信验证码登录 如果不存在 加入数据  然后 生成一个动态码
+            $salt = random(16);
+            pdo_insert('ewei_shop_member',['mobile'=>$mobile,'createtime'=>time(),'status'=>1,'salt'=>$salt,'app_salt'=>$app_salt]);
+            $user_id = pdo_insertid();
+            $token = m('member')->setLoginToken($user_id,$app_salt);
+            app_error(0,['token'=>$token]);
+        }else{
+            //如果已经存在 更新app动态码
+            pdo_update('ewei_shop_member',['app_salt'=>$app_salt],['id'=>$member['id']]);
+            $token = m('member')->setLoginToken($member['id'],$app_salt);
+            app_error(0,['token'=>$token]);
+        }
     }
 
     /**
@@ -78,6 +131,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             }
             $resault=com_run("sms::mysend", array('mobile'=>$mobile,'tp_id'=>$tp_id,'code'=>$code));
         }else{
+            //发送海外短信
             $country=pdo_get("sms_country",array("id"=>$country_id));
             $resault=com_run("sms::mysend", array('mobile'=>$country["phonecode"].$mobile,'tp_id'=>$tp_id,'code'=>$code));
         }
@@ -97,7 +151,11 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
-        $openid = $_GPC['openid'];
+        $token = $_GPC['token'];
+        $user_id = m('member')->getLoginToken($token);
+        if($user_id == 0){
+            app_error(1,"用户信息不正确");
+        }
     }
 
     /**
