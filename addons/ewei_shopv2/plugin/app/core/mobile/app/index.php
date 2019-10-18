@@ -28,7 +28,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $tp_id = 3;
         }
         //查找短息的发送的记录
-        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>$tp_id]);
+        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'content'=>$code,'tp_id'=>$tp_id]);
         if(!$sms){
             app_error(1,"短信验证码不正确");
         }
@@ -100,7 +100,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $tp_id = 3;
         }
         //查找短息的发送的记录
-        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>$tp_id]);
+        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'content'=>$code,'tp_id'=>$tp_id]);
         if(!$sms){
             app_error(1,"短信验证码不正确");
         }
@@ -165,10 +165,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $token = $_GPC['token'];
+        //鉴权验证
         $user_id = m('member')->getLoginToken($token);
         if($user_id == 0){
             app_error(1,"用户信息不正确");
         }
+        //
     }
 
     /**
