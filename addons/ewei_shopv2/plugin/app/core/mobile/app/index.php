@@ -16,13 +16,19 @@ class Index_EweiShopV2Page extends AppMobilePage
         $code = $_GPC['code'];
         $type = $_GPC['type'];
         $pwd = $_GPC['pwd'];
+        $country_id = $_GPC['country_id'];
         //$type == 1  注册   $type == 2 忘记密码
         //正则验证手机号的格式
         if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
             app_error(1,"手机号格式不正确");
         }
+        //短信类型
+        $tp_id = 1;
+        if($country_id != 44 && !empty($country_id)){
+            $tp_id = 3;
+        }
         //查找短息的发送的记录
-        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>5]);
+        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>$tp_id]);
         if(!$sms){
             app_error(1,"短信验证码不正确");
         }
@@ -81,14 +87,20 @@ class Index_EweiShopV2Page extends AppMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $mobile = $_GPC['mobile'];
+        $country_id = $_GPC['country_id'];
         //正则验证手机号的格式
         if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
             app_error(1,"手机号格式不正确");
         }
         $code = $_GPC['code'];
         $member = pdo_get('ewei_shop_member',['mobile'=>$mobile]);
+        //短信类型
+        $tp_id = 1;
+        if($country_id != 44 && !empty($country_id)){
+            $tp_id = 3;
+        }
         //查找短息的发送的记录
-        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>5]);
+        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'code'=>$code,'tp_id'=>$tp_id]);
         if(!$sms){
             app_error(1,"短信验证码不正确");
         }
@@ -127,20 +139,21 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($country_id) || $country_id == 44){
             //阿里云的短信 在我们平台的模板i
             if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
-                show_json(0,"手机号格式不正确");
+                app_error(1,"手机号格式不正确");
             }
             $resault=com_run("sms::mysend", array('mobile'=>$mobile,'tp_id'=>$tp_id,'code'=>$code));
         }else{
             //发送海外短信
             $country=pdo_get("sms_country",array("id"=>$country_id));
+            $tp_id = 3;
             $resault=com_run("sms::mysend", array('mobile'=>$country["phonecode"].$mobile,'tp_id'=>$tp_id,'code'=>$code));
         }
         if ($resault["status"]==1){
             //添加短信记录
-            pdo_insert('core_sendsms_log',['uniacid'=>$_W['uniacid'],'mobile'=>$mobile,'tp_id'=>5,'content'=>$code,'createtime'=>time(),'ip'=>CLIENT_IP]);
-            show_json(1,"发送成功");
+            pdo_insert('core_sendsms_log',['uniacid'=>$_W['uniacid'],'mobile'=>$mobile,'tp_id'=>$tp_id,'content'=>$code,'createtime'=>time(),'ip'=>CLIENT_IP]);
+            app_error(0,"发送成功");
         }else{
-            show_json(0,$resault["message"]);
+            app_error(1,$resault["message"]);
         }
     }
 
