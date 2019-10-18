@@ -52,7 +52,7 @@ foreach( $sets as $set )
             //如果该订单内  有折扣包商品  折扣金额为0  那么奖励该商品的价格数给用户的折扣宝
             foreach ($order_goods as $item){
                 $good = pdo_get('ewei_shop_goods',['id'=>$item['goodsid']]);
-                if($good['deduct_type'] == 2 && $good['deduct'] == 0){
+                if($good['deduct_type'] == 2 && $good['deduct'] == 0 && $good['merchid'] == 0){
                     $zhekoubao = $zhekoubao + $good['marketprice'];
                 }
             }

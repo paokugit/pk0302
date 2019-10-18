@@ -1693,5 +1693,27 @@ class Member_EweiShopV2Model
         }
         return true;
     }
+
+    /**
+     * APP登录token加密
+     * @param $user_id
+     * @param $salt
+     * @return string
+     */
+    public function setLoginToken($user_id,$salt)
+    {
+        return base64_encode(json_encode(['uid'=>$user_id,'salt'=>$salt]));
+    }
+
+    /**
+     * APP鉴权校验
+     * @param $token
+     * @return int
+     */
+    public function getLoginToken($token)
+    {
+        $data = json_decode(base64_decode($token),true);
+        return time() - $data['time'] > 3600 ? 0 : $data['uid'];
+    }
 }
 ?>
