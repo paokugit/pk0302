@@ -46,7 +46,21 @@ foreach( $sets as $set )
 
             $time = time();
             pdo_query("update " . tablename("ewei_shop_order") . " set status=3,finishtime=:time where id=:orderid", array( ":time" => $time, ":orderid" => $orderid ));
-            if( $order["isparent"] == 1 ) 
+            //折扣宝订单  花多少钱给多少钱
+            $order_goods = pdo_fetchall('select id,orderid,goodsid from '.tablename('ewei_shop_order_goods').'where orderid = :orderid',[':orderid'=>$orderid]);
+            $zhekoubao = 0;
+            //如果该订单内  有折扣包商品  折扣金额为0  那么奖励该商品的价格数给用户的折扣宝
+            foreach ($order_goods as $item){
+                $good = pdo_get('ewei_shop_goods',['id'=>$item['goodsid']]);
+                if($good['deduct_type'] == 2 && $good['deduct'] == 0){
+                    $zhekoubao = $zhekoubao + $good['marketprice'];
+                }
+            }
+            if($zhekoubao > 0){
+                m('member')->setCredit($order['openid'],'credit3',$zhekoubao,"购买折扣宝商品奖励折扣宝");
+            }
+
+            if( $order["isparent"] == 1 )
             {
                 continue;
             }
@@ -101,7 +115,7 @@ function goodsReceive($order, $sysday = 0)
 
     if( $order["merchid"] == 0 ) 
     {
-        $goods = pdo_fetchall("select og.goodsid, g.autoreceive from" . tablename("ewei_shop_order_goods") . " og left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid where og.orderid=" . $order["id"]);
+        $goods = pdo_fetchall("select og.goodsid, g.autoreceive from " . tablename("ewei_shop_order_goods") . " og left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid where og.orderid=" . $order["id"]);
         foreach( $goods as $i => $g ) 
         {
             $days[] = $g["autoreceive"];
