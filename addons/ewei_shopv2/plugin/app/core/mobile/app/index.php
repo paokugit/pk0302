@@ -169,7 +169,6 @@ class Index_EweiShopV2Page extends AppMobilePage
         $token = $_GPC['token'];
         //鉴权验证
         $user_id = m('member')->getLoginToken($token);
-        var_dump($user_id);exit;
         if($user_id == 0){
             app_error(1,"用户信息不正确");
         }
