@@ -1702,7 +1702,7 @@ class Member_EweiShopV2Model
      */
     public function setLoginToken($user_id,$salt)
     {
-        return base64_encode(json_encode(['uid'=>$user_id,'salt'=>$salt]));
+        return base64_encode(implode(',',[$user_id,$salt]));
     }
 
     /**
@@ -1712,8 +1712,10 @@ class Member_EweiShopV2Model
      */
     public function getLoginToken($token)
     {
-        $data = json_decode(base64_decode($token),true);
-        return time() - $data['time'] > 3600 ? 0 : $data['uid'];
+        $data = explode(',',base64_decode($token));
+        //把登录的账户查出来  然后 对比登录产生的随机码  如果一样就是当前登录 不一样就是又被登录
+        $member = pdo_get('ewei_shop_member',['id'=>$data[0]]);
+        return $member['app_salt'] == $data[1] ? $data[0] : 0;
     }
 }
 ?>
