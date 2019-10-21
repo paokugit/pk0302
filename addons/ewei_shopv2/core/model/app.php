@@ -43,10 +43,10 @@ class App_EweiShopV2Model
         //今天的时间
         $day = date('Y-m-d');
         //自身步数
-        $bushu = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day`=:today and user_id=:user_id and type!=:type", array(':today' => $day, ':openid' => $user_id,':type'=>2));
+        $bushu = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day` = :today and user_id = :user_id and type!=:type", array(':today' => $day, ':user_id' => $user_id,':type'=>2));
         $data['todaystep'] = empty($bushu) ? 0 : $bushu;
         //邀请步数
-        $yaoqing = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day`=:today and user_id=:user_id ", array(':today' => $day, ':openid' => $user_id));
+        $yaoqing = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day` = :today and user_id = :user_id ", array(':today' => $day, ':user_id' => $user_id));
         $data['yaoqing'] = empty($yaoqing) ? 0 : $yaoqing;
 		//是否绑定手机号
 		$data["bind"] = !empty($member["mobile"]) ? 1 : 0;
@@ -162,7 +162,7 @@ class App_EweiShopV2Model
         $data['icon'] = $l;
         //快报
         //计算提现总人数
-        $list = pdo_fetchall('select sum(l.money) as sum_money,m.nickname from '.tablename('ewei_shop_member_log').'l join '.tablename('ewei_shop_member').'m on m.openid=l.openid'.' where l.uniacid = "'.$uniacid.'" and type = 1 and l.status = 1 group by l.openid order by sum_money desc');
+        $list = pdo_fetchall('select sum(l.money) as sum_money,m.nickname from '.tablename('ewei_shop_member_log').'l join '.tablename('ewei_shop_member').'m on m.openid = l.openid or m.id = l.user_id'.' where l.uniacid = "'.$uniacid.'" and type = 1 and l.status = 1 group by l.openid order by sum_money desc');
         $total = count($list);
         //设置每页数
         $pageSize = 100;
@@ -170,7 +170,7 @@ class App_EweiShopV2Model
         $page = rand(1,floor($total/$pageSize));
         $psize = ($page-1)*$pageSize;
         //分页显示
-        $log = pdo_fetchall('select sum(l.money) as sum_money,m.nickname,m.id from '.tablename('ewei_shop_member_log').'l join '.tablename('ewei_shop_member').'m on m.openid=l.openid'.' where l.uniacid = "'.$uniacid.'" and type = 1 and l.status = 1 and m.id NOT IN (4350,9851,9861) group by l.openid order by sum_money desc LIMIT '.$psize.','.$pageSize);
+        $log = pdo_fetchall('select sum(l.money) as sum_money,m.nickname,m.id from '.tablename('ewei_shop_member_log').'l join '.tablename('ewei_shop_member').'m on m.openid=l.openid or m.id = l.user_id'.' where l.uniacid = "'.$uniacid.'" and type = 1 and l.status = 1 and m.id NOT IN (4350,9851,9861) group by l.openid order by sum_money desc LIMIT '.$psize.','.$pageSize);
         foreach ($log as &$item){
             //计算昵称的长度
             $length = mb_strlen($item['nickname']);
@@ -183,7 +183,7 @@ class App_EweiShopV2Model
         }
         $data['rank'] = ['log'=>$log,'page'=>$page,'total'=>$total];
         //年卡入口
-        $list=pdo_fetchall("select * from ".tablename("ewei_shop_adsense")." where type=:type order by sort desc",array(":type"=>$type));
+        $list = pdo_fetchall("select * from ".tablename("ewei_shop_adsense")." where type=:type order by sort desc",array(":type"=>$type));
         foreach ($list as $k=>$v){
             $list[$k]["thumb"]=tomedia($v["thumb"]);
             $list[$k]['url'] = strpos($v['url'],"member_card") == false ? : $member['is_open'] == 1 ? $v['url'] : "/pages/annual_card/equity/equity";
@@ -203,11 +203,11 @@ class App_EweiShopV2Model
         $uniacid = $_W['uniacid'];
         $member = m('member')->getMember($user_id);
         //获得当前用户的店铺
-        $memberMerchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where member_id=:member_id Limit 1', array(':member_id' => $member['id']));
+        $memberMerchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where member_id = :member_id Limit 1', array(':member_id' => $member['id']));
         $data = array();
         //如果当前用户有上级  查他的上级的店铺
         if($member['agentid']>0){
-            $agentMerchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where member_id=:member_id Limit 1', array(':member_id' => $member['agentid']));
+            $agentMerchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where member_id = :member_id Limit 1', array(':member_id' => $member['agentid']));
         }
         //当前用户是店主
         if($memberMerchInfo) {
@@ -215,17 +215,17 @@ class App_EweiShopV2Model
             $merchInfo = $memberMerchInfo;
         }elseif($member && $member['from_merchid']>0){
             //当前用户绑定了商户   查他绑定的商户是谁
-            $merchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where id=:merchid and uniacid=:uniacid Limit 1', array(':uniacid' => $_W['uniacid'], ':merchid' => $member['from_merchid']));
+            $merchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where id = :merchid and uniacid = :uniacid Limit 1', array(':uniacid' => $_W['uniacid'], ':merchid' => $member['from_merchid']));
             //查绑定商户里面的商品
-            $goodsNum = pdo_count("ewei_shop_goods", "deleted =0 and status=1 and uniacid = " . $uniacid . " and merchid = " . $member['from_merchid']);
+            $goodsNum = pdo_count("ewei_shop_goods", "deleted = 0 and status = 1 and uniacid = " . $uniacid . " and merchid = " . $member['from_merchid']);
             if($merchInfo){//获取推荐商铺
                 $args['merchid'] = $member['from_merchid'];
             }else{//推荐附近商店
-                $merchInfo = $this->get_near_merch(1);
+                $merchInfo = m('merch')->get_near_merch(1);
                 $args['merchid'] = $merchInfo['id'];
             }
             if($goodsNum < 3){//推荐其他商品数量大于三的店铺
-                $merchInfo = $this->get_near_merch(1);
+                $merchInfo = m('merch')->get_near_merch(1);
                 $args['merchid'] = $merchInfo['id'];
             }
 
@@ -233,7 +233,7 @@ class App_EweiShopV2Model
             $args['merchid'] = $agentMerchInfo['id'];
             $merchInfo = $agentMerchInfo;
         }else{//推荐附近商店
-            $merchInfo = $this->get_near_merch(1);
+            $merchInfo = m('merch')->get_near_merch(1);
             $args['merchid'] = $merchInfo['id'];
         }
         $args['order'] = 'sort desc,isrecommand';
@@ -472,6 +472,7 @@ class App_EweiShopV2Model
             'step'=>$step["step"],
             'step_id'=>$step_id,
             'createtime'=>time(),
+            'openid'=>$member['openid'],
             'user_id'=>$user_id,
         ];
         //加入领取记录
@@ -507,6 +508,7 @@ class App_EweiShopV2Model
     {
         global $_W;
         $uniacid = $_W['uniacid'];
+        $member = m()->getMember($user_id);
         //如果是贡献机用户
         $devote = pdo_getall('ewei_shop_devote_record',['uniacid'=>$_W['uniacid'],'user_id'=>$user_id,'status'=>1]);
         foreach ($devote as $key=>$item){
@@ -516,7 +518,7 @@ class App_EweiShopV2Model
             if(pdo_exists('ewei_shop_devote_log',['devote_id'=>$item['id'],'user_id'=>$user_id,'day'=>date('Y-m-d')])){
                 continue;
             }else{
-                pdo_insert('ewei_shop_devote_log',['devote_id'=>$item['id'],'user_id'=>$user_id,'num'=>100,'day'=>date('Y-m-d'),'createtime'=>time()]);
+                pdo_insert('ewei_shop_devote_log',['devote_id'=>$item['id'],'openid'=>$member['openid'],'user_id'=>$user_id,'num'=>100,'day'=>date('Y-m-d'),'createtime'=>time()]);
             }
         }
         $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_devote_record').' where uniacid = "'.$uniacid.'" and user_id = :user_id and status = 1',[':user_id'=>$user_id]);

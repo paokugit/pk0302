@@ -1713,5 +1713,29 @@ class Member_EweiShopV2Model
         }
         return true;
     }
+
+    /**
+     * APP登录token加密
+     * @param $user_id
+     * @param $salt
+     * @return string
+     */
+    public function setLoginToken($user_id,$salt)
+    {
+        return base64_encode(implode(',',[$user_id,$salt]));
+    }
+
+    /**
+     * APP鉴权校验
+     * @param $token
+     * @return int
+     */
+    public function getLoginToken($token)
+    {
+        $data = explode(',',base64_decode($token));
+        //把登录的账户查出来  然后 对比登录产生的随机码  如果一样就是当前登录 不一样就是又被登录
+        $member = pdo_get('ewei_shop_member',['id'=>$data[0]]);
+        return $member['app_salt'] == $data[1] ? $data[0] : 0;
+    }
 }
 ?>
