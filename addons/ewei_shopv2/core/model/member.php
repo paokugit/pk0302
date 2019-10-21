@@ -300,21 +300,24 @@ class Member_EweiShopV2Model
 		}
 		else 
 		{
-			$value = pdo_fetchcolumn("SELECT " . $credittype . " FROM " . tablename("ewei_shop_member") . " WHERE  uniacid=:uniacid and openid=:openid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $openid ));
-			$newcredit = $credits + $value;
+// 			$value = pdo_fetchcolumn("SELECT " . $credittype . " FROM " . tablename("ewei_shop_member") . " WHERE  uniacid=:uniacid and openid=:openid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $openid ));
+		    $value=pdo_fetch("select ".$credittype."from ".tablename("ewei_shop_member")." where uniacid=:uniacid and (openid=:openid or user_id=:user_id) limit 1",array( ":uniacid" => $_W["uniacid"], ":openid" =>$member["openid"],":user_id"=>$member["id"]));
+		    $newcredit = $credits + $value;
 			if( $newcredit <= 0 ) 
 			{
 				$newcredit = 0;
 			}
-            if((int) $openid == 0){
-                $log_data["openid"]=$openid;
-                pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid ));
-            }else{
-                $log_data["user_id"]=$openid;
-                pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "user_id" => $openid ));
-            }
-
+//             if((int) $openid == 0){
+//                 $log_data["openid"]=$openid;
+//                 pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid ));
+//             }else{
+//                 $log_data["user_id"]=$openid;
+//                 pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "user_id" => $openid ));
+//             }
+            pdo_query("update ".tablename("ewei_shop_member")." set ".$credittype."=:newcredit"." where uniacid=:uniacid and  id=:id",array(":newcredit"=>$newcredit,":uniacid"=>$_W["uniacid"],":id"=>$member["id"]));
 			$log_data["remark"] = $log_data["remark"];
+			$log_data["openid"]=$member["openid"];
+			$log_data["user_id"]=$member["id"];
 
 		}
 		pdo_insert("mc_credits_record", $log_data);
