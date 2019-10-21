@@ -652,7 +652,11 @@ class Order_EweiShopV2Model
 		global $_W;
 		if( 0 < $order["deductcredit2"] ) 
 		{
-			m("member")->setCredit($order["openid"], "credit2", $order["deductcredit2"], array( "0", $_W["shopset"]["shop"]["name"] . "购物返还抵扣余额 余额: " . $order["deductcredit2"] . " 订单号: " . $order["ordersn"] ));
+		    //修改
+		    $member=pdo_fetch("select * from ".tablename("ewei_shop_member")." where openid=:openid or id=:user_id limit 1",array(":openid"=>$order["openid"],":user_id"=>$order["user_id"]));
+// 			m("member")->setCredit($order["openid"], "credit2", $order["deductcredit2"], array( "0", $_W["shopset"]["shop"]["name"] . "购物返还抵扣余额 余额: " . $order["deductcredit2"] . " 订单号: " . $order["ordersn"] ));
+		    m("member")->setCredit($member["id"], "credit2", $order["deductcredit2"], array( "0", $_W["shopset"]["shop"]["name"] . "购物返还抵扣余额 余额: " . $order["deductcredit2"] . " 订单号: " . $order["ordersn"] ));
+		    
 		}
 	}
 	public function setGiveBalance($orderid = "", $type = 0) 

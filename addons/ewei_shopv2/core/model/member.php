@@ -301,7 +301,7 @@ class Member_EweiShopV2Model
 		else 
 		{
 // 			$value = pdo_fetchcolumn("SELECT " . $credittype . " FROM " . tablename("ewei_shop_member") . " WHERE  uniacid=:uniacid and openid=:openid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $openid ));
-		    $value=pdo_fetch("select ".$credittype."from ".tablename("ewei_shop_member")." where uniacid=:uniacid and (openid=:openid or user_id=:user_id) limit 1",array( ":uniacid" => $_W["uniacid"], ":openid" =>$member["openid"],":user_id"=>$member["id"]));
+		    $value=pdo_fetch("select ".$credittype."from ".tablename("ewei_shop_member")." where uniacid=:uniacid and (openid=:openid or id=:user_id) limit 1",array( ":uniacid" => $_W["uniacid"], ":openid" =>$member["openid"],":user_id"=>$member["id"]));
 		    $newcredit = $credits + $value;
 			if( $newcredit <= 0 ) 
 			{

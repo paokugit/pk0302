@@ -20,13 +20,25 @@ class Op_EweiShopV2Page extends AppMobilePage
 		if (empty($orderid)) {
 			app_error(AppError::$ParamsError);
 		}
-
-		$order = pdo_fetch('select id,ordersn,openid,status,deductcredit,deductcredit2,deductprice,discount_price,couponid,`virtual`,`virtual_info`,merchid  from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
+		//修改
+        $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        
+		$order = pdo_fetch('select id,ordersn,openid,user_id,status,deductcredit,deductcredit2,deductprice,discount_price,couponid,`virtual`,`virtual_info`,merchid  from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid']));
 
 		if (empty($order)) {
 			app_error(AppError::$OrderNotFound);
 		}
-
+        if ($order["openid"]!=$member["openid"]&&$order["user_id"]!=$member["id"]){
+            app_error(AppError::$OrderNotFound);
+        }
 		if (0 < $order['status']) {
 			app_error(AppError::$OrderCannotCancel);
 		}
@@ -56,11 +68,11 @@ class Op_EweiShopV2Page extends AppMobilePage
 		m('order')->setStocksAndCredits($orderid, 2);
 
 		if (0 < $order['deductprice']) {
-			m('member')->setCredit($order['openid'], 'credit1', $order['deductcredit'], array('0', $_W['shopset']['shop']['name'] . ('购物返还抵扣卡路里 卡路里: ' . $order['deductcredit'] . ' 抵扣金额: ' . $order['deductprice'] . ' 订单号: ' . $order['ordersn'])));
+			m('member')->setCredit($member["id"], 'credit1', $order['deductcredit'], array('0', $_W['shopset']['shop']['name'] . ('购物返还抵扣卡路里 卡路里: ' . $order['deductcredit'] . ' 抵扣金额: ' . $order['deductprice'] . ' 订单号: ' . $order['ordersn'])));
 		}
           //折扣宝
 		if (0 < $order['discount_price']) {
-		    m('member')->setCredit($order['openid'], 'credit3', $order['discount_price'], array('0', $_W['shopset']['shop']['name'] . ('购物返还抵扣折扣宝 折扣宝: ' . $order['discount_price'] . ' 抵扣金额: ' . $order['discount_price'] . ' 订单号: ' . $order['ordersn'])));
+		    m('member')->setCredit($member["id"], 'credit3', $order['discount_price'], array('0', $_W['shopset']['shop']['name'] . ('购物返还抵扣折扣宝 折扣宝: ' . $order['discount_price'] . ' 抵扣金额: ' . $order['discount_price'] . ' 订单号: ' . $order['ordersn'])));
 		}
 		
 		m('order')->setDeductCredit2($order);
@@ -70,7 +82,13 @@ class Op_EweiShopV2Page extends AppMobilePage
 
 		pdo_update('ewei_shop_order', array('status' => -1, 'canceltime' => time(), 'closereason' => trim($_GPC['remark'])), array('id' => $order['id'], 'uniacid' => $_W['uniacid']));
 		pdo_update('ewei_shop_gift_log',['status'=>0],['order_sn'=>$order['ordersn']]);
+		if ($_GPC["type"]!=1){
+		    //小程序消息
 		m('notice')->sendOrderMessage($orderid);
+		}else{
+		    //app
+		    
+		}
 		app_json();
 	}
 

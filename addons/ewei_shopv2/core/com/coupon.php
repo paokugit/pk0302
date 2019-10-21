@@ -692,7 +692,10 @@ class Coupon_EweiShopV2ComModel extends ComModel
 		if( !empty($coupon["used"]) ) 
 		{
 			pdo_update("ewei_shop_coupon_data", array( "used" => 0, "usetime" => 0, "ordersn" => "" ), array( "id" => $order["couponid"] ));
+			if ($order["openid"]){
+			    //小程序消息
 			$this->sendReturnMessage($order["openid"], $coupon);
+			}
 		}
 	}
 	public function backConsumeCoupon($orderid) 
