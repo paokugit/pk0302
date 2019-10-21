@@ -12,14 +12,17 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		global $_W;
 		global $_GPC;
 		$uniacid = $_W['uniacid'];
-		$openid = $_W['openid'];
+		$openid = $_GPC['openid'];
 // 		$condition = ' and f.uniacid= :uniacid and f.openid=:openid and f.deleted=0';
 // 		$params = array(':uniacid' => $uniacid, ':openid' => $openid);
         //增加user_id逻辑
         $type=$_GPC["type"];//1表示app接口
         if ($type==1){
           //app接口
-          $member_id=$_GPC["member_id"];
+            $member_id=m('member')->getLoginToken($_GPC['openid']);
+          if ($member_id==0){
+              app_error(1,"无此用户");
+          }
           $member=m("member")->getMember($member_id);
           $condition = ' and f.uniacid= :uniacid and (f.openid=:openid or f.user_id=:user_id) and f.deleted=0';
           $params = array(':uniacid' => $uniacid, ':openid' => $member["openid"],':user_id'=>$member["id"]);

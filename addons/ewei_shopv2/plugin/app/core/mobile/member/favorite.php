@@ -15,7 +15,14 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		$pindex = max(1, intval($_GPC['page']));
 		$psize = 10;
 		//编辑修改
-		$openid=$_W["openid"];
+		$openid=$_GPC["openid"];
+		if ($_GPC["type"]==1){
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		}
 		$member=m("member")->getMember($openid);
 		$condition = ' and f.uniacid = :uniacid and (f.openid=:openid or f.user_id=:user_id) and f.deleted=0';
 		if ($merch_plugin && $merch_data['is_openmerch']) {
@@ -65,6 +72,13 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		}
         //修改
         $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
         $member=m("member")->getMember($openid);
 		$isfavorite = intval($_GPC['isfavorite']);
 		$goods = pdo_fetch('select * from ' . tablename('ewei_shop_goods') . ' where id=:id and uniacid=:uniacid limit 1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
@@ -97,7 +111,14 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 			app_error(AppError::$ParamsError);
 		}
         //修改
-        $openid=$_W["openid"];
+        $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
         $member=m("member")->getMember($openid);
 // 		$sql = 'update ' . tablename('ewei_shop_member_favorite') . ' set deleted=1 where openid=:openid and id in (' . implode(',', $ids) . ')';
 		$sql = 'update ' . tablename('ewei_shop_member_favorite') . ' set deleted=1 where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';
@@ -113,6 +134,13 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		$psize = 10;
 		//修改
 		$openid=$_GPC["openid"];
+		if ($_GPC["type"]==1){
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		}
 		$member=m("member")->getMember($openid);
 		$condition = ' and  (f.openid=:openid or user_id=:user_id)';
 		$params = array(':openid' =>$member["openid"],':user_id'=>$member["id"]);
@@ -150,7 +178,14 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 	        app_error(AppError::$ParamsError);
 	    }
 	    //修改
-	    $openid=$_W["openid"];
+	    $openid=$_GPC["openid"];
+	    if ($_GPC["type"]==1){
+	        $member_id=m('member')->getLoginToken($openid);
+	        if ($member_id==0){
+	            app_error(1,"无此用户");
+	        }
+	        $openid=$member_id;
+	    }
 	    $member=m("member")->getMember($openid);
 	    // 		$sql = 'update ' . tablename('ewei_shop_member_favorite') . ' set deleted=1 where openid=:openid and id in (' . implode(',', $ids) . ')';
 	    $sql = 'delete from ' . tablename('ewei_shop_merch_follow') . 'where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';

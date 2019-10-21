@@ -156,11 +156,21 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		    }
 		}
 		if ($type){ 
-		$member=pdo_get("ewei_shop_member",array("id"=>$member_id)); 
-		}else{
-		$member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid]);
+		    $token=$_GPC["openid"];
+		    $openid=m('member')->getLoginToken($token);
+		    if ($openid==0){
+		        app_error(1,"无此用户");
+		    } 
 		}
-		
+// 		$openid=89;
+		$member=m("member")->getMember($openid);
+		if (!$member){
+		    if ($type==1){
+		        app_error(1,"无此用户");
+		    }else{
+		        show_json(1,"无此用户");
+		    }
+		}
 		$pageSize = 10;
 		$pindex = ($page - 1) * $pageSize;
 		

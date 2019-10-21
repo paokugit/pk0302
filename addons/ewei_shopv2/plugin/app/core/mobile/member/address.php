@@ -10,10 +10,18 @@ class Address_EweiShopV2Page extends AppMobilePage
 	{
 		global $_W;
 		global $_GPC;
-		if (empty($_W['openid'])) { 
+		if (empty($_GPC['openid'])) { 
 			app_error(AppError::$ParamsError);
 		}
-        $member=m("member")->getMember($_W["openid"]);
+		$openid=$_GPC["openid"];
+		if ($_GPC["type"]==1){
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		}
+        $member=m("member")->getMember($openid);
 		$limit = '';
 		$page = intval($_GPC['page']);
 
@@ -90,6 +98,13 @@ class Address_EweiShopV2Page extends AppMobilePage
 		$data['streetdatavalue'] = trim($_GPC['streetdatavalue']);
         //判断
         $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
         $member=m("member")->getMember($openid);
 		//添加
 		$data["isdefault"]=$_GPC["isdefault"];

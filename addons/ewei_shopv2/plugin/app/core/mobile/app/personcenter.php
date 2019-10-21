@@ -10,11 +10,13 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
     public function index(){
         global $_GPC;
         global $_W;
-        $member_id=$_GPC["member_id"];
-        $member=pdo_fetch("select nickname,avatar,credit2,credit3,credit4,agentlevel,is_open,expire_time,mobile from ".tablename("ewei_shop_member")." where id=:id",array(":id"=>$member_id));
-        if (!$member){
+        $token=$_GPC["token"];
+        $member_id=m('member')->getLoginToken($token);
+        if ($member_id==0){
             app_error(1,"无此用户");
         }
+        $member=pdo_fetch("select nickname,avatar,credit2,credit3,credit4,agentlevel,is_open,expire_time,mobile from ".tablename("ewei_shop_member")." where id=:id",array(":id"=>$member_id));
+       
         //消息条数
         $member["news"]=0;
         //年卡判断 1开通
@@ -42,13 +44,17 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
                 $resault["server"][$k]=tomedia($v);
             }
         }
-        app_json($resault); 
+       app_error(0,$resault);
     }
     //粉丝
     public function fans(){
         global $_GPC;
         global $_W;
-        $member_id=$_GPC["member_id"];
+        $token=$_GPC["token"];
+        $member_id=m('member')->getLoginToken($token);
+        if ($member_id==0){
+            app_error(1,"无此用户");
+        }
         $member=pdo_get("ewei_shop_member",array("id"=>$member_id));
         if (empty($member)){
             app_error(1,"无此用户");
@@ -81,7 +87,12 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
     public function fans_list(){
         global $_GPC;
         global $_W;
-        $member_id=$_GPC["member_id"];
+        $token=$_GPC["token"];
+        $member_id=m('member')->getLoginToken($token);
+        if ($member_id==0){
+            app_error(1,"无此用户");
+        }
+//         $member_id=89;
         $member=pdo_get("ewei_shop_member",array("id"=>$member_id));
         if (empty($member)){
             app_error(1,"无此用户");

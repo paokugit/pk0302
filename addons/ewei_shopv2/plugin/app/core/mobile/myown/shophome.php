@@ -66,6 +66,13 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
             app_error(-1,"商户id未传");
         }
         $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
         //修改
         $member=m("member")->getMember($openid);
         $follow=$_GPC["follow"];//1表示关注 0取消关注

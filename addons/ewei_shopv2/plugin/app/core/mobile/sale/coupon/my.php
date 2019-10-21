@@ -12,7 +12,6 @@ class My_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
-        $openid = $_W["openid"];
         $cate = trim($_GPC["cate"]);
         $imgname = "ling";
         $imgname = "ling";
@@ -35,6 +34,13 @@ class My_EweiShopV2Page extends AppMobilePage
         }
         //修改
         $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
         $member=m("member")->getMember($openid);
         $pindex = max(1, intval($_GPC["page"]));
         $psize = 10;
