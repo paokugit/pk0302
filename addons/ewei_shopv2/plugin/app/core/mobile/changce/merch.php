@@ -527,11 +527,11 @@ class Merch_EweiShopV2Page extends AppMobilePage
             if($merchInfo){//获取推荐商品
                $args['merchid'] = $member['from_merchid'];
             }else{//推荐附近商店
-                $merchInfo = $this->get_near_merch(1);
+                $merchInfo = m('merch')->get_near_merch(1);
                 $args['merchid'] = $merchInfo['id'];
             }
             if($goodsNum<3){//推荐其他商品数量大于三的店铺
-                $merchInfo = $this->get_near_merch(1);
+                $merchInfo = m('merch')->get_near_merch(1);
                 $args['merchid'] = $merchInfo['id'];
             }
 
@@ -539,7 +539,7 @@ class Merch_EweiShopV2Page extends AppMobilePage
             $args['merchid'] = $agentMerchInfo['id'];
             $merchInfo = $agentMerchInfo;
         }else{//推荐附近商店
-                $merchInfo = $this->get_near_merch(1);
+                $merchInfo = m('merch')->get_near_merch(1);
                 $args['merchid'] = $merchInfo['id'];
         }
         $args['order'] = 'sort desc,isrecommand';
@@ -549,92 +549,6 @@ class Merch_EweiShopV2Page extends AppMobilePage
         $data['goodList'] = $goodList;
         show_json(0,$data);
 
-    }
-
-    /**
-     * 获取最近的店铺
-     * @return mixed
-     */
-    public function get_near_merch($is_from=0)
-    {
-        global $_GPC;
-        global $_W;
-
-        $merch_plugin = p('merch');
-        $merch_data = m('common')->getPluginset('merch');
-        $citysel = false;
-        $citys = array();
-        if ($merch_plugin && $merch_data['is_openmerch']) {
-            $data = array();
-            $pindex = max(1, intval($_GPC['page']));
-            $psize = 10;
-            $lat = floatval($_GPC['lat']);
-            $lng = floatval($_GPC['lng']);
-            $sorttype = intval($_GPC['sorttype']);
-            $range = intval($_GPC['range']);
-
-            $data = array_merge($data, array('status' => 1, 'field' => 'id,uniacid,merchname,salecate,logo,groupid,cateid,address,tel,lng,lat'));
-            if (!(empty($sorttype))) {
-                $data['orderby'] = array('id' => 'desc');
-            }
-            $merchuser = $merch_plugin->getMerch($data);
-           // print_r($data);print_r($merchuser);pdo_debug();exit;
-            $data = array();
-            $data = array_merge($data, array('status' => 1, 'orderby' => array('displayorder' => 'desc', 'id' => 'asc')));
-            $category = $merch_plugin->getCategory($data);
-            if (!(empty($merchuser))) {
-                $cate_list = array();
-                if (!(empty($category))) {
-                    foreach ($category as $k => $v) {
-                        $cate_list[$v['id']] = $v;
-                    }
-                }
-
-                if ($pindex == 1) {
-                    $member = m('member')->getMember($_W['openid']);
-                    if (!empty($member['agentid'])) {
-                        $agent = m('member')->getMember($member['agentid']);
-                        $isstore = pdo_getall('ewei_shop_merch_user', array('payopenid' => $agent['openid']));
-                    }
-                }
-                if (!empty($isstore)) {
-                    $merchuser = array_merge($isstore, $merchuser);
-                }
-                foreach ($merchuser as $k => $v) {
-                    if (($lat != 0) && ($lng != 0) && !(empty($v['lat'])) && !(empty($v['lng']))) {
-                        $distance = m('util')->GetDistance($lat, $lng, $v['lat'], $v['lng'], 2);
-                        if ((0 < $range) && ($range < $distance)) {
-                            unset($merchuser[$k]);
-                            continue;
-                        }
-                        $merchuser[$k]['distance'] = $distance;
-                        if ($distance < 1) $disname = ($distance * 100) . 'm';
-                        else $disname = ($distance) . 'km';
-                        $merchuser[$k]['disname'] = $disname;
-                    } elseif ($range) {
-                        unset($merchuser[$k]);
-                        continue;
-                    } else {
-                        $merchuser[$k]['distance'] = 100000;
-                        $merchuser[$k]['disname'] = '';
-                    }
-                    $merchuser[$k]['catename'] = $cate_list[$v['cateid']]['catename'];
-                    $merchuser[$k]['logo'] = tomedia($v['logo']);
-
-                    if($is_from>0){
-                        $goodsNum = pdo_count("ewei_shop_goods", "deleted =0 and status=1  and merchid = " . $v['id']);
-                        if($goodsNum<3){
-                            unset($merchuser[$k]);
-                        }
-                    }
-                }
-            }
-
-            if ($sorttype == 0 && !empty($merchuser)) {
-                $merchuser = m('util')->multi_array_sort($merchuser, 'distance');
-            }
-            return $merchuser[0];
-        }
     }
 
     /**
