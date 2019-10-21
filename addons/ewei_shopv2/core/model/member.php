@@ -306,10 +306,16 @@ class Member_EweiShopV2Model
 			{
 				$newcredit = 0;
 			}
+            if((int) $openid == 0){
+                $log_data["openid"]=$openid;
+                pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid ));
+            }else{
+                $log_data["user_id"]=$openid;
+                pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "user_id" => $openid ));
+            }
 
-			pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid ));
 			$log_data["remark"] = $log_data["remark"];
-            $log_data["openid"]=$openid;
+
 		}
 		pdo_insert("mc_credits_record", $log_data);
 		$member_log_table_flag = pdo_tableexists("ewei_shop_member_credit_record");
@@ -1111,13 +1117,14 @@ class Member_EweiShopV2Model
         }
         return array('levelname'=>'普通会员','leveltime'=>'','levelid'=>0);
     }
+
     //fanbeibei
     //获取每天可兑换的卡路里
    public function exchange_step($openid=""){
-        
-        
-        $member=pdo_get('ewei_shop_member',array('openid'=>$openid));
-        
+
+        //$member = pdo_get('ewei_shop_member',array('openid'=>$openid));
+        $member = $this->getMember($openid);
+
         if ($member["agentlevel"]!=0){
             
             $level=pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
@@ -1539,7 +1546,8 @@ class Member_EweiShopV2Model
     //fbb
     //获取剩余加速时间
     public function acceleration($openid=""){
-        $member=pdo_get("ewei_shop_member",array("openid"=>$openid));
+        //$member=pdo_get("ewei_shop_member",array("openid"=>$openid));
+        $member = $this->getMember($openid);
         //加速剩余天数
         $res["day"]=0;
         $res["duihuan"]=0;
@@ -1701,30 +1709,6 @@ class Member_EweiShopV2Model
             }
         }
         return true;
-    }
-
-    /**
-     * APP登录token加密
-     * @param $user_id
-     * @param $salt
-     * @return string
-     */
-    public function setLoginToken($user_id,$salt)
-    {
-        return base64_encode(implode(',',[$user_id,$salt]));
-    }
-
-    /**
-     * APP鉴权校验
-     * @param $token
-     * @return int
-     */
-    public function getLoginToken($token)
-    {
-        $data = explode(',',base64_decode($token));
-        //把登录的账户查出来  然后 对比登录产生的随机码  如果一样就是当前登录 不一样就是又被登录
-        $member = pdo_get('ewei_shop_member',['id'=>$data[0]]);
-        return $member['app_salt'] == $data[1] ? $data[0] : 0;
     }
 }
 ?>

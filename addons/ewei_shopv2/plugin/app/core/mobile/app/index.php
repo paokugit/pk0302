@@ -71,7 +71,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                 //APP登录动态码  如果有人登录就更新
                 $app_salt = random(36);
                 pdo_update('ewei_shop_member',['app_salt'=>$app_salt],['id'=>$member['id']]);
-                $token = m('member')->setLoginToken($member['id'],$app_salt);
+                $token = m('app')->setLoginToken($member['id'],$app_salt);
                 app_error(0,['token'=>$token,'msg'=>"登录成功"]);
             }else{
                 app_error(1,"密码不正确");
@@ -115,12 +115,12 @@ class Index_EweiShopV2Page extends AppMobilePage
             $salt = random(16);
             pdo_insert('ewei_shop_member',['mobile'=>$mobile,'createtime'=>time(),'status'=>1,'salt'=>$salt,'app_salt'=>$app_salt]);
             $user_id = pdo_insertid();
-            $token = m('member')->setLoginToken($user_id,$app_salt);
+            $token = m('app')->setLoginToken($user_id,$app_salt);
             app_error(0,['token'=>$token]);
         }else{
             //如果已经存在 更新app动态码
             pdo_update('ewei_shop_member',['app_salt'=>$app_salt],['id'=>$member['id']]);
-            $token = m('member')->setLoginToken($member['id'],$app_salt);
+            $token = m('app')->setLoginToken($member['id'],$app_salt);
             app_error(0,['token'=>$token]);
         }
     }
@@ -164,15 +164,63 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function home()
     {
-        global $_W;
+        global $_GPC;
+        //鉴权验证的token
+        $token = $_GPC['token'];
+        //icon的类别
+        $icon_type = $_GPC['icon_type'];
+        //秒杀的类型
+        $seckill_type = $_GPC['seckill_type'];
+        //附近商家的定位
+        $lat = $_GPC['lat'];
+        $lng = $_GPC['lng'];
+        //允许的距离范围
+        $range = $_GPC['range'];
+        $cateid = $_GPC['cate_id'];
+        $sorttype = intval($_GPC['sorttype']);
+        $keyword = $_GPC['keyword'];
+        //鉴权验证
+        $user_id = m('app')->getLoginToken($token);
+        //签到得卡路里 和  年卡会员每日得折扣宝
+
+        //获取用户卡路里   折扣宝  自身步数  和 邀请步数  以及是都绑定手机号
+        $bushu = m('app')->getbushu($user_id);
+        //小图标导航   快报   和  年卡入口
+        $icon = m('app')->get_icon($user_id,$icon_type);
+        //门店服务
+        $merch = m('app')->merch($user_id);
+        //附近商家
+        $near = m('app')->near($user_id,$lat,$lng,$range,$cateid,$sorttype,$keyword);
+        //秒杀
+        $seckill = m('app')->seckill($seckill_type);
+        //边看边买
+        $look_buy = m('app')->look_buy();
+        //每日一推
+        $every = m('app')->every();
+        //跑库精选
+        $choice = m('app')->choice();
+        app_error(0,['bushu'=>$bushu,'icon'=>$icon,'merch'=>$merch,'near'=>$near,'seckill'=>$seckill,'look_buy'=>$look_buy,'every'=>$every,'choice'=>$choice]);
+    }
+
+    /**
+     * 首页---领取卡路里  或者折扣宝  因为后期没有卡路里
+     */
+    public function index_getcredit()
+    {
         global $_GPC;
         $token = $_GPC['token'];
-        //鉴权验证
-        $user_id = m('member')->getLoginToken($token);
+        $step_id =$_GPC['step_id'];
+        $user_id = m('app')->getLoginToken($token);
         if($user_id == 0){
-            app_error(1,"用户信息不正确");
+            app_error(1,'登录信息失效');
         }
-        //
+        $get = m('app')->getcredit($user_id,$step_id);
+        if($get){
+            $error = 0;$msg = "领取成功";
+        } else{
+            $error = 1;$msg = "领取失败";
+        }
+        app_error($error,$msg);
     }
 
     /**
@@ -188,7 +236,16 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function rebate()
     {
-
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        //卡路里和折扣宝余额
+        $credit = pdo_get('ewei_shop_member',['id'=>$user_id],['credit1','credit3']);
+        //贡献机数量 和 运行状态
+        $devote_machine = m('app')->devote_machine($user_id);
+        //贡献值  和  是否绑定手机号 微信
+        $devote = m('app')->devote($user_id);
+        app_error(0,['credit'=>$credit,'devote_machine'=>$devote_machine,'devote'=>$devote]);
     }
 
     /**
@@ -196,7 +253,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function exclusive()
     {
-
+        
     }
 
     /**

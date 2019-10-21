@@ -399,7 +399,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
      * @param $total
      * @param $uniacid
      * @param $openid
-     * @return int
+     * @return array
      */
     public function getlist($total,$uniacid,$openid)
     {
