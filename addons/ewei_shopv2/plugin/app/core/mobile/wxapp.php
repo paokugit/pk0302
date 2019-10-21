@@ -23,7 +23,7 @@ class Wxapp_EweiShopV2Page extends Page
         global $_W;
         $code = trim($_GPC["code"]);
         if (empty($code)) {
-            app_error(AppError::$ParamsError);
+            app_error(AppError::$ParamsError,"login");
         }
         $url = "https://api.weixin.qq.com/sns/jscode2session?appid=" . $this->appid . "&secret=" . $this->appsecret . "&js_code=" . $code . "&grant_type=authorization_code";
         load()->func("communication");
@@ -80,7 +80,7 @@ class Wxapp_EweiShopV2Page extends Page
         $iv = trim($_GPC['res']["iv"]);
         $sessionKey = trim($_GPC['res']["sessionKey"]);
         if (empty($encryptedData) || empty($iv) || empty(trim($_GPC["openid"]))) {
-            app_error(AppError::$ParamsError);
+            app_error(AppError::$ParamsError,"urundata");
         }
         $appset = m("common")->getSysset("app");
         $pc = new WXBizDataCrypt($appset['appid'], $sessionKey);
@@ -158,7 +158,7 @@ class Wxapp_EweiShopV2Page extends Page
         $iv = trim($_GPC["iv"]);
         $sessionKey = trim($_GPC["sessionKey"]);
         if (empty($encryptedData) || empty($iv)) {
-            app_error(AppError::$ParamsError);
+            app_error(AppError::$ParamsError,"auth");
         }
         $pc = new WXBizDataCrypt($this->appid, $sessionKey);
         $errCode = $pc->decryptData($encryptedData, $iv, $data);
@@ -217,7 +217,7 @@ class Wxapp_EweiShopV2Page extends Page
         global $_W;
         $openid = trim($_GPC["openid"]);
         if (empty($openid)) {
-            app_error(AppError::$ParamsError);
+            app_error(AppError::$ParamsError,"check");
         }
         $openid=str_replace("sns_wa_", '', $openid);
 

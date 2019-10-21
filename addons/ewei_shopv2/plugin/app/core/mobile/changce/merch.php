@@ -63,7 +63,8 @@ class Merch_EweiShopV2Page extends AppMobilePage
                             continue;
                         }
                         $merchuser[$k]['distance'] = $distance;
-                        if ($distance < 1) $disname = ($distance * 100) . 'm';
+                        //if ($distance < 1) $disname = ($distance * 100) . 'm';
+                        if ($distance < 1) $disname = ($distance * 1000) . 'm';
                         else $disname = ($distance) . 'km';
                         $merchuser[$k]['disname'] = $disname;
                     } elseif ($range) {
