@@ -43,10 +43,10 @@ class App_EweiShopV2Model
         //今天的时间
         $day = date('Y-m-d');
         //自身步数
-        $bushu = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day` = :today and user_id = :user_id and type!=:type", array(':today' => $day, ':user_id' => $user_id,':type'=>2));
+        $bushu = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day` = :today and (user_id = :user_id or openid = :openid) and type!=:type", array(':today' => $day, ':user_id' => $user_id,':openid'=>$member['openid'],':type'=>2));
         $data['todaystep'] = empty($bushu) ? 0 : $bushu;
         //邀请步数
-        $yaoqing = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day` = :today and user_id = :user_id ", array(':today' => $day, ':user_id' => $user_id));
+        $yaoqing = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day` = :today and (user_id = :user_id  or openid = :openid)", array(':today' => $day, ':user_id' => $user_id,':openid'=>$member['openid']));
         $data['yaoqing'] = empty($yaoqing) ? 0 : $yaoqing;
 		//是否绑定手机号
 		$data["bind"] = !empty($member["mobile"]) ? 1 : 0;
@@ -72,12 +72,12 @@ class App_EweiShopV2Model
         //获取今日已兑换的卡路里
         $beginToday = mktime(0,0,0,date('m'),date('d'),date('Y'));
         $endToday = mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
-        $cardtoday = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime` >= :beginToday and `createtime` <= :endToday and user_id = :user_id and credittype = :credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":user_id"=>$user_id,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+        $cardtoday = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime` >= :beginToday and `createtime` <= :endToday and (user_id = :user_id or openid = :openid) and credittype = :credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":user_id"=>$user_id,":openid"=>$member['openid'],":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
         $step_number = $jinri = empty($cardtoday) ? 0 : $cardtoday*1500/$subscription_ratio;
         if ($step_number < $bushu) {
-            $datault = pdo_fetchall("select * from ".tablename("ewei_shop_member_getstep")." where day = :day and user_id = :user_id and status = 0 order by step asc",array(":day"=>$day,":user_id"=>$user_id));
+            $datault = pdo_fetchall("select * from ".tablename("ewei_shop_member_getstep")." where day = :day and (user_id = :user_id or openid = :openid) and status = 0 order by step asc",array(":day"=>$day,":user_id"=>$user_id,':openid'=>$openid));
         }else{
-            $datault = pdo_fetchall("select * from ".tablename("ewei_shop_member_getstep")." where day = :day and user_id = :user_id and status = 0 and type = 2 order by step asc",array(":day"=>$day,":user_id"=>$user_id));
+            $datault = pdo_fetchall("select * from ".tablename("ewei_shop_member_getstep")." where day = :day and (user_id = :user_id or openid = :openid) and status = 0 and type = 2 order by step asc",array(":day"=>$day,":user_id"=>$user_id,':openid'=>$member['openid']));
         }
         $r=array();
         $i=0;
@@ -487,7 +487,7 @@ class App_EweiShopV2Model
         $beginToday = strtotime(date('Y-m-d'));
         $endToday = strtotime(date('Y-m-d',strtotime('+1 days')));
         //步数兑换和好友捐赠  今天用户得到了多少卡路里
-        $cardtoday = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime` >= :beginToday and `createtime` <= :endToday and user_id = :user_id and credittype = :credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":user_id"=>$user_id,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+        $cardtoday = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime` >= :beginToday and `createtime` <= :endToday and (user_id = :user_id or openid = :openid) and credittype = :credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":user_id"=>$user_id,":openid"=>$member['openid'],":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
         $jinri = empty($cardtoday) ? 0 : $cardtoday * 1500 / $subscription_ratio;
         $keduihuan = $jinri + $step['step'] > $bushu ? ($bushu - $jinri) * $exchange : $step['step'] * $exchange;
         if ($step["type"]==0){
@@ -510,19 +510,20 @@ class App_EweiShopV2Model
         $uniacid = $_W['uniacid'];
         $member = m()->getMember($user_id);
         //如果是贡献机用户
-        $devote = pdo_getall('ewei_shop_devote_record',['uniacid'=>$_W['uniacid'],'user_id'=>$user_id,'status'=>1]);
+        $devote = pdo_fetchall('select * from '.tablename('ewei_shop_devote_record').' where uniacid = :uniacid and (user_id = :user_id or openid = :openid) and status = 1'.[':uniacid'=>$uniacid,':user_id'=>$user_id,':openid'=>$member['openid']]);
         foreach ($devote as $key=>$item){
             if($item['expire'] < time()){
                 pdo_update('ewei_shop_devote_record',['status'=>0],['id'=>$item['id']]);
             }
-            if(pdo_exists('ewei_shop_devote_log',['devote_id'=>$item['id'],'user_id'=>$user_id,'day'=>date('Y-m-d')])){
+            $log = pdo_fetch('select * from '.tablename(ewei_shop_devote_log).'where devote_id = :devote_id and (user_id = :user_id or openid =:openid) and day =:day',[':devote_id'=>$item['id'],':user_id'=>$user_id,':openid'=>$member['openid'],':day'=>date('Y-m-d')]);
+            if($log){
                 continue;
             }else{
                 pdo_insert('ewei_shop_devote_log',['devote_id'=>$item['id'],'openid'=>$member['openid'],'user_id'=>$user_id,'num'=>100,'day'=>date('Y-m-d'),'createtime'=>time()]);
             }
         }
-        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_devote_record').' where uniacid = "'.$uniacid.'" and user_id = :user_id and status = 1',[':user_id'=>$user_id]);
-        $count = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_devote_record').'where uniacid = "'.$uniacid.'" and user_id = :user_id',[':user_id'=>$user_id]);
+        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_devote_record').' where uniacid = "'.$uniacid.'" and (user_id = :user_id or openid = :openid) and status = 1',[':user_id'=>$user_id,':openid'=>$member['openid']]);
+        $count = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_devote_record').'where uniacid = "'.$uniacid.'" and (user_id = :user_id or openid = :openid)',[':user_id'=>$user_id,':openid'=>$member['openid']]);
         $list = $this->getlist($total,$uniacid,$user_id);
         foreach ($list as $key=>&$item){
             $item['id'] = implode(',',$item['id']);
@@ -545,14 +546,17 @@ class App_EweiShopV2Model
      */
     public function getlist($total,$uniacid,$user_id)
     {
+        $member = m('member')->getMember($user_id);
         $list = [];
         $size = 1;
         for ($i=1;$i<=$total;$i++){
             $key = $i%8 != 0 ? $i%8 : 8;
             $num = ceil(bcdiv($i,8,2));
             $list[$key]['image'] = "https://paokucoin.com/img/backgroup/s-gxserve.gif";
-            $id = pdo_fetchcolumn('select id from '.tablename('ewei_shop_devote_record').'where user_id =:user_id and uniacid = "'.$uniacid.'" and status = 1 LIMIT '.($i-1).','.$size,[':user_id'=>$user_id]);
-            $list[$key]['log'][] = pdo_get('ewei_shop_devote_log',['user_id'=>$user_id,'uniacid'=>$uniacid,'devote_id'=>$id,'status'=>1,'day'=>date('Y-m-d',time())])?1:0;
+            $id = pdo_fetchcolumn('select id from '.tablename('ewei_shop_devote_record').'where (user_id =:user_id or openid = :openid) and uniacid = "'.$uniacid.'" and status = 1 LIMIT '.($i-1).','.$size,[':user_id'=>$user_id,':openid'=>$member['openid']]);
+            //$list[$key]['log'][] = pdo_get('ewei_shop_devote_log',['user_id'=>$user_id,'uniacid'=>$uniacid,'devote_id'=>$id,'status'=>1,'day'=>date('Y-m-d',time())])?1:0;
+            $log = pdo_fetch('select * from '.tablename('').'where uniacid = :uniacid and (user_id = :user_id or openid = :openid) and devote_id = :devote_id and status = 1 and day = :day',[':uniacid'=>$uniacid,':user_id'=>$user_id,':openid'=>$member['openid'],':devote_id'=>$id,':day'=>date('Y-m-d')]);
+            $list[$key]['log'][] = $log ? 1 : 0;
             $list[$key]['id'][] = $id;
             $list[$key]['count'] = $num;
             $list[$key]['is_open'] = 1;
@@ -578,9 +582,336 @@ class App_EweiShopV2Model
         $data["credit4"]=$member["credit4"];
         $data["bind"] = empty($member["weixin"])||empty($member["mobile"]) ? 0 : 1;
         //折扣宝提现金额
-        $data["tixian"] = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where user_id = :user_id and credittype = :credittype and remark like :remark",array(":user_id"=>$user_id,":credittype"=>"credit3",":remark"=>'折扣宝提现%'));
+        $data["tixian"] = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where (user_id = :user_id or openid = :openid) and credittype = :credittype and remark like :remark",array(":user_id"=>$user_id,":openid"=>$member['openid'],":credittype"=>"credit3",":remark"=>'折扣宝提现%'));
         $data["tixian"] = $data["tixian"] < 0 ? abs($data["tixian"]) : 0;
         return $data;
+    }
+
+    /**
+     * @return array
+     */
+    public function get_list()
+    {
+       //$goods = pdo_fetchall('select * from '.tablename('ewei_shop_goods').'where status = 1 and deleted = 0 and id in (3,4,5,7)');
+       $goods = pdo_fetchall('select id,thumb,sales,salesreal,agentlevel,content from '.tablename('ewei_shop_goods').'where status = 1 and deleted = 0 and id in (3,4,5,7)');
+       foreach ($goods as $key=>$good){
+           $goods[$key]['memberthumb'] = tomedia($good['thumb']);
+           $goods[$key]['thumb'] = m('goods')->levelurlup($good['id']);
+           $goods[$key]['salesreal'] = $goods[$key]['sales'] = $good['salesreal'] * 21 + rand(0,10);
+           $agentlevel = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where id=:id limit 1", array( ":id" => $good['agentlevel']));
+           $goods[$key]['available'] = $agentlevel['available'];
+           $goods[$key]['content'] = strip_tags($good['content']);
+       }
+       return $goods;
+    }
+
+    public function get_list1($user_id,$id)
+    {
+        //获取用户信息
+        $member = m('member')->getMember($user_id);
+        //获得达人中心的所有图标
+        $list = pdo_get("ewei_shop_small_set",array("id"=>$id));
+        $list["icon"] = unserialize($list["icon"]);
+        $list["backgroup"] = tomedia($list["backgroup"]);
+        $list["banner"] = tomedia($list["banner"]);
+        foreach ($list["icon"] as $k=>$v){
+            $list["icon"][$k]["img"] = tomedia($v["img"]);
+            $list["icon"][$k]["icon"] = tomedia($v["icon"]);
+        }
+
+        $level = pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
+        //加速日期
+        $accelerate_day = date("Y-m-d",strtotime("+".$level["accelerate_day"]." day",strtotime($member["agentlevel_time"])));
+        $dd = m("member")->acceleration($user_id);
+        //加速剩余天数
+        $resault["surplus_day"] = $dd["day"];
+        $resault["give_day"] = $dd["give_day"];
+        $resault["accelerate_day"] = $dd["accelerate_day"];
+        $resault["type"] = $dd["type"];
+
+        //获取用户加速期间的卡路里
+        if ($dd["type"] == 0){
+            $starttime = strtotime($member["agentlevel_time"]);
+            $endtime = strtotime($accelerate_day);
+        }else{
+            $starttime = strtotime($member["accelerate_start"]);
+            $endtime = strtotime($member["accelerate_end"]);
+        }
+        $credit = pdo_fetchcolumn("select sum(num) from ".tablename('mc_credits_record')."where credittype = :credittype and (user_id = :user_id or openid = :openid) and createtime >= :starttime and createtime <= :endtime and (remark like :remark or remark like :cc)",array('credittype'=>"credit1",':user_id'=>$user_id,':openid'=>$member['openid'],':starttime'=>$starttime,':endtime'=>$endtime,':remark'=>'%'.'步数兑换',':cc'=>'好友助力'));
+        if (empty($credit)){
+            $resault["credit"]=0;
+        }else{
+            $resault["credit"]=$credit;
+        }
+        return ['icon'=>$list,'accelerate'=>$resault];
+    }
+
+    /**
+     * 收款码的收款记录
+     * @param $user_id
+     * @return array
+     */
+    public function rebate_record($user_id)
+    {
+        //查该用户是不是有商家
+        $merch_user = pdo_get('ewei_shop_merch_user',['member_id'=>$user_id]);
+        //如果该用户有商家  就是商家id  没有 就是用户id加own
+        $mch_id = empty($merch_user) ? $user_id."own" : $merch_user['id'];
+        //计算这个店铺成交的第一个订单的日期
+        $create = pdo_getcolumn('ewei_shop_order',['status'=>3,'merchid'=>$mch_id],'createtime');
+        $start_time = !empty($create) ? $create : time();
+        //计算时间
+        $day = round((time()-$start_time)/86400);
+        $list = [];
+        $total = 0;
+        $total_money = 0;
+        for ($i = 0;$i<=$day;$i++){
+            //今天  昨天 前天的每天开始时间
+            $start = strtotime(date('Y-m-d',strtotime('-'.$i.'day')));
+            //每天的时间键值
+            $time = date('Y年m月d日',$start);
+            $end = $start + 86400;
+            if(is_numeric($mch_id)){
+                //商家收款记录
+                $list[$time]['list'] = pdo_fetchall('select id,openid,price,createtime,cate from '.tablename('ewei_shop_merch_log').' where createtime between "'.$start.'" and "'.$end.'" and status = 1 and merchid = "'.$mch_id.'"  and price > 0 and cate = "'.$_GPC['cate'].'"');
+            }else{
+                //个人的收款记录  rechargetype  交易类型  就是个人的id拼接own
+                $list[$time]['list'] = pdo_fetchall('select id,openid,money as price,createtime from '.tablename('ewei_shop_member_log').' where createtime between "'.$start.'" and "'.$end.'" and status = 1 and rechargetype = "'.$mch_id.'"  and money > 0');
+            }
+            //计算每天的收款笔数
+            $list[$time]['count'] = count($list[$time]['list']);
+            //如果 某天没有收款 去掉他的收款时间的键
+            if($list[$time]['count'] == 0){
+                unset($list[$time]);
+                continue;
+            }
+            // 把每天的收款钱数  单独组成个一位数组  请求和  保留两位小数
+            $money = array_column($list[$time]['list'],'price');
+            $list[$time]['total'] = round(array_sum($money),2);
+            //换时间格式  和  查出付款人的昵称
+            foreach ($list[$time]['list'] as $key=>$item){
+                $list[$time]['list'][$key]['createtime'] = date('H:i:s',$item['createtime']);
+                $list[$time]['list'][$key]['nickname'] = pdo_getcolumn('ewei_shop_member',['openid'=>$item['openid']],'nickname');
+            }
+            //计算总收款笔数 和 总钱
+            $total+=$list[$time]['count'];
+            $total_money += $list[$time]['total'];
+        }
+        return ['list'=>$list,'total'=>$total,'total_money'=>$total_money];
+    }
+
+    public function rebate_set($user_id,$money,$fee,$id,$cate = 2)
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $member = m('member')->getMember($user_id);
+        //查该用户是不是有商家
+        $merch_user = pdo_get('ewei_shop_merch_user',['member_id'=>$user_id]);
+        $data = [
+            'uniacid'=>$uniacid,
+            'money'=>$money,
+            'deduct'=>$fee,
+            'cate'=>$cate,
+            'openid'=>$member['openid'],
+            'user_id'=>$user_id,
+        ];
+        //如果是商家
+        $data['merchid'] = $merch_user ? $merch_user['id'] : 0;
+        //有$id 修改 没有添加
+        if($id){
+            //判断$money金额的满减条件是否存在
+            $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where (openid = :openid or user_id = :user_id) and money = "'.$money.'" and cate = "'.$cate.'" and id != "'.$id.'"',[':openid'=>$member['openid'],':user_id'=>$user_id]);
+            if($res){
+                return ['status'=>1,'msg'=>$money.'的满减条件已存在，请前往修改或者更换满减条件'];
+            }
+            pdo_update('ewei_shop_deduct_setting',$data,['id'=>$id]);
+            $msg = "修改成功";
+        }else{
+            //判断$money金额的满减条件是否存在
+            $res = pdo_fetch('select id from '.tablename('ewei_shop_deduct_setting').' where (openid=:openid or user_id = :user_id) and money=:money and cate=:cate',array(':openid'=>$member['openid'],':user_id'=>$user_id,':money'=>$money,':cate'=>$cate));
+            if($res){
+                return ['status'=>1,'msg'=>$money.'的满减条件已存在，请前往修改或者更换满减条件'];
+            }
+            pdo_insert('ewei_shop_deduct_setting',$data);
+            $msg = "添加成功";
+        }
+        return ['status'=>0,'msg'=>$msg];
+    }
+
+    /**
+     * 获取折扣设置列表
+     * @param $user_id
+     * @param int $page
+     * @param int $cate
+     * @return array
+     */
+    public function rebate_get($user_id,$page = 1,$cate = 2)
+    {
+        $pageSize = 10;
+        $spage = ($page - 1) * $pageSize;
+        //查该用户是不是有商家
+        $merch_user = pdo_get('ewei_shop_merch_user',['member_id'=>$user_id]);
+        //如果该用户有商家  就是商家id  没有 就是用户id加own
+        $mch_id = empty($merch_user) ? $user_id."own" : $merch_user['id'];
+        //如果是数字  就查商家信息  不是 就查openid
+        if(is_numeric($mch_id)){
+            $total = pdo_count('ewei_shop_deduct_setting',['merchid'=>$mch_id,'cate'=>$cate]);
+            $list = pdo_fetchall('select id,money,merchid,deduct,cate,openid from '.tablename('ewei_shop_deduct_setting').'where merchid = :merchid and cate = :cate order by money asc LIMIT '.$spage.','.$pageSize,array(':merchid'=>$mch_id,':cate'=>$cate));
+        }elseif (strpos($mch_id,"own")){
+            $member = pdo_get('ewei_shop_member',['id'=>intval($mch_id)]);
+            $total = pdo_count('ewei_shop_deduct_setting',['openid'=>$member['openid'],'cate'=>$cate]);
+            $list = pdo_fetchall('select id,money,merchid,deduct,cate,openid from '.tablename('ewei_shop_deduct_setting').'where (user_id = :user_id or openid = :openid) and cate = :cate order by money asc LIMIT '.$spage.','.$pageSize,array(':openid'=>$member['openid'],':user_id'=>$user_id,':cate'=>$cate));
+        }
+        return ['list'=>$list,'pageSize'=>$pageSize,'total'=>$total,'page'=>$page];
+    }
+
+    /**
+     * 个人资产提现
+     * @param $user_id
+     * @param $money
+     * @return array
+     */
+    public function rebate_owndraw($user_id,$money)
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $member = m('member')->getMember($user_id);
+        $credit5 = $member['credit5'];
+        //bccomp  比较 两个精确的小数的大小   == -1  是前者小于后者
+        if(bccomp($credit5,$money,2) == -1){
+            return ['status'=>1,'msg'=>"资金余额不足"];
+        }
+        //个人资产提现 logno的  开头是OW  own_withdraw
+        $order_sn = "OW".date('YmdHis').random(12);
+        $data = [
+            'uniacid'=>$uniacid,
+            'openid'=>$member['openid'],
+            'user_id'=>$user_id,
+            'type'=>1,
+            'logno'=>$order_sn,
+            'title'=>'个人资金提现',
+            'createtime'=>time(),
+            'status'=>0,
+            'money'=>$money,
+            'realmoney'=>bcsub($money,bcmul($money,0.03,2),2),
+            'deductionmoney'=>bcmul($money,0.03,2),
+            'draw_type'=>3,
+        ];
+        pdo_begin();
+        try{
+            pdo_insert('ewei_shop_member_log',$data);
+            pdo_update('ewei_shop_member',['credit5'=>bcsub($credit5,$money,2)],['id'=>$user_id,'uniacid'=>$uniacid]);
+            pdo_commit();
+        }catch(Exception $exception){
+            pdo_rollback();
+        }
+        return ['status'=>0,'msg'=>'提现成功'];
+    }
+
+    /**
+     * 商家提现记录
+     * @param $user_id
+     * @param $applytype
+     * @return array
+     */
+    public function rebate_merchdraw($user_id,$applytype)
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        //查该用户是不是有商家
+        $merch_user = pdo_get('ewei_shop_merch_user',['member_id'=>$user_id]);
+        if(!$merch_user){
+            return ['status'=>1,'msg'=>'商户信息错误'];
+        }
+        $item = p('merch')->getMerchPrice($merch_user['id'],1,1);
+        $list = p('merch')->getMerchPriceList($merch_user['id'],0,0,1);
+        $order_num = count($list);
+        $cansettle = true;
+        if ($item['realpricerate'] <= 0) {
+            $cansettle = false;
+        }
+        if (($item['realprice'] <= 0)  || empty($list))
+        {
+            return array('status'=>1,'msg'=> '您没有可提现的金额');
+        }
+        if($item['realpricerate'] < 10){
+            return ['status'=>1,'msg'=>'提现金额不足'];
+        }
+        $insert = array();
+        $insert['uniacid'] = $uniacid;
+        $insert['merchid'] = $merch_user['id'];
+        $insert['applyno'] = m('common')->createNO('merch_bill', 'applyno', 'MO');
+        $insert['orderids'] = iserializer($item['orderids']);
+        $insert['ordernum'] = $order_num;
+        $insert['price'] = $item['price'];
+        $insert['realprice'] = $item['realprice'];
+        $insert['realpricerate'] = $item['realpricerate'];
+        $insert['finalprice'] = $item['finalprice'];
+        $insert['orderprice'] = $item['orderprice'];
+        $insert['payrateprice'] = round(($item['realpricerate'] * $item['payrate']) / 100, 2);
+        $insert['payrate'] = $item['payrate'];
+        $insert['applytime'] = time();
+        $insert['status'] = 1;
+        $insert['applytype'] = $applytype;
+        $insert['type'] = 1;
+        pdo_insert('ewei_shop_merch_bill', $insert);
+        $billid = pdo_insertid();
+        foreach ($list as $k => $v )
+        {
+            $orderid = $v['id'];
+            $insert_data = array();
+            $insert_data['uniacid'] = $uniacid;
+            $insert_data['billid'] = $billid;
+            $insert_data['orderid'] = $orderid;
+            $insert_data['ordermoney'] = $v['realprice'];
+            pdo_insert('ewei_shop_merch_billo', $insert_data);
+            $change_order_data = array();
+            $change_order_data['merchapply'] = 1;
+            pdo_update('ewei_shop_order', $change_order_data, array('id' => $orderid));
+        }
+        p('merch')->sendMessage(array('merchname' => $merch_user['merchname'], 'money' => $insert['realprice'], 'realname' => $merch_user['realname'], 'mobile' => $merch_user['mobile'], 'applytime' => time()), 'merch_apply_money');
+        return ['status'=>0,'msg'=>"提现申请成功"];
+    }
+
+    /**
+     * 个人资产提现记录
+     * @param $user_id
+     * @param $page
+     * @return array
+     */
+    public function rebate_owndraw_log($user_id,$page)
+    {
+        $member = m('member')->getMember($user_id);
+        $pageSize = 20;
+        $psize = ($page - 1)*$pageSize;
+        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_member_log')." where (openid = :openid or user_id = :user_id) and title = '个人资金提现'",[':openid'=>$member['openid'],':user_id'=>$user_id]);
+        //查询提现记录  FROM_UNIXTIIME()    sql语句中 时间戳转换成时间格式
+        $list = pdo_fetchall('select id,title,money,FROM_UNIXTIME(createtime) as createtime,status,refuse_reason from '.tablename('ewei_shop_member_log').' where (openid = :openid or user_id = :user_id) and title = "个人资金提现" order by id desc LIMIT '.$psize.','.$pageSize,[':openid'=>$member['openid'],':user_id'=>$user_id]);
+        return ['list'=>$list,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize];
+    }
+
+    /**
+     * 商家资产提现记录
+     * @param $user_id
+     * @param $page
+     * @return array
+     */
+    public function rebate_merchdraw_log($user_id,$page)
+    {
+        //查该用户是不是有商家
+        $merch_user = pdo_get('ewei_shop_merch_user',['member_id'=>$user_id]);
+        if(!$merch_user){
+            return ['status'=>1,'msg'=>'商户信息错误'];
+        }
+        $pageSize = 10;
+        $pindex = ($page - 1) * $pageSize;
+        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_merch_bill').'where uniacid = :uniacid and merchid = :merchid',[':uniacid'=>$uniacid,':merchid'=>$merch_user['id']]);
+        $list = pdo_getall('ewei_shop_merch_bill','merchid="'.$merchid.'" and uniacid="'.$uniacid.'" and type = 1 order by id desc LIMIT '.$pindex.','.$pageSize,['id','realprice','realpricerate','status','applytime']);
+        foreach ($list as $key=>$item){
+            $list[$key]['applytime'] = date('Y-m-d H:i:s',$item['applytime']);
+            $list[$key]['title'] = "资金提现";
+        }
+        return ['list'=>$list,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize];
     }
 }
 
