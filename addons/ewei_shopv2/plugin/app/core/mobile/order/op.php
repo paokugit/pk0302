@@ -28,15 +28,17 @@ class Op_EweiShopV2Page extends AppMobilePage
                 app_error(1,"无此用户");
             }
             $openid=$member_id;
-        }
+        }  
         $member=m("member")->getMember($openid);
         
-		$order = pdo_fetch('select id,ordersn,openid,user_id,status,deductcredit,deductcredit2,deductprice,discount_price,couponid,`virtual`,`virtual_info`,merchid  from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid']));
+		$order = pdo_fetch('select id,ordersn,openid,user_id,status,deductcredit,deductcredit2,deductprice,discount_price,couponid,`virtual`,`virtual_info`,merchid  from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid  limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid']));
 
 		if (empty($order)) {
+		   
 			app_error(AppError::$OrderNotFound);
 		}
         if ($order["openid"]!=$member["openid"]&&$order["user_id"]!=$member["id"]){
+           
             app_error(AppError::$OrderNotFound);
         }
 		if (0 < $order['status']) {
@@ -106,9 +108,18 @@ class Op_EweiShopV2Page extends AppMobilePage
 		if (empty($orderid)) {
 			app_error(AppError::$ParamsError);
 		}
-
-		$order = pdo_fetch('select id,ordersn,status,price,merchid,openid,couponid,refundstate,refundid,share_price,share_id from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
-
+        $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+        $member_id=m('member')->getLoginToken($openid);
+        if ($member_id==0){
+            app_error(1,"无此用户");
+        }
+        $openid=$member_id;
+        }
+        
+        $member=m("member")->getMember($openid);
+		$order = pdo_fetch('select id,ordersn,status,price,merchid,openid,user_id,couponid,refundstate,refundid,share_price,share_id from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and (openid=:openid or user_id=:user_id) limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'],':openid'=>$member["openid"],':user_id'=>$member["id"]));
+        
 		if (empty($order)) {
 			app_error(AppError::$OrderNotFound);
 		}
@@ -129,7 +140,7 @@ class Op_EweiShopV2Page extends AppMobilePage
             $share_member=pdo_get("ewei_shop_member",array('id'=>$order["share_id"]));
             if (!empty($share_member)){
                 //用户佣金
-                m('member')->setCredit($share_member["openid"], 'credit2', $order["share_price"],"赏金任务佣金，用户确认收货");
+                m('member')->setCredit($share_member["id"], 'credit2', $order["share_price"],"赏金任务佣金，用户确认收货");
                 pdo_update("ewei_shop_member",array('frozen_credit2'=>$share_member["frozen_credit2"]-$order["share_price"]),array('id'=>$order["share_id"]));
                 //更新记录
                 pdo_update("ewei_shop_member_credit2",array("frozen"=>1),array('orderid'=>$orderid));
@@ -146,11 +157,12 @@ class Op_EweiShopV2Page extends AppMobilePage
 		   }
 		}
 		if($zhekoubao > 0){
-			m('member')->setCredit($order['openid'],'credit3',$zhekoubao,"购买折扣宝商品奖励折扣宝");
+			m('member')->setCredit($member["id"],'credit3',$zhekoubao,"购买折扣宝商品奖励折扣宝");
 		}
 		pdo_update('ewei_shop_order', array('status' => 3, 'finishtime' => time(), 'refundstate' => 0), array('id' => $order['id'], 'uniacid' => $_W['uniacid']));
 		m('order')->setStocksAndCredits($orderid, 3);
-		m('member')->upgradeLevel($order['openid'], $orderid);
+// 		m('member')->upgradeLevel($order['openid'], $orderid);
+		m('member')->upgradeLevel($member["id"], $orderid);
 		m('order')->setGiveBalance($orderid, 1);
 
 		if (com('coupon')) {
@@ -211,7 +223,7 @@ class Op_EweiShopV2Page extends AppMobilePage
 			app_error(AppError::$ParamsError);
 		}
 
-		$order = pdo_fetch('select id,status,refundstate,refundid from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
+		$order = pdo_fetch('select id,status,refundstate,refundid from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid  limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid']));
 
 		if (empty($order)) {
 			app_error(AppError::$OrderNotFound);

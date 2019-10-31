@@ -13,7 +13,7 @@ class Refund_EweiShopV2Page extends AppMobilePage
 		$uniacid = $_W['uniacid'];
 		$openid = $_W['openid'];
 		$orderid = intval($_GPC['id']);
-		$order = pdo_fetch('select id,status,price,refundid,goodsprice,dispatchprice,deductprice,deductcredit2,finishtime,isverify,`virtual`,refundstate,merchid from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $uniacid, ':openid' => $openid));
+		$order = pdo_fetch('select id,status,price,refundid,goodsprice,dispatchprice,deductprice,deductcredit2,finishtime,isverify,`virtual`,refundstate,merchid from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid  limit 1', array(':id' => $orderid, ':uniacid' => $uniacid));
 
 		if (empty($order)) {
 			app_error(AppError::$OrderNotFound);
@@ -141,7 +141,14 @@ class Refund_EweiShopV2Page extends AppMobilePage
 		global $_W;
 		global $_GPC;
 		extract($this->globalData());
-
+        $openid=$_GPC["openid"];
+        if($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
 		if ($order['status'] == '-1') {
 			app_error(AppError::$OrderCanNotRefund, '订单已经处理完毕');
 		}
@@ -188,7 +195,7 @@ class Refund_EweiShopV2Page extends AppMobilePage
 			pdo_update('ewei_shop_order', array('refundstate' => $refundstate), array('id' => $orderid, 'uniacid' => $uniacid));
 			pdo_update('ewei_shop_order_refund', $refund, array('id' => $refundid, 'uniacid' => $uniacid));
 		}
-
+        //小程序消息
 		m('notice')->sendOrderMessage($orderid, true);
 		app_json();
 	}

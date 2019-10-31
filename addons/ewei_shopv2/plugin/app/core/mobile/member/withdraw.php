@@ -109,13 +109,28 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		if (empty($set['withdraw'])) {
 			app_error(1, '系统未开启提现!');
 		}
-
+        
 		$set_array = array();
 		$set_array['charge'] = $set['withdrawcharge']?$set['withdrawcharge']:3;
 		$set_array['begin'] = floatval($set['withdrawbegin']);
 		$set_array['end'] = floatval($set['withdrawend']);
 		$money = floatval($_GPC['money']);
-		$credit = m('member')->getCredit($_W['openid'], 'credit2');
+		$openid=$_GPC["openid"];
+		if ($_GPC["apptype"]==1){
+		    
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		    
+		}
+		$member=m("member")->getMember($openid);
+		if (empty($member)){
+		    app_error(1,"无此用户");
+		}
+		
+		$credit = $member["credit2"];
 
 		if ($money <10 ) {
 			app_error(2, '提现金额不能低于10元!');
@@ -146,7 +161,7 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		$applytype = intval($_GPC['applytype']);
 
 		if (!array_key_exists($applytype, $type_array)) {
-			show_json(0, '未选择提现方式，请您选择提现方式后重试!');
+			app_error(0, '未选择提现方式，请您选择提现方式后重试!');
 		}
 
 		if ($applytype == 2) {
@@ -217,11 +232,12 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 			}
 		}
 
-		m('member')->setCredit($_W['openid'], 'credit2', 0 - $money, array(0, $_W['shopset']['set'][''] . '余额提现预扣除: ' . $money . ',实际到账金额:' . $realmoney . ',手续费金额:' . $deductionmoney));
+		m('member')->setCredit($member["id"], 'credit2', 0 - $money, array(0, $_W['shopset']['set'][''] . '余额提现预扣除: ' . $money . ',实际到账金额:' . $realmoney . ',手续费金额:' . $deductionmoney));
 		$logno = m('common')->createNO('member_log', 'logno', 'RW');
 		$apply['uniacid'] = $_W['uniacid'];
 		$apply['logno'] = $logno;
-		$apply['openid'] = $_W['openid'];
+		$apply['openid'] = $member['openid'];
+		$apply["user_id"]=$member["id"];
 		$apply['title'] = '余额提现';
 		$apply['type'] = 1;
 		$apply['createtime'] = time();
@@ -229,7 +245,7 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		$apply['money'] = $money;
 		$apply['realmoney'] = $realmoney;
 		$apply['deductionmoney'] = $deductionmoney;
-		$apply['charge'] = $set_array['charge'];
+ 		$apply['charge'] = $set_array['charge'];
 		$apply['applytype'] = $applytype;
 		pdo_insert('ewei_shop_member_log', $apply);
 		$logid = pdo_insertid();

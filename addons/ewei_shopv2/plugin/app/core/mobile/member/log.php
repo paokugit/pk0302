@@ -48,7 +48,21 @@ class Log_EweiShopV2Page extends AppMobilePage
         }*/
 
         $addwhere='';
-
+        $openid=$_GPC["openid"];
+        if ($_GPC["apptype"]==1){
+            
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+            
+        }
+        $member=m("member")->getMember($openid);
+        if (empty($member)){
+            app_error(1,"无此用户");
+        }
+        
         if (empty($type)){
 
 		}elseif ($type==1){
@@ -66,8 +80,8 @@ class Log_EweiShopV2Page extends AppMobilePage
         }
 
 
-        $condition = " and openid=:openid and uniacid=:uniacid and credittype=:credittype and module=:module   ".$addwhere;
-        $params = array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid'], ':credittype' => 'credit1', ':module' => 'ewei_shopv2');
+        $condition = " and (openid=:openid or user_id=:user_id) and uniacid=:uniacid and credittype=:credittype and module=:module   ".$addwhere;
+        $params = array(':uniacid' => $_W['uniacid'], ':openid' =>$member["openid"],':user_id'=>$member["id"], ':credittype' => 'credit1', ':module' => 'ewei_shopv2');
 
         $list = pdo_fetchall('select createtime,remark,num from ' . tablename('mc_credits_record') . ' where 1 ' . $condition . ' order by createtime desc LIMIT ' . (($pindex - 1) * $psize) . ',' . $psize, $params);
        // $total = pdo_fetchcolumn('select count(*) from ' . tablename('mc_credits_record') . ' where 1 ' . $condition, $params);
@@ -92,20 +106,33 @@ class Log_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
-        $member = $this->member;
+//         $member = $this->member;
+        //修改
+        $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (empty($member)){
+            app_error(1,"无此用户");
+        }
         
         $data['id'] = $member['id'];
         $data['openid'] = $member['openid'];
         $data['credit2'] = $member['credit2'];//账户余额
         $data['frozen_credit2']=$member["frozen_credit2"];
         //已经提现
-        $sql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where openid=:openid and type=1 and status = 1";
-        $params = array(':openid' => $_W['openid']);
+        $sql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where (openid=:openid or user_id=:user_id) and type=1 and status = 1";
+        $params = array(':openid' =>$member["openid"],":user_id"=>$member["id"]);
         $data['balance_total'] = pdo_fetchcolumn($sql, $params);//成功提现金额
 
         //累计收入
-        $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where openid=:openid and type=3 and status = 1";
-        $comeparams = array(':openid' => $_W['openid']);
+        $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where (openid=:openid or user_id=:user_id) and type=3 and status = 1";
+        $comeparams = array(':openid' =>$member["openid"],":user_id"=>$member["id"]);
         $data['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计推荐收入
 
         app_json(array('info' => $data));
@@ -114,16 +141,31 @@ class Log_EweiShopV2Page extends AppMobilePage
     public function money_log(){
         global $_W;
         global $_GPC;
+        //修改
+        $openid=$_GPC["openid"];
+        if ($_GPC["apptype"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (empty($member)){
+            app_error(1,"无此用户");
+        }
+        
         $type = intval($_GPC['type']);
         $pindex = max(1, intval($_GPC['page']));
         $psize = 10;
         $apply_type = array(0 => '微信钱包', 2 => '支付宝', 3 => '银行卡');
         if($_GPC['type']==1){// 收入
-            $condition = ' and openid=:openid and type in (0,3)';
+            $condition = ' and (openid=:openid or user_id=:user_id) and type in (0,3)';
         }else{// 支出
-            $condition = ' and openid=:openid and type in (1,2) and (title="余额提现" or title="小程序商城消费")';
+            $condition = ' and (openid=:openid or user_id=:user_id) and type in (1,2) and (title="余额提现" or title="小程序商城消费")';
         }
-        $params = array( ':openid' => $_W['openid']);
+//         $params = array( ':openid' => $_W['openid']);
+        $params = array( ':openid' => $member['openid'],':user_id'=>$member["id"]);
         $list = pdo_fetchall('select * from ' . tablename('ewei_shop_member_log') . (' where 1 ' . $condition . ' order by createtime desc LIMIT ') . ($pindex - 1) * $psize . ',' . $psize, $params);
         $total = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_log') . (' where 1 ' . $condition), $params);
         $newList = array();
