@@ -249,11 +249,155 @@ class Index_EweiShopV2Page extends AppMobilePage
     }
 
     /**
+     * 收款付
+     */
+    public function rebate_qrcode()
+    {
+        global $_GPC;
+        $mid = trim($_GPC['merchid']);
+        if(!$mid) app_error(1,"参数不能为空");
+        if(is_numeric($mid)){
+            //折扣宝商家收款码
+            $rebate_url = 'pages/discount/zkbscancode/zkbscancode';
+        }else{
+            //折扣宝个人收款码
+            $rebate_url = 'pages/personalcode/scancode';
+        }
+        $rebate_back= 'kaluli';
+        //生成二维码
+        $rebate = m('qrcode')->createHelpPoster(['back'=>$rebate_back,'url'=>$rebate_url,'cate'=>2],$mid);
+        if(!$rebate ){
+            app_error(1,'生成收款码错误');
+        }
+        app_error(0,['rebate'=>$rebate['qrcode'],'rebate_qr'=>$rebate['qr']]);
+    }
+
+    /**
+     * 折扣列表
+     */
+    public function rebate_get()
+    {
+        global $_GPC;
+        $token = $_GPC['token'];
+        $page = $_GPC['page'];
+        $user_id = m('app')->getLoginToken($token);
+        $data = m('app')->rebate_get($user_id,$page);
+        app_error(0,$data);
+    }
+
+    /**
+     * 设置折扣
+     */
+    public function rebate_set()
+    {
+        global $_GPC;
+        $money = $_GPC['money'];
+        $fee = $_GPC['deduct'];
+        $id = $_GPC['id'];
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        $data = m('app')->rebate_set($user_id,$money,$fee,$id);
+        app_error($data['status'],$data['msg']);
+    }
+
+    /**
+     * 资金账户
+     */
+    public function rebate_credit()
+    {
+        global $_GPC;
+        $type = $_GPC['type'];
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        $member = m('member')->getMember($user_id);
+        //$type == 1 商家收款码的资金账户
+        if($type == 1){
+            $merchid = pdo_getcolumn('ewei_shop_merch_user',['member_id'=>$user_id],'id');
+            $item = p('merch')->getMerchPrice($merchid,1,1);
+            $data = ['orderprice'=>number_format($item['orderprice'],2),'realpricerate'=>number_format($item['realpricerate'],2)];
+        }else{
+            $data = ['credit5'=>$member['credit5']];
+        }
+        app_error(0,$data);
+    }
+
+    /**
+     * 收款记录
+     */
+    public function rebate_record()
+    {
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        $data = m('app')->rebate_record($user_id);
+        app_error(0,$data);
+    }
+
+    /**
+     * 资产提现
+     */
+    public function rebate_draw()
+    {
+        global $_GPC;
+        //接受参数
+        $money = $_GPC['money'];
+        $type = $_GPC['type'];
+        $applytype = $_GPC['applytype'];
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if($money < 10){
+            app_error(1,"最少提现10块");
+        }
+        //防止联系请求
+        $redis = redis();
+        if($redis->get($user_id.$money)){
+            show_json(0,"申请处理中，请稍后...");
+        }else{
+            $token = md5($user_id.$money.time());
+            $redis->set($user_id.$money,$token,30);
+        }
+        //$type == 1 个人资金提现  2商家资金提现
+        if($type == 1){
+            $data = m('app')->rebate_owndraw($user_id,$money);
+        }else{
+            $data = m('app')->rebate_merchdraw($user_id,$applytype);
+        }
+        app_error($data['status'],$data['msg']);
+    }
+
+    /**
+     * 资产提现记录
+     */
+    public function rebate_drawlog()
+    {
+        global $_GPC;
+        $page = $_GPC['page'];
+        $type = $_GPC['type'];
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if($type == 1){
+            $data = m('app')->rebate_owndraw_log($user_id,$page);
+        }else{
+            $data = m('app')->rebate_merchdraw_log($user_id,$page);
+        }
+        app_json($data);
+    }
+
+    /**
      * 专享
      */
     public function exclusive()
     {
-
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        $member = m('member')->getMember($user_id);
+        if(empty($user_id) || $member['agentlevel'] == 0){
+            $data = m('app')->get_list();
+        }else{
+            $data = m('app')->get_list1();
+        }
+        app_error(0,$data);
     }
 
     /**

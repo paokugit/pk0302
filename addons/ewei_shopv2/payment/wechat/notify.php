@@ -947,7 +947,8 @@ class EweiShopWechatPay
         //用ordersn订单号 查订单信息
         $order = pdo_fetch('select * from '.tablename('ewei_shop_order').' where ordersn = "'.$ordersn.'"');
         //计算付款者 是不是第一次给收款码付款
-        $count = pdo_count('ewei_shop_member_log',['openid'=>$order['openid'],'rechargetype'=>"scan",'status'=>1]);
+        //$count = pdo_count('ewei_shop_member_log',['openid'=>$order['openid'],'rechargetype'=>"scan",'status'=>1]);
+        $count = pdo_count('ewei_shop_member_log',['openid'=>$order['openid'],'rechargetype'=>"wxscan",'status'=>1]);
         //从order里面获得openID 查用户的卡路里和折扣宝余额
         $member = pdo_fetch('select id,agentid,credit1,credit3 from '.tablename('ewei_shop_member').'where openid = "'.$order['openid'].'"');
         if ($data['result_code'] == 'SUCCESS' && $data['return_code'] == 'SUCCESS') {
