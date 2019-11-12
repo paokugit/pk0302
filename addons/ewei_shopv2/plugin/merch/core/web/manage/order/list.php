@@ -378,10 +378,30 @@ class List_EweiShopV2Page extends MerchWebPage
 			{
 				$magent = m("member")->getMember($agentid);
 			}
-			$order_goods = pdo_fetchall("select g.id,g.title,g.thumb,g.goodssn,og.goodssn as option_goodssn, g.productsn,og.productsn as option_productsn, og.total,og.price,og.optionname as optiontitle, og.realprice,og.changeprice,og.oldprice,og.commission1,og.commission2,og.commission3,og.commissions,og.diyformdata,og.diyformfields,op.specs from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " left join " . tablename("ewei_shop_goods_option") . " op on og.optionid = op.id " . " where og.uniacid=:uniacid and og.orderid=:orderid ", array( ":uniacid" => $uniacid, ":orderid" => $value["id"] ));
+			$order_goods = pdo_fetchall("select g.id,g.title,g.thumb,g.goodssn,og.refundid,og.goodssn as option_goodssn, g.productsn,og.productsn as option_productsn, og.total,og.price,og.optionname as optiontitle, og.realprice,og.changeprice,og.oldprice,og.commission1,og.commission2,og.commission3,og.commissions,og.diyformdata,og.diyformfields,op.specs from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " left join " . tablename("ewei_shop_goods_option") . " op on og.optionid = op.id " . " where og.uniacid=:uniacid and og.orderid=:orderid and og.status!=-1", array( ":uniacid" => $uniacid, ":orderid" => $value["id"] ));
 			$goods = "";
+			//商品售后id
+			$good_refundid=array();
+			$gi=0;
 			foreach( $order_goods as &$og ) 
 			{
+			    //获取商品售后
+			    if ($og["refundid"]!=0&&!empty($og["refundid"])){
+			        if (!in_array($og["refundid"], $good_refundid)){
+			            $good_refundid[$gi]["refundid"]=$og["refundid"];
+			            //判断售后状态
+			            $r=pdo_get("ewei_shop_order_refund",array("id"=>$og["refundid"]));
+			            if ($r["status"]==0){
+			                //未处理
+			                $good_refundid[$gi]["status"]=0;
+			            }else{
+			                $good_refundid[$gi]["status"]=1;
+			            }
+			            $i+=1;
+			        }
+			    }
+			    
+			    
 				if( !empty($og["specs"]) ) 
 				{
 					$thumb = m("goods")->getSpecThumb($og["specs"]);
@@ -466,6 +486,8 @@ class List_EweiShopV2Page extends MerchWebPage
 					$og["goods_diyformdata"] = $diyformdata;
 				}
 			}
+			//商品售后申请
+			$value["good_refundid"]=$good_refundid;
 			unset($og);
 			if( !empty($level) && empty($agentid) ) 
 			{

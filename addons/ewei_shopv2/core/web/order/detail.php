@@ -63,7 +63,7 @@ class Detail_EweiShopV2Page extends WebPage
 		{
 			$diyformfields = ",o.diyformfields,o.diyformdata";
 		}
-		$goods = pdo_fetchall("SELECT op.specs,g.*, o.goodssn as option_goodssn, o.productsn as option_productsn,o.total,g.type,o.optionname,o.optionid,o.price as orderprice,o.realprice,o.changeprice,o.oldprice,o.commission1,o.commission2,o.commission3,o.commissions,o.seckill,o.seckill_taskid,o.seckill_roomid" . $diyformfields . " FROM " . tablename("ewei_shop_order_goods") . " o left join " . tablename("ewei_shop_goods") . " g on o.goodsid=g.id " . " left join " . tablename("ewei_shop_goods_option") . " op on o.optionid=op.id " . " WHERE o.orderid=:orderid and o.uniacid=:uniacid", array( ":orderid" => $id, ":uniacid" => $_W["uniacid"] ));
+		$goods = pdo_fetchall("SELECT op.specs,g.*,o.rstate,o.refundid,o.refundstatus, o.goodssn as option_goodssn, o.productsn as option_productsn,o.total,g.type,o.optionname,o.optionid,o.price as orderprice,o.realprice,o.changeprice,o.oldprice,o.commission1,o.commission2,o.commission3,o.commissions,o.seckill,o.seckill_taskid,o.seckill_roomid" . $diyformfields . " FROM " . tablename("ewei_shop_order_goods") . " o left join " . tablename("ewei_shop_goods") . " g on o.goodsid=g.id " . " left join " . tablename("ewei_shop_goods_option") . " op on o.optionid=op.id " . " WHERE o.orderid=:orderid and o.uniacid=:uniacid and o.status!=-1", array( ":orderid" => $id, ":uniacid" => $_W["uniacid"] ));
 		$is_merch = false;
 		foreach( $goods as &$r ) 
 		{

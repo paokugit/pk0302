@@ -53,7 +53,7 @@
 </div>
 {/if}
    <form class="form-horizontal form" action="" method="post">
-        <input type="hidden" name="id" value="{$item['id']}" />
+        <input type="hidden" name="id" value="{$refund['id']}" />
         
         <input type="hidden" name="dispatchid" value="{$dispatch['id']}" />
 		  {if !empty($refund)}
@@ -117,6 +117,15 @@
                              <td style='width:80px'>退还卡路里：</td>
                              <td>{$item['deductcredit']}(个)</td>
                          </tr>-->
+                         {else}
+                         <tr>
+                             <td style='width:80px'>更换规格：</td>
+                             <td>{$goods_id[0]["opetionname"]} </td>
+                         </tr>
+                         <tr>
+                             <td style='width:80px'>件数：</td>
+                             <td>{$goods_id[0]["total"]} </td>
+                         </tr>
                          {/if}
 
                          <tr>
@@ -256,7 +265,7 @@
                         <p class="form-control-static ops">
                             {if $item['merchid'] == 0}
                                 {if ($refund['status'] == 0 || $refund['status'] > 1)}
-                                <a class="btn btn-primary btn-xs" data-toggle="ajaxModal"  href="{php echo webUrl('order/op/refund/submit', array('id' => $item['id'],'refundid' => $refund['id']))}">处理申请</a>
+                                <a class="btn btn-primary btn-xs" data-toggle="ajaxModal"  href="{php echo webUrl('order/op/refund/submit', array('id' => $refund['id'],'refundid' => $refund['id']))}">处理申请</a>
                                 {/if}
                             {/if}
                         </p>
@@ -359,33 +368,26 @@
                        {/if}
                        <td colspan="{$colspan}" style="padding-right: 60px;text-align: right">
                            <div class="price">
-                               <p> <span class="price-inner">商品小计：</span><span style="font-weight: bold">￥{php echo number_format( $item['goodsprice'] ,2)}</span></p>
-                               <p><span class="price-inner">运费：</span>￥{php echo number_format( $item['olddispatchprice'],2)}</p>
+                               <p> <span class="price-inner">商品小计：</span><span style="font-weight: bold">￥{php echo number_format( $price ,2)}</span></p>
+                               <p><span class="price-inner">运费：</span>￥{php echo number_format( $dispatchprice,2)}</p>
                                {if !$item['ispackage']}
-                                   {if $item['taskdiscountprice']>0}
-                                   <p><span class="price-inner">任务活动优惠：</span><span class="text-danger">-￥{php echo number_format( $item['taskdiscountprice'],2)}</span></p>
+                                  
+                                  
+                                   {if $deductprice>0}
+                                   <p><span class="price-inner">卡路里抵扣：</span><span class="text-danger">-￥{php echo number_format( $deductprice,2)}</span></p>
                                    {/if}
-                                   {if $item['lotterydiscountprice']>0}
-                                   <p><span class="price-inner">游戏活动优惠：</span><span class="text-danger">-￥{php echo number_format( $item['lotterydiscountprice'],2)}</span></p>
+                                   {if $discount_price>0}
+                                   <p><span class="price-inner">余额抵扣：</span><span class="text-danger">-￥{php echo number_format( $discount_price,2)}</span></p>
                                    {/if}
-                                   {if $item['discountprice']>0}
-                                   <p><span class="price-inner">会员折扣：</span><span class="text-danger">-￥{php echo number_format( $item['discountprice'],2)}</span></p>
+                                   {if $deductenough>0}
+                                   <p><span class="price-inner">满额立减：</span><span class="text-danger">-￥{php echo number_format( $deductenough,2)}</span></p>
                                    {/if}
-                                   {if $item['deductprice']>0}
-                                   <p><span class="price-inner">卡路里抵扣：</span><span class="text-danger">-￥{php echo number_format( $item['deductprice'],2)}</span></p>
-                                   {/if}
-                                   {if $item['deductcredit2']>0}
-                                   <p><span class="price-inner">余额抵扣：</span><span class="text-danger">-￥{php echo number_format( $item['deductcredit2'],2)}</span></p>
-                                   {/if}
-                                   {if $item['deductenough']>0}
-                                   <p><span class="price-inner">满额立减：</span><span class="text-danger">-￥{php echo number_format( $item['deductenough'],2)}</span></p>
-                                   {/if}
-                                   {if $item['couponprice']>0}
-                                   <p><span class="price-inner">优惠券优惠：</span><span class="text-danger">-￥{php echo number_format( $item['couponprice'],2)}</span></p>
+                                   {if $couponprice>0}
+                                   <p><span class="price-inner">优惠券优惠：</span><span class="text-danger">-￥{php echo number_format( $couponprice,2)}</span></p>
                                    {/if}
                                {/if}
 
-                               {if intval($item['changeprice'])!=0}
+                           <!--    {if intval($item['changeprice'])!=0}
                                <p>
                                    <span class="price-inner">卖家改价：</span>
                                    <span style='{if 0<$item['changeprice']}color:green{else}color:red{/if}'>{if 0<$item['changeprice']}+{else}-{/if}￥{php echo number_format(abs($item['changeprice']),2)}</span>
@@ -397,9 +399,9 @@
                                    <span class="price-inner">卖家改运费：</span>
                                    <span style='{if 0<$item['changedispatchprice']}color:green{else}color:red{/if}'>{if 0<$item['changedispatchprice']}+{else}-{/if}￥{php echo abs($item['changedispatchprice'])}</span>
                                </p>
-                               {/if}
+                               {/if} --> 
 
-                               <p><span class="price-inner">实付款：</span><span style="font-size: 14px;font-weight: bold;color: #e4393c">￥{php echo number_format($item['price'],2)}</span></p>
+                               <p><span class="price-inner">实付款：</span><span style="font-size: 14px;font-weight: bold;color: #e4393c">￥{php echo number_format($price+$dispatchprice-$deductprice-$discount_price-$deductenough-$couponprice,2)}</span></p>
                            </div>
                        </td>
                    </tr>
