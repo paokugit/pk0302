@@ -171,7 +171,8 @@ class List_EweiShopV2Page extends AppMobilePage
             $detail['marketprice'] = $goods['marketprice'];
             $detail['productprice'] = $goods['productprice'];
             $comment = pdo_fetchall('select oc.nickname,oc.content,oc.headimgurl from '.tablename('ewei_shop_order_comment').'oc join '.tablename('ewei_shop_order_goods').('g on g.goodsid = oc.goodsid').' where oc.goodsid = :goods_id and oc.level > 3',[':goods_id'=>$detail['goods_id']]);
-            $favorite = pdo_get('ewei_shop_goods_zan',['openid'=>$_GPC['openid'],'goodsid'=>$detail['goods_id'],'status'=>1]);
+            $member = m('member')->getMember($_GPC['openid']);
+            $favorite = pdo_fetch('select * from '.tablename('ewei_shop_goods_zan').'where (openid = :openid or user_id = :user_id) and goodsid = :goods_id and status = 1',[':openid'=>$member['openid'],':user_id'=>$member['id'],':goods_id'=>$detail['goods_id']]);
             $detail['fav'] = empty($favorite) ? 0 : 1;
             $detail['fav_count'] = pdo_count('ewei_shop_goods_zan',['goodsid'=>$detail['goods_id'],'status'=>1]);
             $detail['video'] = tomedia($detail['video']);
@@ -199,7 +200,8 @@ class List_EweiShopV2Page extends AppMobilePage
         if($openid == "" || $goods_id == ""){
             show_json(0,"参数不完整");
         }
-        $zan = pdo_get('ewei_shop_goods_zan',['openid'=>$openid,'goodsid'=>$goods_id]);
+        $member = m('member')->getMember($openid);
+        $zan = pdo_fetch('select * from '.tablename('ewei_shop_goods_zan').'where (openid = :openid or user_id = :user_id) and goodsid = :goods_id',[':openid'=>$member['openid'],':user_id'=>$member['id'],':goods_id'=>$goods_id]);
         if(!empty($zan)){
             $status = $zan['status'] == 1 ? 0 : 1;
             $msg = $zan['status'] == 1 ? "取消点赞成功" : "点赞成功";
@@ -207,7 +209,7 @@ class List_EweiShopV2Page extends AppMobilePage
         }else{
             $status = 1;
             $msg = "点赞成功";
-            pdo_insert('ewei_shop_goods_zan',['status'=>1,'openid'=>$openid,'uniacid'=>1,'goodsid'=>$goods_id,'createtime'=>time()]);
+            pdo_insert('ewei_shop_goods_zan',['status'=>1,'openid'=>$member['openid'],'user_id'=>$member['id'],'uniacid'=>1,'goodsid'=>$goods_id,'createtime'=>time()]);
         }
         show_json(1,['msg'=>$msg,'status'=>$status]);
     }

@@ -1725,7 +1725,8 @@ class Member_EweiShopV2Model
      */
     public function setLoginToken($user_id,$salt)
     {
-        return base64_encode(implode(',',[$user_id,$salt]));
+        $token = base64_encode(implode(',',[$user_id,$salt]));
+        return str_replace('=','',$token);
     }
 
     /**
