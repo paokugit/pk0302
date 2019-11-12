@@ -19,6 +19,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $msg = $_GPC['msg'];
         $money = $_GPC['money'];
         $token = $_GPC['token'];
+        $apitoken = $_GPC['apitoken'];
         //判断参数完整性
         $add = ['mobile'=>$mobile,'msg'=>$msg,'money'=>$money,'token'=>$token];
         if($mobile == "" || $msg == "" || $money == "" || $token == ""){
@@ -29,7 +30,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['mobile'=>$mobile,'uniacid'=>$uniacid]);
         //计算用户的额度
-        $limit = m('game')->checklimit($member['openid'],$member['agentlevel']);
+        $limit = m('payment')->checklimit($member['openid'],$member['agentlevel']);
         //计算用户已经消费的额度
         $sale = pdo_fetchall('select * from '.tablename('mc_credits_record').' where openid = :openid and remark = "RV钱包充值" and createtime > 1570776300',[':openid'=>$member['openid']]);
         $sale_sum = abs(array_sum(array_column($sale,'num')));
@@ -74,7 +75,9 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $res = pdo_update('ewei_shop_member',$data,['openid'=>$member['openid'],'mobile'=>$mobile]);
         if($res){
             //show_json(200,"支付成功");
-            m('game')->addCreditlog($member['openid'],3,-$money,"RV钱包充值");
+            $company = pdo_get('core_company',['apisecret'=>$apitoken,'uniacid'=>$_W['uniacid'],'status'=>1]);
+            $message = empty($apitoken) ? "RV钱包充值" : $company['company']."钱包充值";
+            m('game')->addCreditlog($member['openid'],3,-$money,$message);
             $this->addlog($add,200,"支付成功");
             exit(json_encode(['code'=>200,'msg'=>"支付成功"]));
         }
@@ -134,8 +137,8 @@ class Rebate_EweiShopV2Page extends AppMobilePage
     public function addlog($add,$code,$msg)
     {
         $data = [
-            'request'=>json_encode($add),
-            'response'=>json_encode(['code'=>$code,'msg'=>$msg]),
+            'request'=>json_encode($add,true),
+            'response'=>json_encode(['code'=>$code,'msg'=>$msg],true),
             'createtime'=>time()
         ];
         return pdo_insert('core_rebate_log',$data);

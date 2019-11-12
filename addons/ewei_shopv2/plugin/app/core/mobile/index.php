@@ -367,16 +367,17 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($openid)) {
             app_error(AppError::$ParamsError, '系统错误');
         }
+        $member = m('member')->getMember($openid);
         //获取步数
         $now_setp=$_GPC["step"];
         
         $cs["step"]=$_GPC["step"];
         $cs["step_id"]=$_GPC["id"];
         $cs["create_time"]=time();
-        $cs["openid"]=$_W["openid"];
+        $cs["openid"]=$member["openid"];
+        $cs["user_id"]=$member["id"];
         pdo_insert("ewei_shop_member_getsteplog",$cs);
         $day = date('Y-m-d');
-        $member = m('member')->getMember($_W['openid']);
         $shopset = m("common")->getSysset("shop");
         //获取当前用户卡路里兑换比例
     
@@ -411,7 +412,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
             $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
             
-            $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":openid"=>$openid,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+            $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and (openid=:openid or user_id = :user_id) and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":openid"=>$openid,":user_id"=>$member['id'],":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
             
             if (empty($cardtoday)){
                 $jinri=0;

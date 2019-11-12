@@ -182,6 +182,8 @@ if ($_W['ispost']) {
 	$data['dispatchtype'] = intval($_GPC['dispatchtype']);
 	$data['dispatchprice'] = trim($_GPC['dispatchprice']);
 	$data['dispatchid'] = intval($_GPC['dispatchid']);
+	$data['is_remote'] = intval($_GPC['is_remote']);
+	$data['remote_dispatchprice'] = intval($_GPC['remote_dispatchprice']);
 
 	if ($data['total'] === -1) {
 		$data['total'] = 0;
@@ -760,7 +762,7 @@ if ($com_virtual) {
 }
 
 $areas = m('common')->getAreas();
-
+$express = pdo_getcolumn('ewei_shop_express_set',['uniacid'=>$_W['uniacid']],'express_set');
 if ($diyform) {
 	$form_list = $diyform->getDiyformList();
 	$dfields = iunserializer($item['diyfields']);
