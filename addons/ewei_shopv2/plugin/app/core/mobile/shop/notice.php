@@ -88,7 +88,7 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		//查用户信息
 		$member = pdo_get('ewei_shop_member',['openid'=>$openid]);
 		//查用户的私信的全部
-		$list = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where uniacid = "'.$uniacid.'" and openid=:openid',[":openid"=>$openid]);
+		$list = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where uniacid = "'.$uniacid.'" and openid="'.$openid.'"');
 		//如果没 私信  也就是后台没发 就是第一次进入
 		if(count($list) <= 0){
 			//加入第一次进去的欢迎语
@@ -113,8 +113,8 @@ class Notice_EweiShopV2Page extends AppMobilePage
 			$list[$key]['createtime'] = $this->transform_time($item['createtime']);
 		}
 		$notice = pdo_fetchall('select * from '.tablename('ewei_shop_notice').' where `uniacid` ="'.$uniacid.'" and status=1');
-		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid=:openid and uniacid="'.$uniacid.'"',[':openid'=>$openid]);
-		$email = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where openid=:openid and num=0 and uniacid="'.$uniacid.'"',[':openid'=>$openid]);
+		$log = pdo_fetchall('select * from '.tablename('ewei_shop_notice_log').' where openid="'.$_GPC['openid'].'" and uniacid="'.$_W['uniacid'].'"');
+		$email = pdo_fetchall('select * from '.tablename('ewei_shop_email').' where openid="'.$_GPC['openid'].'" and num=0 and uniacid="'.$_W['uniacid'].'"');
 		show_json(1,['list'=>$list,'notice'=>bcsub(count($notice),count($log)),'email'=>count($email)]);
 	}
 

@@ -133,28 +133,32 @@ class Index_EweiShopV2Page extends AppMobilePage
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         //新人的信息
         $new_member = [];
-	    //如果存在被邀请人  并且 被邀请人不是邀请人
+	//如果存在被邀请人  并且 被邀请人不是邀请人
         if($new_openid != "" && $new_openid != $openid){
             $new_member = pdo_get('ewei_shop_member',['openid'=>$new_openid,'uniacid'=>$uniacid]);
-            $add = ['openid'=>$new_openid,'bang'=>$openid,'createtime'=>time(),'share'=>$new_member['id'],'user_id'=>$member['id']];
-	        //如果被邀请人不为空
+            $add = ['openid'=>$new_openid,'bang'=>$openid,'createtime'=>time()];
+	    //如果被邀请人不为空 
             if(!$new_member){
                 //新用户不存在  插入新的用户的openid
                 $data = array("uniacid" => $_W["uniacid"],"uid" => 0,'agentid'=>$member['id'], "openid" => $new_openid, 'agentlevel'=>0 ,"openid_wa" => mb_substr($new_openid,7), "comefrom" => "sns_wa","createtime" => time(), "status" => 0);
                 pdo_insert('ewei_shop_member',$data);                
                 $add['status'] = 1;//添加绑定日志
-                $add1 = ['openid'=>$new_openid,'user_id'=>$new_member['id'],'item'=>'game','value'=>'绑定上级:'.$new_openid.'/'.'未获得昵称'.',绑定上级id:'.$member['id'].'-'.$member['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                $add1 = ['openid'=>$new_openid,'item'=>'game','value'=>'绑定上级:'.$new_openid.'/'.'未获得昵称'.',绑定上级id:'.$member['id'].'-'.$member['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                //粉丝
+                $my=pdo_get("ewei_shop_member",array("openid"=>$new_openid));
+                m("member")->fans($my["id"],$member["id"]);
+                
             } elseif ($new_member && $new_member['agentid'] == 0 && $member['agentid'] != $new_member['id']){
                 //如果老用户  但是上级   更改上级  但是  老用户   
                 pdo_update('ewei_shop_member',['agentid'=>$member['id']],['id'=>$new_member['id']]);
                 $add['status'] = 0;
-                $add1 = ['openid'=>$new_openid,'user_id'=>$new_member['id'],'item'=>'game','value'=>'绑定上级:'.$new_openid.'/'.$new_member['nickname'].',绑定上级id:'.$member['id'].'-'.$member['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                $add1 = ['openid'=>$new_openid,'item'=>'game','value'=>'绑定上级:'.$new_openid.'/'.$new_member['nickname'].',绑定上级id:'.$member['id'].'-'.$member['nickname'],'create_time'=>date('Y-m-d H:i:s',time())];
+                //粉丝
+                $my=pdo_get("ewei_shop_member",array("openid"=>$new_openid));
+                m("member")->fans($my["id"],$member["id"]);
             }
-            //粉丝
-            $my=pdo_get("ewei_shop_member",array("openid"=>$new_openid));
-            m("member")->fans($my["id"],$member["id"]);
             m('memberoperate')->addlog($add1);
-            if(!pdo_fetch('select * from '.tablename('ewei_shop_gift_record').'where (openid = :new_openid or share = :share) and (bang = :openid or user_id = :user_id) and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':new_openid'=>$new_openid,':share'=>$new_member['id'],':openid'=>$openid,':user_id'=>$member['id']])){
+            if(!pdo_fetch('select * from '.tablename('ewei_shop_gift_record').'where openid = :new_openid and bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':new_openid'=>$new_openid,':openid'=>$openid])){
                 if($new_openid != $openid){
                     pdo_insert('ewei_shop_gift_record',$add);
                 }
@@ -192,7 +196,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }else{
             $get_all = 1;
         }
-        $get = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_gift_log').'where (openid = :openid or user_id = :user_id) and status = 2 and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid,':user_id'=>$member['id']]);
+        $get = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_gift_log').'where openid = :openid and status = 2 and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid]);
         $share = ['title'=>'免费领礼包啦，商品免费领到手','thumb'=>"https://www.paokucoin.com/img/backgroup/free.jpg"];
         show_json(1,['share'=>$share,'goods'=>$goods,'all'=>$all,'desc'=>$gift['desc'],'help_count'=>$help_count,'new_member'=>$new,'remain'=>bcsub($target,$help_count) > 0 ? bcsub($target,$help_count) :0,'agent_level'=>$member['agentlevel'],'agentlevel'=>$agentlevel,'avatar'=>$member['avatar'],'gift'=>$gift['title'],'is_get'=>$is_get,'start'=>date('Y-m-d',$gift['starttime']),'end'=>date('Y-m-d',$gift['endtime']),'get_all'=>$get_all,'gets'=>$get,'week_start'=>date('m.d',$week['start']),'week_end'=>date('m.d',strtotime("-1s",$week['end']))]);
     }
@@ -213,9 +217,9 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         $mid = $_GPC['mids'];
-	    $openid = $_GPC['openid'];
+	$openid = $_GPC['openid'];
         //$member = $this->member;
-	    $member = pdo_get('ewei_shop_member',['openid'=>$openid]);
+	$member = pdo_get('ewei_shop_member',['openid'=>$openid]);
         if( empty($member) )
         {
             $member = array( );
@@ -276,13 +280,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         $gifts = pdo_fetchall(' select id,title,levels,starttime from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$uniacid.'"');
         //该用户对应的礼包
         $gift = m('game')->get_gift($gifts,$openid);
-        //$total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_gift_record').' where (bang = :openid or user_id = :user_id) and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid,':user_id'=>$member['id']]);
-        $record = pdo_fetchall('select * from '.tablename('ewei_shop_gift_record').' where (bang = :openid or user_id = :user_id) and createtime between "'.$week['start'].'" and "'.$week['end'].'" order by id desc LIMIT '.$pindex.','.$pageSize,[':openid'=>$openid,':user_id'=>$member['id']]);
+        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_gift_record').' where bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid]);
+        $record = pdo_fetchall('select * from '.tablename('ewei_shop_gift_record').' where bang = :openid and createtime between "'.$week['start'].'" and "'.$week['end'].'" order by id desc LIMIT '.$pindex.','.$pageSize,[':openid'=>$openid]);
         $new = pdo_fetchall('select id,nickname,avatar,openid,createtime from '.tablename('ewei_shop_member').' where agentid = "'.$member['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'" order by createtime desc LIMIT 10');
         $record = array_merge($record,$new);
         $list = m('game')->isvalid($record,$week['start'],$member['id']);
-        $list = m('util')->array_unique_unset($list,"openid","share");
-        $total = count($list);
+        $list = m('util')->array_unique_unset($list,"openid");
         if(count($list) > 0){
             show_json(1,['list'=>$list,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize]);
         }else{
@@ -305,9 +308,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         $pageSize = 10;
         $pindex = ($page - 1) * $pageSize;
-        $member = m('member')->getMember($openid);
-        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_gift_log').' where uniacid = :uniacid and (openid = :openid or user_id = :user_id) status = 2',[':uniacid'=>$uniacid,':openid'=>$openid,':user_id'=>$member['id']]);
-        $list = pdo_fetchall('select g.thumb,l.gift_id,l.createtime,l.status from '.tablename('ewei_shop_gift_log').'l join '.tablename('ewei_shop_goods').'g on g.id = l.goods_id'.' where l.uniacid = "'.$uniacid.'" and (l.openid = :openid or l.user_id = :user_id) and l.status = 2 LIMIT '.$pindex.','.$pageSize,[':openid'=>$openid,':user_id'=>$member['id']]);
+        $total = pdo_count('ewei_shop_gift_log',['uniacid'=>$uniacid,'openid'=>$openid,"status"=>2]);
+        $list = pdo_fetchall('select g.thumb,l.gift_id,l.createtime,l.status from '.tablename('ewei_shop_gift_log').'l join '.tablename('ewei_shop_goods').'g on g.id = l.goods_id'.' where l.uniacid = "'.$uniacid.'" and l.openid = :openid and l.status = 2 LIMIT '.$pindex.','.$pageSize,[':openid'=>$openid]);
         foreach($list as $key => $item){
             $week = m('util')->week($item['createtime']);
             $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
@@ -330,7 +332,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $uniacid = $_W['uniacid'];
-        $list = pdo_fetchall('select m.nickname,m.avatar,l.gift_id from '.tablename('ewei_shop_gift_log')."l join ".tablename('ewei_shop_member').'m on l.openid = m.openid or l.user_id = m.id '.' where l.uniacid = "'.$uniacid.'" and l.status = 2 order by l.id desc LIMIT 66');
+        $list = pdo_fetchall('select m.nickname,m.avatar,l.gift_id from '.tablename('ewei_shop_gift_log')."l join ".tablename('ewei_shop_member').'m on l.openid = m.openid '.' where l.uniacid = "'.$uniacid.'" and l.status = 2 order by l.id desc LIMIT 66');
         foreach ($list as $key=>$item){
             $list[$key]['gift'] = m('game')->check($item['gift_id']);
         }

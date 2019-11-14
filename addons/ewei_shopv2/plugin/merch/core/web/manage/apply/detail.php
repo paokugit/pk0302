@@ -22,7 +22,7 @@ class Detail_EweiShopV2Page extends MerchWebPage
 		{
 			if ($item['creditstatus'] == 2) 
 			{
-				$data = $this->model->getMerchPriceList($item['merchid'], $value, 10, $item["type"]);
+				$data = $this->model->getMerchPriceList($item['merchid'], $value, 10, $id);
 			}
 			else if ($item['creditstatus'] == 1) 
 			{
