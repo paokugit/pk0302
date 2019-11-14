@@ -279,14 +279,9 @@
 
             </td>
             <td  rowspan="{php echo count($item['goods'])}" style='text-align:center' >
-              
-              <!--    {if !empty($item['refundid'])}
+                {if !empty($item['refundid'])}
                 <a class='op text-primary'  href="{php echo merchUrl('order/op/refund', array('id' => $item['id']))}" >维权{if $item['refundstate']>0}处理{else}详情{/if}</a><br/>
-                {/if}-->
-                 {loop $item['good_refundid'] $refundis}
-                               <a class='op  text-primary'  href="{php echo merchUrl('order/op/refund', array('id' => $refundis['refundid']))}" >维权{if $refundis['status']==0}处理{else}详情{/if}</a> 
-                  {/loop}
-                  
+                {/if}
                 <a class='op text-primary'  href="{php echo merchUrl('order/detail', array('id' => $item['id']))}" >查看详情</a><br/>
                 {if $item['addressid']!=0 && $item['statusvalue']>=2}
                 <a class='op text-primary'  data-toggle="ajaxModal" href="{php echo merchUrl('util/express', array('id' => $item['id'],'express'=>$item['express'],'expresssn'=>$item['expresssn']))}"   >物流信息</a>

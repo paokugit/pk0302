@@ -691,7 +691,6 @@
                     <th style="padding-left: 20px">规格/编号/条码</th>
                     <th style="text-align: center" >单价(元)/数量</th>
                     <th style="text-align: center">数量</th>
-                     <th style="text-align: center;width: 10%">售后状态</th>
                     <th  style="text-align: center">折扣前（元）</th>
                     <th style="text-align: center">折扣后（元）</th>
                     {if !empty($goods['diyformdata']) && $goods['diyformdata'] != 'false'}
@@ -720,23 +719,6 @@
                     <td style="text-align: center">{$goods['marketprice']}
                     </td>
                     <td style="text-align: center">{$goods['total']}个</td>
-                    
-                      <!-- 维权 -->
-                    <td style="padding: 10px 20px">
-                    <p style="white-space:normal;">
-                    {if $goods['rstate']==1}
-                                                                        退款       
-                  <p style="white-space:normal;"><a href="{php echo webUrl('order/op/refund', array('id' => $goods['refundid']))}" >维权详情</a> </p>
-                                                  
-                    {/if}
-                    {if $goods['rstate']==2}换货
-                     <p style="white-space:normal;"><a href="{php echo webUrl('order/op/refund', array('id' => $goods['refundid']))}" >维权详情</a> </p>
-                    
-                    
-                    {/if}
-                   </p>
-                    </td>
-                    
                     <td style="text-align: center" >
                         {$goods['orderprice']}
                     </td>
@@ -782,9 +764,9 @@
                         {/if}
                     </td>
                     <td  {if !empty($goods['diyformdata']) && $goods['diyformdata'] != 'false'}
-                    colspan="7"
-                    {else}
                     colspan="6"
+                    {else}
+                    colspan="5"
                     {/if}
                     style="padding-right: 60px">
                     <div class="price">

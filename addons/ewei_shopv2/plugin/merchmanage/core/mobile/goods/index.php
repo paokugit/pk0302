@@ -34,10 +34,9 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 		global $_W;
 		global $_GPC;
 		$id = intval($_GPC['id']);
-        	$express = pdo_getcolumn('ewei_shop_express_set',['uniacid'=>$_W['uniacid']],'express_set');
+
 		if (!(empty($id))) {
 			$item = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_goods') . ' WHERE id = :id and uniacid = :uniacid', array(':id' => $id, ':uniacid' => $_W['uniacid']));
-			
 			$merchid = $_W['merchmanage']['merchid'];
 			if ($item['merchid'] != $merchid) {
 				$this->message('抱歉，商品不存在!', mobileUrl('merchmanage/goods'), 'error');
@@ -46,7 +45,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
  
 
 		if ($_W['ispost']) {
-		    $data = array('title' => trim($_GPC['title']), 'edareas'=>trim($_GPC['edareas']),'subtitle' => trim($_GPC['subtitle']), 'unit' => trim($_GPC['unit']), 'status' => intval($_GPC['status']), 'showtotal' => intval($_GPC['showtotal']), 'cash' => intval($_GPC['cash']), 'invoice' => intval($_GPC['invoice']), 'isnodiscount' => intval($_GPC['isnodiscount']), 'nocommission' => intval($_GPC['nocommission']), 'isrecommand' => intval($_GPC['isrecommand']), 'isnew' => intval($_GPC['isnew']), 'ishot' => intval($_GPC['ishot']), 'issendfree' => intval($_GPC['issendfree']), 'totalcnf' => intval($_GPC['totalcnf']), 'dispatchtype' => intval($_GPC['dispatchtype']), 'showlevels' => trim($_GPC['showlevels']), 'showgroups' => trim($_GPC['showgroups']), 'buylevels' => trim($_GPC['buylevels']), 'buygroups' => trim($_GPC['buygroups']), 'maxbuy' => intval($_GPC['maxbuy']), 'minbuy' => intval($_GPC['minbuy']), 'usermaxbuy' => intval($_GPC['usermaxbuy']), 'diypage' => intval($_GPC['diypage']), 'displayorder' => intval($_GPC['displayorder']));
+		    $data = array('title' => trim($_GPC['title']), 'subtitle' => trim($_GPC['subtitle']), 'unit' => trim($_GPC['unit']), 'status' => intval($_GPC['status']), 'showtotal' => intval($_GPC['showtotal']), 'cash' => intval($_GPC['cash']), 'invoice' => intval($_GPC['invoice']), 'isnodiscount' => intval($_GPC['isnodiscount']), 'nocommission' => intval($_GPC['nocommission']), 'isrecommand' => intval($_GPC['isrecommand']), 'isnew' => intval($_GPC['isnew']), 'ishot' => intval($_GPC['ishot']), 'issendfree' => intval($_GPC['issendfree']), 'totalcnf' => intval($_GPC['totalcnf']), 'dispatchtype' => intval($_GPC['dispatchtype']), 'showlevels' => trim($_GPC['showlevels']), 'showgroups' => trim($_GPC['showgroups']), 'buylevels' => trim($_GPC['buylevels']), 'buygroups' => trim($_GPC['buygroups']), 'maxbuy' => intval($_GPC['maxbuy']), 'minbuy' => intval($_GPC['minbuy']), 'usermaxbuy' => intval($_GPC['usermaxbuy']), 'diypage' => intval($_GPC['diypage']), 'displayorder' => intval($_GPC['displayorder']));
 
 		    $data['deduct']=trim($_GPC["deduct"]);
 		    $data['deduct_type']=$_GPC["deduct_type"];
@@ -98,8 +97,6 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 			}
 			 else {
 				$data['dispatchprice'] = trim($_GPC['dispatchprice']);
-				$data['remote_dispatchprice'] = trim($_GPC['remote_dispatchprice']);
-				$data['is_remote'] = trim($_GPC['is_remote']);
 			}
 
 			$cateset = m('common')->getSysset('shop');

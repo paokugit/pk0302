@@ -268,95 +268,26 @@ class Util_EweiShopV2Model
      * 二维数组根据某个值的进行去重
      * @param $arr
      * @param $key
-     * @param $k
      * @return array
      */
-	public function array_unique_unset($arr,$key = "",$k = "")
+	public function array_unique_unset($arr,$key)
 	{
 		$res = [];
 		foreach ($arr as $value) {
 			//查看有没有重复项
-			if(isset($res[$value[$key]]) || isset($res[$value[$k]])){
-				//有：销毁
-				unset($value[$key]);
-				unset($value[$k]);
-			} else{
+			if($value['is_valid'] == 1){
+				if(isset($res[$value[$key]])){
+					//有：销毁
+					unset($value[$key]);
+				} else{
+					$res[$value[$key]] = $value;
+				}
+			}else{
 				$res[$value[$key]] = $value;
-				$res[$value[$k]] = $value;
 			}
 		}
 		return $res;
 	}
-
-    /**
-     * 检测是否为违禁色情图片
-     * @param $fileName
-     * @return bool
-     */
-    function validatorImage($fileName){
-        $image = $this->getImage($fileName);
-        $width = ImagesX($image);
-        $height = ImagesY($image);
-        $ycb = 0;
-        for($y=0;$y<$height;$y++){
-            for($x=0;$x<$width;$x++){
-                $rgb = ImageColorAt($image,$x,$y);
-                $r = ($rgb >> 16) & 0xFF;
-                $g = ($rgb >> 8) & 0xFF;
-                $b = $rgb & 0xFF;
-                $ycbcr = $this->rgb2ycbcr($r,$g,$b);
-                if((86 <= $ycbcr['cb'] && $ycbcr['cb'] <= 117)&&(140 <= $ycbcr['cr'] && $ycbcr['cr'] < 168)){
-                    $ycb++;
-                }
-            }
-        }
-        imagedestroy($image);
-        if($ycb > (floatval($width)*floatval($height)*0.3))
-            return true;
-        else
-            return false;
-    }
-
-    /**
-     * 保存图像函数
-     * @param $fileName
-     * @return mixed
-     */
-    function getImage($fileName){
-        $info = getImageSize($fileName);
-        $ext = null;
-        switch ($info[2]) {
-            case 1 :
-                $ext = "gif";
-                break;
-            case 2 :
-                $ext = "jpeg";
-                break;
-            case 3 :
-                $ext = "png";
-                break;
-        }
-        $function = 'ImageCreateFrom'.ucfirst($ext);
-        $resource = $function($fileName);
-        return $resource;
-    }
-
-    /**
-     * RGB 转 YCbCr色彩
-     * @param $r
-     * @param $g
-     * @param $b
-     * @return array
-     */
-    function rgb2ycbcr($r,$g,$b){
-        $r = floatval($r);
-        $g = floatval($g);
-        $b = floatval($b);
-        $y = 0.299*$r + 0.587*$g + 0.114*$b;
-        $cb = (1 / 1.772) * ($b - $y) + 128;
-        $cr = (1 / 1.402) * ($r - $y) + 128;
-        return array('y'=>$y,'cb'=>$cb,'cr'=>$cr);
-    }
 }
 
 if (!defined('IN_IA')) {

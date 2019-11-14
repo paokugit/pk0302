@@ -96,11 +96,6 @@ if (!class_exists("AppModel")) {
             return $wOpt;
         }
 
-        /**
-         * @param $out_trade_no
-         * @param int $money
-         * @return array|bool
-         */
         public function isWeixinPay($out_trade_no, $money = 0)
         {
             global $_W;
@@ -154,9 +149,6 @@ if (!class_exists("AppModel")) {
             return error(-1, '未知错误');
         }
 
-        /**
-         * @return array|mixed
-         */
         public function getAccessToken()
         {
             global $_W;
@@ -186,14 +178,6 @@ if (!class_exists("AppModel")) {
             return $result['access_token'];
         }
 
-        /**
-         * @param null $openid
-         * @param array $datas
-         * @param null $prepay_id
-         * @param int $orderid
-         * @param string $type
-         * @return array
-         */
         public function sendNotice($openid = NULL, $datas = array(), $prepay_id = NULL, $orderid = 0, $type = 'pay')
         {
             global $_W;
@@ -240,14 +224,7 @@ if (!class_exists("AppModel")) {
             return $result;
         }
 
-        /**
-         *  fanbeibei 消息提醒
-         * @param null $openid
-         * @param array $datas
-         * @param int $orderid
-         * @param string $template_id
-         * @return array|bool
-         */
+        //fanbeibei 消息提醒
         public function mysendNotice($openid = NULL, $datas = array(),  $orderid = 0, $template_id="")
         {
             global $_W;
@@ -268,7 +245,8 @@ if (!class_exists("AppModel")) {
             if (empty($appset)) {
                 return error(-1, '未读取到小程序设置');
             }
-
+            
+            
             $page = 'pages/order/detail/index?id=' . $orderid;
             if (empty($orderid)) {
                 $page = '';
@@ -282,12 +260,6 @@ if (!class_exists("AppModel")) {
             $result = ihttp_post('https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=' . $accessToken, $obj);
             return $result;
         }
-
-        /**
-         * @param $str
-         * @param array $datas
-         * @return mixed
-         */
         protected function replaceTemplate($str, $datas = array())
         {
             foreach ($datas as $d) {
@@ -296,10 +268,6 @@ if (!class_exists("AppModel")) {
             return $str;
         }
 
-        /**
-         * @param $id
-         * @return bool
-         */
         public function getTMessage($id)
         {
             global $_W;
@@ -310,9 +278,6 @@ if (!class_exists("AppModel")) {
             return $item;
         }
 
-        /**
-         * @return array|mixed
-         */
         public function getGlobal()
         {
             $data = m('cache')->getArray('wxapp', 'global');
@@ -324,10 +289,6 @@ if (!class_exists("AppModel")) {
             return (is_array($data) ? $data : array());
         }
 
-        /**
-         * @param $data
-         * @return bool
-         */
         public function setGlobal($data)
         {
             if (empty($data)) {
@@ -340,13 +301,6 @@ if (!class_exists("AppModel")) {
             return true;
         }
 
-        /**
-         * @param int $id
-         * @param bool $mobile
-         * @param int $pagess
-         * @param int $select
-         * @return bool
-         */
         public function getPage($id = 0, $mobile = false,$pagess=1,$select=0)
         {
             global $_W;
@@ -501,7 +455,7 @@ if (!class_exists("AppModel")) {
                                     $item['data'] = m('goods')->getList($args);
                                     $item['total'] = $item['data']['total'];
                                     $item['pagesize'] = 30;
-                                    $item['data'] = m('shop')->getGoodsList($item['data']);
+                                    $item['data'] = $this->getGoodsList($item['data']);
 
                                    if (!(empty($item['params']['goodsscroll']))) {
                                         $swiperpage = 1;
@@ -525,7 +479,7 @@ if (!class_exists("AppModel")) {
                                         $item['data'] = m('goods')->getList($args);
                                         $item['total'] = $item['data']['total'];
                                         $item['pagesize'] = 30;
-                                        $item['data'] = m('shop')->getGoodsList($item['data']);
+                                        $item['data'] = $this->getGoodsList($item['data']);
                                         foreach ($item['data'] as $childid => $child) {
                                             $data_temp[$k][] = $child;
                                             if ($i < $swiperpage) {
@@ -611,31 +565,123 @@ if (!class_exists("AppModel")) {
             return $page;
         }
 
-        /**
-         * @param $select
-         * @param $pagess
-         * @return mixed
-         */
+
+
         public function zktGoodsList($select,$pagess){
                 if($select==2){//最新的
-                    $args = array( "pagesize" =>10, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
+                    $args = array( "pagesize" =>20, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id desc,(minprice-deduct) asc,deduct desc' );
                 }elseif($select==1){//销量
-                    $args = array( "pagesize" =>10, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
+                    $args = array( "pagesize" =>20, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales desc,(minprice-deduct) asc,deduct desc' );
                 }else{//价格
-                    $args = array( "pagesize" =>10, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
+                    $args = array( "pagesize" =>20, "page" => $pagess,"deduct_type"=>2,"from" => "miniprogram", "order" =>'(minprice-deduct) asc,deduct desc' );
                 }
                 $item['data'] = array();
                 $item['data'] = m('goods')->getList($args);
                 $item['total'] = $item['data']['total'];
-                $item['pagesize'] = 10;
-                $item['data'] = m('shop')->getGoodsList($item['data'],$pagess);
+                $item['pagesize'] = 20;
+                $item['data'] = $this->getGoodsList($item['data'],$pagess);
                 return $item;
         }
 
-        /**
-         * @param null $str
-         * @param bool $pagetype
-         */
+        public function getGoodsList($goodsList,$pages){
+            $newGoodsList = array();
+            $day=date("Y-m-d");
+            $adv=pdo_fetchall("select * from ".tablename("ewei_shop_goodtop")." where is_del=0 and start_date<=:start_date and end_date>=:end_date",array(":start_date"=>$day,":end_date"=>$day));
+            if ($pages==1){
+                foreach ($goodsList['list'] as $key=>$goods){
+                    //判断是否包含
+                   
+                    $gid=$this->inarray($adv, $key);
+                    if ($gid==0){
+                            $newGoodsList[$key]['gid'] = $goods['id'];
+                            $newGoodsList[$key]['deduct'] = $goods['deduct'];
+                            $newGoodsList[$key]['deduct_type'] = $goods['deduct_type'];
+                            $newGoodsList[$key]['title'] = $goods['title'];
+                            $newGoodsList[$key]['subtitle'] = $goods['subtitle'];
+                            $newGoodsList[$key]['price'] = $goods['minprice'];
+                            $newGoodsList[$key]['productprice'] = $goods['productprice'];
+                            $newGoodsList[$key]['thumb'] = $goods['thumb'];
+                            $newGoodsList[$key]['total'] = $goods['total'];
+                            $newGoodsList[$key]['ctype'] = $goods['type'];
+                            $newGoodsList[$key]['sales'] = $goods['sales'];
+                            $newGoodsList[$key]['video'] = $goods['video'];
+                            $newGoodsList[$key]['seecommission'] = $goods['seecommission'];
+                            $newGoodsList[$key]['cansee'] = $goods['cansee'];
+                            $newGoodsList[$key]['seetitle'] = $goods['seetitle'];
+                            $newGoodsList[$key]['bargain'] = $goods['bargain'];
+                            $newGoodsList[$key]['showprice'] = round($goods['minprice']-$goods['deduct'],2);
+                            $newGoodsList[$key]['issendfree'] = $goods['issendfree'];
+                            //添加广告表示
+                            $newGoodsList[$key]['adv']=0;
+                            $newGoodsList[$key]['main_target']="";
+                            $newGoodsList[$key]['substandard']="";
+                        
+                    }else{
+                        $a=pdo_get("ewei_shop_goodtop",array("id"=>$gid));
+                        $gd=pdo_get("ewei_shop_goods",array("id"=>$a["goodid"]));
+                        $newGoodsList[$key]['gid'] = $gd['id'];
+                        $newGoodsList[$key]['deduct'] = $gd['deduct'];
+                        $newGoodsList[$key]['deduct_type'] = $gd['deduct_type'];
+                        $newGoodsList[$key]['title'] = $gd['title'];
+                        $newGoodsList[$key]['subtitle'] = $gd['subtitle'];
+                        $newGoodsList[$key]['price'] = $gd['minprice'];
+                        $newGoodsList[$key]['productprice'] = $gd['productprice'];
+                        $newGoodsList[$key]['thumb'] = tomedia($gd['thumb']);
+                        $newGoodsList[$key]['total'] = $gd['total'];
+                        $newGoodsList[$key]['ctype'] = $gd['type'];
+                        $newGoodsList[$key]['sales'] = $gd['sales'];
+                        $newGoodsList[$key]['video'] = $gd['video'];
+                        $newGoodsList[$key]['seecommission'] = $gd['seecommission'];
+                        $newGoodsList[$key]['cansee'] = $gd['cansee'];
+                        $newGoodsList[$key]['seetitle'] = $gd['seetitle'];
+                        $newGoodsList[$key]['bargain'] = $gd['bargain'];
+                        $newGoodsList[$key]['showprice'] = round($gd['minprice']-$gd['deduct'],2);
+                        $newGoodsList[$key]['issendfree'] = $gd['issendfree'];
+                        //添加广告表示
+                        $newGoodsList[$key]['adv']=1;
+                        $newGoodsList[$key]['main_target']=$a["main_target"];
+                        $newGoodsList[$key]['substandard']=$a["substandard"];
+                    }
+                }
+                
+            }else{
+                foreach ($goodsList['list'] as $key=>$goods){
+                    $newGoodsList[$key]['gid'] = $goods['id'];
+                    $newGoodsList[$key]['deduct'] = $goods['deduct'];
+                    $newGoodsList[$key]['deduct_type'] = $goods['deduct_type'];
+                    $newGoodsList[$key]['title'] = $goods['title'];
+                    $newGoodsList[$key]['subtitle'] = $goods['subtitle'];
+                    $newGoodsList[$key]['price'] = $goods['minprice'];
+                    $newGoodsList[$key]['productprice'] = $goods['productprice'];
+                    $newGoodsList[$key]['thumb'] = $goods['thumb'];
+                    $newGoodsList[$key]['total'] = $goods['total'];
+                    $newGoodsList[$key]['ctype'] = $goods['type'];
+                    $newGoodsList[$key]['sales'] = $goods['sales'];
+                    $newGoodsList[$key]['video'] = $goods['video'];
+                    $newGoodsList[$key]['seecommission'] = $goods['seecommission'];
+                    $newGoodsList[$key]['cansee'] = $goods['cansee'];
+                    $newGoodsList[$key]['seetitle'] = $goods['seetitle'];
+                    $newGoodsList[$key]['bargain'] = $goods['bargain'];
+                    $newGoodsList[$key]['showprice'] = round($goods['minprice']-$goods['deduct'],2);
+                    $newGoodsList[$key]['issendfree'] = $goods['issendfree'];
+                    //添加广告表示
+                    $newGoodsList[$key]['adv']=0;
+                    $newGoodsList[$key]['main_target']="";
+                    $newGoodsList[$key]['substandard']="";
+                }
+            }
+            return $newGoodsList;
+        }
+       
+        //判断是否包含
+        public function inarray($arary,$key){
+            foreach ($arary as $k=>$v){
+               if ($v["sort"]==$key){
+                   return $v["id"];
+               } 
+            }
+            return 0;
+        }
         public function calculate($str = NULL, $pagetype = false)
         {
             global $_W;
@@ -791,11 +837,6 @@ if (!class_exists("AppModel")) {
             $this->ordernum = $ordernum;
         }
 
-        /**
-         * @param null $type
-         * @param null $str
-         * @return bool|int|mixed|void
-         */
         public function judge($type = NULL, $str = NULL)
         {
             if (empty($type) || empty($str)) {
@@ -849,10 +890,6 @@ if (!class_exists("AppModel")) {
             }
         }
 
-        /**
-         * @param $item
-         * @return mixed
-         */
         public function rpx($item)
         {
             $needHandle = array('fontsize', 'padding', 'paddingtop', 'paddingleft', 'margintop', 'marginleft', 'height', 'leftright', 'bottom');
@@ -867,11 +904,6 @@ if (!class_exists("AppModel")) {
             return $item;
         }
 
-        /**
-         * @param $item
-         * @param bool $mobile
-         * @return mixed
-         */
         public function goodsData($item, $mobile = false)
         {
             global $_W;
@@ -1031,12 +1063,6 @@ if (!class_exists("AppModel")) {
             return $item;
         }
 
-        /**
-         * @param $goods
-         * @param $level
-         * @param $set
-         * @return float|int|mixed
-         */
         public function getCommission($goods, $level, $set)
         {
             global $_W;
@@ -1075,10 +1101,6 @@ if (!class_exists("AppModel")) {
             return $commission;
         }
 
-        /**
-         * @param $openid
-         * @return bool|string
-         */
         public function getLevel($openid)
         {
             global $_W;
@@ -1094,10 +1116,6 @@ if (!class_exists("AppModel")) {
             return $level;
         }
 
-        /**
-         * @param $item
-         * @return mixed
-         */
         public function goodsCG($item)
         {
             global $_W;
@@ -1115,10 +1133,6 @@ if (!class_exists("AppModel")) {
             return $item;
         }
 
-        /**
-         * @param $item
-         * @return array
-         */
         public function mediaData($item)
         {
             $needHandle = array('iconurl', 'imgurl', 'leftnavimg', 'rightnavimg', 'thumb', 'goodsiconsrc');
@@ -1171,19 +1185,11 @@ if (!class_exists("AppModel")) {
             return $item;
         }
 
-        /**
-         * @param $item
-         * @return mixed
-         */
         public function mediaRich($item)
         {
             return $item;
         }
 
-        /**
-         * @param array $params
-         * @return array
-         */
         public function getCodeUnlimit($params = array())
         {
             if (empty($params) || !(is_array($params))) {
@@ -1205,9 +1211,6 @@ if (!class_exists("AppModel")) {
             return $request['content'];
         }
 
-        /**
-         * @return array
-         */
         public function getAuth()
         {
             global $_W;
@@ -1237,11 +1240,6 @@ if (!class_exists("AppModel")) {
             }
         }
 
-        /**
-         * @param $authid
-         * @param string $uri
-         * @return array
-         */
         public function getRelease($authid, $uri = '')
         {
             global $_W;
@@ -1268,9 +1266,6 @@ if (!class_exists("AppModel")) {
             }
         }
 
-        /**
-         * @return array
-         */
         public function getReleaseList()
         {
             global $_W;
@@ -1298,11 +1293,6 @@ if (!class_exists("AppModel")) {
             }
         }
 
-        /**
-         * @param int $page
-         * @param int $psize
-         * @return mixed
-         */
         public function getReleaseLog($page = 1, $psize = 10)
         {
             load()->func('communication');
@@ -1323,18 +1313,13 @@ if (!class_exists("AppModel")) {
             }
         }
 
-        /**
-         * @param null $url
-         * @param bool $vid
-         * @return array|string|void
-         */
         public function getQVideo($url = NULL, $vid = false)
         {
             if (empty($url)) {
                 return;
             }
             if (!($vid)) {
-                $vid = m('shop')->getQVideoVid($url);
+                $vid = $this->getQVideoVid($url);
             }
             load()->func('communication');
             $request = ihttp_get('https://h5vv.video.qq.com/getinfo?callback=renrenVideo&otype=json&platform=11001&host=v.qq.com&sphttps=1&vid=' . $vid);
@@ -1356,10 +1341,6 @@ if (!class_exists("AppModel")) {
             return $videopath . $fvideo['fn'] . '?vkey=' . $fvideo['fvkey'];
         }
 
-        /**
-         * @param $url
-         * @return string|void
-         */
         public function getQVideoVid($url)
         {
             if (empty($url) || !(strexists($url, 'v.qq.com/iframe/'))) {
@@ -1371,9 +1352,6 @@ if (!class_exists("AppModel")) {
             return $vid;
         }
 
-        /**
-         * @return array
-         */
         public function createAuth()
         {
             global $_W;
@@ -1392,10 +1370,6 @@ if (!class_exists("AppModel")) {
             return error(-1, $result['result']['message']);
         }
 
-        /**
-         * @param $menuid
-         * @return array|string
-         */
         public function diyMenu($menuid)
         {
             global $_W;
@@ -1438,7 +1412,7 @@ if (!class_exists("AppModel")) {
                 } else {
                     continue;
                 }
-                $newUrl = m('shop')->getUrl($item['linkurl']);
+                $newUrl = $this->getUrl($item['linkurl']);
                 $newItem = array('url' => $newUrl['url']);
                 if (!(empty($newUrl['vars']))) {
                     $newItem['url_vars'] = $newUrl['vars'];
@@ -1462,7 +1436,7 @@ if (!class_exists("AppModel")) {
                         if (empty($child['linkurl']) || empty($child['text'])) {
                             continue;
                         }
-                        $childNewUrl = m('shop')->getUrl($child['linkurl']);
+                        $childNewUrl = $this->getUrl($child['linkurl']);
                         $newChild = array('text' => $child['text'], 'url' => $childNewUrl['url']);
                         if (!(empty($childNewUrl['vars']))) {
                             $newChild['url_vars'] = $childNewUrl['vars'];
@@ -1485,10 +1459,6 @@ if (!class_exists("AppModel")) {
             return array('type' => $data['params']['navstyle'], 'navfloat' => $data['params']['navfloat'], 'style' => $data['style'], 'items' => $newMenu);
         }
 
-        /**
-         * @param $page
-         * @return array|string
-         */
         public function defaultMenu($page)
         {
             global $_W;
@@ -1513,10 +1483,40 @@ if (!class_exists("AppModel")) {
             return array('type' => 0, 'navfloat' => 'top', 'style' => array('pagebgcolor' => '#f9f9f9', 'bgcolor' => '#ffffff', 'bgcoloron' => '#ffffff', 'iconcolor' => '#999999', 'iconcoloron' => '#ff0000', 'textcolor' => '#666666', 'textcoloron' => '#ff0000', 'bordercolor' => '#ffffff', 'bordercoloron' => '#ffffff', 'childtextcolor' => '#666666', 'childbgcolor' => '#f4f4f4', 'childbordercolor' => '#eeeeee'), 'items' => $menu);
         }
 
-        /**
-         * @param null $class
-         * @return array|string
-         */
+        public function getUrl($url)
+        {
+            global $_W;
+            if (empty($url)) {
+                return array();
+            }
+            if (strexists($url, './index.php?') && strexists($url, 'ewei_shopv2') && strexists($url, 'mobile')) {
+                $parse = parse_url($url);
+                $parse_query = $parse['query'];
+                if (empty($parse_query)) {
+                    return array();
+                }
+                $vars = explode('&', $parse_query);
+                $newVars = array();
+                foreach ($vars as $i => $var) {
+                    $vararr = explode('=', $var);
+                    $newVars[$vararr[0]] = $vararr[1];
+                }
+                if (($newVars['m'] != 'ewei_shopv2') || ($newVars['do'] != 'mobile')) {
+                    return array('url' => $url);
+                }
+                $route = $newVars['r'] = ((!(empty($newVars['r'])) ? $newVars['r'] : 'index'));
+                unset($newVars['i'], $newVars['c'], $newVars['m'], $newVars['do'], $newVars['r']);
+                $newUrl = array('url' => $route, 'vars' => $newVars);
+                $routes = explode('.', $route);
+                if (!(in_array($routes[0], $this->staticurl))) {
+                    $newUrl['url'] = $_W['siteroot'] . 'app/' . str_replace('./', '', $url);
+                    unset($newUrl['vars']);
+                }
+                return $newUrl;
+            }
+            return array('url' => $url);
+        }
+
         public function getIconUnicode($class = NULL)
         {
             $file = EWEI_SHOPV2_PLUGIN . 'app/static/iconfont.json';
@@ -1540,11 +1540,6 @@ if (!class_exists("AppModel")) {
             return $newArr;
         }
 
-        /**
-         * @param $params
-         * @param array $config
-         * @return array|bool|string
-         */
         public function alipay_build($params, $config = array())
         {
             global $_W;
@@ -1570,12 +1565,6 @@ if (!class_exists("AppModel")) {
             return http_build_query($arr);
         }
 
-        /**
-         * @param string $openid
-         * @param array $data
-         * @param string $message_type
-         * @return bool
-         */
         public function sendMessage($openid = '', $data = array(), $message_type = '')
         {
             global $_W;
@@ -1653,10 +1642,6 @@ if (!class_exists("AppModel")) {
             }
         }
 
-        /**
-         * @param $str
-         * @return null|string|string[]|void
-         */
         public function saveImg($str)
         {
             if (empty($str) || is_array($str)) {

@@ -54,11 +54,8 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 			$this->message('订单备注保存成功！', webUrl('order', array('op' => 'detail', 'id' => $item['id'])), 'success');
 		}
 
-        if ($item["user_id"]){
-		$member = m('member')->getMember($item['user_id']);
-        }else{
-            $member = m('member')->getMember($item['openid']);
-        }
+
+		$member = m('member')->getMember($item['openid']);
 		$dispatch = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_dispatch') . ' WHERE id = :id and uniacid=:uniacid and merchid=0', array(':id' => $item['dispatchid'], ':uniacid' => $_W['uniacid']));
 
 		if (empty($item['addressid'])) {
@@ -85,7 +82,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 		}
 
 
-		$goods = pdo_fetchall('SELECT g.*, o.goodssn as option_goodssn, o.productsn as option_productsn,o.total,g.type,o.optionname,o.optionid,o.price as orderprice,o.realprice,o.changeprice,o.oldprice,o.commission1,o.commission2,o.commission3,o.commissions,o.seckill,o.seckill_taskid,o.seckill_roomid' . $diyformfields . ' FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.uniacid=:uniacid and o.status!=-1', array(':orderid' => $id, ':uniacid' => $_W['uniacid']));
+		$goods = pdo_fetchall('SELECT g.*, o.goodssn as option_goodssn, o.productsn as option_productsn,o.total,g.type,o.optionname,o.optionid,o.price as orderprice,o.realprice,o.changeprice,o.oldprice,o.commission1,o.commission2,o.commission3,o.commissions,o.seckill,o.seckill_taskid,o.seckill_roomid' . $diyformfields . ' FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.uniacid=:uniacid', array(':orderid' => $id, ':uniacid' => $_W['uniacid']));
 		$is_merch = false;
 
 		foreach ($goods as &$r ) {
@@ -385,11 +382,10 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 				$statuscondition = ' AND o.status=-1 and o.refundtime=0';
 			}
 			 else if ($status == '4') {
-			//	$statuscondition = ' AND o.refundstate>0 and o.refundid<>0';
-			     $statuscondition = ' AND ogg.rstate!=0';
+				$statuscondition = ' AND o.refundstate>0 and o.refundid<>0';
 			}
 			 else if ($status == '5') {
-				$statuscondition = ' AND ogg.rstate!=0 and (ogg.refundstatus=1 or ogg.refundstatus=-1)';
+				$statuscondition = ' AND o.refundtime<>0';
 			}
 			 else if ($status == '1') {
 				$statuscondition = ' AND ( o.status = 1 or (o.status=0 and o.paytype=3) )';
@@ -483,7 +479,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
         }
 
 		if (($condition != ' o.uniacid = :uniacid and and o.deleted=0 and o.isparent=0') || !(empty($sqlcondition))) {
-			$sql = 'select o.* , a.realname as arealname,a.mobile as amobile,a.province as aprovince ,a.city as acity , a.area as aarea,a.address as aaddress,' . "\r\n" . '                  d.dispatchname,m.nickname,m.id as mid,m.realname as mrealname,m.mobile as mmobile,sm.id as salerid,sm.nickname as salernickname,s.salername,' . "\r\n" . '                  r.rtype,r.status as rstatus,o.sendtype from ' . tablename('ewei_shop_order') . ' o ' .'left join '.tablename("ewei_shop_order_goods").' ogg on ogg.orderid=o.id '.' left join ' . tablename('ewei_shop_order_refund') . ' r on r.id =o.refundid ' . ' left join ' . tablename('ewei_shop_member') . ' m on (m.id=o.user_id or m.openid=o.openid) and m.uniacid =  o.uniacid ' . ' left join ' . tablename('ewei_shop_member_address') . ' a on a.id=o.addressid ' . ' left join ' . tablename('ewei_shop_dispatch') . ' d on d.id = o.dispatchid ' . ' left join ' . tablename('ewei_shop_saler') . ' s on s.openid = o.verifyopenid and s.uniacid=o.uniacid' . ' left join ' . tablename('ewei_shop_member') . ' sm on (sm.openid = s.openid or sm.id=s.user_id) and ogg.status!=-1 and sm.uniacid=s.uniacid' . ' ' . $sqlcondition . ' where ' . $condition . ' ' . $statuscondition . ' GROUP BY o.id ORDER BY o.createtime DESC  ';
+			$sql = 'select o.* , a.realname as arealname,a.mobile as amobile,a.province as aprovince ,a.city as acity , a.area as aarea,a.address as aaddress,' . "\r\n" . '                  d.dispatchname,m.nickname,m.id as mid,m.realname as mrealname,m.mobile as mmobile,sm.id as salerid,sm.nickname as salernickname,s.salername,' . "\r\n" . '                  r.rtype,r.status as rstatus,o.sendtype from ' . tablename('ewei_shop_order') . ' o' . ' left join ' . tablename('ewei_shop_order_refund') . ' r on r.id =o.refundid ' . ' left join ' . tablename('ewei_shop_member') . ' m on m.openid=o.openid and m.uniacid =  o.uniacid ' . ' left join ' . tablename('ewei_shop_member_address') . ' a on a.id=o.addressid ' . ' left join ' . tablename('ewei_shop_dispatch') . ' d on d.id = o.dispatchid ' . ' left join ' . tablename('ewei_shop_saler') . ' s on s.openid = o.verifyopenid and s.uniacid=o.uniacid' . ' left join ' . tablename('ewei_shop_member') . ' sm on sm.openid = s.openid and sm.uniacid=s.uniacid' . ' ' . $sqlcondition . ' where ' . $condition . ' ' . $statuscondition . ' GROUP BY o.id ORDER BY o.createtime DESC  ';
 
 			if (empty($_GPC['export'])) {
 				$sql .= 'LIMIT ' . (($pindex - 1) * $psize) . ',' . $psize;
@@ -491,7 +487,6 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 
 
 			$list = pdo_fetchall($sql, $paras);
-			
 		}
 		 else {
 			$status_condition = str_replace('o.', '', $statuscondition);
@@ -723,30 +718,11 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 				}
 
 
-				$order_goods = pdo_fetchall('select g.id,g.title,g.thumb,g.goodssn,og.refundid,og.goodssn as option_goodssn, g.productsn,og.productsn as option_productsn, og.total,' . "\r\n" . '                    og.price,og.optionname as optiontitle, og.realprice,og.changeprice,og.oldprice,og.commission1,og.commission2,og.commission3,og.commissions,og.diyformdata,' . "\r\n" . '                    og.diyformfields,op.specs,g.merchid,og.seckill,og.seckill_taskid,og.seckill_roomid,g.ispresell from ' . tablename('ewei_shop_order_goods') . ' og ' . ' left join ' . tablename('ewei_shop_goods') . ' g on g.id=og.goodsid ' . ' left join ' . tablename('ewei_shop_goods_option') . ' op on og.optionid = op.id ' . ' where og.uniacid=:uniacid and og.orderid=:orderid and og.status!=-1', array(':uniacid' => $uniacid, ':orderid' => $value['id']));
+				$order_goods = pdo_fetchall('select g.id,g.title,g.thumb,g.goodssn,og.goodssn as option_goodssn, g.productsn,og.productsn as option_productsn, og.total,' . "\r\n" . '                    og.price,og.optionname as optiontitle, og.realprice,og.changeprice,og.oldprice,og.commission1,og.commission2,og.commission3,og.commissions,og.diyformdata,' . "\r\n" . '                    og.diyformfields,op.specs,g.merchid,og.seckill,og.seckill_taskid,og.seckill_roomid,g.ispresell from ' . tablename('ewei_shop_order_goods') . ' og ' . ' left join ' . tablename('ewei_shop_goods') . ' g on g.id=og.goodsid ' . ' left join ' . tablename('ewei_shop_goods_option') . ' op on og.optionid = op.id ' . ' where og.uniacid=:uniacid and og.orderid=:orderid ', array(':uniacid' => $uniacid, ':orderid' => $value['id']));
 				$order_goods = set_medias($order_goods, 'thumb');
 				$goods = '';
-				//商品售后id
-				$good_refundid=array();
-				$gi=0;
+
 				foreach ($order_goods as &$og ) {
-				    
-				    //获取商品售后
-				    if ($og["refundid"]!=0&&!empty($og["refundid"])){
-				        if (!in_array($og["refundid"], $good_refundid)){
-				            $good_refundid[$gi]["refundid"]=$og["refundid"];
-				            //判断售后状态
-				            $r=pdo_get("ewei_shop_order_refund",array("id"=>$og["refundid"]));
-				            if ($r["status"]==0){
-				                //未处理
-				                $good_refundid[$gi]["status"]=0;
-				            }else{
-				                $good_refundid[$gi]["status"]=1;
-				            }
-				            $i+=1;
-				        }
-				    }
-				    
 					$og['seckill_task'] = false;
 					$og['seckill_room'] = false;
 
@@ -883,9 +859,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 					$value['commission3'] = $commission3;
 				}
 
-				//商品售后申请
-				$value["good_refundid"]=$good_refundid;
-				
+
 				$value['goods'] = set_medias($order_goods, 'thumb');
 				$value['goods_str'] = $goods;
 
@@ -967,7 +941,7 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 
 		unset($value);
 		if (($condition != ' o.uniacid = :uniacid and and o.deleted=0 and o.isparent=0') || !(empty($sqlcondition))) {
-			$t = pdo_fetch('SELECT COUNT(*) as count, ifnull(sum(o.price),0) as sumprice   FROM ' . tablename('ewei_shop_order') . ' o '.'left join '.tablename("ewei_shop_order_goods").' ogg on ogg.orderid=o.id' . ' left join ' . tablename('ewei_shop_order_refund') . ' r on r.id =o.refundid ' . ' left join ' . tablename('ewei_shop_member') . ' m on m.openid=o.openid  and m.uniacid =  o.uniacid' . ' left join ' . tablename('ewei_shop_member_address') . ' a on o.addressid = a.id ' . ' left join ' . tablename('ewei_shop_saler') . ' s on s.openid = o.verifyopenid and s.uniacid=o.uniacid' . ' left join ' . tablename('ewei_shop_member') . ' sm on (sm.openid = s.openid or sm.id=s.user_id)  and sm.uniacid=s.uniacid and ogg.status!=-1' . ' ' . $sqlcondition . ' WHERE ' . $condition . ' ' . $statuscondition, $paras);
+			$t = pdo_fetch('SELECT COUNT(*) as count, ifnull(sum(o.price),0) as sumprice   FROM ' . tablename('ewei_shop_order') . ' o ' . ' left join ' . tablename('ewei_shop_order_refund') . ' r on r.id =o.refundid ' . ' left join ' . tablename('ewei_shop_member') . ' m on m.openid=o.openid  and m.uniacid =  o.uniacid' . ' left join ' . tablename('ewei_shop_member_address') . ' a on o.addressid = a.id ' . ' left join ' . tablename('ewei_shop_saler') . ' s on s.openid = o.verifyopenid and s.uniacid=o.uniacid' . ' left join ' . tablename('ewei_shop_member') . ' sm on sm.openid = s.openid and sm.uniacid=s.uniacid' . ' ' . $sqlcondition . ' WHERE ' . $condition . ' ' . $statuscondition, $paras);
 		}
 		 else {
 			$t = pdo_fetch('SELECT COUNT(*) as count, ifnull(sum(price),0) as sumprice   FROM ' . tablename('ewei_shop_order') . ' WHERE uniacid = :uniacid and deleted=0 and isparent=0 ' . $status_condition, $paras);
