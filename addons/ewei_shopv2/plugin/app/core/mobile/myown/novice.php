@@ -57,7 +57,23 @@ class Novice_EweiShopV2Page extends AppMobilePage{
         global $_GPC;
         global $_W;
         $openid=$_GPC["openid"];
-        $data["openid"]=$openid;
+        if ($_GPC["type"]==1){
+            
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+            
+        }
+        $member=m("member")->getMember($openid);
+        if (empty($member)){
+            app_error(1,"无此用户");
+        }
+        
+        $data["feedback"]=$_GPC["feedback"];
+        $data["openid"]=$member["openid"];
+        $data["user_id"]=$member["id"];
         $data["content"]=$_GPC["content"];
         $data["mobile"]=$_GPC["mobile"];
         $data["time"]=$_GPC["time"];
@@ -65,6 +81,9 @@ class Novice_EweiShopV2Page extends AppMobilePage{
         $img=$_GPC["img"];
         if ($img){
         $data["img"]=serialize($img);
+        }
+        if (empty($data["content"])){
+            app_error(1,"必须填写问题内容");
         }
         if (pdo_insert("ewei_shop_notive_question",$data)){
             app_error(0,"成功");

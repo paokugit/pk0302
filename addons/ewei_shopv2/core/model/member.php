@@ -301,8 +301,8 @@ class Member_EweiShopV2Model
 		else 
 		{
 // 			$value = pdo_fetchcolumn("SELECT " . $credittype . " FROM " . tablename("ewei_shop_member") . " WHERE  uniacid=:uniacid and openid=:openid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $openid ));
-		    $value=pdo_fetch("select ".$credittype."from ".tablename("ewei_shop_member")." where uniacid=:uniacid and (openid=:openid or user_id=:user_id) limit 1",array( ":uniacid" => $_W["uniacid"], ":openid" =>$member["openid"],":user_id"=>$member["id"]));
-		    $newcredit = $credits + $value;
+// 		    $value=pdo_fetch("select ".$credittype." from ".tablename("ewei_shop_member")." where uniacid=:uniacid and (openid=:openid or id=:user_id) limit 1",array( ":uniacid" => $_W["uniacid"], ":openid" =>$member["openid"],":user_id"=>$member["id"]));
+		    $newcredit = $credits + $member[$credittype];
 			if( $newcredit <= 0 ) 
 			{
 				$newcredit = 0;
@@ -316,10 +316,11 @@ class Member_EweiShopV2Model
 //             }
             pdo_query("update ".tablename("ewei_shop_member")." set ".$credittype."=:newcredit"." where uniacid=:uniacid and  id=:id",array(":newcredit"=>$newcredit,":uniacid"=>$_W["uniacid"],":id"=>$member["id"]));
 			$log_data["remark"] = $log_data["remark"];
-			$log_data["openid"]=$member["openid"];
-			$log_data["user_id"]=$member["id"];
-
+			
 		}
+		$log_data["openid"]=$member["openid"];
+		$log_data["user_id"]=$member["id"];
+		
 		pdo_insert("mc_credits_record", $log_data);
 		$member_log_table_flag = pdo_tableexists("ewei_shop_member_credit_record");
 		pdo_insert("ewei_shop_member_credit_record", $log_data);
@@ -1722,8 +1723,7 @@ class Member_EweiShopV2Model
      */
     public function setLoginToken($user_id,$salt)
     {
-        $token = base64_encode(implode(',',[$user_id,$salt]));
-        return str_replace('=','',$token);
+        return base64_encode(implode(',',[$user_id,$salt]));
     }
 
     /**
@@ -1738,5 +1738,6 @@ class Member_EweiShopV2Model
         $member = pdo_get('ewei_shop_member',['id'=>$data[0]]);
         return $member['app_salt'] == $data[1] ? $data[0] : 0;
     }
+   
 }
 ?>

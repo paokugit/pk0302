@@ -19,16 +19,18 @@ class Index_EweiShopV2Page extends AppMobilePage
 		}
 		$level = m("member")->getLevel($_W["openid"]);
 		$open_creditshop = p("creditshop") && $_W["shopset"]["creditshop"]["centeropen"];
-		$params = array( ":uniacid" => $_W["uniacid"], ":openid" => $_W["openid"] );
+// 		$params = array( ":uniacid" => $_W["uniacid"], ":openid" => $_W["openid"] );
 		$merch_plugin = p("merch");
 		$merch_data = m("common")->getPluginset("merch");
+		$mmessage=m("member")->getMember($_W["openid"]);
+		$params = array( ":uniacid" => $_W["uniacid"], ":openid" => $_W["openid"],":user_id"=>$mmessage["id"] );
 		if( $merch_plugin && $merch_data["is_openmerch"] ) 
 		{
-			$statics = array( "order_0" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and status=0  and uniacid=:uniacid and type = 0 limit 1", $params), "order_1" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and status=1 and refundid=0 and uniacid=:uniacid and type = 0 limit 1", $params), "order_2" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and status=2 and refundid=0 and uniacid=:uniacid and type = 0 limit 1", $params), "order_4" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and refundstate=1 and uniacid=:uniacid and type = 0 limit 1", $params), "cart" => pdo_fetchcolumn("select ifnull(sum(total),0) from " . tablename("ewei_shop_member_cart") . " where uniacid=:uniacid and openid=:openid and deleted=0 ", $params), "favorite" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_member_favorite") . " where uniacid=:uniacid and openid=:openid and deleted=0 ", $params) );
+			$statics = array( "order_0" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where (openid=:openid or user_id=:user_id) and status=0  and uniacid=:uniacid and type = 0 limit 1", $params), "order_1" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where (openid=:openid or user_id=:user_id) and status=1 and refundid=0 and uniacid=:uniacid and type = 0 limit 1", $params), "order_2" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where (openid=:openid or user_id=:user_id) and status=2 and refundid=0 and uniacid=:uniacid and type = 0 limit 1", $params), "order_4" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where (openid=:openid or user_id=:user_id) and refundstate=1 and uniacid=:uniacid and type = 0 limit 1", $params), "cart" => pdo_fetchcolumn("select ifnull(sum(total),0) from " . tablename("ewei_shop_member_cart") . " where uniacid=:uniacid and (openid=:openid or user_id=:user_id) and deleted=0 ", $params), "favorite" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_member_favorite") . " where uniacid=:uniacid and (openid=:openid or user_id=:user_id) and deleted=0 ", $params) );
 		}
 		else 
 		{
-			$statics = array( "order_0" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and status=0  and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "order_1" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and status=1 and refundid=0 and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "order_2" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and status=2 and refundid=0 and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "order_4" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where openid=:openid and ismr=0 and refundstate=1 and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "cart" => pdo_fetchcolumn("select ifnull(sum(total),0) from " . tablename("ewei_shop_member_cart") . " where uniacid=:uniacid and openid=:openid and deleted=0 and selected = 1", $params), "favorite" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_member_favorite") . " where uniacid=:uniacid and openid=:openid and deleted=0 and `type`=0", $params) );
+			$statics = array( "order_0" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where (openid=:openid or user_id=:user_id) and ismr=0 and status=0  and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "order_1" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where (openid=:openid or user_id=:user_id) and ismr=0 and status=1 and refundid=0 and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "order_2" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where (openid=:openid or user_id=:user_id) and ismr=0 and status=2 and refundid=0 and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "order_4" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where (openid=:openid or user_id=:user_id) and ismr=0 and refundstate=1 and uniacid=:uniacid and isparent=0 and type = 0 limit 1", $params), "cart" => pdo_fetchcolumn("select ifnull(sum(total),0) from " . tablename("ewei_shop_member_cart") . " where uniacid=:uniacid and (openid=:openid or user_id=:user_id) and deleted=0 and selected = 1", $params), "favorite" => pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_member_favorite") . " where uniacid=:uniacid and (openid=:openid or user_id=:user_id) and deleted=0 and `type`=0", $params) );
 		}
 		$hascoupon = false;
 		$hascouponcenter = false;
@@ -38,9 +40,9 @@ class Index_EweiShopV2Page extends AppMobilePage
 			$time = time();
 			$sql = "select count(*) from " . tablename("ewei_shop_coupon_data") . " d";
 			$sql .= " left join " . tablename("ewei_shop_coupon") . " c on d.couponid = c.id";
-			$sql .= " where d.openid=:openid and d.uniacid=:uniacid and  d.used=0 ";
+			$sql .= " where (d.openid=:openid or d.user_id=:user_id) and d.uniacid=:uniacid and  d.used=0 ";
 			$sql .= " and (   (c.timelimit = 0 and ( c.timedays=0 or c.timedays*86400 + d.gettime >=" . $time . " ) )  or  (c.timelimit =1 and c.timestart<=" . $time . " && c.timeend>=" . $time . ")) order by d.gettime desc";
-			$statics["coupon"] = pdo_fetchcolumn($sql, array( ":openid" => $_W["openid"], ":uniacid" => $_W["uniacid"] ));
+			$statics["coupon"] = pdo_fetchcolumn($sql, array( ":openid" => $_W["openid"],":user_id"=>$mmessage["id"],":uniacid" => $_W["uniacid"] ));
 			$pcset = $_W["shopset"]["coupon"];
 			if( empty($pcset["closemember"]) ) 
 			{

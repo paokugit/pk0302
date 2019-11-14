@@ -681,10 +681,6 @@ class System_EweiShopV2Model {
                         "route" => "group"
                     ) ,
                     array(
-                        "title" => "跑库精选",
-                        "route" => "choice"
-                    ) ,
-                    array(
                         "title" => "标签管理",
                         "route" => "label",
                         "extend" => "goods.label.style"
@@ -1210,6 +1206,20 @@ class System_EweiShopV2Model {
                                 "title" => "商品置顶",
                                 "route" => "shoptop"
                             ) 
+                        )
+                    ) ,
+                    array(
+                        "title" => "关于跑库",
+                        "items" => array(
+                            array(
+                                "title" => "隐私政策",
+                                "route" => "about.index"
+                            ) ,
+                            array(
+                                "title" => "软件许可及服务协议",
+                                "route" => "about.software"
+                            ) ,
+                            
                         )
                     ) ,
                     array(

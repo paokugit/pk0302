@@ -652,7 +652,11 @@ class Order_EweiShopV2Model
 		global $_W;
 		if( 0 < $order["deductcredit2"] ) 
 		{
-			m("member")->setCredit($order["openid"], "credit2", $order["deductcredit2"], array( "0", $_W["shopset"]["shop"]["name"] . "购物返还抵扣余额 余额: " . $order["deductcredit2"] . " 订单号: " . $order["ordersn"] ));
+		    //修改
+		    $member=pdo_fetch("select * from ".tablename("ewei_shop_member")." where openid=:openid or id=:user_id limit 1",array(":openid"=>$order["openid"],":user_id"=>$order["user_id"]));
+// 			m("member")->setCredit($order["openid"], "credit2", $order["deductcredit2"], array( "0", $_W["shopset"]["shop"]["name"] . "购物返还抵扣余额 余额: " . $order["deductcredit2"] . " 订单号: " . $order["ordersn"] ));
+		    m("member")->setCredit($member["id"], "credit2", $order["deductcredit2"], array( "0", $_W["shopset"]["shop"]["name"] . "购物返还抵扣余额 余额: " . $order["deductcredit2"] . " 订单号: " . $order["ordersn"] ));
+		    
 		}
 	}
 	public function setGiveBalance($orderid = "", $type = 0) 
@@ -1627,8 +1631,7 @@ class Order_EweiShopV2Model
 			    //如果包邮  但是是偏远地区邮费又不是空  那么 是偏远地域
 			    $area = explode(';',$g['edareas']);
 			    //如果他没设置  偏远  普通 默认 没有偏远地域
-			    //if(!in_array($user_province,$area) && !empty($g['edareas'])&& $g['remote_dispatchprice'] != 0){
-			    if(!in_array($user_province,$area) && !empty($g['edareas'])&& $g['remote_dispatchprice'] >= 0){
+			    if(!in_array($user_province,$area) && !empty($g['edareas'])&& $g['remote_dispatchprice'] != 0){
 			    	$dispatch_price += $g['remote_dispatchprice'];
 			        $is_remote = 1;
 			    }else{
@@ -1797,10 +1800,10 @@ class Order_EweiShopV2Model
 				{
 					if( $city_express_data["state"] == 1 ) 
 					{
-						if( ($g["dispatchprice"] >= 0 || $g['remote_dispatchprice'] >= 0) && !$sendfree )
+						if( (0 < $g["dispatchprice"] || $g['remote_dispatchprice'] > 0) && !$sendfree )
 						{
 						    //如果有偏远地域差价  加上他 没有 还是基础差价
-                            $remote_dispatchprice = $g['remote_dispatchprice'] >= 0 ?$g['remote_dispatchprice'] :0;
+                            $remote_dispatchprice = $g['remote_dispatchprice'] > 0 ?$g['remote_dispatchprice'] :0;
 							if( $city_express_data["is_sum"] == 1 )
 							{
 								$dispatch_price += $g["dispatchprice"]+$remote_dispatchprice;

@@ -67,9 +67,6 @@ define(['core', './sortable.js'], function (core, Sortable) {
                 diypage: modal.getVal('diypage', true),
                 diyformid: modal.getVal('diyformid', true),
                 dispatchtype: modal.radioVal('dispatchtype', true),
-                is_romete: modal.radioVal('is_romete', true),
-                edareas: modal.getVal('edareas', true),
-                remote_dispatchprice: modal.getVal('remote_dispatchprice', true),
                 displayorder: modal.getVal('displayorder', true),
                 deduct:modal.getVal('deduct'),
                 deduct_type:modal.getVal('deduct_type')
@@ -98,15 +95,12 @@ define(['core', './sortable.js'], function (core, Sortable) {
                 obj.total = modal.getVal('total', true);
                 obj.weight = modal.getVal('weight');
                 obj.goodssn = modal.getVal('goodssn');
-                obj.productsn = modal.getVal('productsn');
-                obj.edareas = modal.getVal('edareas');
+                obj.productsn = modal.getVal('productsn')
             }
             if (obj.dispatchtype == 0) {
                 obj.dispatchid = modal.radioVal("dispatchid", true)
             } else {
                 obj.dispatchprice = modal.getVal("dispatchprice")
-                obj.remote_dispatchprice = modal.getVal("remote_dispatchprice")
-                obj.is_remote = modal.radioVal("is_remote")
             }
             if (obj.title == '') {
                 FoxUI.toast.show("请填写商品名称");
