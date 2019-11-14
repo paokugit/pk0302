@@ -146,12 +146,34 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		$keyword = $_GPC['keywords'];
 		$openid = $_GPC['openid'];
 		$page = max(1,$_GPC['page']);
+		$type=$_GPC["type"];
+		
 		if($keyword == "" || $openid == "" || $page == "" ){
+		    if ($type==1){
+		        app_error(1,"参数不完整");
+		    }else{
 			show_json(0,"参数不完整");
+		    }
+		}
+		if ($type){ 
+		    $token=$_GPC["openid"];
+		    $openid=m('member')->getLoginToken($token);
+		    if ($openid==0){
+		        app_error(1,"无此用户");
+		    } 
+		}
+// 		$openid=89;
+		$member=m("member")->getMember($openid);
+		if (!$member){
+		    if ($type==1){
+		        app_error(1,"无此用户");
+		    }else{
+		        show_json(1,"无此用户");
+		    }
 		}
 		$pageSize = 10;
 		$pindex = ($page - 1) * $pageSize;
-		$member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid]);
+		
 		$total = pdo_count('ewei_shop_member','uniacid = "'.$uniacid.'" and (mobile = "'.$keyword.'" or nickname like "%'.$keyword.'%" or realname like "%'.$keyword.'%")');
 		$list = pdo_getall('ewei_shop_member','uniacid = "'.$uniacid.'" and (mobile = "'.$keyword.'" or nickname like "%'.$keyword.'%" or realname like "%'.$keyword.'%") order by id desc LIMIT '.$pindex.','.$pageSize,['id','openid','nickname','realname','mobile','createtime','avatar','agentid','agentlevel']);
 		foreach ($list as $key => $item) {
@@ -160,7 +182,12 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 			$list[$key]['createtime'] = date('Y-m-d H:i',$item['createtime']);
 			$list[$key]['agentname'] = $item['agentlevel'] == 0 ? "普通会员" : pdo_getcolumn('ewei_shop_commission_level',['id'=>$item['agentlevel'],'uniacid'=>$uniacid],'levelname');
 		}
-		show_json(1,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
+		if ($type==1){
+		    app_error(0,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
+		}else{
+			show_json(1,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
+		}
+
 	}
 }
 

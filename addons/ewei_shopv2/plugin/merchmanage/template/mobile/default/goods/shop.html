@@ -90,10 +90,10 @@
                     '<div class="store-other">' +
                     '<div class="store-other-absolute">' +
                     '<div class="tuijianImg">' +
-                    '<img src="https://www.paokucoin.com/img/backgroup/tuijian.png" alt="">' + '</div>' +
+                    '<img src="http://paokucoin.com/img/backgroup/tuijian.png" alt="">' + '</div>' +
                     '<div class="into-shop-box">' + '<span class="into-shop-text">' + '进店有礼' +
                     '</span>' + '<span class="intoImg">' +
-                    '<img src="https://www.paokucoin.com/img/backgroup/open.png" alt="">' + '</span>' +
+                    '<img src="http://paokucoin.com/img/backgroup/open.png" alt="">' + '</span>' +
                     '</div>' +
                     '</div>'
                 '</div>'
@@ -122,7 +122,7 @@
                             .thumb + ' alt="">' + '</div>' +
                             '<div class="proname">' + item.title + '</div>' +
                             '<div class="good-price-box">' +
-                            '<img class="calorie-img" src="https://www.paokucoin.com/img/backgroup/kaluli02.png" alt="">' +
+                            '<img class="calorie-img" src="http://paokucoin.com/img/backgroup/kaluli02.png" alt="">' +
                             '<span class="calorie-num">' + item.deduct + '</span>' + '+' +
                             '<span class="price-num">' + '￥' + item.marketprice +
                             '</span>' +
@@ -188,7 +188,7 @@
                             '<div class="good-info">' +
                             '<div class="handlebtn good-name" data-id=' + item.id + '>' + item.title + '</div>' +
                             '<div class="good-price-box">' +
-                            '<img class="calorie-img" src="https://www.paokucoin.com/img/backgroup/kaluli02.png" alt="">' +
+                            '<img class="calorie-img" src="http://paokucoin.com/img/backgroup/kaluli02.png" alt="">' +
                             '<span class="calorie-num">100+</span>' +
                             '<span class="price-num">' + '￥' + item.marketprice +
                             '</span>' +
@@ -347,7 +347,7 @@
                     if(result==-1){
                     $.ajax({
                         type: 'POST',
-                        url: '{php echo mobileUrl("merchmanage/goods/show/changesort");}',
+                        url: '{php echo mobileUrl("merchmanage/goods/show/changesort")}' ,
                         data: {
                             "ids": goodid+':1'
                         },

@@ -25,7 +25,6 @@ class Reward_EweiShopV2Model
      * @return bool
      */
     public function getReward($agentid,$memberlevel,$memberopenid){
-        global $_W;
         $agentInfo = pdo_fetch("select * from " . tablename("ewei_shop_member") . " where id=:id limit 1", array(  ":id" => $agentid ));
         if(!$agentInfo) return false;
         $rewardMoney = $this->getRewardMoney($agentInfo['agentlevel'],$memberlevel);// 奖励金额

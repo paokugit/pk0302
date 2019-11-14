@@ -42,9 +42,9 @@ class Choice_EweiShopV2Page extends WebPage
 		global $_GPC;
 		$uniacid = $_W['uniacid'];
 		$id = intval($_GPC['id']);
-		$cates = pdo_fetchall('select id,title from '.tablename('ewei_shop_icon').'where cate in (1,2) and status = 1');
 		if (!empty($id)) {
 			$item = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_choice') . ' WHERE id=:id and uniacid=:uniacid limit 1 ', array(':id' => $id,':uniacid'=>$uniacid));
+
 			if (!empty($item['goodsids'])) {
 				$item['goodsids'] = trim($item['goodsids'], ',');
 				$goods = pdo_fetchall('select id,title,thumb from ' . tablename('ewei_shop_goods') . (' where id in (' . $item['goodsids'] . ') and status=1 and deleted=0 and uniacid=' . $_W['uniacid'] . ' order by instr(\'' . $item['goodsids'] . '\',id)'));
@@ -53,13 +53,12 @@ class Choice_EweiShopV2Page extends WebPage
 		if ($_W['ispost']) {
 			$title = trim($_GPC['title']);
 			$displayorder = trim($_GPC['displayorder']);
-			$icon_id = trim($_GPC['icon_id']);
 			$content = $_GPC['content'];
 			$goodsids = $_GPC['goodsids'];
 			$status = $_GPC['status'];
 			$thumb = $_GPC['thumb'];
 			$image = $_GPC['image'];
-			$data = array('title' => $title, 'goodsids' => implode(',', $goodsids), 'status' => $status ,'displayorder' => $displayorder ,'icon_id' => $icon_id , 'content' => $content , 'thumb'=>$thumb , 'image'=>$image);
+			$data = array('title' => $title, 'goodsids' => implode(',', $goodsids), 'status' => $status ,'displayorder' => $displayorder , 'content' => $content , 'thumb'=>$thumb , 'image'=>$image);
 
 			if (!empty($item)) {
 				pdo_update('ewei_shop_choice', $data, array('id' => $item['id']));

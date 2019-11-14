@@ -14,12 +14,23 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		$merch_data = m('common')->getPluginset('merch');
 		$pindex = max(1, intval($_GPC['page']));
 		$psize = 10;
-		$condition = ' and f.uniacid = :uniacid and f.openid=:openid and f.deleted=0';
+		//编辑修改
+		$openid=$_GPC["openid"];
+		if ($_GPC["type"]==1){
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		}
+		$member=m("member")->getMember($openid);
+		$condition = ' and f.uniacid = :uniacid and (f.openid=:openid or f.user_id=:user_id) and f.deleted=0';
 		if ($merch_plugin && $merch_data['is_openmerch']) {
-			$condition = ' and f.uniacid = :uniacid and f.openid=:openid and f.deleted=0 and f.type=0';
+			$condition = ' and f.uniacid = :uniacid and (f.openid=:openid or f.user_id=:user_id) and f.deleted=0 and f.type=0';
 		}
 
-		$params = array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']);
+// 		$params = array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']);
+		$params = array(':uniacid' => $_W['uniacid'], ':openid' =>$member["openid"],':user_id'=>$member["id"]);
 		$sql = 'SELECT COUNT(*) FROM ' . tablename('ewei_shop_member_favorite') . (' f where 1 ' . $condition);
 		$total = pdo_fetchcolumn($sql, $params);
 		$list = array();
@@ -59,7 +70,16 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		if (empty($id)) {
 			app_error(AppError::$ParamsError);
 		}
-
+        //修改
+        $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
 		$isfavorite = intval($_GPC['isfavorite']);
 		$goods = pdo_fetch('select * from ' . tablename('ewei_shop_goods') . ' where id=:id and uniacid=:uniacid limit 1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
 
@@ -67,16 +87,16 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 			app_error(AppError::$GoodsNotFound);
 		}
 
-		$data = pdo_fetch('select id,deleted from ' . tablename('ewei_shop_member_favorite') . ' where uniacid=:uniacid and goodsid=:id and openid=:openid limit 1', array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid'], ':id' => $id));
+		$data = pdo_fetch('select id,deleted from ' . tablename('ewei_shop_member_favorite') . ' where uniacid=:uniacid and goodsid=:id and (openid=:openid or user_id=:user_id) limit 1', array(':uniacid' => $_W['uniacid'], ':openid' => $member['openid'],':user_id'=>$member["id"],':id' => $id));
 
 		if (empty($data)) {
 			if (!empty($isfavorite)) {
-				$data = array('uniacid' => $_W['uniacid'], 'goodsid' => $id, 'openid' => $_W['openid'], 'createtime' => time());
+				$data = array('uniacid' => $_W['uniacid'], 'goodsid' => $id, 'openid' => $member['openid'],'user_id'=>$member["id"],'createtime' => time());
 				pdo_insert('ewei_shop_member_favorite', $data);
 			}
 		}
 		else {
-			pdo_update('ewei_shop_member_favorite', array('deleted' => $isfavorite ? 0 : 1), array('id' => $data['id'], 'uniacid' => $_W['uniacid']));
+			pdo_update('ewei_shop_member_favorite', array('deleted' => $isfavorite ? 0 : 1,'openid'=>$member["openid"],'user_id'=>$member["id"]), array('id' => $data['id'], 'uniacid' => $_W['uniacid']));
 		}
 
 		app_json(array('isfavorite' => $isfavorite == 1));
@@ -90,9 +110,19 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		if (empty($ids) || !is_array($ids)) {
 			app_error(AppError::$ParamsError);
 		}
-
-		$sql = 'update ' . tablename('ewei_shop_member_favorite') . ' set deleted=1 where openid=:openid and id in (' . implode(',', $ids) . ')';
-		pdo_query($sql, array(':openid' => $_W['openid']));
+        //修改
+        $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+// 		$sql = 'update ' . tablename('ewei_shop_member_favorite') . ' set deleted=1 where openid=:openid and id in (' . implode(',', $ids) . ')';
+		$sql = 'update ' . tablename('ewei_shop_member_favorite') . ' set deleted=1 where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';
+		pdo_query($sql, array(':openid' => $member['openid'],':user_id'=>$member["id"]));
 		app_json();
 	}
 
@@ -102,23 +132,34 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		global $_GPC;
 		$pindex = max(1, intval($_GPC['page']));
 		$psize = 10;
-		$condition = ' and f.uniacid = :uniacid and f.openid=:openid and f.deleted=0 and f.type=1';
-		$params = array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']);
-		$sql = 'SELECT COUNT(*) FROM ' . tablename('ewei_shop_member_favorite') . (' f where 1 ' . $condition);
+		//修改
+		$openid=$_GPC["openid"];
+		if ($_GPC["type"]==1){
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		}
+		$member=m("member")->getMember($openid);
+		$condition = ' and  (f.openid=:openid or user_id=:user_id)';
+		$params = array(':openid' =>$member["openid"],':user_id'=>$member["id"]);
+		$sql = 'SELECT COUNT(*) FROM ' . tablename('ewei_shop_merch_follow') . (' f where 1 ' . $condition);
 		$total = pdo_fetchcolumn($sql, $params);
 		$list = array();
 
 		if (!empty($total)) {
-			$sql = 'SELECT f.id,f.merchid,g.merchname,g.logo,g.desc FROM ' . tablename('ewei_shop_member_favorite') . ' f ' . ' left join ' . tablename('ewei_shop_merch_user') . ' g on f.merchid = g.id ' . ' where 1 ' . $condition . ' ORDER BY `id` DESC LIMIT ' . ($pindex - 1) * $psize . ',' . $psize;
+			$sql = 'SELECT f.id,f.merch_id,g.merchname,g.logo,g.desc FROM ' . tablename('ewei_shop_merch_follow') . ' f ' . ' left join ' . tablename('ewei_shop_merch_user') . ' g on f.merch_id = g.id ' . ' where 1 ' . $condition . ' ORDER BY `id` DESC LIMIT ' . ($pindex - 1) * $psize . ',' . $psize;
 			$list = pdo_fetchall($sql, $params);
 			$list = set_medias($list, 'logo');
 			$merch_plugin = p('merch');
 			$merch_data = m('common')->getPluginset('merch');
 			if (!empty($list) && $merch_plugin && $merch_data['is_openmerch']) {
-				$merch_user = pdo_fetchall('select id,merchname from ' . tablename('ewei_shop_merch_user') . ' where id in(' . implode(',', array_unique(array_column($list, 'merchid'))) . ')', array(), 'id');
-
+				$merch_user = pdo_fetchall('select id,merchname from ' . tablename('ewei_shop_merch_user') . ' where id in(' . implode(',', array_unique(array_column($list, 'merch_id'))) . ')', array(), 'id');
+// 				var_dump(array_column($list, 'merch_id'));
+// 				var_dump($merch_user);
 				foreach ($list as &$row) {
-					$row['merchname'] = $merch_user[$row['merchid']]['merchname'] ? $merch_user[$row['merchid']]['merchname'] : $_W['shopset']['shop']['name'];
+					$row['merchname'] = $merch_user[$row['merch_id']]['merchname'] ? $merch_user[$row['merch_id']]['merchname'] : $_W['shopset']['shop']['name'];
 				}
 
 				unset($row);
@@ -127,6 +168,34 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 
 		app_json(array('list' => $list, 'total' => $total, 'pagesize' => $psize));
 	}
+	
+	public function remove_shop()
+	{
+	    global $_W;
+	    global $_GPC;
+	    $ids = $_GPC['ids'];
+	    if (empty($ids) || !is_array($ids)) {
+	        app_error(AppError::$ParamsError);
+	    }
+	    //修改
+	    $openid=$_GPC["openid"];
+	    if ($_GPC["type"]==1){
+	        $member_id=m('member')->getLoginToken($openid);
+	        if ($member_id==0){
+	            app_error(1,"无此用户");
+	        }
+	        $openid=$member_id;
+	    }
+	    $member=m("member")->getMember($openid);
+	    // 		$sql = 'update ' . tablename('ewei_shop_member_favorite') . ' set deleted=1 where openid=:openid and id in (' . implode(',', $ids) . ')';
+	    $sql = 'delete from ' . tablename('ewei_shop_merch_follow') . 'where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';
+	    if (pdo_query($sql, array(':openid' => $member['openid'],':user_id'=>$member["id"]))){
+	    app_json();
+	    }else{
+	        app_error(1,"失败");
+	    }
+	}
+	
 }
 
 ?>

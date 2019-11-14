@@ -12,7 +12,6 @@ class My_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
-        $openid = $_W["openid"];
         $cate = trim($_GPC["cate"]);
         $imgname = "ling";
         $imgname = "ling";
@@ -33,38 +32,55 @@ class My_EweiShopV2Page extends AppMobilePage
             }
 
         }
-
+        //修改
+        $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
         $pindex = max(1, intval($_GPC["page"]));
         $psize = 10;
         $time = time();
         $sql = "select d.id,d.couponid,d.gettime,c.timelimit,c.coupontype,c.timedays,c.timestart,c.timeend,c.thumb,c.couponname,c.enough,c.backtype,c.deduct,c.discount,c.backmoney,c.backcredit,c.backredpack,c.bgcolor,c.thumb,c.merchid,c.tagtitle,c.settitlecolor,c.titlecolor from " . tablename("ewei_shop_coupon_data") . " d";
         $sql .= " left join " . tablename("ewei_shop_coupon") . " c on d.couponid = c.id";
-        $sql .= " where d.openid=:openid and d.uniacid=:uniacid ";
+        $sql .= " where (d.openid=:openid or d.user_id=:user_id) and d.uniacid=:uniacid ";
+        $s="select count(d.id) from " . tablename("ewei_shop_coupon_data") . " d"." left join " . tablename("ewei_shop_coupon") . " c on d.couponid = c.id"." where (d.openid=:openid or d.user_id=:user_id) and d.uniacid=:uniacid ";
         if( !empty($past) ) 
         {
             $sql .= " and  ( (c.timelimit =0 and c.timedays<>0 and  c.timedays*86400 + d.gettime <unix_timestamp()) or (c.timelimit=1 and c.timeend<unix_timestamp() ))";
+            $s .= " and  ( (c.timelimit =0 and c.timedays<>0 and  c.timedays*86400 + d.gettime <unix_timestamp()) or (c.timelimit=1 and c.timeend<unix_timestamp() ))";
         }
         else
         {
             if( !empty($used) ) 
             {
                 $sql .= " and d.used =1 ";
+                $s .= " and d.used =1 ";
             }
             else
             {
                 if( empty($used) ) 
                 {
                     $sql .= " and (   (c.timelimit = 0 and ( c.timedays=0 or c.timedays*86400 + d.gettime >=unix_timestamp() ) )  or  (c.timelimit =1 and c.timeend>=" . $time . ")) and  d.used =0 ";
+                    $s .= " and (   (c.timelimit = 0 and ( c.timedays=0 or c.timedays*86400 + d.gettime >=unix_timestamp() ) )  or  (c.timelimit =1 and c.timeend>=" . $time . ")) and  d.used =0 ";
                 }
 
             }
 
         }
 
-        $total = pdo_fetchcolumn($sql, array( ":openid" => $openid, ":uniacid" => $_W["uniacid"] ));
+//         $total = pdo_fetchcolumn($sql, array( ":openid" => $openid, ":uniacid" => $_W["uniacid"] ));
+        $total = pdo_fetchcolumn($s, array( ":openid" => $member["openid"],":user_id"=>$member["id"], ":uniacid" => $_W["uniacid"] ));
         $sql .= " order by d.gettime desc  LIMIT " . ($pindex - 1) * $psize . "," . $psize;
-        $coupons = set_medias(pdo_fetchall($sql, array( ":openid" => $openid, ":uniacid" => $_W["uniacid"] )), "thumb");
-        pdo_update("ewei_shop_coupon_data", array( "isnew" => 0 ), array( "uniacid" => $_W["uniacid"], "openid" => $_W["openid"] ));
+//         $coupons = set_medias(pdo_fetchall($sql, array( ":openid" => $openid, ":uniacid" => $_W["uniacid"] )), "thumb");
+        $coupons = set_medias(pdo_fetchall($sql, array( ":openid" => $member["openid"],":user_id"=>$member["id"], ":uniacid" => $_W["uniacid"] )), "thumb");
+//         pdo_update("ewei_shop_coupon_data", array( "isnew" => 0 ), array( "uniacid" => $_W["uniacid"], "openid" => $_W["openid"] ));
+        pdo_query("update ".tablename("ewei_shop_coupon_data")." set isnew=0 where uniacid=:uniacid and (openid=:openid or user_id=:user_id)",array(":uniacid"=>$_W["uniacid"],":openid"=>$member["openid"],":user_id"=>$member["id"]));
+//         var_dump($coupons);
         if( empty($coupons) ) 
         {
             $coupons = array(  );
@@ -200,12 +216,11 @@ class My_EweiShopV2Page extends AppMobilePage
             {
                 $row["color"] = "disa";
             }
-
             $row["imgname"] = $imgname;
             $row["check"] = $check;
             $row["title2"] = $title2;
             $row["iconurl"] = $_W["siteroot"] . "addons/ewei_shopv2/template/mobile/default/static/images/coupon/" . $row["imgname"] . ".png";
-            unset($row["timelimit"]);
+             unset($row["timelimit"]);
             unset($row["coupontype"]);
             unset($row["timestart"]);
             unset($row["timeend"]);

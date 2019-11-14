@@ -17,12 +17,12 @@
             <p style="color:#333;font-size:26px;margin-top: 8px">请输入注册手机号</p>
             <div class="account_info">
                 <div class="ipt_box">
-                    <div class="img01_box"><img src="https://www.paokucoin.com/img/backgroup/mobile@2x.png" alt=""></div>
+                    <div class="img01_box"><img src="http://paokucoin.com/img/backgroup/mobile@2x.png" alt=""></div>
                     <input type="text" placeholder="请输入手机号" id="ipt1" class="telphone">
                     </div>
                     <div class="ipt_box">
                      <div class="img01_box">
-                     <img src="https://www.paokucoin.com/img/backgroup/duanxin@2x.png" alt=""></div>
+                     <img src="http://paokucoin.com/img/backgroup/duanxin@2x.png" alt=""></div>
                      <input type="text" placeholder="6位数验证码" id="ipt2" class="password">
                      <input type="button" id="codebtn" value="获取验证码" onclick="sendemail();sendcode()" />
                    </div>
@@ -106,7 +106,7 @@ $(".account-btn").bind("click",function(){
 var telphoneval = $(".telphone").val();
         var pswdval = $(".password").val();
 if(telphoneval ==phonenum && pswdval == code){
-	 location.href="https://www.paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.login.reset&mobile="+telphoneval; 
+	 location.href="http://paokucoin.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.login.reset&mobile="+telphoneval; 
 }
 if(pswdval != code){
 $("#warning").show().delay(1000).hide(300);

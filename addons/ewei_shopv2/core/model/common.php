@@ -28,8 +28,7 @@ class Common_EweiShopV2Model
 	{
 		global $_W;
 		global $_GPC;
-		$set = $this->getSetData($uniacid);
-		$allset = iunserializer($set["sets"]);
+
 		$retsets = array( );
 		if( !empty($key) ) 
 		{

@@ -1,205 +1,1 @@
-{template '_header'}
-
-
-
-<div class="page-header">
-
-    当前位置：<span class="text-primary">{if !empty($level['id'])}编辑{else}添加{/if}会员礼包{if !empty($level['id'])}({$level['level_name']}){/if}</span>
-
-</div>
-
-
-
-<div class="page-content">
-
-    <div class="page-sub-toolbar">
-
-        <span class=''>
-
-            {ifp 'member.memlevel.add'}
-
-                <a class="btn btn-primary btn-sm" href="{php echo webUrl('member/memlevel/add')}">添加新会员礼包</a>
-
-            {/if}
-
-        </span>
-
-    </div>
-
-    <form {ife 'member.memlevel' $level}action="" method="post"{/if} class="form-horizontal form-validate" enctype="multipart/form-data">
-        <input type="hidden" name="id" value="{$level['id']}" />
-        <!--礼包名称-->
-        {if $id!='default'}
-            <div class="form-group">
-                <label class="col-lg control-label">礼包名称</label>
-                <div class="col-sm-9 col-xs-12">
-                    {ife 'member.memlevel' $level}
-                        <input class="form-control" name="level_name" value="{$level['level_name']}">
-                    {else}
-                        <div class='form-control-static'>{$level['level_name']}</div>
-                    {/if}
-                </div>
-            </div>
-        {/if}
-        <!--礼包短标题-->
-        {if $id!='default'}
-            <div class="form-group">
-                <label class="col-lg control-label">短标题</label>
-                <div class="col-sm-9 col-xs-12">
-                    {ife 'member.memlevel' $level}
-                    <input class="form-control" name="title" value="{$level['title']}">
-                    {else}
-                    <div class='form-control-static'>{$level['title ']}</div>
-                    {/if}
-                </div>
-            </div>
-        {/if}
-        <!--礼包价格-->
-        {if $id!='default'}
-            <div class="form-group">
-                <label class="col-lg control-label">礼包价格</label>
-                <div class="col-sm-9 col-xs-12">
-                    {ife 'member.memlevel' $level}
-                    <input class="form-control" name="price" value="{$level['price']}">
-                    {else}
-                    <div class='form-control-static'>{$level['price ']}</div>
-                    {/if}
-                </div>
-            </div>
-        {/if}
-        <!--礼包商品图片-->
-        <div class="form-group">
-            <label class="col-lg control-label">商品轮播图</label>
-            <div class="col-sm-9 col-xs-12 gimgs">
-                {ife 'goods' $item}
-                {php echo tpl_form_field_multi_image2('thumbs',$piclist)}
-                    <span class="help-block image-block">商品图的数量和商品的数量一致，且顺序一致</span>
-                    <span class="help-block">您可以拖动图片改变其显示顺序 </span>
-                {else}
-                {loop $piclist $p}
-                    <a href='{php echo tomedia($p)}' target='_blank'>
-                        <img src="{php echo tomedia($p)}" style='height:100px;border:1px solid #ccc;padding:1px;float:left;margin-right:5px;' />
-                    </a>
-                {/loop}
-                {/if}
-            </div>
-        </div>
-        <!--选择商品-->
-        <div class="form-group" id="product">
-            <label class="col-lg control-label">指定商品</label>
-            <div class="col-sm-9 col-xs-12">
-                {ife 'member.memlevel' $level}
-                <div class="input-group">
-                    <input type="text" id="goodsid_text" name="goodsid_text" value="" class="form-control text" readonly="">
-                    <div class="input-group-btn">
-                        <button class="btn btn-primary select_goods" type="button">选择商品</button>
-                    </div>
-                </div>
-                <div class="input-group multi-img-details container ui-sortable goods_show">
-                    {if !empty($goods)}
-                        {loop $goods $g}
-                        <div class="multi-item" data-id="{$g['id']}" data-name="goodsid" id="{$g['id']}">
-                            <img class="img-responsive img-thumbnail" src="{php echo tomedia($g['thumb'])}" onerror="this.src='../addons/ewei_shopv2/static/images/nopic.png'" style="width:100px;height:100px;">
-                            <div class="img-nickname">{$g['title']}</div>
-                            <input type="hidden" value="{$g['id']}" name="goodsid[]">
-                            <em onclick="removeHtml({$g['id']})" class="close">×</em>
-                            <div style="clear:both;"></div>
-                        </div>
-                        {/loop}
-                    {/if}
-                </div>
-                    <script>
-                        $(function(){
-                            var title = '';
-                            $('.img-nickname').each(function(){
-                                title += $(this).html()+';';
-                            });
-                            $('#goodsid_text').val(title);
-                        })
-                        myrequire(['web/goods_selector'],function (Gselector) {
-                            $('.select_goods').click(function () {
-                                var ids = select_goods_ids();
-                                Gselector.open('goods_show','',0,true,'',ids);
-                            });
-                        })
-                        function goods_show(data) {
-                            if(data.act == 1){
-                                var html = '<div class="multi-item" data-id="'+data.id+'" data-name="goodsid" id="'+data.id+'">'
-                                    +'<img class="img-responsive img-thumbnail" src="'+data.thumb+'" onerror="this.src=\'../addons/ewei_shopv2/static/images/nopic.png\'" style="width:100px;height:100px;">'
-                                    +'<div class="img-nickname">'+data.title+'</div>'
-                                    +'<input type="hidden" value="'+data.id+'" name="goodsid[]">'
-                                    +'<em onclick="removeHtml('+data.id+')" class="close">×</em>'
-                                    +'</div>';
-
-                                $('.goods_show').append(html);
-                                var title = '';
-                                $('.img-nickname').each(function(){
-                                    title += $(this).html()+';';
-                                });
-                                $('#goodsid_text').val(title);
-                            }else if(data.act == 0){
-                                removeHtml(data.id);
-                            }
-
-                        }
-                        function removeHtml(id){
-                            $("[id='"+id+"']").remove();
-                            var title = '';
-                            $('.img-nickname').each(function(){
-                                title += $(this).html()+';';
-                            });
-                            $('#goodsid_text').val(title);
-                        }
-                        function select_goods_ids(){
-                            var goodsids = [];
-                            $(".multi-item").each(function(){
-                                goodsids.push($(this).attr('data-id'));
-                            });
-                            return goodsids;
-                        }
-                    </script>
-                {else}
-                    <div class="input-group multi-img-details container ui-sortable">
-                        {loop $goods $item}
-                        <div data-name="goodsid" data-id="{$item['id']}" class="multi-item">
-                            <div class="img-nickname">{$item['title']}</div>
-                        </div>
-                        {/loop}
-                    </div>
-                {/if}
-            </div>
-        </div>
-
-        <!--礼包状态-->
-        <div class="form-group" {if $id=='default'}style="display: none;"{/if}>
-            <label class="col-lg control-label">状态</label>
-            <div class="col-sm-9 col-xs-12">
-                {ife 'shop.adv' $item}
-                    <label class='radio-inline'>
-                        <input type='radio' name='status' value='1' {if $level['status']==1}checked{/if} /> 启用
-                    </label>
-                    <label class='radio-inline'>
-                        <input type='radio' name='status' value='0' {if $level['status']==0}checked{/if} /> 禁用
-                    </label>
-                {else}
-                    <div class='form-control-static'>{if empty($item['status'])}隐藏{else}显示{/if}</div>
-                {/if}
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-lg control-label"></label>
-            <div class="col-sm-9 col-xs-12">
-                {ife 'member.memlevel' $level}
-                    <input type="submit" value="提交" class="btn btn-primary"  />
-                {/if}
-                <input type="button" name="back" onclick='history.back()' {ifp 'member.memlevel.add|member.memlevel.edit'}style='margin-left:10px;'{/if} value="返回列表" class="btn btn-default" />
-            </div>
-        </div>
-
-    </form>
-
-</div>
-
-{template '_footer'}
-
+{template '_header'}<div class="page-header">    当前位置：<span class="text-primary">{if !empty($level['id'])}编辑{else}添加{/if}会员礼包{if !empty($level['id'])}({$level['level_name']}){/if}</span></div><div class="page-content">    <div class="page-sub-toolbar">        <span class=''>            {ifp 'member.memlevel.add'}                <a class="btn btn-primary btn-sm" href="{php echo webUrl('member/memlevel/add')}">添加新会员礼包</a>            {/if}        </span>    </div>    <form {ife 'member.memlevel' $level}action="" method="post"{/if} class="form-horizontal form-validate" enctype="multipart/form-data">        <input type="hidden" name="id" value="{$level['id']}" />        <!--礼包名称-->        {if $id!='default'}            <div class="form-group">                <label class="col-lg control-label">礼包名称</label>                <div class="col-sm-9 col-xs-12">                    {ife 'member.memlevel' $level}                        <input class="form-control" name="level_name" value="{$level['level_name']}">                    {else}                        <div class='form-control-static'>{$level['level_name']}</div>                    {/if}                </div>            </div>        {/if}        <!--礼包短标题-->        {if $id!='default'}            <div class="form-group">                <label class="col-lg control-label">短标题</label>                <div class="col-sm-9 col-xs-12">                    {ife 'member.memlevel' $level}                    <input class="form-control" name="title" value="{$level['title']}">                    {else}                    <div class='form-control-static'>{$level['title ']}</div>                    {/if}                </div>            </div>        {/if}        <!--礼包价格-->        {if $id!='default'}            <div class="form-group">                <label class="col-lg control-label">礼包价格</label>                <div class="col-sm-9 col-xs-12">                    {ife 'member.memlevel' $level}                    <input class="form-control" name="price" value="{$level['price']}">                    {else}                    <div class='form-control-static'>{$level['price ']}</div>                    {/if}                </div>            </div>        {/if}        <!--礼包商品图片-->        <div class="form-group">            <label class="col-lg control-label">商品轮播图</label>            <div class="col-sm-9 col-xs-12 gimgs">                {ife 'goods' $item}                {php echo tpl_form_field_multi_image2('thumbs',$piclist)}                    <span class="help-block image-block">商品图的数量和商品的数量一致，且顺序一致</span>                    <span class="help-block">您可以拖动图片改变其显示顺序 </span>                {else}                {loop $piclist $p}                    <a href='{php echo tomedia($p)}' target='_blank'>                        <img src="{php echo tomedia($p)}" style='height:100px;border:1px solid #ccc;padding:1px;float:left;margin-right:5px;' />                    </a>                {/loop}                {/if}            </div>        </div>        <!--选择商品-->        <div class="form-group" id="product">            <label class="col-lg control-label">指定商品</label>            <div class="col-sm-9 col-xs-12">                {ife 'member.memlevel' $level}                <div class="input-group">                    <input type="text" id="goodsid_text" name="goodsid_text" value="" class="form-control text" readonly="">                    <div class="input-group-btn">                        <button class="btn btn-primary select_goods" type="button">选择商品</button>                    </div>                </div>                <div class="input-group multi-img-details container ui-sortable goods_show">                    {if !empty($goods)}                        {loop $goods $g}                        <div class="multi-item" data-id="{$g['id']}" data-name="goodsid" id="{$g['id']}">                            <img class="img-responsive img-thumbnail" src="{php echo tomedia($g['thumb'])}" onerror="this.src='../addons/ewei_shopv2/static/images/nopic.png'" style="width:100px;height:100px;">                            <div class="img-nickname">{$g['title']}</div>                            <input type="hidden" value="{$g['id']}" name="goodsid[]">                            <em onclick="removeHtml({$g['id']})" class="close">×</em>                            <div style="clear:both;"></div>                        </div>                        {/loop}                    {/if}                </div>                    <script>                        $(function(){                            var title = '';                            $('.img-nickname').each(function(){                                title += $(this).html()+';';                            });                            $('#goodsid_text').val(title);                        })                        myrequire(['web/goods_selector'],function (Gselector) {                            $('.select_goods').click(function () {                                var ids = select_goods_ids();                                Gselector.open('goods_show','',0,true,'',ids);                            });                        })                        function goods_show(data) {                            if(data.act == 1){                                var html = '<div class="multi-item" data-id="'+data.id+'" data-name="goodsid" id="'+data.id+'">'                                    +'<img class="img-responsive img-thumbnail" src="'+data.thumb+'" onerror="this.src=\'../addons/ewei_shopv2/static/images/nopic.png\'" style="width:100px;height:100px;">'                                    +'<div class="img-nickname">'+data.title+'</div>'                                    +'<input type="hidden" value="'+data.id+'" name="goodsid[]">'                                    +'<em onclick="removeHtml('+data.id+')" class="close">×</em>'                                    +'</div>';                                $('.goods_show').append(html);                                var title = '';                                $('.img-nickname').each(function(){                                    title += $(this).html()+';';                                });                                $('#goodsid_text').val(title);                            }else if(data.act == 0){                                removeHtml(data.id);                            }                        }                        function removeHtml(id){                            $("[id='"+id+"']").remove();                            var title = '';                            $('.img-nickname').each(function(){                                title += $(this).html()+';';                            });                            $('#goodsid_text').val(title);                        }                        function select_goods_ids(){                            var goodsids = [];                            $(".multi-item").each(function(){                                goodsids.push($(this).attr('data-id'));                            });                            return goodsids;                        }                    </script>                {else}                    <div class="input-group multi-img-details container ui-sortable">                        {loop $goods $item}                        <div data-name="goodsid" data-id="{$item['id']}" class="multi-item">                            <div class="img-nickname">{$item['title']}</div>                        </div>                        {/loop}                    </div>                {/if}            </div>        </div>        <!--礼包状态-->        <div class="form-group" {if $id=='default'}style="display: none;"{/if}>            <label class="col-lg control-label">状态</label>            <div class="col-sm-9 col-xs-12">                {ife 'shop.adv' $item}                    <label class='radio-inline'>                        <input type='radio' name='status' value='1' {if $level['status']==1}checked{/if} /> 启用                    </label>                    <label class='radio-inline'>                        <input type='radio' name='status' value='0' {if $level['status']==0}checked{/if} /> 禁用                    </label>                {else}                    <div class='form-control-static'>{if empty($item['status'])}隐藏{else}显示{/if}</div>                {/if}            </div>        </div>        <div class="form-group">            <label class="col-lg control-label"></label>            <div class="col-sm-9 col-xs-12">                {ife 'member.memlevel' $level}                    <input type="submit" value="提交" class="btn btn-primary"  />                {/if}                <input type="button" name="back" onclick='history.back()' {ifp 'member.memlevel.add|member.memlevel.edit'}style='margin-left:10px;'{/if} value="返回列表" class="btn btn-default" />            </div>        </div>    </form></div>{template '_footer'}

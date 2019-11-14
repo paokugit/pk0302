@@ -681,6 +681,10 @@ class System_EweiShopV2Model {
                         "route" => "group"
                     ) ,
                     array(
+                        "title" => "跑库精选",
+                        "route" => "choice"
+                    ) ,
+                    array(
                         "title" => "标签管理",
                         "route" => "label",
                         "extend" => "goods.label.style"
