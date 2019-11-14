@@ -107,7 +107,7 @@
         <span class='help-block'>个人购买次数限制，默认是0，没有次数限制</span>
     </div>
 </div>
-{if  $item['more_spec'] == 0  ||($item['more_spec'] == 0 && $item['is_ladder'] == 0) }
+{if  $item['more_spec'] == 0  ||($item['more_spec'] == 0 && $item['is_ladder'] == 0) }<!-- 
 <div class="form-group"  {if $item['is_ladder'] == 1}style="display: none"{/if}>
 
     <label class="col-lg control-label">开启阶梯团</label>
@@ -116,7 +116,7 @@
         <span class='help-block'>开启后不允许修改</span>
     </div>
 
-</div>
+</div> -->
 {/if}
 <!--阶梯团start-->
 <div class="form-group" id="ladder_data"  {if !$item['is_ladder']} style="display: none" {/if}>
