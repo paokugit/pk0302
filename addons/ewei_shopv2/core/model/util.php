@@ -93,8 +93,8 @@ class Util_EweiShopV2Model
 	}
 
 	/**
-     * è®¡ç®—ä¸¤ç»„ç»çº¬åº¦åæ ‡ ä¹‹é—´çš„è·ç¦»
-     * params ï¼šlat1 çº¬åº¦1ï¼› lng1 ç»åº¦1ï¼› lat2 çº¬åº¦2ï¼› lng2 ç»åº¦2ï¼› len_type ï¼ˆ1:m or 2:km);
+     * ¼ÆËãÁ½×é¾­Î³¶È×ø±ê Ö®¼äµÄ¾àÀë
+     * params £ºlat1 Î³¶È1£» lng1 ¾­¶È1£» lat2 Î³¶È2£» lng2 ¾­¶È2£» len_type £¨1:m or 2:km);
      * return m or km
      */
 	public function GetDistance($lat1, $lng1, $lat2, $lng2, $len_type = 1, $decimal = 2)
@@ -245,51 +245,48 @@ class Util_EweiShopV2Model
 	}
 
     /**
-     * è®¡ç®—å‘¨å¼€å§‹ å’Œ  å‘¨ç»“æŸ
+     * ¼ÆËãÖÜ¿ªÊ¼ ºÍ  ÖÜ½áÊø
      * @param $time
      * @return array
      */
 	public function week($time)
 	{
-		//ä»Šå¤©æ˜ŸæœŸå‡ 
+		//½ñÌìĞÇÆÚ¼¸
 		$week = date('w',$time);
-		//å¦‚æœæ˜¯å‘¨æ—¥  æ˜¯0  ç„¶å  å‡6  å¦åˆ™  å‡å»  å‘¨å‡  - 1
+		//Èç¹ûÊÇÖÜÈÕ  ÊÇ0  È»ºó  ¼õ6  ·ñÔò  ¼õÈ¥  ÖÜ¼¸ - 1
 		$w = $week  == 0 ? 6 : $week - 1;
 		$week_days = 7 - $w;
-		//ä»Šå¤©çš„0ç‚¹æ—¶é—´æˆ³
+		//½ñÌìµÄ0µãÊ±¼ä´Á
 		$today = date('Ymd',$time);
-		//è®¡ç®—æœ¬å‘¨çš„å¼€å§‹å’Œç»“æŸæ—¶é—´
+		//¼ÆËã±¾ÖÜµÄ¿ªÊ¼ºÍ½áÊøÊ±¼ä
 		$week_start = strtotime('-'.$w.'days',strtotime($today));
 		$week_end = strtotime('+'.$week_days.'days',strtotime($today));
 		return ['start'=>$week_start,'end'=>$week_end];
 	}
 
     /**
-     * äºŒç»´æ•°ç»„æ ¹æ®æŸä¸ªå€¼çš„è¿›è¡Œå»é‡
+     * ¶şÎ¬Êı×é¸ù¾İÄ³¸öÖµµÄ½øĞĞÈ¥ÖØ
      * @param $arr
      * @param $key
-     * @param $k
      * @return array
      */
-	public function array_unique_unset($arr,$key = "",$k = "")
+	public function array_unique_unset($arr,$key)
 	{
 		$res = [];
 		foreach ($arr as $value) {
-			//æŸ¥çœ‹æœ‰æ²¡æœ‰é‡å¤é¡¹
-			if(isset($res[$value[$key]]) || isset($res[$value[$k]])){
-				//æœ‰ï¼šé”€æ¯
+			//²é¿´ÓĞÃ»ÓĞÖØ¸´Ïî
+			
+			if(isset($res[$value[$key]])){
+				//ÓĞ£ºÏú»Ù
 				unset($value[$key]);
-				unset($value[$k]);
 			} else{
 				$res[$value[$key]] = $value;
-				$res[$value[$k]] = $value;
 			}
 		}
 		return $res;
 	}
-
     /**
-     * æ£€æµ‹æ˜¯å¦ä¸ºè¿ç¦è‰²æƒ…å›¾ç‰‡
+     * ¼ì²âÊÇ·ñÎªÎ¥½ûÉ«ÇéÍ¼Æ¬
      * @param $fileName
      * @return bool
      */
@@ -305,20 +302,20 @@ class Util_EweiShopV2Model
                 $g = ($rgb >> 8) & 0xFF;
                 $b = $rgb & 0xFF;
                 $ycbcr = $this->rgb2ycbcr($r,$g,$b);
-                if((86 <= $ycbcr['cb'] && $ycbcr['cb'] <= 117)&&(140 <= $ycbcr['cr'] && $ycbcr['cr'] < 168)){
+                if((86<=$ycbcr['cb']&&$ycbcr['cb']<=117)&&(140<=$ycbcr['cr']&&$ycbcr['cr']< 168)){
                     $ycb++;
                 }
             }
         }
         imagedestroy($image);
-        if($ycb > (floatval($width)*floatval($height)*0.3))
+        if($ycb>(floatval($width)*floatval($height)*0.3))
             return true;
         else
             return false;
     }
 
     /**
-     * ä¿å­˜å›¾åƒå‡½æ•°
+     * ±£´æÍ¼Ïñº¯Êı
      * @param $fileName
      * @return mixed
      */
@@ -342,7 +339,7 @@ class Util_EweiShopV2Model
     }
 
     /**
-     * RGB è½¬ YCbCrè‰²å½©
+     * RGB ×ª YCbCrÉ«²Ê
      * @param $r
      * @param $g
      * @param $b

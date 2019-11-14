@@ -21,8 +21,8 @@ class Bindmobile_EweiShopV2Page extends AppMobilePage{
         $code=rand(100000,999999);
         if (empty($country_id)||$country_id==44){
             if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
-                app_error(1,"手机号格式不正确");
-            }
+                            app_error(1,"手机号格式不正确");
+                        }
             $resault=com_run("sms::mysend", array('mobile'=>$mobile,'tp_id'=>1,'code'=>$code));
         }else{
             $country=pdo_get("sms_country",array("id"=>$country_id));
@@ -36,8 +36,8 @@ class Bindmobile_EweiShopV2Page extends AppMobilePage{
         }else{
             app_error(1,$resault["message"]);
         }
+        
     }
-
     //国家区号
     public function country(){
         $list["list"]=pdo_fetchall("select * from ".tablename("sms_country")." where name_zh=:name_zh1 or name_zh=:name_zh2 or name_zh=:name_zh3",array(":name_zh1"=>"中国",":name_zh2"=>"马来西亚",":name_zh3"=>"泰国"));

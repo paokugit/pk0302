@@ -8,7 +8,7 @@ class Index_EweiShopV2Page extends MobilePage
    
 	public function main()
 	{
-	   
+	    
 		global $_W;
 		global $_GPC;
 		$_SESSION['newstoreid'] = 0;

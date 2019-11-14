@@ -1,11 +1,11 @@
 <?php
 class Shop_EweiShopV2Model
 {
-    /**
-     * 获取商品分类
-     * @param bool $refresh
-     * @return array
-     */
+	/**
+	 * 获取商品分类
+	 * @global type $_W
+	 * @return type
+	 */
 	public function getCategory($refresh = false)
 	{
 		global $_W;
@@ -149,6 +149,7 @@ class Shop_EweiShopV2Model
 
 		return $allcategory;
 	}
+
 
     /**
      * @param int $type

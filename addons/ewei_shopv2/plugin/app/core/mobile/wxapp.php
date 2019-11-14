@@ -165,6 +165,7 @@ class Wxapp_EweiShopV2Page extends Page
 
         if ($errCode == 0) {
             $data = json_decode($data, true);
+
             $member = m("member")->getMember("sns_wa_" . $data["openId"]);
             if (empty($member)) {
                 $member = array("uniacid" => $_W["uniacid"],"uid" => 0, "openid" => "sns_wa_" . $data["openId"], "nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"), "openid_wa" => $data["openId"], "comefrom" => "sns_wa", "unionid"=>$data["unionId"],"createtime" => time(), "status" => 0);

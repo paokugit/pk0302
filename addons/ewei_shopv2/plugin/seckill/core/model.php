@@ -386,8 +386,8 @@ class SeckillModel extends PluginModel
 	public function deleteSeckill() 
 	{
 		global $_W;
-		error_log('disable delete sec kill');
-		return true;
+        error_log('disable delete sec kill');
+        return true;
 		if (is_error(redis())) 
 		{
 			return false;

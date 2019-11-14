@@ -14,7 +14,7 @@ class Notive_EweiShopV2Page extends WebPage
         $params = array(':uniacid' => $_W['uniacid']);
         
        
-        $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_notive') . (' WHERE 1 ' . $condition.'  ORDER BY sort DESC limit ') . ($pindex - 1) * $psize . ',' . $psize, $params);
+        $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_notive') . ('ORDER BY sort DESC limit ') . ($pindex - 1) * $psize . ',' . $psize, $params);
         $total = pdo_fetchcolumn('SELECT count(*) FROM ' . tablename('ewei_shop_notive') . (' WHERE 1 ' . $condition), $params);
         $pager = pagination2($total, $pindex, $psize);
         include $this->template();

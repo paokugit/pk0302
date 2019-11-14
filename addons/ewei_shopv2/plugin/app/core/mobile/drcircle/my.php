@@ -105,7 +105,7 @@ class My_EweiShopV2Page extends AppMobilePage{
         }
     }
     
-    function sensitive($string){
+    function sensitives($string){
         //获取敏感词
         $notice=pdo_get("ewei_shop_member_devote",array("id"=>2));
         $list=unserialize($notice["content"]);
@@ -756,5 +756,47 @@ class My_EweiShopV2Page extends AppMobilePage{
         app_error(0,"成功");
         
     }
+     //获取access_token
+    public function access_token(){
+        $res=file_get_contents("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx4b602a36aa1c67d1&secret=e68369138b66cdae48729e6a996dd17d");
+//         var_dump($res);
+        $res=json_decode($res);
+//         var_dump($res->errcode);
+        return $res;
+    }
     
+    public function sensitive($string){
+        $res=$this->access_token();
+        if ($res->errcode==0){
+            
+            $data["content"]=$string;
+            //  var_dump(json_encode($data,JSON_UNESCAPED_UNICODE));
+            $url="https://api.weixin.qq.com/wxa/msg_sec_check?access_token=".$res->access_token;
+            $re=$this->curl_post_raw($url,json_encode($data,JSON_UNESCAPED_UNICODE));
+            $re=json_decode($re);
+            if($re->errcode==87014){
+                return 10;
+            }else{
+                $count=$this->sensitives($string);
+                return $count;
+            }
+        }else{
+            $count=$this->sensitives($string);
+            return $count;
+        }
+    }
+	
+	function curl_post_raw($url,$rawData){
+        $ch = curl_init();
+        curl_setopt($ch,CURLOPT_URL,$url);
+        curl_setopt($ch,CURLOPT_HEADER,0);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,10);
+        curl_setopt($ch,CURLOPT_POST,1);
+        curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $rawData);
+        $data = curl_exec($ch);
+        curl_close($ch);
+        return $data;
+	}
 }
