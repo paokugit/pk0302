@@ -18,6 +18,7 @@ class Sms_EweiShopV2ComModel extends ComModel
 		global $_W;
 		$smsset = $this->sms_set();
 		$template = $this->sms_verify($tplid, $smsset);
+        
 		if (empty($template['status'])) {
 			return $template;
 		}
@@ -76,6 +77,7 @@ class Sms_EweiShopV2ComModel extends ComModel
 			include_once EWEI_SHOPV2_VENDOR . 'aliyun/sendSms.php';
 			$option = array('keyid' => $smsset['aliyun_new_keyid'], 'keysecret' => $smsset['aliyun_new_keysecret'], 'phonenumbers' => $mobile, 'signname' => $template['smssign'], 'templatecode' => $template['smstplid'], 'templateparam' => $params);
 			$result = sendSms($option);
+
 			if ($result['Message'] != 'OK') {
 				return array('status' => 0, 'message' => '短信发送失败(错误信息: ' . $result['Message'] . ')');
 			}

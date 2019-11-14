@@ -46,10 +46,10 @@ foreach( $sets as $set )
 
             $time = time();
             pdo_query("update " . tablename("ewei_shop_order") . " set status=3,finishtime=:time where id=:orderid", array( ":time" => $time, ":orderid" => $orderid ));
-            //æŠ˜æ‰£å®è®¢å•  èŠ±å¤šå°‘é’±ç»™å¤šå°‘é’±
+            //ÕÛ¿Û±¦¶©µ¥  »¨¶àÉÙÇ®¸ø¶àÉÙÇ®
             $order_goods = pdo_fetchall('select id,orderid,goodsid from '.tablename('ewei_shop_order_goods').'where orderid = :orderid',[':orderid'=>$orderid]);
             $zhekoubao = 0;
-            //å¦‚æœè¯¥è®¢å•å†…  æœ‰æŠ˜æ‰£åŒ…å•†å“  æŠ˜æ‰£é‡‘é¢ä¸º0  é‚£ä¹ˆå¥–åŠ±è¯¥å•†å“çš„ä»·æ ¼æ•°ç»™ç”¨æˆ·çš„æŠ˜æ‰£å®
+            //Èç¹û¸Ã¶©µ¥ÄÚ  ÓĞÕÛ¿Û°üÉÌÆ·  ÕÛ¿Û½ğ¶îÎª0  ÄÇÃ´½±Àø¸ÃÉÌÆ·µÄ¼Û¸ñÊı¸øÓÃ»§µÄÕÛ¿Û±¦
             foreach ($order_goods as $item){
                 $good = pdo_get('ewei_shop_goods',['id'=>$item['goodsid']]);
                 if($good['deduct_type'] == 2 && $good['deduct'] == 0 && $good['merchid'] == 0){
@@ -57,7 +57,7 @@ foreach( $sets as $set )
                 }
             }
             if($zhekoubao > 0){
-                m('member')->setCredit($order['openid'],'credit3',$zhekoubao,"è´­ä¹°æŠ˜æ‰£å®å•†å“å¥–åŠ±æŠ˜æ‰£å®");
+                m('member')->setCredit($order['openid'],'credit3',$zhekoubao,"¹ºÂòÕÛ¿Û±¦ÉÌÆ·½±ÀøÕÛ¿Û±¦");
             }
 
             if( $order["isparent"] == 1 )

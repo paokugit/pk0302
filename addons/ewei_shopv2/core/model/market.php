@@ -40,8 +40,11 @@ class Market_EweiShopV2Model{
     public function send_out($mobile,$content){
         header("Content-type:text/html; charset=UTF-8");
         $target = "http://api.yx.ihuyi.com/webservice/sms.php?method=Submit";
+//         $mobile = '136xxxxxxxx';//手机号码，多个号码请用,隔开
         $content=$content."【跑库】";
         $post_data = "account=M67752248&password=6ec49782f14727c76f1068f694a49bb4&mobile=".$mobile."&content=".rawurlencode($content);
+        //用户名是登录用户中心->营销短信->产品总览->APIID
+        //查看密码请登录用户中心->营销短信->产品总览->APIKEY
         $gets =  $this->xml_to_array($this->Post($post_data, $target));
         if($gets['SubmitResult']['code']==2){
             return true;

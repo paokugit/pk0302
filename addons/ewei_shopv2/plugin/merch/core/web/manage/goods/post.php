@@ -762,7 +762,7 @@ if ($com_virtual) {
 }
 
 $areas = m('common')->getAreas();
-$express = pdo_getcolumn('ewei_shop_express_set',['uniacid'=>$_W['uniacid']],'express_set');
+
 if ($diyform) {
 	$form_list = $diyform->getDiyformList();
 	$dfields = iunserializer($item['diyfields']);

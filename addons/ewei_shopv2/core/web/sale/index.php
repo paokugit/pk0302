@@ -82,13 +82,7 @@ class Index_EweiShopV2Page extends ComWebPage
 													}
 													else 
 													{
-													    if(cv("sale.giftbag")){
-                                                            header("location: " . webUrl("sale/giftbag"));
-                                                        }
-                                                        else
-                                                        {
-                                                            header("location: " . webUrl());
-                                                        }
+														header("location: " . webUrl());
 													}
 												}
 											}
