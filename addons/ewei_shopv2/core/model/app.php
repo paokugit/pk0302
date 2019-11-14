@@ -2886,6 +2886,66 @@ class App_EweiShopV2Model
     {
 
     }
+
+    /**
+     * 活动分类的列表
+     * @param $id
+     * @param $keywords
+     * @param int $page
+     * @param int $type
+     * @param string $sort
+     * @return array
+     */
+    public function shop_cate_list($id,$keywords,$page = 1,$type = 3,$sort = "desc")
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $banner = pdo_fetchall(' select * from '.tablename('ewei_shop_icon_banner').' where uniacid = :uniacid and status = 1 and icon_id = :icon_id',['uniacid'=>$uniacid,'icon_id'=>$id]);
+        if($type == 3){    //综合
+            $args = array( "pagesize" =>9, "page" => $page, "order" =>'displayorder desc,(minprice-deduct) asc,deduct desc,sales desc' );
+        }elseif ($type==2){   //价格
+            $args = array( "pagesize" =>9, "page" => $page, "order" =>'(minprice-deduct) '.$sort.',deduct '.$sort);
+        }elseif ($type==1){   //销量
+            $args = array( "pagesize" =>9, "page" => $page, "order" =>'sales '.$sort.',(minprice-deduct) '.$sort.',deduct '.$sort );
+        }else{   //最新
+            $args = array( "pagesize" =>9, "page" => $page, "order" =>'id '.$sort.',(minprice-deduct) '.$sort.',deduct '.$sort );
+        }
+        $data = m('shop')->get_cate_list($id,$keywords,$args);
+        return ['data'=>$data,'banner'=>$banner];
+    }
+
+    public function shop_shop_list($user_id,$type,$page = 1)
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $member = m('member')->getMember($user_id);
+        $pageize = 10;
+        $pindex = ($page - 1) * $pageize;
+        $condition = " m.uniacid = :uniacid and m.status = 1 and m.member_id != 0 and mc.status = 1";
+        $params = [":uniacid"=>$uniacid];
+        if($type == 1){
+            //店铺名 店铺logo 文章分类  文章标题  文章描述  文章的商品  文章的等级
+            $list = pdo_fetchall("select m.merchname,m.logo,m.merchlevel,mc.id,mc.cid,mc.title,mc.descript,mc.content,mc.goods_id from ".tablename("ewei_shop_merch_choice")." mc left join ".tablename('ewei_shop_merch_user')." m on m.id = mc.mer_id where ".$condition." order by m.isrecommand desc,mc.createtime desc limit ".$pindex.",".$pageize,$params);
+            set_medias($list,'logo');
+            foreach ($list as $key => $value){
+                $list[$key]['cate'] = $value['cid'] == 0 ? "" : pdo_getcolumn('ewei_shop_merch_choice_cate',['id'=>$value['cid'],'status'=>1],'cate');
+                $list[$key]['levelname'] = $value['merchlevel'] == 0 ? "" : pdo_getcolumn('ewei_shop_merch_level',['id'=>$value['merchlevel'],'status'=>1],'levelname');
+                $goods_id = explode(',',$value['goods_id']);
+                foreach ($goods_id as $item){
+                    $list[$key]['goods'][] = pdo_fetch('select title,marketprice,productprice,thumb from '.tablename('ewei_shop_goods').' where id = "'.$item.'" and status = 1 and deleted = 0');
+                }
+                $list[$key]['fav'] = pdo_fetchcolumn(' select count(1) from '.tablename('ewei_shop_merch_choice_fav').' where (openid = :openid or user_id = :user_id) and chid = :chid and status = 1 and uniacid = :uniacid',[':uniacid'=>$uniacid,':openid'=>$member['openid'],':user_id'=>$member['id'],':chid'=>$value['id']]);
+                $list[$key]['comment'] = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_merch_choice_comment').' where parent_id = "'.$value['id'].'" and type = 1');
+            }
+        }elseif ($type == 2){
+            $condition .= " and (f.openid = :openid or f.user_id = :user_id)";
+            $sql = "";
+        }elseif ($type == 3){
+            $condition .= "";
+            $sql = "";
+        }
+
+    }
 }
 
 ?>
