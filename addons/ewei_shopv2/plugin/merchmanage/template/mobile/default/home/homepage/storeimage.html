@@ -15,7 +15,7 @@
             <div class="head_text">请上传店铺门头、室内环境图、其他图等</div>
             <div class="head_img">
                 <input type="file" name="file" id="file" onchange="fileUpload()" style="display:none">
-                <img onclick="select_file()" src="http://paokucoin.com/img/backgroup/videoadd.png" alt="">
+                <img onclick="select_file()" src="https://www.paokucoin.com/img/backgroup/videoadd.png" alt="">
             </div>
         </div>
         <div class="list_img">
@@ -55,7 +55,7 @@
                     $(".mask").css('display', 'none')
                     $.each(data.imgaddr, function (i, item) {
                         str += '<div class="total_view">' +
-                            '<img class="deleteimg" style="width:20px;height:20px;border-radius: 50%;background: #0f0;position: absolute;top:5px;right:5px" src="http://paokucoin.com/img/backgroup/imgdel@2x.png">' +
+                            '<img class="deleteimg" style="width:20px;height:20px;border-radius: 50%;background: #0f0;position: absolute;top:5px;right:5px" src="https://www.paokucoin.com/img/backgroup/imgdel@2x.png">' +
                             '<img class="imgcc" src="' + item + '" alt="" data-mesage="' + data.message[i] + '">' +
                             '</div>'
                         $('.list_img').html(str)
@@ -115,7 +115,7 @@
                     alert(data.message); return;
                 }
                 str += '<div class="total_view">' +
-                    '<img class="deleteimg" style="width:20px;height:20px;border-radius: 50%;background: #0f0;position: absolute;top:5px;right:5px" src="http://paokucoin.com/img/backgroup/imgdel@2x.png">' +
+                    '<img class="deleteimg" style="width:20px;height:20px;border-radius: 50%;background: #0f0;position: absolute;top:5px;right:5px" src="https://www.paokucoin.com/img/backgroup/imgdel@2x.png">' +
                     '<img class="imgcc" src="' + data.addr + '" alt="" data-mesage="' + data.message + '">' +
                     '</div>'
                 $('.list_img').html(str)

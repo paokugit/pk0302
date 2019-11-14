@@ -97,19 +97,30 @@ class Shop_EweiShopV2Page extends AppMobilePage
    {
         global $_GPC;
         // 这个传id最好吧  然后 根据id查类别  cate == 1fruit水果美食   2city同城  3cash零元兑  4task任务赚  5share分享赚   6rank网红榜单
-        $cate = $_GPC['cate'];
-        app_error(0);
+        $id = $_GPC['id'];
+        if(empty($id)) app_error(1,"参数错误");
+        $page = max(1,$_GPC['page']);
+        $keywords = $_GPC['keywords'];
+       //order  类型  综合不传   销量sales  价格 minprice  by  升序asc   降序desc
+        $type = empty($_GPC['type']) ? 3 : $_GPC['type'];
+        $sort = empty($_GPC['sort']) ? "desc" : $_GPC['sort'];
+        $data = m('app')->shop_cate_list($id,$keywords,$page,$type,$sort);
+        app_error(0,$data);
    }
 
     /**
      *  ta的店列表
      */
-    public function shop_shop()
+    public function shop_shop_list()
     {
         global $_GPC;
-        //1全部店   2关注的店
+        //1全部店   2关注的店   3上新
         $type = $_GPC['type'];
-        
+        $token = $_GPC['token'];
+        $page = max(1,$_GPC['page']);
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0 && $type != 1) app_error(2,"登录失效");
+        $data = m('app')->shop_shop_list($user_id,$type,$page);
         app_error(0);
     }
 

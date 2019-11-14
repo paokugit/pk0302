@@ -1,11 +1,11 @@
 <?php
 class Shop_EweiShopV2Model
 {
-    /**
-     * 获取商品分类
-     * @param bool $refresh
-     * @return array
-     */
+	/**
+	 * 获取商品分类
+	 * @global type $_W
+	 * @return type
+	 */
 	public function getCategory($refresh = false)
 	{
 		global $_W;
@@ -149,6 +149,7 @@ class Shop_EweiShopV2Model
 
 		return $allcategory;
 	}
+
 
     /**
      * @param int $type
@@ -786,6 +787,32 @@ class Shop_EweiShopV2Model
             $ret = m("dispatch")->getDispatchPrice(1, $dispatch);
         }
         return $ret;
+    }
+
+    public function get_cate_list($id,$keywords = "",$args = [])
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $page = $args['page'];
+        $pageSize = $args['pagesize'];
+        $pindex = ($page - 1) * $pageSize;
+        $order = $args['order'];
+        $condition = '`uniacid` = :uniacid AND `deleted` = 0 and status=1 and icon_id = :id';
+        $params = array(':uniacid' => $uniacid,':id'=>$id);
+        if(!empty($keywords)){
+            $condition .= ' AND (`title` LIKE :keywords OR `keywords` LIKE :keywords)';
+            $params[':keywords'] = '%' . trim($keywords) . '%';
+        }
+        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_goods').'where '.$condition.' ',$params);
+        $list = pdo_fetchall('select * from '.tablename('ewei_shop_goods').' where '.$condition.' order by '.$order.' limit '.$pindex.','.$pageSize,$params);
+        set_medias($list,'thumb');
+        $count = pdo_count('ewei_shop_choice',['uniacid'=>$uniacid,'status'=>1]);
+        $pindex = rand(0,$count-1);
+        $choice = pdo_fetch('select * from '.tablename('ewei_shop_choice').' where uniacid = "'.$uniacid.'" and status = 1 and icon_id = "'.$id.'" limit '.$pindex.', 1');
+        $choice["thumb"] = tomedia($choice['thumb']);
+        $choice["image"] = tomedia($choice['image']);
+        array_push($list,$choice);
+        return ['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total];
     }
 }
 

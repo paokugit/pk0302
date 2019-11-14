@@ -966,6 +966,7 @@ class My_EweiShopV2Page extends AppMobilePage{
         app_error(0,"成功");
         
     }
+
     //获取access_token
     public function access_token(){
         $res=file_get_contents("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx4b602a36aa1c67d1&secret=e68369138b66cdae48729e6a996dd17d");
@@ -1008,5 +1009,5 @@ class My_EweiShopV2Page extends AppMobilePage{
         $data = curl_exec($ch);
         curl_close($ch);
         return $data;
-    }
+	}
 }

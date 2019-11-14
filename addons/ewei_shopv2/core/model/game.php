@@ -169,6 +169,20 @@ class Game_EweiShopV2Model{
     }
 
     /**
+     * 检测会员的额度
+     * @param $openid
+     * @param $level
+     * @return bool|mixed
+     */
+    public function checklimit($openid,$level)
+    {
+        $limit = pdo_getcolumn('ewei_shop_commission_level',['id'=>$level],'limit');
+        $all = pdo_fetchall('select * from '.tablename('ewei_shop_member_limit_order').'where openid = :openid and status = 1',[':openid'=>$openid]);
+        $sum = array_sum(array_column($all,'limit'));
+        return $limit + $sum;
+    }
+
+    /**
      * 获得该用户应该获得的礼包
      * @param $gift
      * @param $openid
@@ -179,7 +193,7 @@ class Game_EweiShopV2Model{
         global $_W;
         $uniacid = $_W['uniacid'];
         //获得用户的信息
-        $member = m('member')->getMember($openid);
+        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
         foreach ($gift as &$item) {
             $level = explode(',',$item['levels']);
             //判断是有此范围内
@@ -232,7 +246,8 @@ class Game_EweiShopV2Model{
     public function isvalid($list,$time,$uid)
     {
         foreach($list as $key=>$item){
-            $member = pdo_fetch('select * from '.tablename('ewei_shop_member').' where openid = :openid or user_id = :user_id',[':openid'=>$item['openid'],':user_id'=>$item['share']]);
+            //$member = pdo_get('ewei_shop_member',['openid'=>$item['bang']]);
+            $member = pdo_get('ewei_shop_member',['openid'=>$item['openid']]);
             $list[$key]['nickname'] = $member['nickname'];
             $list[$key]['avatar'] = $member['avatar'];
             $list[$key]['timestamp'] = date('Y-m-d H:i',$item['createtime']);
@@ -341,11 +356,28 @@ class Game_EweiShopV2Model{
 
     /**
      * @param $gifts
+     * @param $openid
      * @return array
      */
-    public function gift($gifts)
+    public function gift($gifts,$openid)
     {
         $goods = [];
+//        //获取本周的始末
+//        $week = m('util')->week(time());
+//        //获得本周的领取记录
+//        $log = pdo_fetchall('ewei_shop_gift_log',"openid = :openid and createtime between '".$week['start']."' and '".$week['end']."'",[':openid'=>$openid]);
+//        //把领取礼包的id组成一维数组
+//        $log_ids = array_column($log,'gift_id','id');
+//        //获得用户的id
+//        $id = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'id');
+//        //计算本周的邀请人数
+//        $num = pdo_count('ewei_shop_member','agentid = "'.$id.'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
+//        $num = 23;
+//        $count = 0;
+//        //计算领取过的  已经需要多少人
+//        foreach ($log_ids as $item){
+//            $count += pdo_getcolumn('ewei_shop_gift_bag',['id'=>$item],'member');
+//        }
         foreach ($gifts as $key=>$item){
             $ids = explode(',',$item['goodsid']);
             $levels = explode(',',$item['levels']);
@@ -360,118 +392,13 @@ class Game_EweiShopV2Model{
                 }
                 $goods[$key]['level_name'] .= pdo_getcolumn('ewei_shop_commission_level',['id'=>$level],'levelname');
             }
+//            //如果领取过的人数  大于
+//            if($count > $num){
+//                $goods[$key]['is_get'] = 0;
+//            }else{
+//                $goods[$key]['is_get'] = in_array($item['id'],$log_ids) ? 0 : 1;
+//            }
         }
         return $goods;
-    }
-
-    /**
-     * 切换地址接口
-     * @param $address_id
-     * @param $openid
-     * @param $uniacid
-     * @return int
-     */
-    public function change_address($address_id,$openid,$uniacid)
-    {
-        $member = m('member')->getMember($openid);
-        $record = pdo_fetch('select * from '.tablename('ewei_shop_level_record').'where (openid = :openid or user_id = :user_id) and uniacid = :uniacid order by id asc',[':openid'=>$member['openid'],':user_id'=>$member['id'],':uniacid'=>$uniacid]);
-        $user_address = pdo_fetch('select * from '.tablename('ewei_shop_member_address').'where (openid = :openid or user_id = :user_id) and uniacid = :uniacid and id = :address_id and deleted = 0',[':openid'=>$member['openid'],':user_id'=>$member['id'],':uniacid'=>$uniacid,':address_id'=>$address_id]);
-        if(empty($user_address)){
-            show_json(0,"用户地址错误");
-        }
-        $base_address = pdo_getcolumn('ewei_shop_express_set',['uniacid'=>$uniacid,'id'=>1],'express_set');
-        $base_express = explode(';',$base_address);
-        if(in_array($user_address['province'],$base_express)){
-            $data['is_remote'] = 0;
-            //这个人的第一条记录为0的话  说明是第一次领取
-            $data['price'] = $record['status'] > 0 ? 10 : 0;
-        }else{
-            $data['is_remote'] = 1;
-            //这个人的第一条记录为0的话  说明是第一次领取
-            $data['price'] = $record['status'] > 0 ? 20 : 0;
-        }
-        return $data;
-
-    }
-
-    /**
-     * 添加订单
-     * @param $openid
-     * @param $order_sn
-     * @param $money
-     * @param $address_id
-     * @param $remark
-     * @param $goods
-     * @return bool
-     */
-    public function addorder($openid,$order_sn,$money,$address_id = "",$remark = "",$goods = [])
-    {
-        global $_W;
-        $uniacid = $_W['uniacid'];
-        $member = m('member')->getMember($openid);
-        //因为领取的权益是实物产品  所以需要地址
-        $address = empty($address_id)?null:serialize(pdo_get('ewei_shop_member_address',['id'=>$address_id,'uniacid'=>$uniacid]));
-        $data = [
-            'uniacid'=>$uniacid,
-            'openid'=>$member['openid'],
-            'user_id'=>$member['id'],
-            'ordersn'=>$order_sn,
-            'goodsprice'=>$goods['marketprice']?:0,
-            'price'=>$money,
-            'createtime'=>time(),
-            'agentid'=>$member['agent_id'],
-            'addressid'=>$address_id?:0,
-            'address'=>$address,
-            'dispatchprice'=>$money,
-            'remark'=>$remark,
-        ];
-        $data['status'] = $money == 0 ? 1 :0;
-        pdo_insert('ewei_shop_order',$data);
-        $orderid = pdo_insertid();
-        if(!empty($goods)){
-            $add = [
-                'uniacid'=>$uniacid,
-                'goodsid'=>$goods['id'],
-                'orderid'=>$orderid,
-                'price'=>$money,
-                'total'=>1,
-                'createtime'=>time(),
-                'realprice'=>0,
-                'changeprice'=>$goods['marketprice'],
-                'oldprice'=>$goods['marketprice'],
-                'openid'=>$member['openid'],
-                'optionname'=>'',
-            ];
-            pdo_insert('ewei_shop_order_goods',$add);
-        }
-        return $orderid;
-    }
-
-    /**
-     * 添加用户日志
-     * @param $openid
-     * @param $order_sn
-     * @param $money
-     * @param $remark
-     * @return bool
-     */
-    public function addmemberlog($openid,$order_sn,$money,$remark)
-    {
-        global $_W;
-        $uniacid = $_W['uniacid'];
-        $member = m('member')->getMember($openid);
-        $data= [
-            'uniacid'=>$uniacid,
-            'openid'=>$member['openid'],
-            'user_id'=>$member['id'],
-            'type'=>2,
-            'logno'=>$order_sn,
-            'title'=>$remark,
-            'createtime'=>time(),
-            'status'=>0,
-            'money'=>-$money,
-            'rechargetype'=>'waapp',
-        ];
-        return pdo_insert('ewei_shop_member_log',$data);
     }
 }
