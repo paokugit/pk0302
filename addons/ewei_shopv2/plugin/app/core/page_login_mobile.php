@@ -1,10 +1,7 @@
 <?php
 function app_error($errcode = 0, $message = '')
 {
-   
-  
 	exit(json_encode(array('error' => $errcode, 'message' => empty($message) ? AppError::getError($errcode) : $message)));
-   
 }
 
 function app_json($result = NULL)

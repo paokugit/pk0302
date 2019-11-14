@@ -59,8 +59,8 @@
                     <tr>
                         <th style="width:25px;" ></th>
                         <th style='width:50px'>顺序</th>
-                        <th class='th-sortable' data-sort-name='title'>公告</th>
-                      <!--  <th>链接</th> --> 
+                        <th class='th-sortable' data-sort-name='title'>标题</th>
+                        <th>链接</th>
                         <th style="width: 70px;">状态</th>
                         <th style="width: 65px;">操作</th>
                     </tr>
@@ -79,7 +79,7 @@
                                 {/if}
                             </td>
                             <td>{$row['title']}</td>
-                          <!--    <td>{$row['link']}</td>-->
+                            <td>{$row['link']}</td>
                             <td>
                                 <span class='label {if $row['status']==1}label-primary{else}label-default{/if}'
                                       {ifp 'shop.notice.edit'}
@@ -126,7 +126,7 @@
                                 {/if}
                             </div>
                         </td>
-                        <td colspan="2" style="text-align: right">
+                        <td colspan="3" style="text-align: right">
                             {$pager}
                         </td>
                     </tr>

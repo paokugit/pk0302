@@ -2155,10 +2155,10 @@ class MerchModel extends PluginModel
             $has_plugins[] = "quick";
         }
         //拼团
-        if( p("groups") && $perm && $perm->is_perm_plugin("groups") )
-        {
-            $has_plugins[] = "groups";
-        }
+//         if( p("groups") && $perm && $perm->is_perm_plugin("groups") )
+//         {
+//             $has_plugins[] = "groups";
+//         }
 
         if( !empty($merchid) ) 
         {

@@ -19,13 +19,7 @@ function app_error($errcode = 0, $message = '')
 {
 	global $iswxapp;
 	global $openid;
-	if (is_array($message)){
-	    $res = array('error' => $errcode, 'message' =>$message);
-	}else{
-	    
 	$res = array('error' => $errcode, 'message' => empty($message) ? AppError::getError($errcode) : $message);
-	
-	}
 	exit(json_encode($res));
 }
 
