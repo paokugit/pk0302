@@ -75,7 +75,6 @@ class Bind_EweiShopV2Page extends AppMobilePage
 					m("bind")->sendCredit($member);
 				}
                 $this->bindMerch($mobile);
-
                 app_json();
 			}else{
                 app_error(AppError::$VerifyCodeError, "改手机号已被绑定其他账号，请更改手机号");

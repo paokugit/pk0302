@@ -54,7 +54,6 @@ class Sendapi_EweiShopV2Page extends MerchmanageMobilePage{
          if (empty($merchid)){
              $merchid=$_GPC['merchid'];
          }
-         
          //获取商户订单
          $order=pdo_fetchall("select DISTINCT openid from ".tablename("ewei_shop_order")." where merchid=:merchid and status>=1",array(':merchid'=>$merchid));
          $member=array();

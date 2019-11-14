@@ -80,13 +80,24 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
             app_error(-1,"商户id未传");
         }
         $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        //修改
+        $member=m("member")->getMember($openid);
         $follow=$_GPC["follow"];//1表示关注 0取消关注
         if ($follow==1){
-            $merch_follow=pdo_get("ewei_shop_merch_follow",array("openid"=>$openid,"merch_id"=>$merch_id));
+//             $merch_follow=pdo_get("ewei_shop_merch_follow",array("openid"=>$openid,"merch_id"=>$merch_id));
+            $merch_follow=pdo_fetch("select * from ".tablename("ewei_shop_merch_follow")." where (openid=:openid or user_id=:user_id) and merch_id=:merch_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":merch_id"=>$merch_id)); 
             if ($merch_follow){
                 app_error(-1,"不可重复关注");
             }
-            $data["openid"]=$openid;
+            $data["openid"]=$member["openid"];
+            $data["user_id"]=$member["id"];
             $data["merch_id"]=$merch_id;
             $data["create_time"]=time();
             if (pdo_insert("ewei_shop_merch_follow",$data)){
@@ -96,11 +107,13 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
             }
             
         }else{
-            $merch_follow=pdo_get("ewei_shop_merch_follow",array("openid"=>$openid,"merch_id"=>$merch_id));
+//             $merch_follow=pdo_get("ewei_shop_merch_follow",array("openid"=>$openid,"merch_id"=>$merch_id));
+            $merch_follow=pdo_fetch("select * from ".tablename("ewei_shop_merch_follow")." where (openid=:openid or user_id=:user_id) and merch_id=:merch_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":merch_id"=>$merch_id)); 
             if (empty($merch_follow)){
                 app_error(-1,"该用户未关注该商户");
             }
-            if (pdo_delete("ewei_shop_merch_follow",array("openid"=>$openid,"merch_id"=>$merch_id))){
+//             if (pdo_delete("ewei_shop_merch_follow",array("openid"=>$openid,"merch_id"=>$merch_id))){
+            if (pdo_query("delete from ".tablename("ewei_shop_merch_follow")." where (openid=:openid or user_id=:user_id) and merch_id=:merch_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":merch_id"=>$merch_id))){
                 app_error(0,"取消关注成功");
             }else{
                 app_error(-1,"取消关注失败");

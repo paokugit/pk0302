@@ -79,6 +79,7 @@ class Prpcrypt
 			$result = $pkc_encoder->decode($decrypted);
 		}
 		catch (Exception $e) {
+
 			return array(ErrorCode::$IllegalBuffer, NULL);
 		}
 

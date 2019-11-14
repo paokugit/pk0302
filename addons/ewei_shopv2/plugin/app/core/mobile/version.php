@@ -22,6 +22,7 @@ class Version_EweiShopV2Page extends AppMobilePage
 
     public function appversion()
     {
+
         global $_GPC;
         $setting = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 7 ));
         $goodsshare = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 8 ));

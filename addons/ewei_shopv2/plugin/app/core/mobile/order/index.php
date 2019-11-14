@@ -24,17 +24,28 @@ class Index_EweiShopV2Page extends AppMobilePage
 		global $_W;
 		global $_GPC;
 		$uniacid = $_W["uniacid"];
-		$openid = $_W["openid"];
+// 		$openid = $_W["openid"];
+		$openid = $_GPC["openid"];
 		if( empty($openid) ) 
 		{
 			app_error(AppError::$ParamsError);
 		}
+		//修改
+		if ($_GPC["type"]==1){
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		}
+		$member=m("member")->getMember($openid);
+		
 		$pindex = max(1, intval($_GPC["page"]));
 		$psize = 10;
 		$show_status = $_GPC["status"];
 		$r_type = array( "退款", "退货退款", "换货" );
-		$condition = " and openid=:openid and ismr=0 and deleted=0 and uniacid=:uniacid ";
-		$params = array( ":uniacid" => $uniacid, ":openid" => $openid );
+		$condition = " and (openid=:openid or user_id=:user_id) and ismr=0 and deleted=0 and uniacid=:uniacid ";
+		$params = array( ":uniacid" => $uniacid, ":openid" => $member["openid"],":user_id"=>$member["id"] );
 		$merchdata = $this->merchData();
 		extract($merchdata);
 		$condition .= " and merchshow=0 ";
@@ -87,15 +98,20 @@ class Index_EweiShopV2Page extends AppMobilePage
 				$scondition = " og.orderid=:orderid";
 				$param[":orderid"] = $row["id"];
 			}
+<<<<<<< HEAD
 			
 			$sql = "SELECT og.goodsid,og.total,og.rstate,og.refundid,g.title,g.thumb,g.type, og.price,og.optionname as optiontitle,og.optionid,op.specs,g.merchid,g.status,g.cannotrefund FROM " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on og.goodsid = g.id " . " left join " . tablename("ewei_shop_goods_option") . " op on og.optionid = op.id " . " where " . $scondition ." and og.status=0". " order by og.id asc";
 
+=======
+			$sql = "SELECT og.goodsid,og.total,g.title,g.thumb,g.type, og.price,og.optionname as optiontitle,og.optionid,op.specs,g.merchid,g.status,g.cannotrefund FROM " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on og.goodsid = g.id " . " left join " . tablename("ewei_shop_goods_option") . " op on og.optionid = op.id " . " where " . $scondition . " order by og.id asc";
+>>>>>>> parent of 5c12db50... Merge branch 'featuer/hcc' of https://github.com/paokugit/pk0302 into featuer/hcc
 			$goods = pdo_fetchall($sql, $param);
 			$goods = set_medias($goods, array( "thumb" ));
 			$ismerch = 0;
 			$merch_array = array( );
 			$g = 0;
 			$nog = 0;
+			$row["gift"]=array();
 			foreach( $goods as &$r ) 
 			{
 				$merchid = $r["merchid"];

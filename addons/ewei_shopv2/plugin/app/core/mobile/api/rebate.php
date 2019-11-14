@@ -30,7 +30,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['mobile'=>$mobile,'uniacid'=>$uniacid]);
         //计算用户的额度
-        $limit = m('game')->checklimit($member['openid'],$member['agentlevel']);
+        $limit = m('payment')->checklimit($member['openid'],$member['agentlevel']);
         //计算用户已经消费的额度
         $sale = pdo_fetchall('select * from '.tablename('mc_credits_record').' where openid = :openid and remark = "RV钱包充值" and createtime > 1570776300',[':openid'=>$member['openid']]);
         $sale_sum = abs(array_sum(array_column($sale,'num')));

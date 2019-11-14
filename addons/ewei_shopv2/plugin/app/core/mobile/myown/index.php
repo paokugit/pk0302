@@ -147,11 +147,11 @@ class Index_EweiShopV2Page extends AppMobilePage{
             $list["icon"][$k]["icon"]=tomedia($v["icon"]);
         }
         $list["icon"][4]["title"]="达人圈";
-        $list["icon"][4]["img"]="https://www.paokucoin.com/img/backgroup/gif-kt@2x.png";
+        $list["icon"][4]["img"]="https://paokucoin.com/img/backgroup/gif-kt@2x.png";
         $list["icon"][4]["url"]="/pages/expert/circle/circle";
         $list["icon"][4]["icon"]="";
         $list["icon"][5]["title"]="每日必读";
-        $list["icon"][5]["img"]="https://www.paokucoin.com/img/backgroup/quan-kt@2x.png";
+        $list["icon"][5]["img"]="https://paokucoin.com/img/backgroup/quan-kt@2x.png";
         $list["icon"][5]["url"]="/packageA/pages/skyread/read/read";
         $list["icon"][5]["icon"]="";
         show_json(1,$list);
@@ -219,7 +219,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
     
     public function membercount(){
         $member=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." order by id asc");
-        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<50 and  id>=1 order by id asc ");
+        $m=pdo_fetchall("select id,openid,agentid,agentlevel from ".tablename("ewei_shop_member")." where id<=500 and  id>10 order by id asc ");
         
         foreach ($m as $k=>$v){
            //获取直推数据
@@ -280,7 +280,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
     }
     
     public function parent(){
-        $m=pdo_fetchall("select * from ".tablename("ewei_shop_member")." where id>=65603 order by id asc");
+        $m=pdo_fetchall("select * from ".tablename("ewei_shop_member")." where id>=65606 order by id asc");
         foreach ($m as $k=>$v){
             if ($v["agentid"]!=0){
             $parent_id=$this->Getparent($v["id"]);

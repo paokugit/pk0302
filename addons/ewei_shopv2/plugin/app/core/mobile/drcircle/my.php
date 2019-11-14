@@ -125,7 +125,7 @@ class My_EweiShopV2Page extends AppMobilePage{
         }
     }
     
-    function sensitives($string){
+    function sensitive($string){
         //获取敏感词
         $notice=pdo_get("ewei_shop_member_devote",array("id"=>2));
         $list=unserialize($notice["content"]);
@@ -966,6 +966,7 @@ class My_EweiShopV2Page extends AppMobilePage{
         app_error(0,"成功");
         
     }
+<<<<<<< HEAD
 
     //获取access_token
     public function access_token(){
@@ -1010,4 +1011,7 @@ class My_EweiShopV2Page extends AppMobilePage{
         curl_close($ch);
         return $data;
 	}
+=======
+    
+>>>>>>> parent of 5c12db50... Merge branch 'featuer/hcc' of https://github.com/paokugit/pk0302 into featuer/hcc
 }
