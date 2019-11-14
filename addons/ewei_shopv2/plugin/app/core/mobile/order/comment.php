@@ -21,9 +21,21 @@ class Comment_EweiShopV2Page extends AppMobilePage
 		global $_W;
 		global $_GPC;
 		$uniacid = $_W['uniacid'];
-		$openid = $_W['openid'];
+		$openid = $_GPC['openid'];
 		$orderid = intval($_GPC['id']);
-		$order = pdo_fetch('select id,status,iscomment from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $uniacid, ':openid' => $openid));
+		if ($_GPC["type"]==1){
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		}
+		$member=m("member")->getMember($openid);
+		if (empty($member)){
+		    app_error(1,"无此用户");
+		}
+		
+		$order = pdo_fetch('select id,status,iscomment from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and (openid=:openid or user_id=:user_id) limit 1', array(':id' => $orderid, ':uniacid' => $uniacid, ':openid' => $member["openid"],':user_id'=>$member["id"]));
 
 		if (empty($order)) {
 			app_error(AppError::$OrderNotFound);
@@ -37,8 +49,20 @@ class Comment_EweiShopV2Page extends AppMobilePage
 			app_error(AppError::$OrderCanNotComment, '您已经评价过了!');
 		}
 
-		$goods = pdo_fetchall('select og.id,og.goodsid,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,o.title as optiontitle from ' . tablename('ewei_shop_order_goods') . ' og ' . ' left join ' . tablename('ewei_shop_goods') . ' g on g.id=og.goodsid ' . ' left join ' . tablename('ewei_shop_goods_option') . ' o on o.id=og.optionid ' . ' where og.orderid=:orderid and og.uniacid=:uniacid ', array(':uniacid' => $uniacid, ':orderid' => $orderid));
+		$goods = pdo_fetchall('select og.id,og.goodsid,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,o.title as optiontitle,g.ccate from ' . tablename('ewei_shop_order_goods') . ' og ' . ' left join ' . tablename('ewei_shop_goods') . ' g on g.id=og.goodsid ' . ' left join ' . tablename('ewei_shop_goods_option') . ' o on o.id=og.optionid ' . ' where og.orderid=:orderid and og.uniacid=:uniacid and og.status!=-1', array(':uniacid' => $uniacid, ':orderid' => $orderid));
 		$goods = set_medias($goods, 'thumb');
+		foreach ($goods as $k=>$v){
+		    if ($v["ccate"]!=0){
+		        $cate=pdo_get("ewei_shop_category",array("id"=>$v["ccate"]));
+		        if ($cate["label"]){
+		        $goods[$k]["label"]=explode(",", $cate["label"]);
+		        }else{
+		         $goods[$k]["label"]=array();
+		        }
+		    }else{
+		        $goods[$k]["label"]=array();
+		    }
+		}
 		app_json(array('order' => $order, 'goods' => $goods, 'shopname' => $_W['shopset']['shop']['name']));
 	}
 
@@ -46,16 +70,24 @@ class Comment_EweiShopV2Page extends AppMobilePage
 	{
 		global $_W;
 		global $_GPC;
-		$openid = $_W['openid'];
+		$openid = $_GPC['openid'];
 		$uniacid = $_W['uniacid'];
 		$orderid = intval($_GPC['orderid']);
-		$order = pdo_fetch('select id,status,iscomment from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and openid=:openid limit 1', array(':id' => $orderid, ':uniacid' => $uniacid, ':openid' => $openid));
+		if ($_GPC["type"]==1){
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		}
+		$member = m('member')->getMember($openid);
+		$order = pdo_fetch('select id,status,iscomment from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and (openid=:openid or user_id=:user_id) limit 1', array(':id' => $orderid, ':uniacid' => $uniacid, ':openid' => $member["openid"],":user_id"=>$member["id"]));
 
 		if (empty($order)) {
 			app_error(AppError::$OrderNotFound);
 		}
 
-		$member = m('member')->getMember($openid);
+		
 		$comments = $_GPC['comments'];
 
 		if (is_string($comments)) {
@@ -80,7 +112,7 @@ class Comment_EweiShopV2Page extends AppMobilePage
 			$old_c = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_order_comment') . ' where uniacid=:uniacid and orderid=:orderid and goodsid=:goodsid limit 1', array(':uniacid' => $_W['uniacid'], ':goodsid' => $c['goodsid'], ':orderid' => $orderid));
 
 			if (empty($old_c)) {
-				$comment = array('uniacid' => $uniacid, 'orderid' => $orderid, 'goodsid' => $c['goodsid'], 'level' => $c['level'], 'content' => trim($c['content']), 'images' => is_array($c['images']) ? iserializer($c['images']) : iserializer(array()), 'openid' => $openid, 'nickname' => $member['nickname'], 'headimgurl' => $member['avatar'], 'createtime' => time(), 'checked' => $checked);
+			    $comment = array('uniacid' => $uniacid, 'orderid' => $orderid, 'goodsid' => $c['goodsid'], 'level' => $c['level'], 'content' => trim($c['content']), 'images' => is_array($c['images']) ? iserializer($c['images']) : iserializer(array()), 'openid' => $member["openid"], 'user_id'=>$member["id"],'nickname' => $member['nickname'], 'headimgurl' => $member['avatar'], 'createtime' => time(), 'checked' => $checked,'label'=>trim($c["label"]),'deliverry_service'=>intval($_GPC["deliverry_service"]),'service_attitude'=>intval($_GPC["service_attitude"]));
 				pdo_insert('ewei_shop_order_comment', $comment);
 			}
 			else {

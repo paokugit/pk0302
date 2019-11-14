@@ -64,6 +64,19 @@
 	</div>
 	{if !empty($parentid)}
 	<div class="form-group">
+		<label class="col-sm-2 control-label must">评论标签(多给标签以,分割)</label>
+		<div class="col-sm-9 col-xs-12">
+			{ife 'goods.category' $item}
+			<input type="text" name="label" class="form-control" value="{$item['label']}" data-rule-required='true' />
+			{else}
+			<div class='form-control-static'>{$item['label']}</div>
+			{/if}
+		</div>
+	</div>
+	{/if}
+	
+	{if !empty($parentid)}
+	<div class="form-group">
 		<label class="col-sm-2 control-label">分类图片</label>
 		<div class="col-sm-9 col-xs-12">
 			{ife 'goods.category' $item}
@@ -167,7 +180,7 @@
 			{/if}
 		</div>
 	</div>
-
+    
 	<div class="form-group">
 		<label class="col-sm-2 control-label"></label>
 		<div class="col-sm-9 col-xs-12">

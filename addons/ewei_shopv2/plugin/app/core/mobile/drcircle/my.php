@@ -10,7 +10,15 @@ class My_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
-        $member=pdo_get("ewei_shop_member",array("openid"=>$openid));
+//         $member=pdo_get("ewei_shop_member",array("openid"=>$openid));
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+         $member=m("member")->getMember($openid);
         //获取商户信息
         $merch=pdo_get("ewei_shop_merch_user",array("member_id"=>$member["id"]));
         if (empty($merch)){
@@ -78,10 +86,22 @@ class My_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
-        $data["openid"]=$openid;
         if (empty($openid)){
             app_error(1,"未传openid");
         }
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        $data["openid"]=$member["openid"];
+        $data["user_id"]=$member["id"];
         $data["content"]=$_GPC["content"];
         if ($_GPC["content"]){
        
@@ -98,7 +118,7 @@ class My_EweiShopV2Page extends AppMobilePage{
         $data["create_time"]=time();
         $data["create_day"]=date("Y-m-d H:i:s");
         if (pdo_insert("ewei_shop_member_drcircle",$data)){
-            pdo_delete("ewei_shop_member_drcirclelog",array("openid"=>$openid));
+            pdo_query("delete from ".tablename("ewei_shop_member_drcirclelog")." where openid=:openid or user_id=:user_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
             app_error(0,"发布成功");
         }else{
             app_error(1,"发布失败");
@@ -120,7 +140,7 @@ class My_EweiShopV2Page extends AppMobilePage{
             $replaceArray = array_combine($patternList,array_fill(0,count($patternList),'*')); //把匹配到的数组进行合并，替换使用
             $stringAfter = strtr($string, $replaceArray); //结果替换
         }
-        
+      
         return $count;
     }
     
@@ -129,9 +149,24 @@ class My_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
+        if (empty($openid)){
+            app_error(1,"未传openid");
+        }
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        
         $page=$_GPC["page"];
         $first=($page-1)*10;
-        $list=pdo_fetchall("select id,content,img,goods_id,view_count,comment_count,zan_count,create_day,create_time from ".tablename("ewei_shop_member_drcircle")." where is_view=0 and is_del=0 and openid=:openid order by create_time desc limit ".$first." ,10",array(":openid"=>$openid));
+        $list=pdo_fetchall("select id,content,img,goods_id,view_count,comment_count,zan_count,create_day,create_time from ".tablename("ewei_shop_member_drcircle")." where is_view=0 and is_del=0 and (openid=:openid or user_id=:user_id) order by create_time desc limit ".$first." ,10",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
         $month=array();
         $monthi=0;
         $year=array();
@@ -336,7 +371,7 @@ class My_EweiShopV2Page extends AppMobilePage{
            
         }
         $z["list"]=$l;
-        $total=pdo_fetch("select count(*) as a from ".tablename("ewei_shop_member_drcircle")." where is_view=0 and is_del=0 and openid=:openid order by create_time desc",array(":openid"=>$openid));;
+        $total=pdo_fetch("select count(*) as a from ".tablename("ewei_shop_member_drcircle")." where is_view=0 and is_del=0 and (openid=:openid or user_id=:user_id) order by create_time desc",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));;
         $z["total"]=$total["a"];
         app_error(0,$z);
     }
@@ -381,9 +416,24 @@ class My_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
+        if (empty($openid)){
+            app_error(1,"未传openid");
+        }
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        
         $circle_id=$_GPC["circle_id"];
         $circle=pdo_get("ewei_shop_member_drcircle",array("id"=>$circle_id,"is_del"=>0,"is_view"=>0));
-        if ($circle["openid"]!=$openid){
+        if ($circle["openid"]!=$member["openid"]&&$circle["user_id"]!=$member["id"]){
             app_error(1,"只能删除自己的朋友圈");
         }
         if (pdo_update("ewei_shop_member_drcircle",array("is_del"=>1),array("id"=>$circle_id))){
@@ -397,12 +447,27 @@ class My_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
+        if (empty($openid)){
+            app_error(1,"未传openid");
+        }
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        
         $comment_id=$_GPC["comment_id"];
         $comment=pdo_get("ewei_shop_member_drcomment",array("id"=>$comment_id,"is_del"=>0,"is_view"=>0));
         if (empty($comment)){
             app_error(1,"评论id不正确");
         }
-        if ($comment["openid"]!=$openid){
+        if ($comment["openid"]!=$openid&&$comment["user_id"]!=$member["id"]){
             app_error(1,"无权限删除");
         }
         if (pdo_update("ewei_shop_member_drcomment",array("is_del"=>1),array("id"=>$comment_id))){
@@ -444,8 +509,27 @@ class My_EweiShopV2Page extends AppMobilePage{
         if (empty($type)){
             app_error(1,"type未传");
         }
+        $openid=$_GPC["openid"];
+        if (empty($openid)){
+            app_error(1,"未传openid");
+        }
+        if ($_GPC["apptype"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        
         $data["parent_id"]=$parent_id;
-        $data["openid"]=$_GPC["openid"];
+        //修改
+        $data["openid"]=$member["openid"];
+        $data["user_id"]=$member["id"];
+        
         $data["content"]=$_GPC["content"];
         $data["create_time"]=time();
         if (empty($data["content"])){
@@ -460,7 +544,15 @@ class My_EweiShopV2Page extends AppMobilePage{
             if (empty($circle)){
                 app_error(1,"信息已不存在");
             }
-            $data["comment_openid"]=$circle["openid"];
+            //修改
+            if (empty($circle["user_id"])){
+                $mm=pdo_get("ewei_shop_member",array("openid"=>$circle["openid"]));
+                $uid=$mm["id"];
+            }else{
+                $uid=$circle["user_id"];
+            }
+//             $data["comment_openid"]=$circle["openid"];
+            $data["comment_openid"]=$uid;
             //获取达人圈id
             $circle_id=$parent_id;
         }
@@ -469,7 +561,15 @@ class My_EweiShopV2Page extends AppMobilePage{
             if (empty($comment)){
                 app_error(1,"信息已不存在");
             }
-            $data["comment_openid"]=$comment["openid"];
+            //修改
+            if (empty($comment["user_id"])){
+                $mm=pdo_get("ewei_shop_member",array("openid"=>$comment["openid"]));
+                $uid=$mm["id"];
+            }else{
+                $uid=$comment["user_id"];
+            }
+//             $data["comment_openid"]=$comment["openid"];
+            $data["comment_openid"]=$uid;
             if (empty($comment["classA_id"])){
                 //回复一级评论
                 $data["classA_id"]=$comment["id"];
@@ -515,9 +615,25 @@ class My_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
+        if (empty($openid)){
+            app_error(1,"未传openid");
+        }
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        
         $page=$_GPC["page"];
         $first=($page-1)*8;
-        $list=pdo_fetchall("select id,openid,content,is_del,is_view,create_time,comment_openid,type,classA_id,parent_id from ".tablename("ewei_shop_member_drcomment")." where comment_openid=:comment_openid order by create_time desc limit ".$first.",8",array(":comment_openid"=>$openid));
+//         $list=pdo_fetchall("select id,openid,content,is_del,is_view,create_time,comment_openid,type,classA_id,parent_id from ".tablename("ewei_shop_member_drcomment")." where comment_openid=:comment_openid order by create_time desc limit ".$first.",8",array(":comment_openid"=>$openid));
+        $list=pdo_fetchall("select id,openid,user_id,content,is_del,is_view,create_time,comment_openid,type,classA_id,parent_id from ".tablename("ewei_shop_member_drcomment")." where (comment_openid=:comment_openid or comment_openid=:user_id) order by create_time desc limit ".$first.",8",array(":comment_openid"=>$member["openid"],":user_id"=>$member["id"]));
         $a=pdo_fetch("select count(*) as a from ".tablename("ewei_shop_member_drcomment")." where comment_openid=:comment_openid",array(":comment_openid"=>$openid));
         foreach ($list as $k=>$v){
             $list[$k]["create_time"]=$this->timeFormat($v["create_time"]);
@@ -526,7 +642,8 @@ class My_EweiShopV2Page extends AppMobilePage{
             $list[$k]["comment_nickname"]=$member["nickname"];
             $list[$k]["comment_avatar"]=$member["avatar"];
             //获取被回复
-            $c=pdo_get("ewei_shop_member",array("openid"=>$v["comment_openid"]));
+//             $c=pdo_get("ewei_shop_member",array("openid"=>$v["comment_openid"]));
+            $c=m("member")->getMember($v["comment_openid"]);
             $list[$k]["bcommnet_openid"]=$c["nickname"];
             if ($v["type"]==1){
                 //达人圈
@@ -537,7 +654,11 @@ class My_EweiShopV2Page extends AppMobilePage{
                 $list[$k]["circle"]["content"]=$circle["content"];
                 $img=unserialize($circle["img"]);
                 $list[$k]["circle"]["img"]=tomedia($img[0]);
+                if ($circle["openid"]){
                 $circle_member=pdo_get("ewei_shop_member",array("openid"=>$circle["openid"]));
+                 }else{
+                     $circle_member=pdo_get("ewei_shop_member",array("id"=>$circle["user_id"]));
+                 }
                 $list[$k]["circle"]["nickname"]=$circle_member["nickname"];
                 //获取回复内容
                 $list[$k]["comment"]=array();
@@ -553,14 +674,23 @@ class My_EweiShopV2Page extends AppMobilePage{
                 $list[$k]["circle"]["content"]=$circle["content"];
                 $img=unserialize($circle["img"]);
                 $list[$k]["circle"]["img"]=tomedia($img[0]);
+                if ($circle["openid"]){
                 $circle_member=pdo_get("ewei_shop_member",array("openid"=>$circle["openid"]));
+                }else{
+                $circle_member=pdo_get("ewei_shop_member",array("id"=>$circle["user_id"]));
+                }
                 $list[$k]["circle"]["nickname"]=$circle_member["nickname"];
                 //获取回复内容
                 $comment=pdo_get("ewei_shop_member_drcomment",array("id"=>$v["parent_id"]));
+                if ($comment["openid"]){
                 $cnickname=pdo_get("ewei_shop_member",array("openid"=>$comment["openid"]));
+                }else{
+                $cnickname=pdo_get("ewei_shop_member",array("openid"=>$comment["user_id"]));
+                }
                 $list[$k]["comment"]["comment_nickname"]=$cnickname["nickname"];
                 if ($comment["comment_openid"]){
-                $bnickname=pdo_get("ewei_shop_member",array("openid"=>$comment["comment_openid"]));
+//                 $bnickname=pdo_get("ewei_shop_member",array("openid"=>$comment["comment_openid"]));
+                $bnickname=m("member")->getMember($comment["comment_openid"]);
                 $list[$k]["comment"]["bcomment_nickname"]=$bnickname["nickname"];
                 }else{
                     $list[$k]["comment"]["bcomment_nickname"]="";
@@ -571,7 +701,8 @@ class My_EweiShopV2Page extends AppMobilePage{
                 
             }
             //判断是否已被回复
-            $log=pdo_get("ewei_shop_member_drcomment",array("openid"=>$openid,"type"=>2,"parent_id"=>$v["id"]));
+//             $log=pdo_get("ewei_shop_member_drcomment",array("openid"=>$openid,"type"=>2,"parent_id"=>$v["id"]));
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_drcomment")." where (openid=:openid or user_id=:user_id) and type=2 and parent_id=:parent_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":parent_id"=>$v["id"]));
             if ($log){
                 $list[$k]["reply"]=1;
             }else{
@@ -617,20 +748,38 @@ class My_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
+        $openid=$_GPC["openid"];
+        if (empty($openid)){
+            app_error(1,"未传openid");
+        }
+        if ($_GPC["apptype"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        
         $type=$_GPC["type"];
         $content_id=$_GPC["content_id"];
         if (empty($type)){
             app_error(2,"type不可为空");
         }
-        if (empty($openid)||empty($content_id)){
-            app_error(2,"openid|content_id不可为空");
+        if (empty($content_id)){
+            app_error(2,"content_id不可为空");
         }
-        $log=pdo_get("ewei_shop_member_drsupport",array("openid"=>$openid,"type"=>$type,"content_id"=>$content_id));
+//         $log=pdo_get("ewei_shop_member_drsupport",array("openid"=>$openid,"type"=>$type,"content_id"=>$content_id));
+        $log=pdo_query("select * from ".tablename("ewei_shop_member_drsupport")." where (openid=:openid or user_id=:user_id) and  type=:type and content_id=:content_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":content_id"=>$content_id,":type"=>$type));
         if ($log){
             app_error(1,"不可重复点赞");
         }
-        $m=pdo_get("ewei_shop_member",array("openid"=>$openid));
-        $data["openid"]=$openid;
+//         $m=pdo_get("ewei_shop_member",array("openid"=>$openid));
+        $data["openid"]=$member["openid"];
+        $data["user_id"]=$member["id"];
         $data["type"]=$type;
         $data["content_id"]=$content_id;
         $data["create_time"]=time();
@@ -641,15 +790,14 @@ class My_EweiShopV2Page extends AppMobilePage{
                 $zan_count=$l["zan_count"]+1;
                 $d["zan_count"]=$zan_count;
                 pdo_update("ewei_shop_member_drcircle",$d,array("id"=>$content_id));
-              //  pdo_query('update '.tablename("ewei_shop_member_drcircle").' set zan_count=zan_count+1  where id='.$content_id);
+              
                 
             }else {
                 $l=pdo_get("ewei_shop_member_drcomment",array("id"=>$content_id));
                 $d["zan_count"]=$l["zan_count"]+1;
                 pdo_update("ewei_shop_member_drcomment",$d,array("id"=>$content_id));
-//                 pdo_query('update '.tablename("ewei_shop_member_drcomment").' set zan_count=zan_count+1  where id='.$content_id); 
             }
-            $mes["avatar"]=$m["avatar"];
+            $mes["avatar"]=$member["avatar"];
             $mes["message"]="点赞成功";
             app_error(0,$mes);
         }else{
@@ -663,13 +811,30 @@ class My_EweiShopV2Page extends AppMobilePage{
         $openid=$_GPC["openid"];
         $type=$_GPC["type"];
         $content_id=$_GPC["content_id"];
+        if (empty($openid)){
+            app_error(1,"未传openid");
+        }
+        if ($_GPC["apptype"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        
+        
         if (empty($type)){
             app_error(2,"type不可为空");
         }
-        if (empty($openid)||empty($content_id)){
-            app_error(2,"openid|content_id不可为空");
+        if (empty($content_id)){
+            app_error(2,"content_id不可为空");
         }
-        $log=pdo_get("ewei_shop_member_drsupport",array("openid"=>$openid,"type"=>$type,"content_id"=>$content_id));
+//         $log=pdo_get("ewei_shop_member_drsupport",array("openid"=>$openid,"type"=>$type,"content_id"=>$content_id));
+        $log=pdo_query("select * from ".tablename("ewei_shop_member_drsupport")." where (openid=:openid or user_id=:user_id) and type=:type and content_id=:content_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":type"=>$type,":content_id"=>$content_id));
         if (empty($log)){
             app_error(1,"未曾点赞");
         }
@@ -705,10 +870,23 @@ class My_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
-        $data["openid"]=$openid;
         if (empty($openid)){
             app_error(1,"未传openid");
         }
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        $data["openid"]=$member["openid"];
+        $data["user_id"]=$member["id"];
+        
         $data["content"]=$_GPC["content"];
         
         if ($_GPC["img"]){
@@ -717,7 +895,7 @@ class My_EweiShopV2Page extends AppMobilePage{
         }
         $data["goods_id"]=$_GPC["goods_id"];
         $data["create_time"]=time();
-        pdo_delete("ewei_shop_member_drcirclelog",array("openid"=>$openid));
+        pdo_query("delete from ".tablename("ewei_shop_member_drcirclelog")." where openid=:openid or user_id=:user_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
         if (pdo_insert("ewei_shop_member_drcirclelog",$data)){
             app_error(0,"发布成功");
         }else{
@@ -730,7 +908,23 @@ class My_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
-       $log= pdo_get("ewei_shop_member_drcirclelog",array("openid"=>$openid));
+        if (empty($openid)){
+            app_error(1,"未传openid");
+        }
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        
+//        $log= pdo_get("ewei_shop_member_drcirclelog",array("openid"=>$openid));
+        $log=pdo_fetch("select * from ".tablename("ewei_shop_member_drcirclelog")." where openid=:openid or user_id=user_id limit 1",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
         if (empty($log)){
             app_error(1,"无信息");
         }
@@ -752,16 +946,33 @@ class My_EweiShopV2Page extends AppMobilePage{
         global $_W;
         global $_GPC;
         $openid=$_GPC["openid"];
-        pdo_delete("ewei_shop_member_drcirclelog",array("openid"=>$openid));
+        if (empty($openid)){
+            app_error(1,"未传openid");
+        }
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (!$member){
+            app_error(1,"不存在该用户");
+        }
+        
+//         pdo_delete("ewei_shop_member_drcirclelog",array("openid"=>$openid));
+        pdo_query("delete from ".tablename("ewei_shop_member_drcirclelog")." where openid=:openid or user_id=:user_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
         app_error(0,"成功");
         
     }
-     //获取access_token
+
+    //获取access_token
     public function access_token(){
         $res=file_get_contents("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx4b602a36aa1c67d1&secret=e68369138b66cdae48729e6a996dd17d");
-//         var_dump($res);
+        //         var_dump($res);
         $res=json_decode($res);
-//         var_dump($res->errcode);
+        //         var_dump($res->errcode);
         return $res;
     }
     
@@ -785,8 +996,8 @@ class My_EweiShopV2Page extends AppMobilePage{
             return $count;
         }
     }
-	
-	function curl_post_raw($url,$rawData){
+    
+    function curl_post_raw($url,$rawData){
         $ch = curl_init();
         curl_setopt($ch,CURLOPT_URL,$url);
         curl_setopt($ch,CURLOPT_HEADER,0);

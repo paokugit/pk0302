@@ -10,13 +10,13 @@
     </div>
     <div class='fui-content navbar'>
 
-        <div class="fui-cell-group">
+       <!-- <div class="fui-cell-group">
             <div class="fui-cell">
                 <div class="fui-cell-label">维权状态</div>
                 <div class="fui-cell-info"></div>
                 <div class="fui-cell-remark noremark">等待客户退回物品</div>
             </div>
-        </div>
+        </div> --> 
 
         <div class="fui-title">维权信息</div>
         <div class="fui-cell-group">
@@ -83,6 +83,59 @@
                     {if $item['paytype'] == 23}银联支付{/if}
                     {if $item['paytype'] == 3}货到付款{/if}</div>
             </div>
+            {if $refund['rtype']!=2}
+             <div class="fui-cell">
+                <div class="fui-cell-label">退款商品:</div>
+                <div class="fui-cell-info"></div>
+               
+            </div>
+             {loop $item['goods'] $goods}
+             <div class="fui-cell">
+                <div class="fui-cell-label" style="width:87%">{$goods['title']} </div>
+                <div class="fui-cell-info"></div>
+               
+                <div class="fui-cell-remark noremark">
+                 {$goods['total']}件                </div>
+               
+            </div>
+             {/loop}
+            
+             {else}
+             
+            
+            
+            <div class="fui-cell">
+                <div class="fui-cell-label">换货商品:</div>
+                <div class="fui-cell-info"></div>
+               
+            </div>
+            
+             <div class="fui-cell">
+                <div class="fui-cell-label" style="width:87%">{$goods[0]['title']}({$goods[0]['optionname']}) </div>
+                <div class="fui-cell-info"></div>
+               
+                <div class="fui-cell-remark noremark">
+                 {$goods[0]['total']}件               
+                </div>
+               
+            </div>
+            
+             <div class="fui-cell">
+                <div class="fui-cell-label">更换规格:</div>
+                <div class="fui-cell-info"></div>
+               
+            </div>
+            
+             <div class="fui-cell">
+                <div class="fui-cell-label" style="width:87%">{$gid[0]['opetionname']} </div>
+                <div class="fui-cell-info"></div>
+               
+                <div class="fui-cell-remark noremark">
+                 {$gid[0]['total']}件               
+                </div>
+               
+            </div>
+            {/if}
         </div>
 
     </div>
@@ -96,7 +149,7 @@
 
     <script language="javascript">
         require(['../addons/ewei_shopv2/plugin/merchmanage/static/js/order-op.js'],function(modal){
-            modal.initRefund({orderid: "{$item['id']}"});
+            modal.initRefund({orderid: "{$refund['id']}"});
         });
     </script>
 </div>

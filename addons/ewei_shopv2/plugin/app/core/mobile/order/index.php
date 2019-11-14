@@ -87,7 +87,9 @@ class Index_EweiShopV2Page extends AppMobilePage
 				$scondition = " og.orderid=:orderid";
 				$param[":orderid"] = $row["id"];
 			}
-			$sql = "SELECT og.goodsid,og.total,g.title,g.thumb,g.type, og.price,og.optionname as optiontitle,og.optionid,op.specs,g.merchid,g.status FROM " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on og.goodsid = g.id " . " left join " . tablename("ewei_shop_goods_option") . " op on og.optionid = op.id " . " where " . $scondition . " order by og.id asc";
+			
+			$sql = "SELECT og.goodsid,og.total,og.rstate,og.refundid,g.title,g.thumb,g.type, og.price,og.optionname as optiontitle,og.optionid,op.specs,g.merchid,g.status,g.cannotrefund FROM " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on og.goodsid = g.id " . " left join " . tablename("ewei_shop_goods_option") . " op on og.optionid = op.id " . " where " . $scondition ." and og.status=0". " order by og.id asc";
+
 			$goods = pdo_fetchall($sql, $param);
 			$goods = set_medias($goods, array( "thumb" ));
 			$ismerch = 0;
@@ -106,6 +108,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 						$r["thumb"] = tomedia($thumb);
 					}
 				}
+				
 				if( $r["status"] == 2 ) 
 				{
 					$row["gift"][$g] = $r;
@@ -328,14 +331,26 @@ class Index_EweiShopV2Page extends AppMobilePage
 	{
 		global $_W;
 		global $_GPC;
-		$openid = $_W["openid"];
+		$openid = $_GPC["openid"];
 		$uniacid = $_W["uniacid"];
 		$orderid = intval($_GPC["id"]);
 		if( empty($orderid) || empty($openid) ) 
 		{
 			app_error(AppError::$ParamsError);
 		}
-		$order = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where id=:id and uniacid=:uniacid and openid=:openid limit 1", array( ":id" => $orderid, ":uniacid" => $uniacid, ":openid" => $openid ));
+		if ($_GPC["type"]==1){
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		}
+		$member=m("member")->getMember($openid);
+		if (empty($member)){
+		    app_error(1,"无此用户");
+		}
+		
+		$order = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where id=:id and uniacid=:uniacid and (openid=:openid or user_id=:user_id) limit 1", array( ":id" => $orderid, ":uniacid" => $uniacid, ":openid" => $member["openid"],":user_id"=>$member["id"] ));
 		$seckill_color = "";
 		if( 0 < $order["seckilldiscountprice"] ) 
 		{
@@ -731,7 +746,9 @@ class Index_EweiShopV2Page extends AppMobilePage
 			}
 		}
 		$cycelbuy_periodic = explode(",", $order["cycelbuy_periodic"]);
-		$order = array( "id" => $order["id"], "ordersn" => $order["ordersn"], "createtime" => date("Y-m-d H:i:s", $order["createtime"]), "paytime" => (!empty($order["paytime"]) ? date("Y-m-d H:i:s", $order["paytime"]) : ""), "sendtime" => (!empty($order["sendtime"]) ? date("Y-m-d H:i:s", $order["sendtime"]) : ""), "finishtime" => (!empty($order["finishtime"]) ? date("Y-m-d H:i:s", $order["finishtime"]) : ""), "status" => $order["status"], "statusstr" => $order["statusstr"], "price" => $order["price"], "goodsprice" => $order["goodsprice"], "dispatchprice" => $order["dispatchprice"], "ispackage" => $order["ispackage"], "seckilldiscountprice" => $order["seckilldiscountprice"], "deductenough" => $order["deductenough"], "couponprice" => $order["couponprice"], "discountprice" => $order["discountprice"], "isdiscountprice" => $order["isdiscountprice"], "deductprice" => $order["deductprice"],"discount_price"=>$order["discount_price"],"deductcredit2" => $order["deductcredit2"], "diyformfields" => (empty($newFields) ? array( ) : $newFields), "diyformdata" => (empty($order_data) ? array( ) : $order_data), "showverify" => $order["showverify"], "verifytitle" => ($order["dispatchtype"] ? "自提码" : "消费码"), "dispatchtype" => $order["dispatchtype"], "verifyinfo" => $verifyinfo, "invoicename" => (empty($order["invoicename"]) ? NULL : m("sale")->parseInvoiceInfo($order["invoicename"])), "merchid" => intval($order["merchid"]), "virtual" => $order["virtual"], "virtual_str" => ($order["status"] == 3 ? $order["virtual_str"] : ""), "virtual_info" => ($order["status"] == 3 ? $order["virtual_info"] : ""), "isvirtualsend" => $order["isvirtualsend"], "virtualsend_info" => (empty($order["virtualsend_info"]) ? "" : $order["virtualsend_info"]), "canrefund" => $order["canrefund"], "refundtext" => (($order["status"] == 1 ? "申请退款" : "申请售后")) . ((!empty($order["refundstate"]) ? "中" : "")), "refundtext_btn" => "", "cancancel" => !$order["userdeleted"] && !$order["status"], "canpay" => $order["paytype"] != 3 && !$order["userdeleted"] && $order["status"] == 0, "canverify" => $order["canverify"] && $order["status"] != -1 && $order["status"] != 0, "candelete" => $order["status"] == 3 || $order["status"] == -1, "cancomment" => $order["status"] == 3 && $order["iscomment"] == 0 && empty($_W["shopset"]["trade"]["closecomment"]), "cancomment2" => $order["status"] == 3 && $order["iscomment"] == 1 && empty($_W["shopset"]["trade"]["closecomment"]), "cancomplete" => $order["status"] == 2, "cancancelrefund" => 0 < $order["refundstate"], "candelete2" => $order["userdeleted"] == 1, "canrestore" => $order["userdeleted"] == 1, "verifytype" => $order["verifytype"], "refundstate" => $order["refundstate"], "icon" => $icon, "city_express_state" => $order["city_express_state"], "iscycelbuy" => $order["iscycelbuy"], "isonlyverifygoods" => $isonlyverifygoods );
+// 		$order = array( "id" => $order["id"], "ordersn" => $order["ordersn"], "createtime" => date("Y-m-d H:i:s", $order["createtime"]), "paytime" => (!empty($order["paytime"]) ? date("Y-m-d H:i:s", $order["paytime"]) : ""), "sendtime" => (!empty($order["sendtime"]) ? date("Y-m-d H:i:s", $order["sendtime"]) : ""), "finishtime" => (!empty($order["finishtime"]) ? date("Y-m-d H:i:s", $order["finishtime"]) : ""), "status" => $order["status"], "statusstr" => $order["statusstr"], "price" => $order["price"], "goodsprice" => $order["goodsprice"], "dispatchprice" => $order["dispatchprice"], "ispackage" => $order["ispackage"], "seckilldiscountprice" => $order["seckilldiscountprice"], "deductenough" => $order["deductenough"], "couponprice" => $order["couponprice"], "discountprice" => $order["discountprice"], "isdiscountprice" => $order["isdiscountprice"], "deductprice" => $order["deductprice"],"discount_price"=>$order["discount_price"],"paytype"=>$order["paytype"],"deductcredit2" => $order["deductcredit2"], "diyformfields" => (empty($newFields) ? array( ) : $newFields), "diyformdata" => (empty($order_data) ? array( ) : $order_data), "showverify" => $order["showverify"], "verifytitle" => ($order["dispatchtype"] ? "自提码" : "消费码"), "dispatchtype" => $order["dispatchtype"], "verifyinfo" => $verifyinfo, "invoicename" => (empty($order["invoicename"]) ? NULL : m("sale")->parseInvoiceInfo($order["invoicename"])), "merchid" => intval($order["merchid"]), "virtual" => $order["virtual"], "virtual_str" => ($order["status"] == 3 ? $order["virtual_str"] : ""), "virtual_info" => ($order["status"] == 3 ? $order["virtual_info"] : ""), "isvirtualsend" => $order["isvirtualsend"], "virtualsend_info" => (empty($order["virtualsend_info"]) ? "" : $order["virtualsend_info"]), "canrefund" => $order["canrefund"], "refundtext" => (($order["status"] == 1 ? "申请退款" : "申请售后")) . ((!empty($order["refundstate"]) ? "中" : "")), "refundtext_btn" => "", "cancancel" => !$order["userdeleted"] && !$order["status"], "canpay" => $order["paytype"] != 3 && !$order["userdeleted"] && $order["status"] == 0, "canverify" => $order["canverify"] && $order["status"] != -1 && $order["status"] != 0, "candelete" => $order["status"] == 3 || $order["status"] == -1, "cancomment" => $order["status"] == 3 && $order["iscomment"] == 0 && empty($_W["shopset"]["trade"]["closecomment"]), "cancomment2" => $order["status"] == 3 && $order["iscomment"] == 1 && empty($_W["shopset"]["trade"]["closecomment"]), "cancomplete" => $order["status"] == 2, "cancancelrefund" => 0 < $order["refundstate"], "candelete2" => $order["userdeleted"] == 1, "canrestore" => $order["userdeleted"] == 1, "verifytype" => $order["verifytype"], "refundstate" => $order["refundstate"], "icon" => $icon, "city_express_state" => $order["city_express_state"], "iscycelbuy" => $order["iscycelbuy"], "isonlyverifygoods" => $isonlyverifygoods );
+		$order = array( "id" => $order["id"], "ordersn" => $order["ordersn"], "createtime" => date("Y-m-d H:i:s", $order["createtime"]), "paytime" => (!empty($order["paytime"]) ? date("Y-m-d H:i:s", $order["paytime"]) : ""), "sendtime" => (!empty($order["sendtime"]) ? date("Y-m-d H:i:s", $order["sendtime"]) : ""), "finishtime" => (!empty($order["finishtime"]) ? date("Y-m-d H:i:s", $order["finishtime"]) : ""), "status" => $order["status"], "statusstr" => $order["statusstr"], "price" => $order["price"], "goodsprice" => $order["goodsprice"], "dispatchprice" => $order["dispatchprice"],  "deductenough" => $order["deductenough"], "couponprice" => $order["couponprice"], "discountprice" => $order["discountprice"], "isdiscountprice" => $order["isdiscountprice"], "deductprice" => $order["deductprice"],"discount_price"=>$order["discount_price"],"paytype"=>$order["paytype"],   "merchid" => intval($order["merchid"]), "virtual" => $order["virtual"], "virtual_str" => ($order["status"] == 3 ? $order["virtual_str"] : ""), "virtual_info" => ($order["status"] == 3 ? $order["virtual_info"] : ""), "isvirtualsend" => $order["isvirtualsend"], "virtualsend_info" => (empty($order["virtualsend_info"]) ? "" : $order["virtualsend_info"]), "canrefund" => $order["canrefund"], "refundtext" => (($order["status"] == 1 ? "申请退款" : "申请售后")) . ((!empty($order["refundstate"]) ? "中" : "")), "refundtext_btn" => "", "cancancel" => !$order["userdeleted"] && !$order["status"], "canpay" => $order["paytype"] != 3 && !$order["userdeleted"] && $order["status"] == 0, "canverify" => $order["canverify"] && $order["status"] != -1 && $order["status"] != 0, "candelete" => $order["status"] == 3 || $order["status"] == -1, "cancomment" => $order["status"] == 3 && $order["iscomment"] == 0 && empty($_W["shopset"]["trade"]["closecomment"]), "cancomment2" => $order["status"] == 3 && $order["iscomment"] == 1 && empty($_W["shopset"]["trade"]["closecomment"]), "cancomplete" => $order["status"] == 2, "cancancelrefund" => 0 < $order["refundstate"], "candelete2" => $order["userdeleted"] == 1, "canrestore" => $order["userdeleted"] == 1, "verifytype" => $order["verifytype"], "refundstate" => $order["refundstate"], "icon" => $icon, "city_express_state" => $order["city_express_state"], "iscycelbuy" => $order["iscycelbuy"], "isonlyverifygoods" => $isonlyverifygoods );
+		
 		if( $order["iscycelbuy"] == 1 ) 
 		{
 			$order["cycelComboPeriods"] = $cycelbuy_periodic[2];
@@ -926,12 +943,23 @@ class Index_EweiShopV2Page extends AppMobilePage
 	{
 		global $_W;
 		global $_GPC;
-		$openid = $_W["openid"];
+		$openid = $_GPC["openid"];
 		$uniacid = $_W["uniacid"];
 		$orderid = intval($_GPC["id"]);
 		$sendtype = intval($_GPC["sendtype"]);
 		$bundle = trim($_GPC["bundle"]);
 		$cycelid = intval($_GPC["cycelid"]);
+		
+		//修改
+		if ($_GPC["type"]==1){
+		    
+		    $member_id=m('member')->getLoginToken($openid);
+		    if ($member_id==0){
+		        app_error(1,"无此用户");
+		    }
+		    $openid=$member_id;
+		    
+		}
 		if( empty($orderid) ) 
 		{
 			app_error(AppError::$OrderNotFound);
@@ -942,8 +970,10 @@ class Index_EweiShopV2Page extends AppMobilePage
 		}
 		else 
 		{
-			$order = pdo_fetch("select expresscom,expresssn,addressid,status,express,sendtype from " . tablename("ewei_shop_order") . " where id=:id and uniacid=:uniacid and openid=:openid limit 1", array( ":id" => $orderid, ":uniacid" => $uniacid, ":openid" => $openid ));
-			if( empty($order) ) 
+// 			$order = pdo_fetch("select expresscom,expresssn,addressid,status,express,sendtype from " . tablename("ewei_shop_order") . " where id=:id and uniacid=:uniacid and openid=:openid limit 1", array( ":id" => $orderid, ":uniacid" => $uniacid, ":openid" => $openid ));
+		    $order = pdo_fetch("select expresscom,expresssn,addressid,status,express,sendtype from " . tablename("ewei_shop_order") . " where id=:id and uniacid=:uniacid  limit 1", array( ":id" => $orderid, ":uniacid" => $uniacid));
+		    
+		    if( empty($order) ) 
 			{
 				app_error(AppError::$OrderNotFound);
 			}

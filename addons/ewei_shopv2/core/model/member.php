@@ -224,8 +224,9 @@ class Member_EweiShopV2Model
 		global $_W;
 		
 		load()->model("mc");
+		if (!is_numeric($openid)){
 		$uid = mc_openid2uid($openid);
-	   
+		}
 		$member = $this->getMember($openid);
 // 		var_dump($openid);
 		
@@ -300,17 +301,30 @@ class Member_EweiShopV2Model
 		}
 		else 
 		{
-			$value = pdo_fetchcolumn("SELECT " . $credittype . " FROM " . tablename("ewei_shop_member") . " WHERE  uniacid=:uniacid and openid=:openid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $openid ));
-			$newcredit = $credits + $value;
+// 			$value = pdo_fetchcolumn("SELECT " . $credittype . " FROM " . tablename("ewei_shop_member") . " WHERE  uniacid=:uniacid and openid=:openid limit 1", array( ":uniacid" => $_W["uniacid"], ":openid" => $openid ));
+// 		    $value=pdo_fetch("select ".$credittype." from ".tablename("ewei_shop_member")." where uniacid=:uniacid and (openid=:openid or id=:user_id) limit 1",array( ":uniacid" => $_W["uniacid"], ":openid" =>$member["openid"],":user_id"=>$member["id"]));
+		    $newcredit = $credits + $member[$credittype];
+
 			if( $newcredit <= 0 ) 
 			{
 				$newcredit = 0;
 			}
 
-			pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid ));
-			$log_data["remark"] = $log_data["remark"];
-            $log_data["openid"]=$openid;
+//             if((int) $openid == 0){
+//                 $log_data["openid"]=$openid;
+//                 pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "openid" => $openid ));
+//             }else{
+//                 $log_data["user_id"]=$openid;
+//                 pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "user_id" => $openid ));
+//             }
+         
+            pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "id" => $member["id"] ));
+            $log_data["remark"] = $log_data["remark"];
+
 		}
+		$log_data["openid"]=$member["openid"];
+		$log_data["user_id"]=$member["id"];
+		
 		pdo_insert("mc_credits_record", $log_data);
 		$member_log_table_flag = pdo_tableexists("ewei_shop_member_credit_record");
 		pdo_insert("ewei_shop_member_credit_record", $log_data);
@@ -1693,5 +1707,31 @@ class Member_EweiShopV2Model
         }
         return true;
     }
+
+    /**
+     * APP登录token加密
+     * @param $user_id
+     * @param $salt
+     * @return string
+     */
+    public function setLoginToken($user_id,$salt)
+    {
+        $token = base64_encode(implode(',',[$user_id,$salt]));
+        return str_replace('=','',$token);
+    }
+
+    /**
+     * APP鉴权校验
+     * @param $token
+     * @return int
+     */
+    public function getLoginToken($token)
+    {
+        $data = explode(',',base64_decode($token));
+        //把登录的账户查出来  然后 对比登录产生的随机码  如果一样就是当前登录 不一样就是又被登录
+        $member = pdo_get('ewei_shop_member',['id'=>$data[0]]);
+        return $member['app_salt'] == $data[1] ? $data[0] : 0;
+    }
+
 }
 ?>

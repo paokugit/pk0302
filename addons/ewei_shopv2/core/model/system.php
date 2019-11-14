@@ -1209,6 +1209,20 @@ class System_EweiShopV2Model {
                         )
                     ) ,
                     array(
+                        "title" => "关于跑库",
+                        "items" => array(
+                            array(
+                                "title" => "隐私政策",
+                                "route" => "about.index"
+                            ) ,
+                            array(
+                                "title" => "软件许可及服务协议",
+                                "route" => "about.software"
+                            ) ,
+                            
+                        )
+                    ) ,
+                    array(
                         "title" => "页面优化",
                         "items" => array(
                             array(

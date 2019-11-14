@@ -1559,7 +1559,7 @@ class Notice_EweiShopV2Model
 		$datas = array( array( "name" => "商城名称", "value" => $_W["shopset"]["shop"]["name"] ), array( "name" => "粉丝昵称", "value" => $member["nickname"] ), array( "name" => "旧等级", "value" => $oldlevelname ), array( "name" => "新等级", "value" => $level["levelname"] ) );
 		$remark = "\n<a href='" . $detailurl . "'>点击进入查看充值订单详情</a>";
 		$text = "亲爱的" . $member["nickname"] . "， 恭喜您成功升级！\n\n您会员等级从[旧等级] 升级为[新等级] , 特此通知!\n您即可享有[新等级]的专属优惠及服务！" . $remark;
-		$this->sendNotice(array( "openid" => $openid, "tag" => "upgrade", "default" => $message, "cusdefault" => $text, "url" => $detailurl, "datas" => $datas, "appurl" => $appurl ));
+		$this->sendNotice(array( "openid" => $member["openid"], "tag" => "upgrade", "default" => $message, "cusdefault" => $text, "url" => $detailurl, "datas" => $datas, "appurl" => $appurl ));
 		com_run("sms::callsms", array( "tag" => "upgrade", "datas" => $datas, "mobile" => $member["mobile"] ));
 	}
 	public function sendMemberPointChange($openid, $pointchange = 0, $changetype = 0, $from = 0) 

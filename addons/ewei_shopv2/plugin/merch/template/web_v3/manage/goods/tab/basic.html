@@ -158,23 +158,24 @@
         <label class="col-sm-2 control-label">商品属性</label>
         <div class="col-sm-9 col-xs-12" >
             {ife 'goods' $item}
-            <!--label for="isrecommand" class="checkbox-inline">
+            <label for="isrecommand" class="checkbox-inline">
                 <input type="checkbox" name="isrecommand" value="1" id="isrecommand" {if $item['isrecommand'] == 1}checked="true"{/if} /> 推荐
-            </label-->
+            </label>
             <label for="isnew" class="checkbox-inline">
                 <input type="checkbox" name="isnew" value="1" id="isnew" {if $item['isnew'] == 1}checked="true"{/if} /> 新品
             </label>
-            <!--label for="ishot" class="checkbox-inline">
+            <label for="ishot" class="checkbox-inline">
                 <input type="checkbox" name="ishot" value="1" id="ishot" {if $item['ishot'] == 1}checked="true"{/if} /> 热卖
-            </label-->
+            </label>
 
             <label for="issendfree" class="checkbox-inline">
                 <input type="checkbox" name="issendfree" value="1" id="issendfree" {if $item['issendfree'] == 1}checked="true"{/if} /> 包邮
             </label>
-
+           <!--  
             <label for="isnodiscount" class="checkbox-inline">
                 <input type="checkbox"  disabled   {if $item['isnodiscount'] == 1 || isset($item) }checked="true"{/if} /> 不参与商城会员折扣
             </label>
+            -->
 
             {else} <div class='form-control-static'>
             {if $item['isnew']==1}新品; {/if}

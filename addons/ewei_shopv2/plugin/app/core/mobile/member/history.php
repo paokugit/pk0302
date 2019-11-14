@@ -45,13 +45,32 @@ class History_EweiShopV2Page extends AppMobilePage
 	{
 		global $_W;
 		global $_GPC;
-		$ids = $_GPC['ids'];
-		if (empty($ids) || !is_array($ids)) {
-			app_error(AppError::$ParamsError);
-		}
-
-		$sql = 'update ' . tablename('ewei_shop_member_history') . ' set deleted=1 where openid=:openid and id in (' . implode(',', $ids) . ')';
-		pdo_query($sql, array(':openid' => $_W['openid']));
+		
+        $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (empty($member)){
+            app_error(1,"无此用户");
+        }
+        $del=$_GPC["del"];
+        if ($del==1){
+            $sql = 'update ' . tablename('ewei_shop_member_history') . ' set deleted=1 where (openid=:openid or user_id=:user_id) ';
+        }else{
+            
+            $ids = $_GPC['ids'];
+            if (empty($ids) || !is_array($ids)) {
+                app_error(AppError::$ParamsError);
+            }
+            
+		$sql = 'update ' . tablename('ewei_shop_member_history') . ' set deleted=1 where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';
+        }
+		pdo_query($sql, array(':openid' => $member["openid"],':user_id'=>$member["id"]));
 		app_error();
 	}
 }
