@@ -185,7 +185,7 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		if ($type==1){
 		    app_error(0,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
 		}else{
-			show_json(1,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
+		show_json(1,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
 		}
 
 	}

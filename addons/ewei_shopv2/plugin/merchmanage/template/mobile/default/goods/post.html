@@ -41,12 +41,12 @@
                     <input type="text" placeholder="请输入商品副标题" class="fui-input" value="{$item['subtitle']}" id="subtitle" />
                 </div>
             </div>
-            <!--<div class="fui-cell">-->
-                <!--<div class="fui-cell-label">单位</div>-->
-                <!--<div class="fui-cell-info">-->
-                    <!--<input type="text" placeholder="请输入商品单位" class="fui-input" value="{$item['unit']}" id="unit" />-->
-                <!--</div>-->
-            <!--</div>-->
+            <div class="fui-cell">
+                <div class="fui-cell-label">单位</div>
+                <div class="fui-cell-info">
+                    <input type="text" placeholder="请输入商品单位" class="fui-input" value="{$item['unit']}" id="unit" />
+                </div>
+            </div>
         </div>
         
         <div class="fui-cell-group">
@@ -149,42 +149,42 @@
                 <div class="fui-cell-label ">显示库存</div>
                 <div class="fui-cell-info"><input type="checkbox" class="fui-switch fui-switch-small fui-switch-success pull-right" id="showtotal" {if !empty($item['showtotal'])}checked="checked"{/if}></div>
             </div>
-            <!--{if empty($item['hasoption'])}-->
-                <!--<div class="fui-cell">-->
-                    <!--<div class="fui-cell-label">商品重量</div>-->
-                    <!--<div class="fui-cell-info">-->
-                        <!--<input type="number" placeholder="请输入商品重量" class="fui-input" value="{$item['weight']}" id="weight" />-->
-                    <!--</div>-->
-                <!--</div>-->
-                <!--<div class="fui-cell">-->
-                    <!--<div class="fui-cell-label">商品编码</div>-->
-                    <!--<div class="fui-cell-info">-->
-                        <!--<input type="number" placeholder="请输入商品编码" class="fui-input" value="{$item['goodssn']}" id="goodssn" />-->
-                    <!--</div>-->
-                <!--</div>-->
-                <!--<div class="fui-cell">-->
-                    <!--<div class="fui-cell-label">商品条码</div>-->
-                    <!--<div class="fui-cell-info">-->
-                        <!--<input type="number" placeholder="请输入商品条码" class="fui-input" value="{$item['productsn']}" id="productsn" />-->
-                    <!--</div>-->
-                <!--</div>-->
-            <!--{/if}-->
+            {if empty($item['hasoption'])}
+                <div class="fui-cell">
+                    <div class="fui-cell-label">商品重量</div>
+                    <div class="fui-cell-info">
+                        <input type="number" placeholder="请输入商品重量" class="fui-input" value="{$item['weight']}" id="weight" />
+                    </div>
+                </div>
+                <div class="fui-cell">
+                    <div class="fui-cell-label">商品编码</div>
+                    <div class="fui-cell-info">
+                        <input type="number" placeholder="请输入商品编码" class="fui-input" value="{$item['goodssn']}" id="goodssn" />
+                    </div>
+                </div>
+                <div class="fui-cell">
+                    <div class="fui-cell-label">商品条码</div>
+                    <div class="fui-cell-info">
+                        <input type="number" placeholder="请输入商品条码" class="fui-input" value="{$item['productsn']}" id="productsn" />
+                    </div>
+                </div>
+            {/if}
         </div>
         {/if}
 
-        <!--<div class="fui-title">浏览权限</div>-->
-        <!--<div class="fui-cell-group fui-cell-click">-->
-            <!--<div class="fui-cell check-param" data-action="viewlevel">-->
-                <!--<div class="fui-cell-label">会员等级</div>-->
-                <!--<div class="fui-cell-info">{$viewlevel_title}</div>-->
-                <!--<div class="fui-cell-remark"></div>-->
-            <!--</div>-->
-            <!--<div class="fui-cell check-param" data-action="viewgroup">-->
-                <!--<div class="fui-cell-label">会员分组</div>-->
-                <!--<div class="fui-cell-info">{$viewgroup_title}</div>-->
-                <!--<div class="fui-cell-remark"></div>-->
-            <!--</div>-->
-        <!--</div>-->
+        <div class="fui-title">浏览权限</div>
+        <div class="fui-cell-group fui-cell-click">
+            <div class="fui-cell check-param" data-action="viewlevel">
+                <div class="fui-cell-label">会员等级</div>
+                <div class="fui-cell-info">{$viewlevel_title}</div>
+                <div class="fui-cell-remark"></div>
+            </div>
+            <div class="fui-cell check-param" data-action="viewgroup">
+                <div class="fui-cell-label">会员分组</div>
+                <div class="fui-cell-info">{$viewgroup_title}</div>
+                <div class="fui-cell-remark"></div>
+            </div>
+        </div>
 
         <div class="fui-title">购买权限</div>
         <div class="fui-cell-group fui-cell-click">
@@ -288,16 +288,16 @@
             {/if}
         </div>
 
-        <!--<div class="fui-cell-group">-->
-            <!--<div class="fui-cell ">-->
-                <!--<div class="fui-cell-label ">货到付款</div>-->
-                <!--<div class="fui-cell-info"><input type="checkbox" class="fui-switch fui-switch-small fui-switch-success pull-right" id="cash" {if $item['cash']==2}checked="checked"{/if}></div>-->
-            <!--</div>-->
-            <!--<div class="fui-cell ">-->
-                <!--<div class="fui-cell-label ">发票</div>-->
-                <!--<div class="fui-cell-info"><input type="checkbox" class="fui-switch fui-switch-small fui-switch-success pull-right" id="invoice" {if !empty($item['invoice'])}checked="checked"{/if}></div>-->
-            <!--</div>-->
-        <!--</div>-->
+        <div class="fui-cell-group">
+            <div class="fui-cell ">
+                <div class="fui-cell-label ">货到付款</div>
+                <div class="fui-cell-info"><input type="checkbox" class="fui-switch fui-switch-small fui-switch-success pull-right" id="cash" {if $item['cash']==2}checked="checked"{/if}></div>
+            </div>
+            <div class="fui-cell ">
+                <div class="fui-cell-label ">发票</div>
+                <div class="fui-cell-info"><input type="checkbox" class="fui-switch fui-switch-small fui-switch-success pull-right" id="invoice" {if !empty($item['invoice'])}checked="checked"{/if}></div>
+            </div>
+        </div>
 
 
         <div class="fui-cell-group fui-cell-click">
@@ -315,18 +315,16 @@
             </div>
         </div>
 
-        <!--<div class="fui-cell-group">-->
-            <!--<div class="fui-cell">-->
-                <!--<div class="fui-cell-label">商品排序</div>-->
-                <!--<div class="fui-cell-info">-->
-                    <!--<input type="number" placeholder="数字越大，排名越靠前" class="fui-input" value="{$item['displayorder']}" id="displayorder" />-->
-                <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
-
-        <div class="fui-title center">
-            更多设置请至PC端后台<span>https://www.paokucoin.com/web/merchant.php?c=site&a=entry&m=ewei_shopv2&do=web&r=login</span>
+        <div class="fui-cell-group">
+            <div class="fui-cell">
+                <div class="fui-cell-label">商品排序</div>
+                <div class="fui-cell-info">
+                    <input type="number" placeholder="数字越大，排名越靠前" class="fui-input" value="{$item['displayorder']}" id="displayorder" />
+                </div>
+            </div>
         </div>
+
+        <div class="fui-title center">更多设置请至PC端后台</div>
 
     </div>
 

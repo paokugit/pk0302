@@ -16,7 +16,6 @@ class Index_EweiShopV2Page extends MerchWebPage
 
     public function ajaxgettotalprice()
     {
-        
         global $_W;
         $merchid = $_W["merchid"];
         $totals = $this->model->getMerchOrderTotalPrice($merchid);

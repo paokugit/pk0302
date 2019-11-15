@@ -6,6 +6,160 @@ require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
 class Index_EweiShopV2Page extends AppMobilePage
 {
     /**
+     * 注册  或者  忘记密码
+     */
+    public function reg_forget()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        $mobile = $_GPC['mobile'];
+        $code = $_GPC['code'];
+        $type = $_GPC['type'];
+        $pwd = $_GPC['pwd'];
+        $country_id = $_GPC['country_id'];
+        //$type == 1  注册   $type == 2 忘记密码
+        //正则验证手机号的格式
+        if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
+            app_error(1,"手机号格式不正确");
+        }
+        //短信类型
+        $tp_id = 1;
+        if($country_id != 44 && !empty($country_id)){
+            $tp_id = 3;
+        }
+        //查找短息的发送的记录
+        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'content'=>$code,'tp_id'=>$tp_id]);
+        if(!$sms){
+            app_error(1,"短信验证码不正确");
+        }
+        if($sms['result'] == 1){
+            app_error(1,"该短信已验证");
+        }
+        //更改短信验证码的验证状态
+        pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
+        if($type == 1){
+            //注册
+            $member = pdo_get('ewei_shop_member',['mobile'=>$mobile]);
+            if(!empty($member)){
+                pdo_update('ewei_shop_member',['password'=>md5(base64_encode($pwd))],['mobile'=>$mobile]);
+            }else{
+                $salt = random(16);
+                pdo_insert('ewei_shop_member',['mobile'=>$mobile,'password'=>md5(base64_encode($pwd)),'createtime'=>time(),'status'=>1,'salt'=>$salt]);
+            }
+        }else{
+            //修改密码
+            pdo_update('ewei_shop_member',['password'=>md5(base64_encode($pwd))],['mobile'=>$mobile]);
+        }
+    }
+
+    /**
+     * 账号密码登录
+     */
+    public function login()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        //接受参数
+        $mobile = $_GPC['mobile'];
+        $pwd = $_GPC['password'];
+        //查找改手机号是否注册
+        $member = pdo_get('ewei_shop_member',['mobile'=>$mobile]);
+        if(!$member){
+            app_error(1,"手机号未注册");
+        }else{
+            if(md5(base64_encode($pwd)) == $member['password']){
+                //APP登录动态码  如果有人登录就更新
+                $app_salt = random(36);
+                pdo_update('ewei_shop_member',['app_salt'=>$app_salt],['id'=>$member['id']]);
+                $token = m('app')->setLoginToken($member['id'],$app_salt);
+                app_error(0,['token'=>$token,'msg'=>"登录成功"]);
+            }else{
+                app_error(1,"密码不正确");
+            }
+        }
+    }
+
+    /**
+     * 验证码登录
+     */
+    public function code_login()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        $mobile = $_GPC['mobile'];
+        $country_id = $_GPC['country_id'];
+        //正则验证手机号的格式
+        if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
+            app_error(1,"手机号格式不正确");
+        }
+        $code = $_GPC['code'];
+        $member = pdo_get('ewei_shop_member',['mobile'=>$mobile]);
+        //短信类型
+        $tp_id = 1;
+        if($country_id != 44 && !empty($country_id)){
+            $tp_id = 3;
+        }
+        //查找短息的发送的记录
+        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'content'=>$code,'tp_id'=>$tp_id]);
+        if(!$sms){
+            app_error(1,"短信验证码不正确");
+        }
+        if($sms['result'] == 1){
+            app_error(1,"该短信已验证");
+        }
+        //更改短信验证码的验证状态
+        pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
+        $app_salt = random(36);
+        if(!$member){
+            //短信验证码登录 如果不存在 加入数据  然后 生成一个动态码
+            $salt = random(16);
+            pdo_insert('ewei_shop_member',['mobile'=>$mobile,'createtime'=>time(),'status'=>1,'salt'=>$salt,'app_salt'=>$app_salt]);
+            $user_id = pdo_insertid();
+            $token = m('app')->setLoginToken($user_id,$app_salt);
+            app_error(0,['token'=>$token]);
+        }else{
+            //如果已经存在 更新app动态码
+            pdo_update('ewei_shop_member',['app_salt'=>$app_salt],['id'=>$member['id']]);
+            $token = m('app')->setLoginToken($member['id'],$app_salt);
+            app_error(0,['token'=>$token]);
+        }
+    }
+
+    /**
+     * 发送短信
+     */
+    public function sms_send()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        //手机号
+        $mobile = $_GPC['mobile'];
+        $country_id = $_GPC['country_id'];
+        //生成短信验证码
+        $code=rand(100000,999999);
+        $tp_id = 1;
+        if (empty($country_id) || $country_id == 44){
+            //阿里云的短信 在我们平台的模板i
+            if (!preg_match("/^1[3456789]{1}\d{9}$/",$mobile)){
+                app_error(1,"手机号格式不正确");
+            }
+            $resault=com_run("sms::mysend", array('mobile'=>$mobile,'tp_id'=>$tp_id,'code'=>$code));
+        }else{
+            //发送海外短信
+            $country=pdo_get("sms_country",array("id"=>$country_id));
+            $tp_id = 3;
+            $resault=com_run("sms::mysend", array('mobile'=>$country["phonecode"].$mobile,'tp_id'=>$tp_id,'code'=>$code));
+        }
+        if ($resault["status"]==1){
+            //添加短信记录
+            pdo_insert('core_sendsms_log',['uniacid'=>$_W['uniacid'],'mobile'=>$mobile,'tp_id'=>$tp_id,'content'=>$code,'createtime'=>time(),'ip'=>CLIENT_IP]);
+            app_error(0,"发送成功");
+        }else{
+            app_error(1,$resault["message"]);
+        }
+    }
+
+    /**
      * 首页
      */
     public function home()
@@ -14,19 +168,17 @@ class Index_EweiShopV2Page extends AppMobilePage
         //鉴权验证的token
         $token = $_GPC['token'];
         //icon的类别
-//        $icon_type = $_GPC['icon_type'];
+        $icon_type = $_GPC['icon_type'];
         //秒杀的类型
-        //$seckill_type = $_GPC['seckill_type'];
+        $seckill_type = $_GPC['seckill_type'];
         //附近商家的定位
         $lat = $_GPC['lat'];
         $lng = $_GPC['lng'];
         //允许的距离范围
-//        $range = $_GPC['range'];
-//        $cateid = $_GPC['cate_id'];
-//        $sorttype = intval($_GPC['sorttype']);
-//        $keyword = $_GPC['keyword'];
-        //消息信息id
-        $level_id = $_GPC['level_id'];
+        $range = $_GPC['range'];
+        $cateid = $_GPC['cate_id'];
+        $sorttype = intval($_GPC['sorttype']);
+        $keyword = $_GPC['keyword'];
         //鉴权验证
         $user_id = m('app')->getLoginToken($token);
         //签到得卡路里 和  年卡会员每日得折扣宝
@@ -34,23 +186,20 @@ class Index_EweiShopV2Page extends AppMobilePage
         //获取用户卡路里   折扣宝  自身步数  和 邀请步数  以及是都绑定手机号
         $bushu = m('app')->getbushu($user_id);
         //小图标导航   快报   和  年卡入口
-        $icon = m('app')->get_icon($user_id,1);
+        $icon = m('app')->get_icon($user_id,$icon_type);
         //门店服务
         $merch = m('app')->merch($user_id);
         //附近商家
-        $near = m('app')->near($user_id,$lat,$lng);
+        $near = m('app')->near($user_id,$lat,$lng,$range,$cateid,$sorttype,$keyword);
         //秒杀
-        //$seckill = m('app')->seckill($seckill_type);
-        $seckill = m('app')->seckill(1);
+        $seckill = m('app')->seckill($seckill_type);
         //边看边买
         $look_buy = m('app')->look_buy();
         //每日一推
         $every = m('app')->every();
         //跑库精选
         $choice = m('app')->choice();
-        //消息弹窗
-        $level = m('app')->notice($user_id,$level_id);
-        app_error(0,['bushu'=>$bushu,'icon'=>$icon,'merch'=>$merch,'near'=>$near,'seckill'=>$seckill,'look_buy'=>$look_buy,'every'=>$every,'choice'=>$choice,'level'=>$level]);
+        app_error(0,['bushu'=>$bushu,'icon'=>$icon,'merch'=>$merch,'near'=>$near,'seckill'=>$seckill,'look_buy'=>$look_buy,'every'=>$every,'choice'=>$choice]);
     }
 
     /**
@@ -62,222 +211,64 @@ class Index_EweiShopV2Page extends AppMobilePage
         $token = $_GPC['token'];
         $step_id =$_GPC['step_id'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
-        $data = m('app')->getcredit($user_id,$step_id);
-        app_error($data['status'],$data['msg']);
-    }
-
-    /**
-     *  年卡中心
-     */
-    public function index_level()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
-        $data = m('app')->index_level($user_id);
-        app_error(0,$data);
-    }
-
-    /**
-     * 每月礼包的商品列表
-     */
-    public function index_level_goods()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
-        $level_id = empty($_GPC['level_id']) ? 5 :$_GPC['level_id'];
-        $data = m('app')->index_level_goods($user_id,$level_id);
-        app_error(0,$data);
-    }
-
-    /**
-     * 年卡礼包领取记录
-     */
-    public function index_level_record()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
-        $page = max($_GPC['page'],1);
-        $data = m('app')->index_level_record($user_id,$page);
-        app_error(0,$data);
-    }
-
-    /**
-     * 年卡权益介绍
-     */
-    public function index_level_detail()
-    {
-        global $_GPC;
-        global $_W;
-        $uniacid = $_W['uniacid'];
-        $level_id = empty($_GPC['id']) ? 5 : $_GPC['id'];
-        $level = pdo_get('ewei_shop_member_memlevel',['id'=>$level_id,'uniacid'=>$uniacid]);
-        $goods = m('app')->index_level_goods(0,$level_id);
-        app_error(0,['goods'=>$goods,'level'=>$level]);
-    }
-
-    /**
-     * 我的年卡中心
-     */
-    public function index_level_my()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
-        $member = m('member')->getMember($user_id);
-        $user = [
-            'id'=>$member['id'],
-            'openid'=>$member['openid'],
-            'nickname'=>$member['nickname'],
-            'avatar'=>$member['avatar'],
-            'realname'=>$member['realname'],
-            'is_open'=>$member['is_open'],
-        ];
-        $user['is_expire'] = $member['is_open'] == 1 && $member['expire_time'] - time() <= 3600*10 ? 1 : 0;
-        $user['expire'] = date('Y-m-d',$member['expire_time']);
-        app_error(0,['member'=>$user]);
-    }
-
-    /**
-     * 领取年卡礼包
-     */
-    public function index_getLevel()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
-        $level_id = empty($_GPC['level_id']) ? 5 : $_GPC['level_id'];
-        $address_id = $_GPC['address_id'];
-        $money = $_GPC['money'];
-        $record_id = $_GPC['record_id'];
-        $good_id = $_GPC['good_id'];
-        $data = m('app')->index_getLevel($user_id,$level_id,$address_id,$money,$record_id,$good_id);
-        app_error($data['status'],$data['msg']);
-    }
-
-    /**
-     * 地址列表  和  切换地址
-     */
-    public function index_address()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
-        //1请求地址列表  并获得默认地址的邮费    2 切换地址
-        $type = !empty($_GPC['type']) ? $_GPC['type'] : 1;
-        $address_id = !empty($_GPC['address_id']) ? $_GPC['address_id'] : 0;
-        $data = m('app')->index_address($user_id,$address_id,$type);
-        app_error($data['status'],$data['msg']);
-    }
-
-    /**
-     * 十人礼包
-     */
-    public function index_gift()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
-        $data = m('app')->index_gift($user_id);
-        app_error(0,$data);
-    }
-
-    /**
-     * 十人礼包的助力记录
-     */
-    public function index_gift_help()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
-        $page = max($_GPC['page'],1);
-        $data = m('app')->index_gift_help($user_id,$page);
-        app_error(0,$data);
-    }
-
-    /**
-     * 十人礼包领取记录
-     */
-    public function index_gift_record()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
-        $page = max($_GPC['page'],1);
-        $data = m('app')->index_gift_record($user_id,$page);
-        app_error(0,$data);
-    }
-
-    /**
-     * 礼包海报
-     */
-    public function index_gift_share()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        $member = m('member')->getMember($user_id);
-        $imgurl = m('qrcode')->HelpPoster($member,$member['id'],['back'=>'/addons/ewei_shopv2/static/images/gift_share.png','type'=>"giftshare",'title'=>'真的一分钱也不要哟！','desc'=>'快来帮我助力一下吧！','con'=>'周周分享，周周领','url'=>'packageA/pages/gift/gift']);
-        if( empty($imgurl))
-        {
-            app_error(AppError::$PosterCreateFail, "海报生成失败");
+        if($user_id == 0){
+            app_error(1,'登录信息失效');
         }
-        app_error(0,array( "url" => $imgurl));
+        $get = m('app')->getcredit($user_id,$step_id);
+        if($get){
+            $error = 0;$msg = "领取成功";
+        } else{
+            $error = 1;$msg = "领取失败";
+        }
+        app_error($error,$msg);
     }
 
     /**
-     * 跑库精选列表
+     * 商城
      */
-    public function index_choice()
+    public function shop()
     {
-        global $_GPC;
-        global $_W;
-        $uniacid = $_W['uniacid'];
-        $page = max(1,$_GPC['page']);
-        $pageSize = 10;
-        $pindex = ($page-1)*$pageSize;
-        $total = pdo_count('ewei_shop_choice',['uniacid'=>$uniacid,'status'=>1]);
-        $list = pdo_fetchall('select * from '.tablename('ewei_shop_choice').'where uniacid = :uniacid and status = 1 order by displayorder desc limit '.$pindex.','.$pageSize,[':uniacid'=>$uniacid]);
-        app_error(0,['list'=>$list,'page'=>$page,'total'=>$total,'pageSize'=>$pageSize]);
+
     }
 
     /**
-     * 跑库精选详情
+     * 折扣付
      */
-    public function index_choice_detail()
-    {
-        global $_GPC;
-        $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
-        $id = $_GPC['id'];
-        $data = m('app')->index_choice_detail($user_id,$id);
-        app_error(0,$data);
-    }
-
-    /**
-     * 跑库精选  ----   关注和取消关注
-     */
-    public function index_choice_fav()
+    public function rebate()
     {
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
-        $id = $_GPC['id'];
-        $data = m('app')->index_choice_fav($user_id,$id);
-        app_error($data['status'],$data['msg']);
+        //卡路里和折扣宝余额
+        $credit = pdo_get('ewei_shop_member',['id'=>$user_id],['credit1','credit3']);
+        //贡献机数量 和 运行状态
+        $devote_machine = m('app')->devote_machine($user_id);
+        //贡献值  和  是否绑定手机号 微信
+        $devote = m('app')->devote($user_id);
+        app_error(0,['credit'=>$credit,'devote_machine'=>$devote_machine,'devote'=>$devote]);
+    }
+
+    /**
+     * 专享
+     */
+    public function exclusive()
+    {
+
+    }
+
+    /**
+     * 我的个人中心
+     */
+    public function my()
+    {
+
+    }
+
+    /**
+     * 订单加支付
+     */
+    public function order(){
+
     }
 }
 ?>
