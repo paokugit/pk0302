@@ -241,16 +241,52 @@
                 <div class="fui-title">统一邮费</div>
                 <div class="fui-cell-group">
                     <div class="fui-cell">
-                        <div class="fui-cell-label">邮费价格</div>
+                        <div class="fui-cell-label">基础邮费</div>
                         <div class="fui-cell-info">
-                            <input type="number" placeholder="请输入统一运费" class="fui-input" value="{$item['dispatchprice']}" id="dispatchprice" />
+                            <input type="number" placeholder="请输入基础运费" class="fui-input" value="{$item['dispatchprice']}" id="dispatchprice" />
                         </div>
                         <div class="fui-cell-remark noremark">元</div>
                     </div>
                 </div>
+                <div class="fui-cell-group">
+                    <div class="fui-cell">
+                        <div class="fui-cell-label">偏远地域</div>
+                        <div class="fui-list-media">
+                            <input type="radio" class="fui-radio fui-radio-success" name="is_remote" value="0" id="is_remote_0" {if empty($item['is_remote'])}checked="checked"{/if}/>
+                            <span style="color: #666">不支持偏远地域</span>
+                        </div>
+                    </div>
+                    <div class="fui-cell">
+                        <div class="fui-cell-label"></div>
+                        <div class="fui-list-media">
+                            <input type="radio" class="fui-radio fui-radio-success" name="is_remote" value="1" id="is_remote_1" {if $item['is_remote'] == 1}checked="checked"{/if} />
+                            <span style="color: #666">偏远加邮费</span>
+                            <div class="fui-cell-info" style="width: 126px;margin-left: 8px;">
+                                <input type="number" placeholder="请输入偏远加运费" class="fui-input" value="{$item['remote_dispatchprice']}" id="remote_dispatchprice" />
+                            </div>
+                            <div class="fui-cell-remark noremark">元</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fui-cell-group">
+                    <div class="fui-cell">
+                        <div class="fui-cell-label">基础地域</div>
+                        <div style="flex-wrap: wrap;display: flex;width: 70%">
+                            {if $item['edareas']}
+                                {loop explode(';',trim($item['edareas'],";")) $val}
+                                    <div class="wai"><div class="close">x</div><div class="nei">{$val}</div></div>
+                                {/loop}
+                            {else}
+                                {loop explode(';',trim($express,";")) $val}
+                                    <div class="wai"><div class="close">x</div><div class="nei">{$val}</div></div>
+                                {/loop}
+                            {/if}
+                        </div>
+                        <input type="hidden" id='edareas' name="edareas" value="{php echo $item['edareas']?$item['edareas']:$express}"/>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 
     <div class="fui-navbar">
@@ -258,3 +294,30 @@
         <div class="nav-item btn btn-gray cancel-params">取消</div>
     </div>
 </div>
+<script>
+    $(".close").click(function () {
+        var city = $(this).next().html() + ";";
+        var citys = $('#edareas').val();
+        citys = citys.replace(city, "");
+        $(this).parent().remove();
+        $("#edareas").val(citys);
+    })
+</script>
+<style>
+    .wai{
+        display:flex;
+        align-items:center;
+        background: #e4e4e4;
+        border: 1px solid #aaaaaa;
+        margin:0.1rem;
+        font-size:0.6rem;
+        padding: 0.2rem 0.3rem;
+    }
+    .close{
+        color:#666;
+        padding: 0 0.1rem;
+    }
+    .nei{
+        color:#666;
+    }
+</style>

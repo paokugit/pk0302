@@ -233,20 +233,20 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="col-sm-2 control-label">不参与单品包邮地区</label>
-                <div class="col-sm-9 col-xs-12">
-                    {ife 'goods' $item}
-                    <div id="areas" class="form-control-static">{$item['edareas']}</div>
-                    <a href="javascript:;" class="btn btn-default" onclick="selectAreas()">添加不参加满包邮的地区</a>
-                    <input type="hidden" id='selectedareas' name="edareas" value="{$item['edareas']}"/>
-                    <input type="hidden" id='selectedareas_code' name="edareas_code" value="{$item['edareas_code']}"/>
-                    <span class="help-block">如果设置0或空，则不支持满件包邮</span>
-                    {else}
-                    <div class='form-control-static'>{$set['enoughareas']}</div>
-                    {/if}
-                </div>
-            </div>
+            <!--<div class="form-group">-->
+                <!--<label class="col-sm-2 control-label">不参与单品包邮地区</label>-->
+                <!--<div class="col-sm-9 col-xs-12">-->
+                    <!--{ife 'goods' $item}-->
+                    <!--<div id="areas" class="form-control-static">{$item['edareas']}</div>-->
+                    <!--<a href="javascript:;" class="btn btn-default" onclick="selectAreas()">添加不参加满包邮的地区</a>-->
+                    <!--<input type="hidden" id='selectedareas' name="edareas" value="{$item['edareas']}"/>-->
+                    <!--<input type="hidden" id='selectedareas_code' name="edareas_code" value="{$item['edareas_code']}"/>-->
+                    <!--<span class="help-block">如果设置0或空，则不支持满件包邮</span>-->
+                    <!--{else}-->
+                    <!--<div class='form-control-static'>{$set['enoughareas']}</div>-->
+                    <!--{/if}-->
+                <!--</div>-->
+            <!--</div>-->
         </div>
     </div>
 </div>

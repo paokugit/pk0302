@@ -659,11 +659,21 @@ class Order_EweiShopV2Model
 		    
 		}
 	}
-	public function setGiveBalance($orderid = "", $type = 0) 
+	public function setGiveBalance($orderid = "", $type = 0,$order_goodsid="") 
 	{
 		global $_W;
-		$order = pdo_fetch("select id,ordersn,price,openid,dispatchtype,addressid,carrier,status from " . tablename("ewei_shop_order") . " where id=:id limit 1", array( ":id" => $orderid ));
+		$order = pdo_fetch("select id,ordersn,price,openid,user_id,dispatchtype,addressid,carrier,status from " . tablename("ewei_shop_order") . " where id=:id limit 1", array( ":id" => $orderid ));
+		if ($order["user_id"]){
+		    $member=m("member")->getMember($order["user_id"]);
+		}else{
+		    $member=m("member")->getMember($order["openid"]);
+		}
+		if ($order_goodsid){
+		$goods = pdo_fetchall("select og.goodsid,og.total,g.totalcnf,og.realprice,g.money,og.optionid,g.total as goodstotal,og.optionid,g.sales,g.salesreal from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.id in(:orderid) and og.uniacid=:uniacid ", array( ":uniacid" => $_W["uniacid"], ":orderid" => $order_goodsid ));
+		
+		}else{
 		$goods = pdo_fetchall("select og.goodsid,og.total,g.totalcnf,og.realprice,g.money,og.optionid,g.total as goodstotal,og.optionid,g.sales,g.salesreal from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:orderid and og.uniacid=:uniacid ", array( ":uniacid" => $_W["uniacid"], ":orderid" => $orderid ));
+		}
 		$balance = 0;
 		foreach( $goods as $g ) 
 		{
@@ -687,22 +697,28 @@ class Order_EweiShopV2Model
 			{
 				if( $order["status"] == 3 ) 
 				{
-					m("member")->setCredit($order["openid"], "credit2", $balance, array( 0, $shopset["name"] . "购物赠送余额 订单号: " . $order["ordersn"] ));
+					m("member")->setCredit($member["id"], "credit2", $balance, array( 0, $shopset["name"] . "购物赠送余额 订单号: " . $order["ordersn"] ));
 				}
 			}
 			else 
 			{
 				if( $type == 2 && 1 <= $order["status"] ) 
 				{
-					m("member")->setCredit($order["openid"], "credit2", 0 - $balance, array( 0, $shopset["name"] . "购物取消订单扣除赠送余额 订单号: " . $order["ordersn"] ));
+					m("member")->setCredit($member["id"], "credit2", 0 - $balance, array( 0, $shopset["name"] . "购物取消订单扣除赠送余额 订单号: " . $order["ordersn"] ));
 				}
 			}
 		}
 	}
-	public function setStocksAndCredits($orderid = "", $type = 0) 
+	public function setStocksAndCredits($orderid = "", $type = 0,$order_goodsid="") 
 	{
 		global $_W;
 		$order = pdo_fetch("select id,ordersn,price,openid,dispatchtype,addressid,carrier,status,isparent,paytype,isnewstore,storeid,istrade,status from " . tablename("ewei_shop_order") . " where id=:id limit 1", array( ":id" => $orderid ));
+		if ($order["user_id"]){
+		    $member=m("member")->getMember($order["user_id"]);
+		}else{
+		    $member=m("member")->getMember($order["openid"]);
+		}
+		
 		if( !empty($order["istrade"]) ) 
 		{
 			return NULL;
@@ -713,7 +729,7 @@ class Order_EweiShopV2Model
 		}
 		else 
 		{
-			$newstoreid = intval($order["storeid"]);
+		    $newstoreid = intval($order["storeid"]);//自提门店ID
 		}
 		$param = array( );
 		$param[":uniacid"] = $_W["uniacid"];
@@ -726,6 +742,11 @@ class Order_EweiShopV2Model
 		{
 			$condition = " og.orderid=:orderid";
 			$param[":orderid"] = $orderid;
+		}
+		//部分商品
+		if ($order_goodsid){
+		    $condition=$condition." and og.id in(:id)";
+		    $param[":id"]=$order_goodsid;
 		}
 		$goods = pdo_fetchall("select og.goodsid,og.seckill,og.total,g.totalcnf,og.realprice,g.credit,og.optionid,g.total as goodstotal,og.optionid,g.sales,g.salesreal,g.type from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where " . $condition . " and og.uniacid=:uniacid ", $param);
 		$credits = 0;
@@ -743,7 +764,7 @@ class Order_EweiShopV2Model
 			else 
 			{
 				$goods_item = pdo_fetch("select total as goodstotal from" . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid limit 1", array( ":id" => $g["goodsid"], ":uniacid" => $_W["uniacid"] ));
-				$g["goodstotal"] = $goods_item["goodstotal"];
+				$g["goodstotal"] = $goods_item["goodstotal"];//商品库存
 			}
 			$stocktype = 0;
 			if( $type == 0 ) 
@@ -799,6 +820,7 @@ class Order_EweiShopV2Model
 					$option = m("goods")->getOption($g["goodsid"], $g["optionid"]);
 					if( 0 < $newstoreid ) 
 					{
+					    //门店自提
 						$store_goods_option = m("store")->getOneStoreGoodsOption($g["optionid"], $g["goodsid"], $newstoreid);
 						if( empty($store_goods_option) ) 
 						{
@@ -830,10 +852,12 @@ class Order_EweiShopV2Model
 						{
 							if( 0 < $newstoreid ) 
 							{
+							    
 								pdo_update("ewei_shop_newstore_goods_option", array( "stock" => $stock ), array( "uniacid" => $_W["uniacid"], "goodsid" => $g["goodsid"], "id" => $store_goods_option["id"] ));
 							}
 							else 
 							{
+							    //商品库存更改
 								pdo_update("ewei_shop_goods_option", array( "stock" => $stock ), array( "uniacid" => $_W["uniacid"], "goodsid" => $g["goodsid"], "id" => $g["optionid"] ));
 							}
 						}
@@ -866,6 +890,7 @@ class Order_EweiShopV2Model
 						}
 						else 
 						{
+						    //库存
 							pdo_update("ewei_shop_goods", array( "total" => $totalstock ), array( "uniacid" => $_W["uniacid"], "id" => $g["goodsid"] ));
 						}
 					}
@@ -875,6 +900,7 @@ class Order_EweiShopV2Model
 			$isgoodspoint = iunserializer($isgoodsdata["credit1"]);
 			if( !empty($isgoodspoint["isgoodspoint"]) && $isgoodspoint["isgoodspoint"] == 1 ) 
 			{
+			    //购买赠送积分，如果带%号，则为按成交价比例计算
 				$gcredit = trim($g["credit"]);
 				if( $g["seckill"] != 1 && !empty($gcredit) ) 
 				{
@@ -895,13 +921,14 @@ class Order_EweiShopV2Model
 			{
 				if( $type == 1 && 1 <= $order["status"] ) 
 				{
+				    //赠送卡路里记录
 					$salesreal = pdo_fetchcolumn("select ifnull(sum(total),0) from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_order") . " o on o.id = og.orderid " . " where og.goodsid=:goodsid and o.status>=1 and o.uniacid=:uniacid limit 1", array( ":goodsid" => $g["goodsid"], ":uniacid" => $_W["uniacid"] ));
 					pdo_update("ewei_shop_goods", array( "salesreal" => $salesreal ), array( "id" => $g["goodsid"] ));
 					$table_flag = pdo_tableexists("ewei_shop_order_buysend");
 					if( 0 < $credits && $table_flag ) 
 					{
-						$send_data = array( "uniacid" => $_W["uniacid"], "orderid" => $orderid, "openid" => $order["openid"], "credit" => $credits, "createtime" => TIMESTAMP );
-						$send_record = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_order_buysend") . " WHERE orderid = :orderid AND uniacid = :uniacid AND openid = :openid", array( ":orderid" => $orderid, ":uniacid" => $_W["uniacid"], ":openid" => $order["openid"] ));
+						$send_data = array( "uniacid" => $_W["uniacid"], "orderid" => $orderid, "openid" => $member["openid"],"user_id"=>$member["id"], "credit" => $credits, "createtime" => TIMESTAMP );
+						$send_record = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_order_buysend") . " WHERE orderid = :orderid AND uniacid = :uniacid AND (openid = :openid or user_id=:user_id)", array( ":orderid" => $orderid, ":uniacid" => $_W["uniacid"], ":openid" => $member["openid"],":user_id"=>$member["id"] ));
 						if( $send_record ) 
 						{
 							pdo_update("ewei_shop_order_buysend", $send_data, array( "id" => $send_record["id"] ));
@@ -917,7 +944,7 @@ class Order_EweiShopV2Model
 		$table_flag = pdo_tableexists("ewei_shop_order_buysend");
 		if( $table_flag ) 
 		{
-			$send_record = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_order_buysend") . " WHERE orderid = :orderid AND uniacid = :uniacid AND openid = :openid", array( ":orderid" => $orderid, ":uniacid" => $_W["uniacid"], ":openid" => $order["openid"] ));
+			$send_record = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_order_buysend") . " WHERE orderid = :orderid AND uniacid = :uniacid AND (openid = :openid or user_id=:user_id)", array( ":orderid" => $orderid, ":uniacid" => $_W["uniacid"], ":openid" => $member["openid"],":user_id"=>$member["id"] ));
 			if( $send_record && 0 < $send_record["credit"] ) 
 			{
 				$credits = $send_record["credit"];
@@ -930,7 +957,7 @@ class Order_EweiShopV2Model
 			{
 				if( $order["status"] == 3 ) 
 				{
-					m("member")->setCredit($order["openid"], "credit1", $credits, array( 0, $shopset["name"] . "购物卡路里 订单号: " . $order["ordersn"] ));
+					m("member")->setCredit($member["id"], "credit1", $credits, array( 0, $shopset["name"] . "购物卡路里 订单号: " . $order["ordersn"] ));
 					m("notice")->sendMemberPointChange($order["openid"], $credits, 0, 3);
 				}
 			}
@@ -938,7 +965,7 @@ class Order_EweiShopV2Model
 			{
 				if( $type == 2 && $order["status"] == 3 ) 
 				{
-					m("member")->setCredit($order["openid"], "credit1", 0 - $credits, array( 0, $shopset["name"] . "购物取消订单扣除卡路里 订单号: " . $order["ordersn"] ));
+					m("member")->setCredit($member["id"], "credit1", 0 - $credits, array( 0, $shopset["name"] . "购物取消订单扣除卡路里 订单号: " . $order["ordersn"] ));
 					m("notice")->sendMemberPointChange($order["openid"], $credits, 1, 3);
 				}
 			}
@@ -1631,7 +1658,8 @@ class Order_EweiShopV2Model
 			    //如果包邮  但是是偏远地区邮费又不是空  那么 是偏远地域
 			    $area = explode(';',$g['edareas']);
 			    //如果他没设置  偏远  普通 默认 没有偏远地域
-			    if(!in_array($user_province,$area) && !empty($g['edareas'])&& $g['remote_dispatchprice'] != 0){
+			    //if(!in_array($user_province,$area) && !empty($g['edareas'])&& $g['remote_dispatchprice'] != 0){
+			    if(!in_array($user_province,$area) && !empty($g['edareas'])&& $g['remote_dispatchprice'] >= 0){
 			    	$dispatch_price += $g['remote_dispatchprice'];
 			        $is_remote = 1;
 			    }else{
@@ -1800,10 +1828,10 @@ class Order_EweiShopV2Model
 				{
 					if( $city_express_data["state"] == 1 ) 
 					{
-						if( (0 < $g["dispatchprice"] || $g['remote_dispatchprice'] > 0) && !$sendfree )
+						if( ($g["dispatchprice"] >= 0 || $g['remote_dispatchprice'] >= 0) && !$sendfree )
 						{
 						    //如果有偏远地域差价  加上他 没有 还是基础差价
-                            $remote_dispatchprice = $g['remote_dispatchprice'] > 0 ?$g['remote_dispatchprice'] :0;
+                            $remote_dispatchprice = $g['remote_dispatchprice'] >= 0 ?$g['remote_dispatchprice'] :0;
 							if( $city_express_data["is_sum"] == 1 )
 							{
 								$dispatch_price += $g["dispatchprice"]+$remote_dispatchprice;

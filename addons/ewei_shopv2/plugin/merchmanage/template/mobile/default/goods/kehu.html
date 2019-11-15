@@ -39,25 +39,30 @@
 </html>
 <script src="../addons/ewei_shopv2/plugin/merchmanage/static/js/jquery.min.js"></script>
 <script type="text/javascript">
-    var str = ""
-    var str2 = ""
-    var str3 = ""
+    var str = "";
+    var str2 = "";
+    var str3 = "";
+    var page = 1;//当前页数
+    var totalPage = 0;//总页数
     $(function () {
         $.ajax({
             type: 'POST',
             url: '{php echo mobileUrl("merchmanage.index.getclient")}',
-            //url: 'http://192.168.0.140:8081/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=merchmanage.index.getclient',
-            data: {},
+            data: {page:page},
             dataType: "json",
             success: function (data) {
+                console.log(data);
+                $('.external').css('display','none');
+                totalPage = Math.ceil(data.result.fans / data.result.pageSize);
                 if (data.result.fans == 0 && data.result.paid == 0) {
                     $(".fensi-num").html(0);
                     $(".fufei-num").html(0);
                     str3 += "<div class='none-div-img'>"+
-                    "<img class='none-img' src='http://paokucoin.com/img/backgroup/zanwuneirong@2x.png'>"+
-                    "<div class='none-div-text'>没有更多数据</div>"+
-                    "</div>"
-                    $(".none-div").html(str3)
+                        "<img class='none-img' src='http://paokucoin.com/img/backgroup/zanwuneirong@2x.png'>"+
+                        "<div class='none-div-text'>没有更多数据</div>"+
+                        "</div>"
+                    $(".none-div").html(str3);
+                    $('.base').css('display','block');
                 } else {
                     // console.log(data);
                     $('.fufei-num').html(data.result.paid);
@@ -87,4 +92,57 @@
             }
         })
     })
+
+
+    $(window).scroll(function(){
+        var scrollTop = $(this).scrollTop();    //滚动条距离顶部的高度
+        var scrollHeight = $(document).height();   //当前页面的总高度
+        var clientHeight = $(this).height();    //当前可视的页面高度
+        if(scrollTop + clientHeight >= scrollHeight){   //距离顶部+当前高度 >=文档总高度 即代表滑动到底部 注：-50 上拉加载更灵敏
+            //加载数据
+            page++;
+            if(page<=totalPage){
+                $('.external').css('display','block');
+                $(function () {
+                    $.ajax({
+                        type: 'POST',
+                        url: '{php echo mobileUrl("merchmanage.index.getclient")}',
+                        data: {page:page},
+                        dataType: "json",
+                        success: function (data) {
+                            console.log(data);
+                            $('.external').css('display','none');
+
+                            $('.fufei-num').html(data.result.paid);
+                            $('.fensi-num').html(data.result.fans);
+                            $.each(data.result.list, function (i, item) {
+                                // console.log(item);
+                                str += "<li class='libiao-li'>" +
+                                    "<div class='liebiao-head'>" +
+                                    "<img class='img-head' src='" + item.avatar + "'>" +
+                                    "</div>" +
+                                    "<div class='mingziandtel'>" +
+                                    "<div class='name'>" + item.nickname + "</div>" +
+                                    "<div class='tel'>" + item.mobile + "</div>" +
+                                    "</div>" +
+                                    "<div class='dingdanandnum'>" +
+                                    "<div class='dingdan-num'>" + item.count + "</div>" +
+                                    "<div class='dingdan-text'>订单</div>" +
+                                    "</div>" +
+                                    "<div class='xiaofeiandnum'>" +
+                                    "<div class='xiaofei-num'>" + item.sum + "</div>" +
+                                    "<div class='xiaofei-text'>消费</div>" +
+                                    "</div>" +
+                                    "</li>"
+                                $(".liebiao-div").html(str)
+                            })
+
+                        }
+                    })
+                })
+            }else{
+                $('.base').css('display','block');
+            }
+        }
+    });
 </script>

@@ -11,25 +11,12 @@ class Refund_EweiShopV2Page extends MerchWebPage
 		global $_W;
 		global $_GPC;
 		$id = intval($_GPC['id']);
-		$refundid = intval($_GPC['refundid']);
-		$item = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_order') . ' WHERE id = :id and uniacid=:uniacid and merchid = :merchid  Limit 1', array(':id' => $id, ':uniacid' => $_W['uniacid'], 'merchid' => $_W['merchid']));
-		if (empty($item)) 
-		{
-			if ($_W['isajax']) 
-			{
-				show_json(0, '未找到订单!');
-			}
-			$this->message('未找到订单!', '', 'error');
-		}
-		if (empty($refundid)) 
-		{
-			$refundid = $item['refundid'];
-		}
-		if (!(empty($refundid))) 
-		{
-			$refund = pdo_fetch('select * from ' . tablename('ewei_shop_order_refund') . ' where id=:id limit 1', array(':id' => $refundid));
-			$refund['imgs'] = iunserializer($refund['imgs']);
-		}
+         $refund = pdo_fetch('select * from ' . tablename('ewei_shop_order_refund') . ' where id=:id limit 1', array(':id' => $id));
+      
+         if (empty($refund)){
+             show_json(0, '未找到售后申请!');
+         }
+         $item=pdo_get("ewei_shop_order",array("id"=>$refund["orderid"]));
 		$r_type = array('退款', '退货退款', '换货');
 		return array('id' => $id, 'item' => $item, 'refund' => $refund, 'r_type' => $r_type);
 	}
@@ -40,17 +27,32 @@ class Refund_EweiShopV2Page extends MerchWebPage
 		global $_S;
 		$opdata = $this->opData();
 		extract($opdata);
+		//获取订单商品id
+		if (!empty($refund["goods_id"])){
+		    $goods_id=unserialize($refund["goods_id"]);
+		    foreach ($goods_id as $k=>$v){
+		        $gid[$k]=$v["goods_id"];
+		    }
+		    
+		}
+		if ($item["user_id"]){
+		    $member=m("member")->getMember($item["user_id"]);
+		}else{
+		    $member=m("member")->getMember($item["openid"]);
+		}
 		$uniacid = $_W['uniacid'];
 		$merchid = $_W['merchid'];
 		if ($_W['ispost']) 
 		{
+		    if ($refund["goods_id"]){
+		        $gg = pdo_fetch('SELECT sum(o.price) as price,sum(o.dispatchprice) as dispatchprice,sum(o.deductprice) as deductprice,sum(o.discount_price) as discount_price,sum(o.couponprice) as couponprice,sum(o.deductenough) as deductenough FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.id in(:id) and o.uniacid=:uniacid', array(':orderid' => $item['id'], ':uniacid' => $uniacid,':id'=>implode(",", $gid)));
+// 		         		   var_dump($uniacid);var_dump($item["id"]); var_dump($gg);var_dump($gid);die;
+		    }
+		    
 		    $order=pdo_get("ewei_shop_order",array('id' => $item['id'], 'uniacid' => $_W['uniacid']));
 		    
 			$shopset = $_S['shop'];
-			if (empty($item['refundstate'])) 
-			{
-				show_json(0, '订单未申请维权，不需处理！');
-			}
+			
 			if (($refund['status'] < 0) || ($refund['status'] == 1)) 
 			{
 				pdo_update('ewei_shop_order', array('refundstate' => 0), array('id' => $item['id'], 'uniacid' => $_W['uniacid'], 'merchid' => $_W['merchid']));
@@ -71,6 +73,7 @@ class Refund_EweiShopV2Page extends MerchWebPage
 			}
 			else if ($refundstatus == 3) 
 			{
+			    //换货--同意--需要用户退回商品
 				$raid = $_GPC['raid'];
 				$message = trim($_GPC['message']);
 				if ($raid == 0) 
@@ -99,11 +102,17 @@ class Refund_EweiShopV2Page extends MerchWebPage
 				{
 					$change_refund['status'] = 3;
 				}
-				pdo_update('ewei_shop_order_refund', $change_refund, array('id' => $item['refundid']));
+				pdo_update('ewei_shop_order_refund', $change_refund, array('id' => $refund["id"]));
+				//更新订单操作
+				$exchange_goods["refundstatus"]=2;
+				pdo_update("ewei_shop_order_goods",$exchange_goods,array("refundid"=>$refund["id"]));
+				pdo_update("ewei_shop_order",$exchange_goods,array("refundid"=>$refund["id"]));
+				
 				m('notice')->sendOrderMessage($item['id'], true);
 			}
 			else if ($refundstatus == 5) 
 			{
+			    //换货--不需要用户寄回
 				$change_refund['rexpress'] = $_GPC['rexpress'];
 				$change_refund['rexpresscom'] = $_GPC['rexpresscom'];
 				$change_refund['rexpresssn'] = trim($_GPC['rexpresssn']);
@@ -116,19 +125,27 @@ class Refund_EweiShopV2Page extends MerchWebPage
 						$change_refund['operatetime'] = $time;
 					}
 				}
-				pdo_update('ewei_shop_order_refund', $change_refund, array('id' => $item['refundid']));
+				pdo_update('ewei_shop_order_refund', $change_refund, array('id' => $refund['id']));
+				//更新订单相关状态--完成
+				$exchange_goods["refundstatus"]=1;
+				pdo_update("ewei_shop_order_goods",$exchange_goods,array("refundid"=>$refund["id"]));
+				pdo_update("ewei_shop_order",$exchange_goods,array("refundid"=>$refund["id"]));
+				
 				m('notice')->sendOrderMessage($item['id'], true);
 			}
 			else if ($refundstatus == 10) 
 			{
+			    //换货--关闭
 				$refund_data['status'] = 1;
 				$refund_data['refundtime'] = $time;
-				pdo_update('ewei_shop_order_refund', $refund_data, array('id' => $item['refundid'], 'uniacid' => $uniacid));
-				$order_data = array();
-				$order_data['refundstate'] = 0;
-				$order_data['status'] = 3;
-				$order_data['refundtime'] = $time;
-				pdo_update('ewei_shop_order', $order_data, array('id' => $item['id'], 'uniacid' => $uniacid, 'merchid' => $merchid));
+				pdo_update('ewei_shop_order_refund', $refund_data, array('id' => $refund['id'], 'uniacid' => $uniacid));
+// 				$order_data = array();
+// 				$order_data['refundstate'] = 0;
+// 				$order_data['status'] = 3;
+// 				$order_data['refundtime'] = $time;
+// 				pdo_update('ewei_shop_order', $order_data, array('id' => $item['id'], 'uniacid' => $uniacid, 'merchid' => $merchid));
+				pdo_update("ewei_shop_order_goods",array("refundstatus"=>1),array("refundid"=>$refund["id"]));
+				pdo_update("ewei_shop_order",array("refundstatus"=>1,"status"=>3),array("refundid"=>$refund["id"]));
 				m('notice')->sendOrderMessage($item['id'], true);
 			}
 			else if ($refundstatus == 1) 
@@ -181,7 +198,15 @@ class Refund_EweiShopV2Page extends MerchWebPage
 					$pay_refund_price = $item['price'];
 					$dededuct__refund_price = $item['deductcredit2'];
 				}
+				
+				//商品
+				if (empty($refund["goods_id"])){
 				$goods = pdo_fetchall('SELECT g.id,g.credit, o.total,o.realprice,g.isfullback FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.uniacid=:uniacid', array(':orderid' => $item['id'], ':uniacid' => $uniacid));
+				
+				}else{
+				$goods = pdo_fetchall('SELECT g.id,g.credit, o.total,o.realprice,g.isfullback FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.uniacid=:uniacid and o.id in(:id)', array(':orderid' => $item['id'], ':uniacid' => $uniacid,':id'=>implode(",", $gid)));
+				    
+				}
 				$refundtype = 0;
 				if (empty($item['transid']) && ($item['paytype'] == 22) && empty($item['apppay'])) 
 				{
@@ -194,7 +219,13 @@ class Refund_EweiShopV2Page extends MerchWebPage
 				}
 				if ($item['paytype'] == 1) 
 				{
-					m('member')->setCredit($item['openid'], 'credit2', $pay_refund_price, array(0, $shopset['name'] . '退款: ' . $pay_refund_price . '元 订单号: ' . $item['ordersn']));
+				    //余额退款
+				    if ($refund["goods_id"]){
+					m('member')->setCredit($member["id"], 'credit2', $pay_refund_price, array(0, $shopset['name'] . '部分商品退款: ' . $pay_refund_price . '元 订单号: ' . $item['ordersn']));
+				   
+				    }else{
+				        m('member')->setCredit($member["id"], 'credit2', $pay_refund_price, array(0, $shopset['name'] . '退款: ' . $pay_refund_price . '元 订单号: ' . $item['ordersn']));  
+				    }
 					$result = true;
 					$refundtype = 0;
 				}
@@ -327,13 +358,31 @@ class Refund_EweiShopV2Page extends MerchWebPage
 					m('order')->setDeductCredit2($item);
 				}
 				//用户消费卡路里修改
-				if ($item["deductprice"]>0){
-				    m('member')->setCredit($item['openid'], 'credit1', $item["deductprice"], array(0, $shopset['name'] . '购物返还抵扣卡路里 卡路里' . $item["deductprice"] . '订单号: ' . $item['ordersn']));
+				if ($refund["goods_id"]){
+				    //部分商品
+				    if ($gg["deductprice"]>0){
+				        m('member')->setCredit($member["id"], 'credit1', $gg["deductprice"], array(0, $shopset['name'] . '购物（部分商品）返还抵扣卡路里 卡路里' . $item["deductprice"] . '订单号: ' . $item['ordersn']));
+				    }
+				}else{
+				    //全部
+				    if ($item["deductprice"]>0){
+				        m('member')->setCredit($member["id"], 'credit1', $item["deductprice"], array(0, $shopset['name'] . '购物返还抵扣卡路里 卡路里' . $item["deductprice"] . '订单号: ' . $item['ordersn']));
+				    }
 				}
 				//折扣宝
-				if ($order["discount_price"]>0){
-				    m('member')->setCredit($item['openid'], 'credit3', $order["discount_price"], array(0, $shopset['name'] . '购物返还抵扣折扣宝 折扣宝' . $order["discount_price"] . '订单号: ' . $item['ordersn']));
+				if ($refund["goods_id"]){
+				    //部分
+				    if ($gg["discount_price"]>0){
+				        m('member')->setCredit($member["id"], 'credit3', $gg["discount_price"], array(0, $shopset['name'] . '购物(部分)返还抵扣折扣宝 折扣宝' . $order["discount_price"] . '订单号: ' . $item['ordersn']));
+				    }
+				}else{
+				    
+				    if ($order["discount_price"]>0){
+				        m('member')->setCredit($member["id"], 'credit3', $order["discount_price"], array(0, $shopset['name'] . '购物返还抵扣折扣宝 折扣宝' . $order["discount_price"] . '订单号: ' . $item['ordersn']));
+				    }
+				    
 				}
+				
 				
 				$change_refund['reply'] = '';
 				$change_refund['status'] = 1;
@@ -344,9 +393,16 @@ class Refund_EweiShopV2Page extends MerchWebPage
 				{
 					$change_refund['operatetime'] = $time;
 				}
-				pdo_update('ewei_shop_order_refund', $change_refund, array('id' => $item['refundid']));
-				m('order')->setGiveBalance($item['id'], 2);
-				m('order')->setStocksAndCredits($item['id'], 2);
+				pdo_update('ewei_shop_order_refund', $change_refund, array('id' =>$refund["id"]));
+				
+				if ($refund["goods_id"]){
+				    m('order')->setGiveBalance($item['id'], 2,implode(",", $gid));
+				    m('order')->setStocksAndCredits($item['id'], 2,implode(",", $gid));
+				}else{
+				    m('order')->setGiveBalance($item['id'], 2);
+				    m('order')->setStocksAndCredits($item['id'], 2);
+				}
+				
 				if ($refund['orderprice'] == $refund['applyprice']) 
 				{
 					if (com('coupon') && !(empty($item['couponid']))) 
@@ -355,7 +411,34 @@ class Refund_EweiShopV2Page extends MerchWebPage
 					}
 				}
 				m('notice')->sendOrderMessage($item['id'], true);
-				pdo_update('ewei_shop_order', array('refundstate' => 0, 'status' => -1, 'refundtime' => $time), array('id' => $item['id'], 'uniacid' => $uniacid, 'merchid' => $merchid));
+// 				pdo_update('ewei_shop_order', array('refundstate' => 0, 'status' => -1, 'refundtime' => $time), array('id' => $item['id'], 'uniacid' => $uniacid, 'merchid' => $merchid));
+				
+				//订单更改
+				if ($refund["goods_id"]){
+				    //订单商品处理
+				    if ($item["status"]==1){
+				        //待发货状态
+				        pdo_query("update ".tablename("ewei_shop_order_goods")." set status=-1,refundstatus=1 "." where refundid=:refundid",array(":refundid"=>$refund["id"]));
+				        //更新订单
+				        $d["goodsprice"]=$item["goodsprice"]-$gg["price"];
+				        $d["deductprice"]=$item["deductprice"]-$gg["deductprice"];
+				        $d["discount_price"]=$item["discount_price"]-$gg["discount_price"];
+				        $d["dispatchprice"]=$item["dispatchprice"]-$gg["dispatchprice"];
+				        $d["deductenough"]=$item["deductenough"]-$gg["deductenough"];
+				        $d["couponprice"]=$item["couponprice"]-$gg["couponprice"];
+				        $d["price"]=$item["price"]-($gg["price"]-$gg["deductprice"]-$gg["discount_price"]-$gg["deductenough"]-$gg["couponprice"]+$gg["dispatchprice"]);
+				        pdo_update("ewei_shop_order",$d,array("id"=>$item["id"]));
+				    }else{
+				        pdo_query("update ".tablename("ewei_shop_order_goods")." set  refundstatus=1 "." where refundid=:refundid",array(":refundid"=>$refund["id"]));
+				        
+				    }
+				    
+				}else{
+				    
+				    pdo_update('ewei_shop_order', array('status' => -1,'refundstatus'=>1, 'refundtime' => $time), array('id' => $item['id'], 'uniacid' => $uniacid));
+				    pdo_update("ewei_shop_order_goods",array("refundstatus"=>1),array("orderid"=>$item["id"],"refundid"=>$refund["id"]));
+				}
+				
 				foreach ($goods as $g ) 
 				{
 					$salesreal = pdo_fetchcolumn('select ifnull(sum(total),0) from ' . tablename('ewei_shop_order_goods') . ' og ' . ' left join ' . tablename('ewei_shop_order') . ' o on o.id = og.orderid ' . ' where og.goodsid=:goodsid and o.status>=1 and o.uniacid=:uniacid and o.merchid=:merchid limit 1', array(':goodsid' => $g['id'], ':uniacid' => $uniacid, 'merchid' => $merchid));
@@ -376,51 +459,128 @@ class Refund_EweiShopV2Page extends MerchWebPage
 			}
 			else if ($refundstatus == -1) 
 			{
-				pdo_update('ewei_shop_order_refund', array('reply' => $refundcontent, 'status' => -1, 'endtime' => $time), array('id' => $item['refundid']));
+			    //拒绝神情
+				pdo_update('ewei_shop_order_refund', array('reply' => $refundcontent, 'status' => -1, 'endtime' => $time), array('id' => $refund["id"]));
 				m('notice')->sendOrderMessage($item['id'], true);
 				plog('order.op.refund', '订单退款拒绝 ID: ' . $item['id'] . ' 订单号: ' . $item['ordersn'] . ' 原因: ' . $refundcontent);
-				pdo_update('ewei_shop_order', array('refundstate' => 0), array('id' => $item['id'], 'uniacid' => $uniacid, 'merchid' => $merchid));
+// 				pdo_update('ewei_shop_order', array('refundstate' => 0), array('id' => $item['id'], 'uniacid' => $uniacid, 'merchid' => $merchid));
+				//修改订单状态
+				
+				pdo_update("ewei_shop_order",array("refundstatus"=>-1),array("refundid"=>$refund["id"]));
+				pdo_update("ewei_shop_order_goods",array("refundstatus"=>-1),array("refundid"=>$refund["id"]));
 			}
 			else if ($refundstatus == 2) 
 			{
-				$refundtype = 2;
-				$change_refund['reply'] = '';
-				$change_refund['status'] = 1;
-				$change_refund['refundtype'] = $refundtype;
-				$change_refund['price'] = $refund['applyprice'];
-				$change_refund['refundtime'] = $time;
-				if (empty($refund['operatetime'])) 
-				{
-					$change_refund['operatetime'] = $time;
-				}
-				pdo_update('ewei_shop_order_refund', $change_refund, array('id' => $item['refundid']));
-				m('order')->setGiveBalance($item['id'], 2);
-				if ($refund['orderprice'] == $refund['applyprice']) 
-				{
-					if (com('coupon') && !(empty($item['couponid']))) 
-					{
-						com('coupon')->returnConsumeCoupon($item['id']);
-					}
-				}
-				m('notice')->sendOrderMessage($item['id'], true);
-				pdo_update('ewei_shop_order', array('refundstate' => 0, 'status' => -1, 'refundtime' => $time), array('id' => $item['id'], 'uniacid' => $uniacid, 'merchid' => $merchid));
-				$goods = pdo_fetchall('SELECT g.id,g.credit, o.total,o.realprice FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.uniacid=:uniacid and o.merchid = :merchid', array(':orderid' => $item['id'], ':uniacid' => $uniacid, ':merchid' => $merchid));
-				$credits = m('order')->getGoodsCredit($goods);
-				if (0 < $credits) 
-				{
-					m('member')->setCredit($item['openid'], 'credit1', -$credits, array(0, $shopset['name'] . '退款扣除购物赠送卡路里: ' . $credits . ' 订单号: ' . $item['ordersn']));
-				}
-				foreach ($goods as $g ) 
-				{
-					$salesreal = pdo_fetchcolumn('select ifnull(sum(total),0) from ' . tablename('ewei_shop_order_goods') . ' og ' . ' left join ' . tablename('ewei_shop_order') . ' o on o.id = og.orderid ' . ' where og.goodsid=:goodsid and o.status>=1 and o.uniacid=:uniacid and o.merchid = :merchid limit 1', array(':goodsid' => $g['id'], ':uniacid' => $uniacid, ':merchid' => $merchid));
-					pdo_update('ewei_shop_goods', array('salesreal' => $salesreal), array('id' => $g['id']));
-				}
-				if ($order["share_id"]!=0&&$order["share_price"]!=0){
-				    //订单赏金
-				    $share_member=pdo_get("ewei_shop_member",array("id"=>$order["share_id"]));
-				    pdo_update("ewei_shop_member",array('frozen_credit2'=>$share_member["frozen_credit2"]-$order["share_price"]),array('id'=>$order["share_id"]));
-				    pdo_update("ewei_shop_member_credit2",array('frozen'=>-1),array("orderid"=>$item['id']));
-				}
+			    //手动退款
+			    
+			    $refundtype = 2;
+			    $change_refund['reply'] = '';
+			    $change_refund['status'] = 1;
+			    $change_refund['refundtype'] = $refundtype;
+			    $change_refund['price'] = $refund['applyprice'];
+			    $change_refund['refundtime'] = $time;
+			    if (empty($refund['operatetime']))
+			    {
+			        $change_refund['operatetime'] = $time;
+			    }
+			    
+			    pdo_update('ewei_shop_order_refund', $change_refund, array('id' =>$refund["id"]));
+			    
+			    if (empty($refund["goods_id"])){
+			        //订单全部退款
+			        m('order')->setGiveBalance($item['id'], 2);
+			        m('order')->setStocksAndCredits($item['id'], 2);
+			        if ($refund['orderprice'] == $refund['applyprice'])
+			        {
+			            if (com('coupon') && !(empty($item['couponid'])))
+			            {
+			                com('coupon')->returnConsumeCoupon($item['id']);
+			            }
+			        }
+			        pdo_update('ewei_shop_order', array('refundstatus' => 1, 'status' => -1, 'refundtime' => $time), array('id' => $item['id'], 'uniacid' => $uniacid));
+			        $goods = pdo_fetchall('SELECT g.id,g.credit, o.total,o.realprice FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.uniacid=:uniacid', array(':orderid' => $item['id'], ':uniacid' => $uniacid));
+			        $credits = m('order')->getGoodsCredit($goods);
+			        plog('order.op.refund.submit', '订单退款 ID: ' . $item['id'] . ' 订单号: ' . $item['ordersn'] . ' 手动退款!');
+			        if ($item['status'] == 3)
+			        {
+			            if (0 < $credits)
+			            {
+			                m('member')->setCredit($item['openid'], 'credit1', -$credits, array(0, $shopset['name'] . '退款扣除购物赠送卡路里: ' . $credits . ' 订单号: ' . $item['ordersn']));
+			            }
+			        }
+			        foreach ($goods as $g )
+			        {
+			            $salesreal = pdo_fetchcolumn('select ifnull(sum(total),0) from ' . tablename('ewei_shop_order_goods') . ' og ' . ' left join ' . tablename('ewei_shop_order') . ' o on o.id = og.orderid ' . ' where og.goodsid=:goodsid and o.status>=1 and o.uniacid=:uniacid limit 1', array(':goodsid' => $g['id'], ':uniacid' => $uniacid));
+			            pdo_update('ewei_shop_goods', array('salesreal' => $salesreal), array('id' => $g['id']));
+			        }
+			        m('notice')->sendOrderMessage($item['id'], true);
+			        
+			        if ($order["share_id"]!=0&&$order["share_price"]!=0){
+			            //订单赏金
+			            $share_member=pdo_get("ewei_shop_member",array("id"=>$order["share_id"]));
+			            pdo_update("ewei_shop_member",array('frozen_credit2'=>$share_member["frozen_credit2"]-$order["share_price"]),array('id'=>$order["share_id"]));
+			            pdo_update("ewei_shop_member_credit2",array('frozen'=>-1),array("orderid"=>$item['id']));
+			        }
+			    }else{
+			        //订单部分退款
+			        $order_goodsid=implode(",", $gid);
+			        m('order')->setGiveBalance($item['id'], 2,$order_goodsid);//余额返现
+			        m('order')->setStocksAndCredits($item['id'], 2,$order_goodsid);
+			        
+			        // 				    pdo_update('ewei_shop_order', array('refundstate' => 0, 'status' => -1, 'refundtime' => $time), array('id' => $item['id'], 'uniacid' => $uniacid));
+			        
+			        
+			        $goods = pdo_fetchall('SELECT g.id,g.credit, o.total,o.realprice FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.id in(:id) and o.uniacid=:uniacid', array(':orderid' => $item['id'], ':uniacid' => $uniacid,':id'=>$order_goodsid));
+			        $gg = pdo_fetch('SELECT sum(o.price) as price,sum(o.dispatchprice) as dispatchprice,sum(o.deductprice) as deductprice,sum(o.discount_price) as discount_price,sum(o.couponprice) as couponprice,sum(o.deductenough) as deductenough FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.id in(:id) and o.uniacid=:uniacid', array(':orderid' => $item['id'], ':uniacid' => $uniacid,':id'=>$order_goodsid));
+			        
+			        // 				    var_dump($order_goodsid);var_dump($goods);die;
+			        //订单商品处理
+			        if ($item["status"]==1){
+			            //待发货状态
+			            pdo_query("update ".tablename("ewei_shop_order_goods")." set status=-1,refundstatus=1 "." where refundid=:refundid",array(":refundid"=>$refund["id"]));
+			            //更新订单
+			            $d["goodsprice"]=$item["goodsprice"]-$gg["price"];
+			            $d["deductprice"]=$item["deductprice"]-$gg["deductprice"];
+			            $d["discount_price"]=$item["discount_price"]-$gg["discount_price"];
+			            $d["dispatchprice"]=$item["dispatchprice"]-$gg["dispatchprice"];
+			            $d["deductenough"]=$item["deductenough"]-$gg["deductenough"];
+			            $d["couponprice"]=$item["couponprice"]-$gg["couponprice"];
+			            $d["price"]=$item["price"]-($gg["price"]-$gg["deductprice"]-$gg["discount_price"]-$gg["deductenough"]-$gg["couponprice"]+$gg["dispatchprice"]);
+			            pdo_update("ewei_shop_order",$d,array("id"=>$item["id"]));
+			        }else{
+			            pdo_query("update ".tablename("ewei_shop_order_goods")." set  refundstatus=1 "." where refundid=:refundid",array(":refundid"=>$refund["id"]));
+			            
+			        }
+			        // 				    var_dump($goods);var_dump($d);die;
+			        $credits = m('order')->getGoodsCredit($goods);
+			        plog('order.op.refund.submit', '订单退款 ID: ' . $item['id'] . ' 订单号: ' . $item['ordersn'] . ' 手动退款!');
+			        if ($item['status'] == 3)
+			        {
+			            if (0 < $credits)
+			            {
+			                m('member')->setCredit($member["id"], 'credit1', -$credits, array(0, $shopset['name'] . '退款扣除购物赠送卡路里: ' . $credits . ' 订单号: ' . $item['ordersn']));
+			            }
+			        }
+			        foreach ($goods as $g )
+			        {
+			            $salesreal = pdo_fetchcolumn('select ifnull(sum(total),0) from ' . tablename('ewei_shop_order_goods') . ' og ' . ' left join ' . tablename('ewei_shop_order') . ' o on o.id = og.orderid ' . ' where og.goodsid=:goodsid and o.status>=1 and o.uniacid=:uniacid limit 1', array(':goodsid' => $g['id'], ':uniacid' => $uniacid));
+			            pdo_update('ewei_shop_goods', array('salesreal' => $salesreal), array('id' => $g['id']));
+			            
+			        }
+			        
+			        m('notice')->sendOrderMessage($item['id'], true);
+			        
+			        if ($order["share_id"]!=0&&$order["share_price"]!=0){
+			            //订单赏金
+			            $share_member=pdo_get("ewei_shop_member",array("id"=>$order["share_id"]));
+			            pdo_update("ewei_shop_member",array('frozen_credit2'=>$share_member["frozen_credit2"]-$order["share_price"]),array('id'=>$order["share_id"]));
+			            pdo_update("ewei_shop_member_credit2",array('frozen'=>-1),array("orderid"=>$item['id']));
+			        }
+			        
+			        
+			        
+			    }
+			    
 			}
 			show_json(1);
 		}
@@ -525,7 +685,31 @@ class Refund_EweiShopV2Page extends MerchWebPage
 			$step_array[3]['title'] = '客户取消' . $r_type[$refund['rtype']];
 			$step_array[3]['time'] = $refund['refundtime'];
 		}
-		$goods = pdo_fetchall('SELECT g.*, o.goodssn as option_goodssn, o.productsn as option_productsn,o.total,g.type,o.optionname,o.optionid,o.price as orderprice,o.realprice,o.changeprice,o.oldprice,o.commission1,o.commission2,o.commission3,o.commissions' . $diyformfields . ' FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.uniacid=:uniacid and o.merchid=:merchid', array(':orderid' => $id, ':uniacid' => $_W['uniacid'], ':merchid' => $_W['merchid']));
+		if (empty($refund["goods_id"])){
+		$goods = pdo_fetchall('SELECT g.*, o.dispatchprice as orderdispatchprice,o.deductprice as orderdeductprice,o.discount_price as orderdiscount_price,o.couponprice as ordercouponprice, o.deductenough as orderdeductenough,o.goodssn as option_goodssn, o.productsn as option_productsn,o.total,g.type,o.optionname,o.optionid,o.price as orderprice,o.realprice,o.changeprice,o.oldprice,o.commission1,o.commission2,o.commission3,o.commissions' . $diyformfields . ' FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.orderid=:orderid and o.uniacid=:uniacid and o.merchid=:merchid and o.status!=-1', array(':orderid' => $item["id"], ':uniacid' => $_W['uniacid'], ':merchid' => $_W['merchid']));
+		
+		}else{
+		   
+		    $goods_id=unserialize($refund["goods_id"]);
+		    $gid="";
+		    foreach ($goods_id as $k=>$v){
+		        if (empty($gid)){
+		            $gid=$v["goods_id"];
+		        }else{
+		            $gid=$gid.",".$v["goods_id"];
+		        }
+		    }
+		   
+		    //获取商品
+		    $goods = pdo_fetchall('SELECT g.*,o.dispatchprice as orderdispatchprice,o.deductprice as orderdeductprice,o.discount_price as orderdiscount_price,o.couponprice as ordercouponprice, o.deductenough as orderdeductenough, o.goodssn as option_goodssn, o.productsn as option_productsn,o.total,g.type,o.optionname,o.optionid,o.price as orderprice,o.realprice,o.changeprice,o.oldprice,o.commission1,o.commission2,o.commission3,o.commissions' . $diyformfields . ' FROM ' . tablename('ewei_shop_order_goods') . ' o left join ' . tablename('ewei_shop_goods') . ' g on o.goodsid=g.id ' . ' WHERE o.id in(:orderid) and o.uniacid=:uniacid and o.merchid=:merchid and o.status!=-1', array(':orderid' =>$gid, ':uniacid' => $_W['uniacid'], ':merchid' => $_W['merchid']));
+		    
+		}
+		$price=0;
+		$dispatchprice=0;
+		$deductprice=0;
+		$discount_price=0;
+		$couponprice=0;
+		$deductenough=0;
 		foreach ($goods as &$r ) 
 		{
 			if (!(empty($r['option_goodssn']))) 
@@ -541,6 +725,13 @@ class Refund_EweiShopV2Page extends MerchWebPage
 				$r['diyformfields'] = iunserializer($r['diyformfields']);
 				$r['diyformdata'] = iunserializer($r['diyformdata']);
 			}
+			//获取商品金额
+			$price+=$r["orderprice"];
+			$dispatchprice+=$r["orderdispatchprice"];
+			$deductprice+=$r["orderdeductprice"];
+			$discount_price+=$r["orderdiscount_price"];
+			$couponprice+=$r["ordercouponprice"];
+			$deductenough+=$r["deductenough"];
 		}
 		unset($r);
 		$item['goods'] = $goods;

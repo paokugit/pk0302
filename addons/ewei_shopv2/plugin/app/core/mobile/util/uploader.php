@@ -12,6 +12,7 @@ class Uploader_EweiShopV2Page extends AppMobilePage
 		global $_GPC;
 		load()->func('file');
 		$field = $_GPC['file'];
+		//var_dump($field);var_dump($_FILES[$field]);var_dump(m('util')->validatorImage($_FILES[$field]['name']));exit;
 		if (!(empty($_FILES[$field]['name']))) 
 		{
 			if (is_array($_FILES[$field]['name'])) 
@@ -23,7 +24,7 @@ class Uploader_EweiShopV2Page extends AppMobilePage
 					$ret = $this->uploadFile($file);
 					if ($ret['status'] == 'error') 
 					{
-						$ret = array('status' => 0);
+						$ret = array('status' => 0,'message'=>$ret['message']);
 					}
 					else 
 					{
@@ -91,6 +92,9 @@ class Uploader_EweiShopV2Page extends AppMobilePage
 		$result['error'] = 0;
 		$result['filename'] = $file['path'];
 		$result['url'] = trim($_W['attachurl'] . $result['filename']);
+		//判断色情低俗图片
+		$res = m('util')->validatorImage($result['url']);
+		if($res) $result = ['status'=>'error','message'=>'请文明上图'];
 		pdo_insert('core_attachment', array('uniacid' => $_W['uniacid'], 'uid' => $_W['member']['uid'], 'filename' => $uploadfile['name'], 'attachment' => $result['filename'], 'type' => 1, 'createtime' => TIMESTAMP));
 		return $result;
 	}

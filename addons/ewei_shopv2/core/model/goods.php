@@ -562,41 +562,66 @@ class Goods_EweiShopV2Model
 		unset($row);
 		return $list;
 	}
-	public function isFavorite($id = '') 
+
+    /**
+     * 商品是否收藏
+     * @param string $id
+     * @param $openid
+     * @return int
+     */
+	public function isFavorite($id = '',$openid)
 	{
-		global $_W;
-		$count = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_favorite') . ' where goodsid=:goodsid and deleted=0 and openid=:openid and uniacid=:uniacid limit 1', array(':goodsid' => $id, ':openid' => $_W['openid'], ':uniacid' => $_W['uniacid']));
-		return 0 < $count;
+	    global $_W;
+	    $member = m('member')->getMember($openid);
+		$count = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_favorite') . ' where goodsid=:goodsid and deleted=0 and (openid=:openid or user_id = :user_id) and uniacid=:uniacid limit 1', array(':goodsid' => $id, ':openid' => $member['openid'], ':user_id' => $member['id'], ':uniacid' => $_W['uniacid']));
+		return 0 < $count ? 1 : 0;
 	}
-	public function addHistory($goodsid = 0) 
+
+    /**
+     * 加入浏览记录
+     * @param $openid
+     * @param int $goodsid
+     */
+	public function addHistory($openid,$goodsid = 0)
 	{
 		global $_W;
-		pdo_query('update ' . tablename('ewei_shop_goods') . ' set viewcount=viewcount+1 where id=:id and uniacid=\'' . $_W[uniacid] . '\' ', array(':id' => $goodsid));
-		$history = pdo_fetch('select id,times from ' . tablename('ewei_shop_member_history') . ' where goodsid=:goodsid and uniacid=:uniacid and openid=:openid limit 1', array(':goodsid' => $goodsid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
-		if (empty($history)) 
-		{
-			$history = array('uniacid' => $_W['uniacid'], 'openid' => $_W['openid'], 'goodsid' => $goodsid, 'deleted' => 0, 'createtime' => time(), 'times' => 1);
-			pdo_insert('ewei_shop_member_history', $history);
-		}
-		else 
-		{
-			pdo_update('ewei_shop_member_history', array('deleted' => 0, 'times' => $history['times'] + 1), array('id' => $history['id']));
+		$member = m('member')->getMember($openid);
+		if(!empty($member)) {
+            pdo_query('update ' . tablename('ewei_shop_goods') . ' set viewcount=viewcount+1 where id=:id and uniacid=\'' . $_W[uniacid] . '\' ', array(':id' => $goodsid));
+            $history = pdo_fetch('select id,times from ' . tablename('ewei_shop_member_history') . ' where goodsid=:goodsid and uniacid=:uniacid and (openid=:openid or user_id = :user_id) limit 1', array(':goodsid' => $goodsid, ':uniacid' => $_W['uniacid'], ':openid' => $member['openid'],':user_id' => $member['id']));
+            if (empty($history))
+            {
+                $history = array('uniacid' => $_W['uniacid'], 'openid' => $_W['openid'], 'goodsid' => $goodsid, 'deleted' => 0, 'createtime' => time(), 'times' => 1);
+                pdo_insert('ewei_shop_member_history', $history);
+            }
+            else
+            {
+                pdo_update('ewei_shop_member_history', array('deleted' => 0, 'times' => $history['times'] + 1), array('id' => $history['id']));
+            }
 		}
 	}
-	public function getCartCount($isnewstore = 0) 
+
+    /**
+     * 计算购物车数量
+     * @param $openid
+     * @param int $isnewstore
+     * @return bool|int
+     */
+	public function getCartCount($openid, $isnewstore = 0)
 	{
 		global $_W;
-		global $_GPC;
+		$member = m('member')->getMember($openid);
 		$paras = array(':uniacid' => $_W['uniacid']);
-		$paras[':openid'] = $_W['openid'];
+		$paras[':openid'] = $member['openid'];
+		$paras[':user_id'] = $member['id'];
 		$sqlcondition = '';
 		if ($isnewstore != 0) 
 		{
 			$sqlcondition = ' and isnewstore=:isnewstore';
 			$paras[':isnewstore'] = $isnewstore;
 		}
-		$count = pdo_fetchcolumn('select sum(total) from ' . tablename('ewei_shop_member_cart') . ' where uniacid=:uniacid and openid=:openid ' . $sqlcondition . ' and deleted=0 limit 1', $paras);
-		return $count;
+		$count = pdo_fetchcolumn('select sum(total) from ' . tablename('ewei_shop_member_cart') . ' where uniacid=:uniacid and (openid=:openid or user_id=:user_id) ' . $sqlcondition . ' and deleted=0 limit 1', $paras);
+		return $count ? $count : 0;
 	}
 	public function getSpecThumb($specs) 
 	{
@@ -1189,6 +1214,30 @@ class Goods_EweiShopV2Model
             $data[$key]['order'] = count($order);
         }
         return $data;
+    }
+
+    /**
+     * 更改会员主图
+     * @param $id
+     * @return string
+     */
+    public function levelurlup($id){
+        switch ($id){
+            case 3:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/XMUU5yU9jJ7yt58CE5O8UW5ogaAUm5.png";
+                break;
+            case 4:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/QT03Aprq37zHAwMt07vhVZP3w0wvht.png";
+                break;
+            case 5:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/a8LsNhn44h183OH00505XL39hS0s37.png";
+                break;
+            case 7:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/Xx7X7pa91M99YofuyfKJOo7P878fa7.png";
+                break;
+            default:
+                return '';
+        }
     }
 }
 ?>

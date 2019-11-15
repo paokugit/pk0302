@@ -224,8 +224,9 @@ class Member_EweiShopV2Model
 		global $_W;
 		
 		load()->model("mc");
+		if (!is_numeric($openid)){
 		$uid = mc_openid2uid($openid);
-	   
+		}
 		$member = $this->getMember($openid);
 // 		var_dump($openid);
 		
@@ -314,8 +315,9 @@ class Member_EweiShopV2Model
 //                 $log_data["user_id"]=$openid;
 //                 pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "user_id" => $openid ));
 //             }
-            pdo_query("update ".tablename("ewei_shop_member")." set ".$credittype."=:newcredit"." where uniacid=:uniacid and  id=:id",array(":newcredit"=>$newcredit,":uniacid"=>$_W["uniacid"],":id"=>$member["id"]));
-			$log_data["remark"] = $log_data["remark"];
+         
+            pdo_update("ewei_shop_member", array( $credittype => $newcredit ), array( "uniacid" => $_W["uniacid"], "id" => $member["id"] ));
+            $log_data["remark"] = $log_data["remark"];
 			
 		}
 		$log_data["openid"]=$member["openid"];
@@ -1723,7 +1725,8 @@ class Member_EweiShopV2Model
      */
     public function setLoginToken($user_id,$salt)
     {
-        return base64_encode(implode(',',[$user_id,$salt]));
+        $token = base64_encode(implode(',',[$user_id,$salt]));
+        return str_replace('=','',$token);
     }
 
     /**

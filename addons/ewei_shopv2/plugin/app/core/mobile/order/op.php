@@ -127,12 +127,23 @@ class Op_EweiShopV2Page extends AppMobilePage
 		if ($order['status'] != 2) {
 			app_error(AppError::$OrderCannotFinish);
 		}
-
-		if (0 < $order['refundstate'] && !empty($order['refundid'])) {
+         //获取订单商品
+        $good=pdo_fetchall("select * from ".tablename("ewei_shop_order_goods")." where orderid=:orderid and refundstatus!=1",array(":orderid"=>$order["id"]));
+		if (0 < $order['refundstate'] && !empty($order['refundid']&&$order["refundstatus"]!=1)) {
 			$change_refund = array();
 			$change_refund['status'] = -2;
 			$change_refund['refundtime'] = time();
 			pdo_update('ewei_shop_order_refund', $change_refund, array('id' => $order['refundid'], 'uniacid' => $_W['uniacid']));
+		}
+		foreach ($good as $k=>$v){
+		    //删除申请中的售后
+		   if ($v["refundid"]){
+		       pdo_delete("ewei_shop_order_refund",array("id"=>$v["refundid"]));
+		    //更新商品申请的售后
+		    $d["refundid"]=0;
+		    $d["rstate"]=0;
+		    pdo_update("ewei_shop_order_goods",$d,array("id"=>$v["id"]));
+		   }
 		}
         //订单赏金
         if ($order["share_price"]!=0){
