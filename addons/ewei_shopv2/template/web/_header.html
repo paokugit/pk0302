@@ -18,7 +18,7 @@
     {if $routes[0] != 'system' }
     <ul class="nav navbar-nav gray-bg">
 
-        <li {if $_W['controller']=='shop'} class="active"{/if}><a href="{php echo webUrl()}">首页1</a></li>
+        <li {if $_W['controller']=='shop'} class="active"{/if}><a href="{php echo webUrl()}">首页</a></li>
         {ifp 'goods'}<li {if $_W['controller']=='goods'} class="active"{/if}><a href="{php echo webUrl('goods')}"> 商品</a></li>{/if}
         {ifp 'member'}<li {if $_W['controller']=='member'} class="active"{/if}><a href="{php echo webUrl('member')}"> 会员</a></li>{/if}
         {ifp 'order'}<li {if $_W['controller']=='order'} class="active"{/if}><a href="{php echo webUrl('order')}"> 订单</a></li>{/if}

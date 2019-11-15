@@ -399,7 +399,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
      * @param $total
      * @param $uniacid
      * @param $openid
-     * @return array
+     * @return int
      */
     public function getlist($total,$uniacid,$openid)
     {
@@ -408,7 +408,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
         for ($i=1;$i<=$total;$i++){
             $key = $i%8 != 0 ? $i%8 : 8;
             $num = ceil(bcdiv($i,8,2));
-            $list[$key]['image'] = "https://paokucoin.com/img/backgroup/s-gxserve.gif";
+            $list[$key]['image'] = "https://www.paokucoin.com/img/backgroup/s-gxserve.gif";
             $id = pdo_fetchcolumn('select id from '.tablename('ewei_shop_devote_record').'where openid =:openid and uniacid = "'.$uniacid.'" and status = 1 LIMIT '.($i-1).','.$size,[':openid'=>$openid]);
             $list[$key]['log'][] = pdo_get('ewei_shop_devote_log',['openid'=>$openid,'uniacid'=>$uniacid,'devote_id'=>$id,'status'=>1,'day'=>date('Y-m-d',time())])?1:0;
             $list[$key]['id'][] = $id;
@@ -417,7 +417,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
         }
         if($total < 8){
             for ($i = 0 ; $i < 8-$total; $i++){
-                array_push($list,['image'=>"https://paokucoin.com/img/backgroup/n-gxserve@2x.png",'devote'=>0,'count'=>0,'is_open'=>0,'id'=>[]]);
+                array_push($list,['image'=>"https://www.paokucoin.com/img/backgroup/n-gxserve@2x.png",'devote'=>0,'count'=>0,'is_open'=>0,'id'=>[]]);
             }
         }
         return $list;
@@ -456,7 +456,7 @@ class Myown_EweiShopV2Page extends AppMobilePage
     public function devotelog($ids,$openid,$uniacid)
     {
         $day = date('Y-m-d');
-	    $i = 0;
+	$i = 0;
         foreach ($ids as $id){
             $log = pdo_get('ewei_shop_devote_log',['devote_id'=>$id,'openid'=>$openid,'uniacid'=>$uniacid,'day'=>$day]);
             if($log['status'] == 1){

@@ -19,9 +19,9 @@ class Level_EweiShopV2Page extends AppMobilePage
             show_json(0,"用户的openid不能为空");
         }
         //用户的信息
-        $member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid],['nickname','realname','is_open',"FROM_UNIXTIME(expire_time) as expire"]);
+        $member = pdo_get('ewei_shop_member',['uniacid'=>$uniacid,'openid'=>$openid],['id','nickname','realname','is_open',"FROM_UNIXTIME(expire_time) as expire"]);
         //待领取的优惠券  两个
-        $coupon = pdo_fetchall('select cd.id,cd.used,co.deduct,co.enough,co.couponname from '.tablename('ewei_shop_coupon_data').'cd join '.tablename('ewei_shop_coupon').'co on co.id=cd.couponid'.' where cd.gettype = 1 and cd.openid = :openid and co.timeend > "'.time().'" order by id desc LIMIT 0,2',[':openid'=>$openid]);
+        $coupon = pdo_fetchall('select cd.id,cd.used,co.deduct,co.enough,co.couponname from '.tablename('ewei_shop_coupon_data').'cd join '.tablename('ewei_shop_coupon').'co on co.id=cd.couponid'.' where (cd.openid = :openid or user_id = :user_id) and co.timeend > "'.time().'" order by id desc LIMIT 0,2',[':openid'=>$openid,':user_id'=>$member['id']]);
         //特权产品列表
         $goods = pdo_getall('ewei_shop_goods','status = 1 and is_right = 1 and total > 0 order by id desc LIMIT 0,8',['id','title','thumb','total','productprice','marketprice','bargain']);
         foreach ($goods as $key=>$item){
@@ -97,7 +97,7 @@ class Level_EweiShopV2Page extends AppMobilePage
             $record[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
             $record[$key]['updatetime'] = date('Y年m月d日',$item['updatetime']);
             $record[$key]['month'] = date('Y年m月',$item['createtime']);
-            $record[$key]['thumb'] = tomedia(pdo_getcolumn('ewei_shop_goods',['id'=>$item['goods_id']],'thumb'));
+            $record[$key]['thumb'] = $item['goods_id'] ? tomedia(pdo_getcolumn('ewei_shop_goods',['id'=>$item['goods_id']],'thumb')) : "https://www.paokucoin.com/img/backgroup/libaoImg.png";
         }
         if(!$record){
             show_json(0,"暂无信息");
@@ -197,12 +197,12 @@ class Level_EweiShopV2Page extends AppMobilePage
         $record = pdo_get('ewei_shop_level_record',['uniacid'=>$uniacid,'level_id'=>$level_id,'id'=>$record_id,'openid'=>$openid]);
         //判断这个月的记录状态
         if($record['status'] > 0){
-            show_json(0,$record['month']."权利礼包已领取或过期");
+	    show_json(0,"权益礼包已领取或过期");
         }
         //查询领取记录里面的已领过的状态
         $log = pdo_fetchall('select * from '.tablename('ewei_shop_level_record').'where uniacid = "'.$uniacid.'" and openid = :openid and level_id = "'.$level_id.'" and status > 0',[':openid'=>$openid]);
         if(count($log) > 0 && (date('Ymd',time()) < $record['month']."10" || date('Ymd',time()) > $record['month']."21")){
-            show_json(0,$record['month']."权益礼包不在领取日期");
+	    show_json(0,"权益商品每月10日到20日领取");
         }
         //查找用户信息
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);

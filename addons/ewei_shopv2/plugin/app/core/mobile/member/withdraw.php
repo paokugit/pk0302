@@ -109,7 +109,7 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		if (empty($set['withdraw'])) {
 			app_error(1, '系统未开启提现!');
 		}
-        
+
 		$set_array = array();
 		$set_array['charge'] = $set['withdrawcharge']?$set['withdrawcharge']:3;
 		$set_array['begin'] = floatval($set['withdrawbegin']);

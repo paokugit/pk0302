@@ -214,9 +214,11 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_W;
         global $_GPC;
-        //$data = pdo_fetchall('select h.*,g.merchid from '.tablename('ewei_shop_member_history').' h join '.tablename('ewei_shop_goods').(' g on g.id = h.goodsid where g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=>$_W['merchmanage']['merchid'],':uniacid'=>$_W['uniacid']));
-        $data = pdo_fetchall('select DISTINCT h.openid,g.merchid from '.tablename('ewei_shop_member_history').' h join '.tablename('ewei_shop_goods').(' g on g.id = h.goodsid where g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=>$_W['merchmanage']['merchid'],':uniacid'=>$_W['uniacid']));
-        //$data = pdo_fetchall('select DISTINCT h.openid,g.merchid,h.uniacid from '.tablename('ewei_shop_member_history').' h RIGHT JOIN '.tablename('ewei_shop_goods').(' g ON g.id = h.goodsid WHERE g.merchid = :merchid and h.uniacid=:uniacid'),array(':merchid'=> 31,':uniacid'=>$_W['uniacid']));
+        $page = max(1,$_GPC['page']);
+        $pageSize = 10;
+        $pindex = ($page - 1)*$pageSize;
+        $list = pdo_fetchall('select DISTINCT h.openid,g.merchid from '.tablename('ewei_shop_member_history').' h join '.tablename('ewei_shop_goods').' g on g.id = h.goodsid'.' where g.merchid = :merchid and h.uniacid=:uniacid',array(':merchid'=>$_W['merchmanage']['merchid'],':uniacid'=>$_W['uniacid']));
+        $data = pdo_fetchall('select DISTINCT h.openid,g.merchid from '.tablename('ewei_shop_member_history').' h join '.tablename('ewei_shop_goods').' g on g.id = h.goodsid'.' where g.merchid = :merchid and h.uniacid=:uniacid limit '.$pindex.','.$pageSize,array(':merchid'=>$_W['merchmanage']['merchid'],':uniacid'=>$_W['uniacid']));
 	$paid = 0;
         foreach ($data as $key=>$item){
             $user = pdo_get('ewei_shop_member',array('openid'=>$item['openid']),['mobile','nickname','avatar']);
@@ -226,12 +228,15 @@ class Index_EweiShopV2Page extends MerchmanageMobilePage
 	    $count= pdo_fetch('select count(1) as count,sum(price) as sum from '.tablename('ewei_shop_order').' where merchid=:merchid and openid=:openid and status=:status',array(':merchid'=>$_W['merchmanage']['merchid'],':status'=>3,':openid'=>$item['openid']));
             $data[$key]['count'] = $count['count']?:0;
             $data[$key]['sum'] = $count['sum']?:0;
+        }
+        foreach ($list as $item){
+            $count= pdo_fetch('select count(1) as count,sum(price) as sum from '.tablename('ewei_shop_order').' where merchid=:merchid and openid=:openid and status=:status',array(':merchid'=>$_W['merchmanage']['merchid'],':status'=>3,':openid'=>$item['openid']));
             if($count['count'] > 0){
                 $paid++;
             }
         }
-        $fans = count($data);
-        show_json(1,['fans'=>$fans,'paid'=>$paid,'list'=>$data]);
+        $fans = count($list);
+        show_json(1,['fans'=>$fans,'paid'=>$paid,'list'=>$data,'page'=>$page,'pageSize'=>$pageSize]);
     }
 
 

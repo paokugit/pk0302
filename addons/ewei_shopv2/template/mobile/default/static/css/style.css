@@ -83,7 +83,15 @@ a {
     text-align: center;
 
 }
-
+.settle-explain{
+	width: 100%;
+    height: 30px;
+    padding-left: 4%;
+    line-height: 30px;
+    background: #fff9dd;
+    color: #f9a504;
+    font-size: 14px
+}
 .content-info i {
     font-size: 6rem;
 }

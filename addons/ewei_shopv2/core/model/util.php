@@ -93,8 +93,8 @@ class Util_EweiShopV2Model
 	}
 
 	/**
-     * è®¡ç®—ä¸¤ç»„ç»çº¬åº¦åæ ‡ ä¹‹é—´çš„è·ç¦»
-     * params ï¼šlat1 çº¬åº¦1ï¼› lng1 ç»åº¦1ï¼› lat2 çº¬åº¦2ï¼› lng2 ç»åº¦2ï¼› len_type ï¼ˆ1:m or 2:km);
+     * ¼ÆËãÁ½×é¾­Î³¶È×ø±ê Ö®¼äµÄ¾àÀë
+     * params £ºlat1 Î³¶È1£» lng1 ¾­¶È1£» lat2 Î³¶È2£» lng2 ¾­¶È2£» len_type £¨1:m or 2:km);
      * return m or km
      */
 	public function GetDistance($lat1, $lng1, $lat2, $lng2, $len_type = 1, $decimal = 2)
@@ -245,27 +245,27 @@ class Util_EweiShopV2Model
 	}
 
     /**
-     * è®¡ç®—å‘¨å¼€å§‹ å’Œ  å‘¨ç»“æŸ
+     * ¼ÆËãÖÜ¿ªÊ¼ ºÍ  ÖÜ½áÊø
      * @param $time
      * @return array
      */
 	public function week($time)
 	{
-		//ä»Šå¤©æ˜ŸæœŸå‡ 
+		//½ñÌìÐÇÆÚ¼¸
 		$week = date('w',$time);
-		//å¦‚æžœæ˜¯å‘¨æ—¥  æ˜¯0  ç„¶åŽ  å‡6  å¦åˆ™  å‡åŽ»  å‘¨å‡  - 1
+		//Èç¹ûÊÇÖÜÈÕ  ÊÇ0  È»ºó  ¼õ6  ·ñÔò  ¼õÈ¥  ÖÜ¼¸ - 1
 		$w = $week  == 0 ? 6 : $week - 1;
 		$week_days = 7 - $w;
-		//ä»Šå¤©çš„0ç‚¹æ—¶é—´æˆ³
+		//½ñÌìµÄ0µãÊ±¼ä´Á
 		$today = date('Ymd',$time);
-		//è®¡ç®—æœ¬å‘¨çš„å¼€å§‹å’Œç»“æŸæ—¶é—´
+		//¼ÆËã±¾ÖÜµÄ¿ªÊ¼ºÍ½áÊøÊ±¼ä
 		$week_start = strtotime('-'.$w.'days',strtotime($today));
 		$week_end = strtotime('+'.$week_days.'days',strtotime($today));
 		return ['start'=>$week_start,'end'=>$week_end];
 	}
 
     /**
-     * äºŒç»´æ•°ç»„æ ¹æ®æŸä¸ªå€¼çš„è¿›è¡ŒåŽ»é‡
+     * ¶þÎ¬Êý×é¸ù¾ÝÄ³¸öÖµµÄ½øÐÐÈ¥ÖØ
      * @param $arr
      * @param $key
      * @return array
@@ -274,20 +274,86 @@ class Util_EweiShopV2Model
 	{
 		$res = [];
 		foreach ($arr as $value) {
-			//æŸ¥çœ‹æœ‰æ²¡æœ‰é‡å¤é¡¹
-			if($value['is_valid'] == 1){
-				if(isset($res[$value[$key]])){
-					//æœ‰ï¼šé”€æ¯
-					unset($value[$key]);
-				} else{
-					$res[$value[$key]] = $value;
-				}
-			}else{
+			//²é¿´ÓÐÃ»ÓÐÖØ¸´Ïî
+			
+			if(isset($res[$value[$key]])){
+				//ÓÐ£ºÏú»Ù
+				unset($value[$key]);
+			} else{
 				$res[$value[$key]] = $value;
 			}
 		}
 		return $res;
 	}
+    /**
+     * ¼ì²âÊÇ·ñÎªÎ¥½ûÉ«ÇéÍ¼Æ¬
+     * @param $fileName
+     * @return bool
+     */
+    function validatorImage($fileName){
+        $image = $this->getImage($fileName);
+        $width = ImagesX($image);
+        $height = ImagesY($image);
+        $ycb = 0;
+        for($y=0;$y<$height;$y++){
+            for($x=0;$x<$width;$x++){
+                $rgb = ImageColorAt($image,$x,$y);
+                $r = ($rgb >> 16) & 0xFF;
+                $g = ($rgb >> 8) & 0xFF;
+                $b = $rgb & 0xFF;
+                $ycbcr = $this->rgb2ycbcr($r,$g,$b);
+                if((86<=$ycbcr['cb']&&$ycbcr['cb']<=117)&&(140<=$ycbcr['cr']&&$ycbcr['cr']< 168)){
+                    $ycb++;
+                }
+            }
+        }
+        imagedestroy($image);
+        if($ycb>(floatval($width)*floatval($height)*0.3))
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * ±£´æÍ¼Ïñº¯Êý
+     * @param $fileName
+     * @return mixed
+     */
+    function getImage($fileName){
+        $info = getImageSize($fileName);
+        $ext = null;
+        switch ($info[2]) {
+            case 1 :
+                $ext = "gif";
+                break;
+            case 2 :
+                $ext = "jpeg";
+                break;
+            case 3 :
+                $ext = "png";
+                break;
+        }
+        $function = 'ImageCreateFrom'.ucfirst($ext);
+        $resource = $function($fileName);
+        return $resource;
+    }
+
+    /**
+     * RGB ×ª YCbCrÉ«²Ê
+     * @param $r
+     * @param $g
+     * @param $b
+     * @return array
+     */
+    function rgb2ycbcr($r,$g,$b){
+        $r = floatval($r);
+        $g = floatval($g);
+        $b = floatval($b);
+        $y = 0.299*$r + 0.587*$g + 0.114*$b;
+        $cb = (1 / 1.772) * ($b - $y) + 128;
+        $cr = (1 / 1.402) * ($r - $y) + 128;
+        return array('y'=>$y,'cb'=>$cb,'cr'=>$cr);
+    }
 }
 
 if (!defined('IN_IA')) {

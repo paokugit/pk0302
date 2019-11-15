@@ -132,7 +132,6 @@ class Category_EweiShopV2Page extends WebPage
 		if( $_W["ispost"] ) 
 		{
 		    $data = array( "uniacid" => $_W["uniacid"], "name" => trim($_GPC["catename"]), "enabled" => intval($_GPC["enabled"]), "displayorder" => intval($_GPC["displayorder"]), "isrecommand" => intval($_GPC["isrecommand"]), "ishome" => intval($_GPC["ishome"]), "description" => $_GPC["description"], "parentid" => intval($parentid), "thumb" => save_media($_GPC["thumb"]), "advimg" => save_media($_GPC["advimg"]), "advurl" => trim($_GPC["advurl"]), "level" => $level,"label"=>$_GPC["label"]);
-// 			var_dump($data);die;
 			if( !empty($id) ) 
 			{
 				unset($data["parentid"]);
@@ -149,8 +148,7 @@ class Category_EweiShopV2Page extends WebPage
 			}
 			m("shop")->getCategory(true);
 			m("shop")->getAllCategory(true);
-// 			var_dump($data);die;
- 			show_json(1, array( "url" => webUrl("goods/category") ));
+			show_json(1, array( "url" => webUrl("goods/category") ));
 		}
 		include($this->template());
 	}

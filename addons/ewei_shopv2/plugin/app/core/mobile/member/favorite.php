@@ -14,12 +14,12 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		$merch_data = m('common')->getPluginset('merch');
 		$pindex = max(1, intval($_GPC['page']));
 		$psize = 10;
-		//缂栬緫淇敼
+		//编辑修改
 		$openid=$_GPC["openid"];
 		if ($_GPC["type"]==1){
 		    $member_id=m('member')->getLoginToken($openid);
 		    if ($member_id==0){
-		        app_error(1,"鏃犳鐢ㄦ埛");
+		        app_error(1,"无此用户");
 		    }
 		    $openid=$member_id;
 		}
@@ -70,12 +70,12 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		if (empty($id)) {
 			app_error(AppError::$ParamsError);
 		}
-        //淇敼
+        //修改
         $openid=$_GPC["openid"];
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"鏃犳鐢ㄦ埛");
+                app_error(1,"无此用户");
             }
             $openid=$member_id;
         }
@@ -110,12 +110,12 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		if (empty($ids) || !is_array($ids)) {
 			app_error(AppError::$ParamsError);
 		}
-        //淇敼
+        //修改
         $openid=$_GPC["openid"];
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"鏃犳鐢ㄦ埛");
+                app_error(1,"无此用户");
             }
             $openid=$member_id;
         }
@@ -132,12 +132,12 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 		global $_GPC;
 		$pindex = max(1, intval($_GPC['page']));
 		$psize = 10;
-		//淇敼
+		//修改
 		$openid=$_GPC["openid"];
 		if ($_GPC["type"]==1){
 		    $member_id=m('member')->getLoginToken($openid);
 		    if ($member_id==0){
-		        app_error(1,"鏃犳鐢ㄦ埛");
+		        app_error(1,"无此用户");
 		    }
 		    $openid=$member_id;
 		}
@@ -177,12 +177,12 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 	    if (empty($ids) || !is_array($ids)) {
 	        app_error(AppError::$ParamsError);
 	    }
-	    //淇敼
+	    //修改
 	    $openid=$_GPC["openid"];
 	    if ($_GPC["type"]==1){
 	        $member_id=m('member')->getLoginToken($openid);
 	        if ($member_id==0){
-	            app_error(1,"鏃犳鐢ㄦ埛");
+	            app_error(1,"无此用户");
 	        }
 	        $openid=$member_id;
 	    }
@@ -192,7 +192,7 @@ class Favorite_EweiShopV2Page extends AppMobilePage
 	    if (pdo_query($sql, array(':openid' => $member['openid'],':user_id'=>$member["id"]))){
 	    app_json();
 	    }else{
-	        app_error(1,"澶辫触");
+	        app_error(1,"失败");
 	    }
 	}
 	

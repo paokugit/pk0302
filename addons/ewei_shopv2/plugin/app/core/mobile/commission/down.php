@@ -162,7 +162,6 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		        app_error(1,"无此用户");
 		    } 
 		}
-// 		$openid=89;
 		$member=m("member")->getMember($openid);
 		if (!$member){
 		    if ($type==1){

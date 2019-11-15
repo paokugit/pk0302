@@ -143,8 +143,7 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		{
 			$result['merch_list'] = array( array('merchname' => '', 'merchid' => 0, 'list' => $list) );
 		}
-		    app_json($result);
-	
+		app_json($result);
 	}
 	public function add() 
 	{
@@ -235,7 +234,7 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		$id = intval($_GPC['id']);
 		$goodstotal = intval($_GPC['total']);
 		if (empty($id)) 
-		{ 
+		{
 			app_error(AppError::$ParamsError);
 		}
 		$optionid = intval($_GPC['optionid']);
@@ -249,7 +248,6 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		$goods = pdo_fetch('select id,maxbuy,minbuy,total,unit from ' . tablename('ewei_shop_goods') . ' where id=:id and uniacid=:uniacid and status=1 and deleted=0', array(':id' => $data['goodsid'], ':uniacid' => $_W['uniacid']));
 		if (empty($goods)) 
 		{
-		    
 			app_error(AppError::$GoodsNotFound);
 		}
 		$diyform_plugin = p('diyform');
@@ -329,7 +327,7 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		$openid = $_W['openid'];
 		$ids = $_GPC['ids'];
 		if (empty($ids)) 
-		{  
+		{
 			app_error(AppError::$ParamsError);
 		}
 		if (!(is_array($ids))) 

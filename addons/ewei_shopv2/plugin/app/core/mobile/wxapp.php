@@ -168,7 +168,7 @@ class Wxapp_EweiShopV2Page extends Page
 
             $member = m("member")->getMember("sns_wa_" . $data["openId"]);
             if (empty($member)) {
-                $member = array("uniacid" => $_W["uniacid"],"uid" => 0, "openid" => "sns_wa_" . $data["openId"], "nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"), "openid_wa" => $data["openId"], "comefrom" => "sns_wa", "unionid"=>$data["unionid"],"createtime" => time(), "status" => 0);
+                $member = array("uniacid" => $_W["uniacid"],"uid" => 0, "openid" => "sns_wa_" . $data["openId"], "nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"), "openid_wa" => $data["openId"], "comefrom" => "sns_wa", "unionid"=>$data["unionId"],"createtime" => time(), "status" => 0);
                 pdo_insert("ewei_shop_member", $member);
             
                 $id = pdo_insertid();
@@ -185,7 +185,7 @@ class Wxapp_EweiShopV2Page extends Page
 //                     m('member')->setCredit($agent["openid"], 'credit4', 1, "推荐新用户");
 //                     }
 //                 }
-                $updateData = array("nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"),"unionid"=> (!empty($data["unionid"]) ? $data["unionid"] : ""));
+                $updateData = array("nickname" => (!empty($data["nickName"]) ? $data["nickName"] : ""), "avatar" => (!empty($data["avatarUrl"]) ? $data["avatarUrl"] : ""), "gender" => (!empty($data["gender"]) ? $data["gender"] : "-1"),"unionid"=> (!empty($data["unionId"]) ? $data["unionId"] : ""));
                 pdo_update("ewei_shop_member", $updateData, array("id" => $member["id"], "uniacid" => $member["uniacid"]));
                 $data["id"] = $member["id"];
                 $data["uniacid"] = $member["uniacid"];
