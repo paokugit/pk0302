@@ -76,10 +76,16 @@
             </div>
 
             <div class="fui-list-group-title text-right big">
+               
                 <!-- 维权 -->
-                <%if item.refundid>0%>
+             <!--   <%if item.refundid>0%>
                     <a class="btn btn-success btn-sm order-btn" data-action="refund" data-orderid="<%item.id%>">维权<%item.refundstate>0?"处理":"详情"%></a>
-                <%/if%>
+                <%/if%> -->
+              <!--商品维权-->
+             <%each item.good_refundid as refundid%>
+               <a class="btn btn-success btn-sm order-btn" data-action="refund" data-orderid="<%refundid.refundid%>">维权<%refundid.status==0?"处理":"详情"%></a>
+             <%/each%>
+              
                 <!-- 未付款 -->
                 <%if item.statusvalue==0%>
                     <%if item.paytypevalue==3%>

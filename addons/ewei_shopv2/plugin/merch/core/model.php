@@ -1334,6 +1334,7 @@ class MerchModel extends PluginModel
         $params = array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid );
         $condition = " and uniacid=:uniacid and merchid=:merchid";
         $data["commission"] = round($list["commission"], 2);
+        //待审核
         $sql = "select *  from " . tablename("ewei_shop_merch_bill") . " where 1 " . $condition . " and status=1 and creditstatus =2";
         $status1 = pdo_fetchall($sql, $params);
         $status1price = 0;
@@ -1368,7 +1369,7 @@ class MerchModel extends PluginModel
 
             $data["commission1"] = round($commission1, 2);
         }
-
+        //待结算金额
         $sql = "select sum(realprice) as totalmoney from " . tablename("ewei_shop_merch_bill") . " where 1 " . $condition . " and status=2 and creditstatus =2";
         $status2 = pdo_fetchall($sql, $params);
         $status2price = 0;
@@ -1403,7 +1404,7 @@ class MerchModel extends PluginModel
 
             $data["commission2"] = round($commission2, 2);
         }
-
+        //已结算金额
         $sql = "select *  from " . tablename("ewei_shop_merch_bill") . " where 1 " . $condition . " and status=3 and creditstatus =2";
         $status3 = pdo_fetchall($sql, $params);
         $status3price = 0;
@@ -1478,6 +1479,27 @@ class MerchModel extends PluginModel
         $sql = "select " . $con . " from " . tablename("ewei_shop_merch_user") . " u " . " left join " . tablename("ewei_shop_order") . " o on u.id=o.merchid" . " where 1 " . $condition . " limit 1";
         $list = pdo_fetch($sql, $params);
         $merchcouponprice = pdo_fetchcolumn("select sum(o.couponprice) from " . tablename("ewei_shop_merch_user") . " u " . " left join " . tablename("ewei_shop_order") . " o on u.id=o.merchid" . " where o.couponmerchid>0 " . $condition . " limit 1", $params);
+        //计算退款金额
+        $order=pdo_fetchall("select * from ".tablename("ewei_shop_order")." where status=3 and isparent=0 and merchapply<=0 and paytype!=3 and type=:type and merchid=:merchid",array(":merchid"=>$merchid,":type"=>$type));
+        $refundid=array();
+        $i=0;
+        foreach ($order as $k=>$v){
+           $goods=pdo_fetchall("select * from ".tablename("ewei_shop_order_goods")." where rstate=1 and refundstatus=1 and orderid=:orderid and status!=-1",array(":orderid"=>$v["id"]));
+           foreach ($goods as $kk=>$vv){
+               if (!in_array($vv["refundid"], $refundid)){
+                   $refundid[$i]=$vv["refundid"];
+                   $i+=1;
+               }
+           }
+           
+        }
+        if (empty($refundid)){
+            $refund_price=0;
+        }else{
+            $refundid=implode(",", $refundid);
+            $refund_price=pdo_fetchcolumn("select sum(applyprice) from ".tablename("ewei_shop_order_refund")." where id in(:id)",array(":id"=>$refundid));
+            
+        }
         if( 0 < $flag ) 
         {
             $sql = "select o.id,o.agentid from " . tablename("ewei_shop_merch_user") . " u " . " left join " . tablename("ewei_shop_order") . " o on u.id=o.merchid" . " where 1 " . $condition;
@@ -1497,7 +1519,7 @@ class MerchModel extends PluginModel
             $list["commission"] = $commission;
         }
 
-        $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
+        $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"]-$refund_price;
        // $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice - $list["seckilldiscountprice"];
         $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice - $list["seckilldiscountprice"]-$list["share_price"]-$list["deductprice"]-$list["discount_price"];
 
@@ -1563,7 +1585,7 @@ class MerchModel extends PluginModel
             $params["id"] = $orderid;
         }
 
-        $con = "o.id,u.merchname,u.payrate,o.price,o.goodsprice,o.dispatchprice,discountprice," . "o.deductprice,o.discount_price,o.deductcredit2,o.isdiscountprice,o.deductenough,o.changeprice,o.agentid,o.seckilldiscountprice," . "o.merchdeductenough,o.merchisdiscountprice,o.couponmerchid,o.couponprice,o.couponmerchid,o.ordersn,o.finishtime,o.merchapply";
+        $con = "o.id,u.merchname,u.payrate,o.price,o.goodsprice,o.dispatchprice,discountprice," . "o.deductprice,o.discount_price,o.deductcredit2,o.isdiscountprice,o.deductenough,o.changeprice,o.agentid,o.seckilldiscountprice," . "o.merchdeductenough,o.merchisdiscountprice,o.couponmerchid,o.couponprice,o.couponmerchid,o.ordersn,o.finishtime,o.merchapply,o.id as orderid";
         $sql = "select " . $con . " from " . tablename("ewei_shop_merch_user") . " u " . " left join " . tablename("ewei_shop_order") . " o on u.id=o.merchid" . " where 1 " . $condition;
         $order = pdo_fetchall($sql, $params);
         foreach( $order as &$list ) 
@@ -1573,10 +1595,28 @@ class MerchModel extends PluginModel
             {
                 $merchcouponprice = $list["couponprice"];
             }
-
+//             var_dump($list["orderid"]);
+            //获取退款商品
+            $refundid=array();
+            $i=0;
+            $goods=pdo_fetchall("select * from ".tablename("ewei_shop_order_goods")." where rstate=1 and refundstatus=1 and orderid=:orderid and status!=-1",array(":orderid"=>$list["orderid"]));
+          
+            foreach ($goods as $kk=>$vv){
+                if (!in_array($vv["refundid"], $refundid)){
+                    $refundid[$i]=$vv["refundid"];
+                    $i+=1;
+                }
+            }
+            
+            if (empty($refundid)){
+                $refundprice=0;
+            }else{
+                $refundprice=pdo_fetchcolumn("select sum(applyprice) from ".tablename("ewei_shop_order_refund")." where id in(:id)",array(":id"=>implode(",", $refundid)));
+            }
+            $list["refundprice"]=$refundprice;
             $list["commission"] = m("order")->getOrderCommission($list["id"], $list["agentid"]);
 
-            $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"];
+            $list["orderprice"] = $list["goodsprice"] + $list["dispatchprice"] + $list["changeprice"]-$refundprice;
            // $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice;
             $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice-$list["discount_price"]-$list["deductprice"];
              //$list['orderprice'] = $list['realprice'] = $list['price'];
@@ -1809,6 +1849,7 @@ class MerchModel extends PluginModel
         $list["orderprice"] = $list["dispatch"] + $list["money"];
         $list["iscredit"] = $iscredit["iscredit"];
         $list["iscreditmoney"] = $iscredit["iscreditmoney"];
+//         var_dump($list);
         return $list;
     }
 
@@ -2113,7 +2154,11 @@ class MerchModel extends PluginModel
         {
             $has_plugins[] = "quick";
         }
-
+        //拼团
+        if( p("groups") && $perm && $perm->is_perm_plugin("groups") )
+        {
+            $has_plugins[] = "groups";
+        }
         if( !empty($merchid) ) 
         {
             $item = $this->getListUserOne($merchid);
