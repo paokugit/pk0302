@@ -72,6 +72,33 @@ class Bindmobile_EweiShopV2Page extends AppMobilePage{
        }
     }
     
+    //绑定手机号--折扣宝
+    public function bind_discount(){
+        global $_W;
+        global $_GPC;
+        $openid=$_GPC["openid"];
+        $mobile=$_GPC["mobile"];
+        $member = m('member')->getMember($openid);
+        if (empty($member)){
+            app_error(1,"openid不正确");
+        }else{
+            if ($member["mobile"]==$mobile){
+                app_error(1,"修改手机号不可与原手机号一样");
+            }
+            if (pdo_update("ewei_shop_member",array("mobile"=>$mobile),array("openid"=>$openid))){
+                //获取是否有奖励记录
+                $log=pdo_get("ewei_shop_member_credit_record",array("openid"=>$openid,"remark"=>"绑定手机号获取"));
+                if (empty($member["mobile"])&&empty($log)){
+                    //添加卡路里
+                    m('member')->setCredit($openid, 'credit3', 20, "绑定手机号获取");
+                }
+                app_error(0,"绑定成功");
+            }else{
+                app_error(1,"绑定失败");
+            }
+        }
+    }
+    
     //手机号是否绑定
     public function isbind(){
         global $_W;

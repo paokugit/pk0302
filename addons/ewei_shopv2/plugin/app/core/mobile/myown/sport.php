@@ -292,14 +292,14 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         //获取今日已兑换的卡路里
         $starttime=strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
         $endtime=strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
-        $count_list=pdo_fetchall("select num from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark like :remark1 or remark like :remark2) order by id desc",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime,':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+        $count_list=pdo_fetchall("select num from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark like :remark1 or remark like :remark2) order by id desc",array(':openid'=>$openid,':credittype'=>"credit3",":starttime"=>$starttime,':endtime'=>$endtime,':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
         //var_dump($count_list);
         $count=array_sum(array_column($count_list, 'num'));
         if (empty($count)){
             $count=0;
         }
         $count=round($count,1);
-        $name="今日步数已兑换".$count."卡路里=";
+        $name="今日步数已兑换".$count."折扣宝=";
         $nameColor = imagecolorallocate($target, 51, 51, 51);
         imagettftext($target, 18, 0, 144, 998, $nameColor, $PINGFANG_LIGHT, $name);
         $name=$count."元";

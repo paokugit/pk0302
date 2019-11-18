@@ -21,7 +21,7 @@ class Cart_EweiShopV2Page extends AppMobilePage
           //app接口
             $member_id=m('member')->getLoginToken($_GPC['openid']);
           if ($member_id==0){
-              app_error(1,"无此用户");
+              apperror(1,"无此用户");
           }
           $member=m("member")->getMember($member_id);
           $condition = ' and f.uniacid= :uniacid and (f.openid=:openid or f.user_id=:user_id) and f.deleted=0';
@@ -36,7 +36,7 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		$totalprice = 0;
 		$ischeckall = true;
 		$level = m('member')->getLevel($openid);
-		$sql = 'SELECT f.id,f.total,f.goodsid,g.total as stock, o.stock as optionstock, g.maxbuy,g.title,g.thumb,ifnull(o.marketprice, g.marketprice) as marketprice,' . ' g.productprice,o.title as optiontitle,f.optionid,o.specs,g.minbuy,g.maxbuy,g.unit,f.merchid,g.merchsale' . ' ,f.selected FROM ' . tablename('ewei_shop_member_cart') . ' f ' . ' left join ' . tablename('ewei_shop_goods') . ' g on f.goodsid = g.id ' . ' left join ' . tablename('ewei_shop_goods_option') . ' o on f.optionid = o.id ' . ' where 1 ' . $condition . ' ORDER BY `id` DESC ';
+		$sql = 'SELECT f.id,f.total,f.goodsid,g.total as stock,g.merchid, o.stock as optionstock, g.maxbuy,g.title,g.thumb,ifnull(o.marketprice, g.marketprice) as marketprice,' . ' g.productprice,o.title as optiontitle,f.optionid,o.specs,g.minbuy,g.maxbuy,g.unit,f.merchid,g.merchsale' . ' ,f.selected FROM ' . tablename('ewei_shop_member_cart') . ' f ' . ' left join ' . tablename('ewei_shop_goods') . ' g on f.goodsid = g.id ' . ' left join ' . tablename('ewei_shop_goods_option') . ' o on f.optionid = o.id ' . ' where 1 ' . $condition . ' ORDER BY `id` DESC ';
 		$list = pdo_fetchall($sql, $params);
 		foreach ($list as &$g ) 
 		{
@@ -114,6 +114,12 @@ class Cart_EweiShopV2Page extends AppMobilePage
 				$ischeckall = false;
 			}
 			unset($g['maxbuy']);
+			if ($g["merchid"]==0){
+			    $g["merchname"]="跑库";
+			}else{
+			    $merch=pdo_get("ewei_shop_merch_user",array("id"=>$g["merchid"]));
+			    $g["merchname"]=$merch["merchname"];
+			}
 		}
 		unset($g);
 		$list = set_medias($list, 'thumb');
@@ -143,7 +149,12 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		{
 			$result['merch_list'] = array( array('merchname' => '', 'merchid' => 0, 'list' => $list) );
 		}
+		if ($type==1){
+		    
+		    apperror(0,"",$result);
+		}else{
 		app_json($result);
+		}
 	}
 	public function add() 
 	{
@@ -233,9 +244,14 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		global $_GPC;
 		$id = intval($_GPC['id']);
 		$goodstotal = intval($_GPC['total']);
+		$type=$_GPC["type"];
 		if (empty($id)) 
 		{
+		    if ($type==1){
+		      apperror(1,"id未传");  
+		    }else{
 			app_error(AppError::$ParamsError);
+		    }
 		}
 		$optionid = intval($_GPC['optionid']);
 		empty($goodstotal) && ($goodstotal = 1);
@@ -243,12 +259,22 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		$data = pdo_fetch('select * from ' . tablename('ewei_shop_member_cart') . ' where id=:id and uniacid=:uniacid  limit 1 ', array(':id' => $id, ':uniacid' => $_W['uniacid']));
 		if (empty($data)) 
 		{
-			app_error(AppError::$NotInCart);
+			
+			if ($type==1){
+			    apperror(1,"不存在");
+			}else{
+			    app_error(AppError::$NotInCart);
+			}
 		}
 		$goods = pdo_fetch('select id,maxbuy,minbuy,total,unit from ' . tablename('ewei_shop_goods') . ' where id=:id and uniacid=:uniacid and status=1 and deleted=0', array(':id' => $data['goodsid'], ':uniacid' => $_W['uniacid']));
 		if (empty($goods)) 
 		{
-			app_error(AppError::$GoodsNotFound);
+			
+			if ($type==1){
+			    apperror(1,"商品已下架");
+			}else{
+			    app_error(AppError::$GoodsNotFound);
+			}
 		}
 		$diyform_plugin = p('diyform');
 		$diyformid = 0;
@@ -293,16 +319,26 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		    $arr["user_id"]=$member["id"];
 		}
 		pdo_update('ewei_shop_member_cart', $arr, array('id' => $id, 'uniacid' => $_W['uniacid']));
+		if ($type==1){
+		   apperror(0,"");
+		}else{
 		app_json();
+		}
+		
 	}
 	public function remove() 
 	{
 		global $_W;
 		global $_GPC;
 		$ids = $_GPC['ids'];
+		$type=$_GPC["type"];
 		if (empty($ids)) 
 		{
+		    if ($type==1){
+		        apperror(1,"ids未传");
+		    }else{
 			app_error(AppError::$ParamsError);
+		    }
 		}
 		if (!(is_array($ids))) 
 		{
@@ -311,13 +347,21 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		}
 		if (empty($ids)) 
 		{
-			app_error(AppError::$ParamsError);
+		    if ($type==1){
+		        apperror(1,"ids未传");
+		    }else{
+		        app_error(AppError::$ParamsError);
+		    }
 		}
 // 		$sql = 'update ' . tablename('ewei_shop_member_cart') . ' set deleted=1 where uniacid=:uniacid and openid=:openid and id in (' . implode(',', $ids) . ')';
 // 		pdo_query($sql, array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
 		$sql = 'update ' . tablename('ewei_shop_member_cart') . ' set deleted=1 where uniacid=:uniacid and id in (' . implode(',', $ids) . ')';
 		pdo_query($sql, array(':uniacid' => $_W['uniacid']));
+		if ($type==1){
+		    apperror(0,"");
+		}else{
 		app_json();
+		}
 	}
 	public function tofavorite() 
 	{
@@ -326,9 +370,14 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		$uniacid = $_W['uniacid'];
 		$openid = $_W['openid'];
 		$ids = $_GPC['ids'];
+		$type=$_GPC["type"];
 		if (empty($ids)) 
-		{
+		{ 
+		    if ($type==1){
+		        apperror(1,"ids未传");
+		    }else{
 			app_error(AppError::$ParamsError);
+		    }
 		}
 		if (!(is_array($ids))) 
 		{
@@ -360,7 +409,11 @@ class Cart_EweiShopV2Page extends AppMobilePage
 		}
 		$sql = 'update ' . tablename('ewei_shop_member_cart') . ' set deleted=1 where uniacid=:uniacid  and id in (' . implode(',', $ids) . ')';
 		pdo_query($sql, array(':uniacid' => $uniacid));
+		if ($type==1){
+		    apperror(0,"");
+		}else{
 		app_json();
+		}
 	}
 	public function select() 
 	{

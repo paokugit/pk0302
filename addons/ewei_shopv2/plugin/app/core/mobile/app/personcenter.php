@@ -13,7 +13,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
         $token=$_GPC["token"];
         $member_id=m('member')->getLoginToken($token);
         if ($member_id==0){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $member=pdo_fetch("select nickname,avatar,credit2,credit3,credit4,agentlevel,is_open,expire_time,mobile,qiandao from ".tablename("ewei_shop_member")." where id=:id",array(":id"=>$member_id));
        
@@ -50,7 +50,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
                 $resault["server"][$k]=tomedia($v);
             }
         }
-       app_error(0,$resault);
+        apperror(0,"",$resault);
     }
     //粉丝
     public function fans(){
@@ -59,11 +59,11 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
         $token=$_GPC["token"];
         $member_id=m('member')->getLoginToken($token);
         if ($member_id==0){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $member=pdo_get("ewei_shop_member",array("id"=>$member_id));
         if (empty($member)){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $resault["id"]=$member_id;
         if ($member["agentid"]){
@@ -79,7 +79,12 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
         //获取直推数据
         $count=pdo_fetch("select count(*) as count from ".tablename("ewei_shop_member")." where agentid=:agentid",array(":agentid"=>$member_id));
         $resault["recommend"]=$count["count"];
-        $member_agentcount=pdo_get("ewei_shop_member_agentcount",array("openid"=>$member["openid"]));
+//         $member_agentcount=pdo_get("ewei_shop_member_agentcount",array("openid"=>$member["openid"]));
+        if (empty($member["openid"])){
+            $member["openid"]=0;
+        }
+        $member_agentcount=pdo_fetch("select * from ".tablename("ewei_shop_member_agentcount")." where openid=:openid or user_id=:user_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
+        
         if ($member_agentcount){
            $resault["shopkeeperallcount"]=$member_agentcount["shopkeeperallcount"];
            $resault["agentallcount"]=$member_agentcount["agentallcount"];
@@ -87,7 +92,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
             $resault["shopkeeperallcount"]=0;
             $resault["agentallcount"]=0;
         }
-        app_error(0,$resault);
+        apperror(0,"",$resault);
     }
     //粉丝--列表
     public function fans_list(){
@@ -96,12 +101,12 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
         $token=$_GPC["token"];
         $member_id=m('member')->getLoginToken($token);
         if ($member_id==0){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
 //         $member_id=89;
         $member=pdo_get("ewei_shop_member",array("id"=>$member_id));
         if (empty($member)){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $page=$_GPC["page"];
         if (empty($page)){
@@ -109,6 +114,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
         }
         $first=($page-1)*15;
         $list=pdo_fetchall("select id,openid,nickname,agentlevel,avatar,createtime from ".tablename("ewei_shop_member")." where agentid=:agentid order by createtime desc limit ".$first." ,15",array(":agentid"=>$member_id));
+       
         foreach ($list as $k=>$v){
             $list[$k]["createtime"]=date("Y-m-d H:i:s",$v["createtime"]);
             $count=pdo_get("ewei_shop_member_agentcount",array("openid"=>$v["openid"]));
@@ -118,7 +124,12 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
                $list[$k]["agentallcount"]=0;
            }
         }
-        app_error(0,$list);
+        $re["list"]=$list;
+        //获取总数量
+        $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_member")." where agentid=:agentid",array(":agentid"=>$member_id));
+        $re["pagetotal"]=ceil($total/15);
+        $re["page"]=$page;
+        apperror(0,"",$re);
     }
     //签到
     public function sign_in(){
@@ -128,18 +139,18 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
         $member_id=m('member')->getLoginToken($openid);
         if ($member_id==0){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $openid=$member_id;
         }
         //         $member_id=89;
         $member=m("member")->getMember($openid);
         if (empty($member)){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         //判断是否已签到
         if ($member["qiandao"]==date("Y-m-d",time())){
-            app_error(1,"不可重复签到");
+            apperror(1,"不可重复签到");
         }
         //昨天日期
         $yesterday=date("Y-m-d",strtotime("-1 day"));
@@ -162,9 +173,9 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
                 'user_id'=>$member["id"]
             );
             pdo_insert('ewei_shop_member_getstep', $d);
-            app_error(0,"签到成功");
+            apperror(0,"签到成功");
         }else{
-            app_error(1,"签到失败");
+            apperror(1,"签到失败");
         }
     }
    //账户设置
@@ -175,14 +186,14 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        if ($_GPC["type"]==1){
        $member_id=m('member')->getLoginToken($openid);
        if ($member_id==0){
-           app_error(1,"无此用户");
+           apperror(1,"无此用户");
        }
        $openid=$member_id;
        }
        //         $member_id=89;
        $member=m("member")->getMember($openid);
        if (empty($member)){
-           app_error(1,"无此用户");
+           apperror(1,"无此用户");
        }
        $d["nickname"]=$member["nickname"];
        $d["avatar"]=$member["avatar"];
@@ -196,7 +207,8 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        }else{
            $d["level"]="普通用户";
        }
-       app_error(0,$d);
+       
+       apperror(0,"",$d);
    }
    //设置--个人中心--性别
    public function mes_gender(){
@@ -206,20 +218,20 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        if ($_GPC["type"]==1){
            $member_id=m('member')->getLoginToken($openid);
            if ($member_id==0){
-               app_error(1,"无此用户");
+               apperror(1,"无此用户");
            }
            $openid=$member_id;
        }
        //         $member_id=89;
        $member=m("member")->getMember($openid);
        if (empty($member)){
-           app_error(1,"无此用户");
+           apperror(1,"无此用户");
        }
        $data["gender"]=$_GPC["gender"];
        if (pdo_update("ewei_shop_member",$data,array("id"=>$member["id"]))){
-           app_error(0,"设置成功");
+           apperror(0,"设置成功");
        }else{
-           app_error(1,"设置失败");
+           apperror(1,"设置失败");
        }
    }
    //设置--消息推送
@@ -230,14 +242,14 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        if ($_GPC["type"]==1){
            $member_id=m('member')->getLoginToken($openid);
            if ($member_id==0){
-               app_error(1,"无此用户");
+               apperror(1,"无此用户");
            }
            $openid=$member_id;
        }
        //         $member_id=89;
        $member=m("member")->getMember($openid);
        if (empty($member)){
-           app_error(1,"无此用户");
+           apperror(1,"无此用户");
        }
        $set=unserialize($member["news"]);
        $d=array();
@@ -261,7 +273,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        }else{
            $d["dynamic"]=0;
        }
-       app_error(0,$d);
+       apperror(0,"",$d);
    }
    //设置--消息推送--提交
    public function setnews_submit(){
@@ -271,14 +283,14 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        if ($_GPC["type"]==1){
            $member_id=m('member')->getLoginToken($openid);
            if ($member_id==0){
-               app_error(1,"无此用户");
+               apperror(1,"无此用户");
            }
            $openid=$member_id;
        }
        //         $member_id=89;
        $member=m("member")->getMember($openid);
        if (empty($member)){
-           app_error(1,"无此用户");
+           apperror(1,"无此用户");
        }
        if ($member["news"]){
            $set=unserialize($member["news"]);
@@ -288,14 +300,14 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        $mode=$_GPC["mode"];
        $open=$_GPC["open"];
        if ($set[$mode]==$open){
-           app_error(1,"不可重复操作");
+           apperror(1,"不可重复操作");
        }
        $set[$mode]=$open;
        $data["news"]=serialize($set);
        if (pdo_update("ewei_shop_member",$data,array("id"=>$member["id"]))){
-           app_error(0,"成功");
+           apperror(0,"成功");
        }else{
-           app_error(1,"失败");
+           apperror(1,"失败");
        }
    }
    //设置--关于跑库（隐私注册|软许）
@@ -304,13 +316,13 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        global $_W;
        $id=$_GPC["id"];
        if (empty($id)){
-           app_error(1,"id未传入");
+           apperror(1,"id未传入");
        }
        $notice=pdo_get("ewei_shop_member_devote",array("id"=>$id));
        if (empty($notice)){
-           app_error(1,"id不正确");
+           apperror(1,"id不正确");
        }
-       app_error(0,$notice);
+       apperror(0,$notice);
    }
    //足迹
    public function footprint(){
@@ -320,13 +332,13 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        if ($_GPC["type"]==1){
            $member_id=m('member')->getLoginToken($openid);
            if ($member_id==0){
-               app_error(1,"无此用户");
+               apperror(1,"无此用户");
            }
            $openid=$member_id;
        }
        $member=m("member")->getMember($openid);
        if (empty($member)){
-           app_error(1,"无此用户");
+           apperror(1,"无此用户");
        }
        $pindex = max(1, intval($_GPC['page']));
        $psize = 10;
@@ -459,7 +471,8 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
                }
            }
        }
-       app_error(0,$l);
+       $res["list"]=$l;
+       apperror(0,"",$res);
    }
    //判断时间阶段
    public function judge_day($time){
@@ -497,4 +510,5 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        }
        return $resault;
    }
+   
 }

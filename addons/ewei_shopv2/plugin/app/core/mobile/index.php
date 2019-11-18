@@ -310,6 +310,116 @@ class Index_EweiShopV2Page extends AppMobilePage
         //  exit('{"info":{"author":{"is_author":1},"currency":[{"id":"2","currency":"2.00","member_id":"1","uniacid":"4","today":"1546358400","source":"3","status":"1","created":"1546394205","msg":"签到奖励"},{"id":"2","currency":"2.00","member_id":"1","uniacid":"4","today":"1546358400","source":"3","status":"1","created":"1546394205","msg":"签到奖励"},{"id":"2","currency":"2.00","member_id":"1","uniacid":"4","today":"1546358400","source":"3","status":"1","created":"1546394205","msg":"签到奖励"}],"my_currency":"4.00","toady":8000},"status":1}');
     }
     
+    //获取今日未兑换的步数列表--折扣宝
+    public function bushu_discount()
+    {
+        global $_GPC;
+        global $_W;
+        
+        $day = date('Y-m-d');
+        $result = array();
+        $openid=$_W["openid"];
+        if (empty($_W['openid'])) {
+            app_error(AppError::$ParamsError);
+        }
+        $member = m('member')->getMember($_W['openid']);
+        $shopset = m("common")->getSysset("shop");
+        // $exchange=exchange($_W['openid']);
+        
+        if (empty($member['agentlevel'])) {
+            // $bushu = 5;
+            $subscription_ratio=0.5*2;
+            $exchange=0.5/1500;
+            $exchange_step=m("member")->exchange_step($openid);
+            //   var_dump($exchange_step);
+            $bushu=ceil($exchange_step*1500/0.5);
+            
+            
+        } else {
+            $memberlevel = pdo_get('ewei_shop_commission_level', array('id' => $member['agentlevel']));
+            // $bushu = $memberlevel['duihuan'];
+            $subscription_ratio=$memberlevel["subscription_ratio"]*2;
+            $exchange=$subscription_ratio/1500;
+            $exchange_step=m("member")->exchange_step($openid);
+            $bushu=ceil($exchange_step*1500/$subscription_ratio);
+            //可兑换的步数
+            //            var_dump($bushu);
+        }
+        // var_dump($bushu);
+        //已兑换的bushu
+        //  $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $_W['openid'],':type'=>2));
+        //获取今日已兑换的卡路里
+        $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
+        $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
+        
+        $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit3",":openid"=>$openid,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+        // var_dump($cardtoday);
+        if (empty($cardtoday)){
+            $jinri=0;
+        }else{
+            $jinri=$cardtoday*1500/$subscription_ratio;
+        }
+        // var_dump($jinri);
+        
+        $step_number=$jinri;
+        
+        if ($step_number < $bushu) {
+            //        $result = pdo_getall('ewei_shop_member_getstep', array('day' => $day, 'openid' => $_W['openid'], 'status' => 0));
+            $result=pdo_fetchall("select * from ".tablename("ewei_shop_member_getstep")." where day=:day and openid=:openid and status=0 order by step asc",array(":day"=>$day,":openid"=>$_W["openid"]));
+        }else{
+            $result=pdo_fetchall("select * from ".tablename("ewei_shop_member_getstep")." where day=:day and openid=:openid and status=0 and type=2 order by step asc",array(":day"=>$day,":openid"=>$_W["openid"]));
+        }
+        $r=array();
+        $i=0;
+        foreach ($result as &$vv) {
+            if ($i<3){
+                if ($vv["type"]!=2){
+                    //步数小于今日步数
+                    if ($step_number<$bushu){
+                        if ($step_number+$vv["step"]>=$bushu){
+                            //大于
+                            $r[$i]["id"]=$vv["id"];
+                            $r[$i]["step"]=$bushu-$step_number;
+                            $card1=($bushu-$step_number)*$exchange;
+                            if ($card1>0.01){
+                                $r[$i]["currency"]=round($card1,2);
+                            }else{
+                                $r[$i]["currency"]=round($card1,4);
+                            }
+                            $r[$i]["type"]=$vv["type"];
+                            $step_number=$bushu;
+                        }else{
+                            //小于
+                            $r[$i]["id"]=$vv["id"];
+                            $r[$i]["step"]=$vv["step"];
+                            $card1=$vv["step"]*$exchange;
+                            if ($card1>0.01){
+                                $r[$i]["currency"]=round($card1,2);
+                            }else{
+                                $r[$i]["currency"]=round($card1,4);
+                            }
+                            $step_number=$step_number+$vv["step"];
+                            $r[$i]["type"]=$vv["type"];
+                        }
+                        $i=$i+1;
+                    }
+                    
+                }else{
+                    $r[$i]["id"]=$vv["id"];
+                    $r[$i]["step"]=$vv["step"];
+                    
+                    $r[$i]["currency"]=2;
+                    $r[$i]["type"]=$vv["type"];
+                    $i=$i+1;
+                }
+                
+            }
+            
+        }
+        unset($vv);
+        
+        app_json(array('result' => $r, 'url' => referer()));
+    }
     public function urundata()
     {
         global $_GPC;
@@ -341,7 +451,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         $shopset = m("common")->getSysset("shop");
         $member = m('member')->getMember($openid);
-        $member = array('credit1' => $member['credit1']);
+        $member = array('credit1' => $member['credit1'],'credit3'=>$member['credit3']);
         $day = date('Y-m-d');
         $bushu = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where  `day`=:today and openid=:openid and type!=:type", array(':today' => $day, ':openid' => $openid,':type'=>2));
         if (empty($bushu)){
@@ -485,6 +595,133 @@ class Index_EweiShopV2Page extends AppMobilePage
         
     }
     
+    
+    //步数兑换卡路里--折扣宝
+    public function getkll_discount()
+    {
+        global $_GPC;
+        global $_W;
+        $openid = $_W['openid'];
+        if (empty($openid)) {
+            app_error(AppError::$ParamsError, '系统错误');
+        }
+        //获取步数
+        $now_setp=$_GPC["step"];
+        
+        $cs["step"]=$_GPC["step"];
+        $cs["step_id"]=$_GPC["id"];
+        $cs["create_time"]=time();
+        $cs["openid"]=$_W["openid"];
+        pdo_insert("ewei_shop_member_getsteplog",$cs);
+        $day = date('Y-m-d');
+        $member = m('member')->getMember($_W['openid']);
+        $shopset = m("common")->getSysset("shop");
+        //获取当前用户卡路里兑换比例
+        
+        if (empty($_GPC["id"])){
+            app_error(-1,"id未获取");
+        }else{
+            
+            if (empty($member['agentlevel'])) {
+                // $bushu = 5;
+                $subscription_ratio=0.5*2;
+                $exchange=0.5/1500;
+                $exchange_step=m("member")->exchange_step($openid);
+                $bushu=ceil($exchange_step*1500/0.5);
+            } else {
+                $memberlevel = pdo_get('ewei_shop_commission_level', array('id' => $member['agentlevel']));
+                //  $bushu = $memberlevel['duihuan'];
+                $subscription_ratio=$memberlevel["subscription_ratio"]*2;
+                //兑换比例
+                $exchange=$subscription_ratio/1500;
+                $exchange_step=m("member")->exchange_step($openid);
+                //今日可兑换步数
+                $bushu=ceil($exchange_step*1500/$subscription_ratio);
+            }
+            
+            $step = pdo_get('ewei_shop_member_getstep', array('id' => $_GPC['id']));
+            //今日步数
+            //             $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $openid,':type'=>2));
+            
+            //             if (empty($jinri)){
+            //                 $jinri=0;
+            //             }
+            $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
+            $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
+            
+            $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit3",":openid"=>$openid,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+            
+            if (empty($cardtoday)){
+                $jinri=0;
+            }else{
+                $jinri=$cardtoday*1500/$subscription_ratio;
+            }
+            
+            
+            if ($step["type"]!=2){
+                
+                if ($jinri>=$bushu) {
+                    app_error(-2,"您每天最多可兑换".$bushu."卡路里");
+                }
+                
+            }
+            
+            if (!empty($step) && $step['status'] == 0) {
+                
+                
+                
+                if ($step["type"]!=2){
+                    //不是签到
+                    //添加传入step字段
+                    if (!empty($now_setp)){
+                        
+                        if (($jinri + $now_setp) >$bushu) {
+                            
+                            $keduihuan = ($bushu-$jinri)*$exchange;
+                            
+                        }else{
+                            
+                            $keduihuan =$now_setp*$exchange;
+                            
+                        }
+                        
+                        
+                    }else{
+                        
+                        if (($jinri + $step["step"]) > $bushu) {
+                            
+                            $keduihuan = ($bushu-$jinri)*$exchange;
+                            
+                        }else{
+                            
+                            $keduihuan =$step["step"]*$exchange;
+                            
+                        }
+                        
+                    }
+                    
+                }else{
+                    //签到 1卡路里
+                    $keduihuan=2;
+                }
+                
+                if ($step["type"]==0){
+                    m('member')->setCredit($openid, 'credit3', $keduihuan, "步数兑换");
+                }elseif ($step["type"]==1){
+                    m('member')->setCredit($openid, 'credit3', $keduihuan, "好友助力");
+                }elseif ($step["type"]==2) {
+                    m('member')->setCredit($openid, 'credit3', $keduihuan, "签到获取");
+                }
+                pdo_update('ewei_shop_member_getstep', array('status' => 1), array('id' => $step['id']));
+                app_error(0,$keduihuan);
+            }
+            
+            app_error(0,"兑换成功");
+        }
+        
+        app_json();
+        
+    }
     //签到
     public function sign_in(){
         global $_GPC;
@@ -576,6 +813,104 @@ class Index_EweiShopV2Page extends AppMobilePage
                 }
                 pdo_update('ewei_shop_member', $update, array('openid' => $member['openid']));
                 wxmessage($openid, $sign_days,'1卡路里');
+                //如果是年卡会员   则给会员发送小程序消息
+                if($member['is_open'] == 1){
+                    m('member')->setCredit($openid,'credit3',10,"年卡会员每日10折扣宝");
+                    wxmessage($openid,$sign_days,"年卡会员每日登陆领取10折扣宝");
+                }
+                app_error(0,"签到成功,获取步数".$step);
+            }
+            
+        }
+        
+    }
+    
+    //签到--折扣宝
+    public function sign_indisocunt(){
+        global $_GPC;
+        global $_W;
+        $openid = trim($_W["openid"]);
+        
+        if (empty($openid)) {
+            app_error(AppError::$ParamsError);
+        }
+        //获取用户信息
+        $member = m("member")->getMember($openid);
+        // var_dump($member);die;
+        $day=date("Y-m-d",time());
+        $shopset = m("common")->getSysset("shop");
+        
+        if ($member["qiandao"]==$day){
+            //             wxmessage($openid, 1);
+            app_error(AppError::$ParamsError, '请勿重复签到');
+        }else{
+            //昨天日期
+            $yesterday=date("Y-m-d",strtotime("-1 day"));
+            if ($member["qiandao"]==$yesterday){
+                //连签天数<7
+                if ($member["sign_days"]!=7){
+                    
+                    $step=$shopset['qiandao'];
+                    $data = array(
+                        'timestamp' => time(),
+                        'openid' => trim($_W["openid"]),
+                        'day' => date('Y-m-d'),
+                        'uniacid' => $_W['uniacid'],
+                        'step' => $step,
+                        'type' => 2
+                    );
+                    $sign_days=$member["sign_days"]+1;
+                }else{
+                    $step=$shopset['qiandao'];
+                    $data = array(
+                        'timestamp' => time(),
+                        'openid' => trim($_W["openid"]),
+                        'day' => date('Y-m-d'),
+                        'uniacid' => $_W['uniacid'],
+                        'step' => $step,
+                        'type' => 2
+                    );
+                    //                     $sign_days=1;
+                    $sign_days=$member["sign_days"]+1;
+                }
+                $update = array('qiandao' => $day,'sign_days'=>$sign_days);
+                // 因为setcredit里面加的有数值 //如果是年卡会员  则折扣宝加10  否则是原来的credit3
+                //                $update['credit3'] = $member['is_open'] == 1 ? bcadd($member['credit3'],10,2) : $member['credit3'] ;
+                pdo_insert('ewei_shop_member_getstep', $data);
+                pdo_update('ewei_shop_member', $update , array('openid' => $member['openid']));
+                //签到消息提醒
+                wxmessage($openid, $sign_days,'2折扣宝');
+                if($member['is_open'] == 1){
+                    m('member')->setCredit($openid,'credit3',10,"年卡会员每日10折扣宝");
+                    wxmessage($openid,date('Y-m-d',time()),'年卡会员每日登陆领取10折扣宝');
+                }
+                app_error(0,"签到成功,获取步数".$step);
+            }else{
+                
+                $step=$shopset['qiandao'];
+                //  var_dump($step);
+                $data = array(
+                    'timestamp' => time(),
+                    'openid' => trim($_W["openid"]),
+                    'day' => date('Y-m-d'),
+                    'uniacid' => $_W['uniacid'],
+                    'step' => $step,
+                    'type' => 2
+                );
+                $sign_days=1;
+                pdo_insert('ewei_shop_member_getstep', $data);
+                $update = [
+                    'qiandao' => $day,
+                    'sign_days'=>$sign_days
+                ];
+                //因为setcredit里面加的有数值
+                //$update['credit3'] = $member['is_open'] == 1 ? bcadd($member['credit3'],10,2) : $member['credit3'] ;
+                //如果过期时间 小于 当前时间  并且  is_open == 1  然后更改is_open
+                if(!empty($member['expire_time']) && $member['expire_time'] < time() && $member['is_open'] == 1){
+                    $update['is_open'] = 2;
+                }
+                pdo_update('ewei_shop_member', $update, array('openid' => $member['openid']));
+                wxmessage($openid, $sign_days,'2折扣宝');
                 //如果是年卡会员   则给会员发送小程序消息
                 if($member['is_open'] == 1){
                     m('member')->setCredit($openid,'credit3',10,"年卡会员每日10折扣宝");

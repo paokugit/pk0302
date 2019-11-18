@@ -1328,8 +1328,7 @@ class EweiShopWechatPay
                 echo false;
             }
         }
-        echo false;
-        
+        echo false;  
     }
 }
 ?>

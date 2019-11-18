@@ -19,15 +19,22 @@ function app_error($errcode = 0, $message = '')
 {
 	global $iswxapp;
 	global $openid;
-	if (is_array($message)){
-	    $res = array('error' => $errcode, 'message' =>$message);
-	}else{
-	    
+	
 	$res = array('error' => $errcode, 'message' => empty($message) ? AppError::getError($errcode) : $message);
 	
-	}
 	exit(json_encode($res));
 }
+
+function apperror($errcode = 0, $message = '',$data=array())
+{
+    global $iswxapp;
+    global $openid;
+    
+    $res = array('error' => $errcode, 'message' => empty($message) ? AppError::getError($errcode) : $message,'data'=>$data);
+    
+    exit(json_encode($res));
+}
+
 
 function app_json($result = NULL)
 {

@@ -100,6 +100,12 @@ class Index_EweiShopV2Page extends AppMobilePage{
            $credit=0;
        }
        $data['credit_price'] = $data['credit_sum'] =$credit;
+       //获取折扣宝奖励
+       $discount=m('credits')->get_sum_creditdiscount(1,$openid);
+       if (empty($discount)){
+           $discount=0;
+       }
+       $data['credit_pricediscount']=$data['credit_sumdiscount']=$discount;
        app_error(0,$data);
    }
 

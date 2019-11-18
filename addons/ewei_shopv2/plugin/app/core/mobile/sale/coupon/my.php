@@ -37,7 +37,7 @@ class My_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
@@ -244,7 +244,12 @@ class My_EweiShopV2Page extends AppMobilePage
         }
         unset($row);
         $set = m("common")->getPluginset("coupon");
+        if ($_GPC["type"]==1){
+            $res["list"]=$coupons;
+            apperror(0,"",$res);
+        }else{
         app_json(array( "list" => $coupons, "pagesize" => $psize, "total" => $total, "closecenter" => intval($set["closecenter"]) ));
+        }
     }
 
     public function getdetail()

@@ -50,13 +50,18 @@ class History_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"�޴��û�");
+                apperror(1,"用户不存在");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (empty($member)){
-            app_error(1,"�޴��û�");
+            if ($_GPC["type"]==1){
+            apperror(1,"用户不存在");    
+            }else{
+            app_error(1,"用户不存在");
+            }
+            
         }
         $del=$_GPC["del"];
         if ($del==1){
@@ -71,7 +76,12 @@ class History_EweiShopV2Page extends AppMobilePage
 		$sql = 'update ' . tablename('ewei_shop_member_history') . ' set deleted=1 where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';
         }
 		pdo_query($sql, array(':openid' => $member["openid"],':user_id'=>$member["id"]));
+		if ($_GPC["type"]==1){
+		    apperror(0,"");
+		}else{
 		app_error();
+		}
+		
 	}
 }
 

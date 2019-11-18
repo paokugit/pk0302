@@ -972,7 +972,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 		}
 		if( !empty($goods["deduct"]) && $goods["deduct"] != "0.00" ) 
 		{
-			$activity["credit"]["deduct"] = $goods["deduct"];
+// 			$activity["credit"]["deduct"] = $goods["deduct"];
 		}
 		if( !empty($goods["credit"]) ) 
 		{
@@ -1169,6 +1169,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
 	        $goods['sales'] = intval($goods['sales']);
 	        $goods['salesreal'] = intval($goods['salesreal']);
 	        $goods['total'] = intval($goods['total']);
+	        $goods["deduct_type"]=0;
 		app_json(array( "goods" => $goods ));
 	}
 	public function getCommission($goods, $level, $set) 

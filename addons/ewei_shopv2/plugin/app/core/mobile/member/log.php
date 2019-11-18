@@ -112,13 +112,17 @@ class Log_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (empty($member)){
+            if ($_GPC["type"]==1){
+                apperror(1,"无此用户");
+            }else{
             app_error(1,"无此用户");
+            }
         }
         
         $data['id'] = $member['id'];
@@ -134,8 +138,11 @@ class Log_EweiShopV2Page extends AppMobilePage
         $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_log')." where (openid=:openid or user_id=:user_id) and type=3 and status = 1";
         $comeparams = array(':openid' =>$member["openid"],":user_id"=>$member["id"]);
         $data['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计推荐收入
-
+        if ($_GPC["type"]==1){
+            apperror(0,"",$data);
+        }else{
         app_json(array('info' => $data));
+        }
     }
 
     public function money_log(){

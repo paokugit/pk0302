@@ -150,7 +150,7 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		
 		if($keyword == "" || $openid == "" || $page == "" ){
 		    if ($type==1){
-		        app_error(1,"参数不完整");
+		        apperror(1,"参数不完整");
 		    }else{
 			show_json(0,"参数不完整");
 		    }
@@ -159,13 +159,13 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 		    $token=$_GPC["openid"];
 		    $openid=m('member')->getLoginToken($token);
 		    if ($openid==0){
-		        app_error(1,"无此用户");
+		        apperror(1,"无此用户");
 		    } 
 		}
 		$member=m("member")->getMember($openid);
 		if (!$member){
 		    if ($type==1){
-		        app_error(1,"无此用户");
+		        apperror(1,"无此用户");
 		    }else{
 		        show_json(1,"无此用户");
 		    }
@@ -182,7 +182,8 @@ class Down_EweiShopV2Page extends Base_EweiShopV2Page
 			$list[$key]['agentname'] = $item['agentlevel'] == 0 ? "普通会员" : pdo_getcolumn('ewei_shop_commission_level',['id'=>$item['agentlevel'],'uniacid'=>$uniacid],'levelname');
 		}
 		if ($type==1){
-		    app_error(0,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
+		    $res["list"]=$list;
+		    apperror(0,"",$res);
 		}else{
 		show_json(1,['list'=>$list,'page'=>$page,'pageSize'=>$pageSize,'total'=>$total]);
 		}
