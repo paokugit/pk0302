@@ -15,6 +15,7 @@ class Wechart_EweiShopV2Page extends ComWebPage
 		global $_GPC;
 		$setting = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 7 ));
 		$goodsshare = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 8 ));
+		$RVC = pdo_fetch("select * from " . tablename("ewei_setting") . " where id=:id limit 1", array( ":id" => 9 ));
 
 		if ($_W['ispost'])
 		{
@@ -22,6 +23,8 @@ class Wechart_EweiShopV2Page extends ComWebPage
 			pdo_update('ewei_setting',$data,array('id'=>7));
 			$data1['value'] = $_GPC['goodsshare'];
 			pdo_update('ewei_setting',$data1,array('id'=>8));
+            $data1['value'] = $_GPC['RVC'];
+            pdo_update('ewei_setting',$data1,array('id'=>9));
 			show_json(1);
 		}
 		include($this->template());

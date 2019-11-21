@@ -19,7 +19,7 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		$sql = 'SELECT * FROM ' . tablename('ewei_shop_notice') . ' where 1 ' . $condition . ' ORDER BY displayorder desc,id desc LIMIT ' . ($pindex - 1) * $psize . ',' . $psize;
 		$list = pdo_fetchall($sql, $params);
 		foreach ($list as $key => &$row) {
-			$row['createtime'] = $this->transform_time($row['createtime']);
+			$row['createtime'] = m('util')->transform_time($row['createtime']);
 			$row['thumb'] = empty($row['thumb']) ? tomedia($_W['shopset']['shop']['logo']) : tomedia($row['thumb']);
 			$zan = pdo_getcolumn('ewei_shop_notice_log',['openid'=>$_GPC['openid'],'notice_id'=>$row['id']],'status');
 			$row['is_zan'] = isset($zan) && $zan == 1 ? 1 : 0;
@@ -136,30 +136,6 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		];
 		pdo_insert('ewei_shop_email',$data);
 		return pdo_insertid();
-	}
-
-    /**
-    * 时间处理
-     * @param $time
-     * @return false|string
-     */
-	public function transform_time($time)
-	{
-	        $sub_time = time() - $time;
-	        $day = floor($sub_time/3600/24);
-	        $hour = floor($sub_time/3600);
-	        $minute = floor($sub_time/60);
-	        if($hour >= 24 && $day >0 && $day <3){
-	            return $day."天前";
-	        }elseif($hour < 24 && $hour >= 1){
-	            return $hour."小时前";
-	        }elseif($minute < 60 && $minute > 0){
-	            return $minute."分钟前";
-	        }elseif($minute <= 0){
-	            return "刚刚";
-	        }else{
-	            return date('Y-m-d H:i:s',$time);
-	        }
 	}
 }
 

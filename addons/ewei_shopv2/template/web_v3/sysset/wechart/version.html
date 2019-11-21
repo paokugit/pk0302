@@ -29,6 +29,18 @@
           </div>
 
           <div class="form-group">
+              <label class="col-lg control-label">RVC明细</label>
+              <div class="col-sm-9 col-xs-12">
+                  <label class="radio radio-inline">
+                      <input type="radio" name="RVC" value="1" {if $RVC['value']==1}checked{/if}/> 开启
+                  </label>
+                  <label class="radio radio-inline">
+                      <input type="radio" name="RVC" value="0" {if $RVC['value']==0}checked{/if}/> 关闭
+                  </label>
+              </div>
+          </div>
+
+          <div class="form-group">
               <label class="col-lg control-label"></label>
               <div class="col-sm-9 col-xs-12">
                   <input type="submit" value="提交" class="btn btn-primary"  />

@@ -22,7 +22,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $shop = m('app')->shop_shop();
         //商品列表
         $goods = m('app')->shop_goods($type,$sort,$page);
-        app_error(0,['adv'=>$adv,'shop'=>$shop,'goods'=>$goods]);
+        app_error1(0,"",['adv'=>$adv,'shop'=>$shop,'goods'=>$goods]);
     }
 
     /**
@@ -31,7 +31,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
     public function shop_cate()
     {
         $data = m('app')->shop_cate();
-        app_error(0,$data);
+        app_error1(0,"",$data);
     }
 
     /**
@@ -55,7 +55,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $order = $_GPC['order'];
         $by = $_GPC['by'];
         $data = m('app')->shop_search($keywords,$cate,$page,$isnew,$ishot,$isrecommand,$isdiscount,$istime,$issendfree,$order,$by);
-        app_error(0,$data);
+        app_error1(0,"",$data);
     }
 
     /**
@@ -70,7 +70,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $user_id = m('app')->getLoginToken($token);
         //$user_id
         $data = m('app')->shop_goods_detail($user_id,$id,$this->merch_user);
-        app_error($data['status'],$data['msg']);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 
     /**
@@ -81,13 +81,13 @@ class Shop_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
+        if($user_id == 0) app_error1(2,'登录信息失效',[]);
         $id = $_GPC['id'];
         if (empty($id)) app_error(AppError::$ParamsError);
         $total = $_GPC['total'];
         $optionid = $_GPC['optionid'];
         $data = m('app')->shop_add_cart($user_id,$id,$optionid,$total);
-        app_error($data['status'],$data['msg']);
+        app_error1($data['status'],"",empty($data['data']) ? $data['data'] : []);
     }
 
    /**
@@ -98,14 +98,14 @@ class Shop_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         // 这个传id最好吧  然后 根据id查类别  cate == 1fruit水果美食   2city同城  3cash零元兑  4task任务赚  5share分享赚   6rank网红榜单
         $id = $_GPC['id'];
-        if(empty($id)) app_error(1,"参数错误");
+        if(empty($id)) app_error(1,"参数错误",[]);
         $page = max(1,$_GPC['page']);
         $keywords = $_GPC['keywords'];
        //order  类型  综合不传   销量sales  价格 minprice  by  升序asc   降序desc
         $type = empty($_GPC['type']) ? 3 : $_GPC['type'];
         $sort = empty($_GPC['sort']) ? "desc" : $_GPC['sort'];
         $data = m('app')->shop_cate_list($id,$keywords,$page,$type,$sort);
-        app_error(0,$data);
+        app_error1(0,"",$data);
    }
 
     /**
@@ -119,9 +119,9 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $token = $_GPC['token'];
         $page = max(1,$_GPC['page']);
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0 && $type != 1) app_error(2,"登录失效");
+        if($user_id == 0 && $type != 1) app_error1(2,"登录失效",[]);
         $data = m('app')->shop_shop_list($user_id,$type,$page);
-        app_error(0);
+        app_error1(0,'',$data);
     }
 
    /**
@@ -131,8 +131,46 @@ class Shop_EweiShopV2Page extends AppMobilePage
    {
         global $_GPC;
         $id = $_GPC['id'];
-        app_error(0);
+        if(empty($id)) app_error1(1,'参数错误',[]);
+        $page = max(1,$_GPC['page']);
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        $data = m('app')->shop_shop_detail($user_id,$id,$page);
+        app_error1(0,"",$data);
    }
 
+   /**
+    * 动态文章  文章评论的点赞
+    */
+    public function shop_choice_fav()
+    {
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if(empty($user_id)) app_error1(2,'登录失效',[]);
+        //要点赞的文章或者 评论的id
+        $id = $_GPC['id'];
+        //type  == 1 文章的点赞    == 2评论的点赞
+        $type = $_GPC['type'];
+        if(empty($id) || empty($type)) app_error1(1,'参数错误',[]);
+        $data = m('app')->shop_choice_fav($user_id,$id,$type);
+        app_error1($data['status'],$data['msg'],$data['data']);
+    }
+
+    /**
+     * 动态文章评论  评论已有的评论
+     */
+    public function shop_choice_comment()
+    {
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if(empty($user_id)) app_error1(2,'登录失效',[]);
+        $type = $_GPC["type"];
+        $parent_id = $_GPC["parent_id"];
+        $content = $_GPC['content'];
+        $data = m('app')->shop_choice_comment($user_id,$parent_id,$content,$type);
+        app_error1($data['status'],$data['msg'],$data['data']);
+    }
 }
 ?>

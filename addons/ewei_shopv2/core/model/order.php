@@ -2780,5 +2780,367 @@ class Order_EweiShopV2Model
 			return false;
 		}
 	}
+
+    /**
+     * @return array
+     */
+    public function merchData()
+    {
+        $merch_plugin = p("merch");
+        $merch_data = m("common")->getPluginset("merch");
+        if( $merch_plugin && $merch_data["is_openmerch"] )
+        {
+            $is_openmerch = 1;
+        }
+        else
+        {
+            $is_openmerch = 0;
+        }
+        return array( "is_openmerch" => $is_openmerch, "merch_plugin" => $merch_plugin, "merch_data" => $merch_data );
+    }
+
+    /**
+     * @param $member
+     * @return array
+     */
+    public function diyformData($member)
+    {
+        global $_W;
+        global $_GPC;
+        $diyform_plugin = p("diyform");
+        $order_formInfo = false;
+        $diyform_set = false;
+        $orderdiyformid = 0;
+        $fields = array( );
+        $f_data = array( );
+        if( $diyform_plugin )
+        {
+            $diyform_set = $_W["shopset"]["diyform"];
+            if( !empty($diyform_set["order_diyform_open"]) )
+            {
+                $orderdiyformid = intval($diyform_set["order_diyform"]);
+                if( !empty($orderdiyformid) )
+                {
+                    $order_formInfo = $diyform_plugin->getDiyformInfo($orderdiyformid);
+                    $fields = $order_formInfo["fields"];
+                    $f_data = $diyform_plugin->getLastOrderData($orderdiyformid, $member);
+                }
+            }
+        }
+        $appDatas = array( );
+        return array( "diyform_plugin" => $diyform_plugin, "order_formInfo" => $order_formInfo, "diyform_set" => $diyform_set, "orderdiyformid" => $orderdiyformid, "fields" => $appDatas["fields"], "f_data" => $appDatas["f_data"] );
+    }
+
+    /**
+     * @param $cardid
+     * @param $dispatch_price
+     * @param $totalprice
+     * @param int $discountprice
+     * @param int $isdiscountprice
+     * @return array
+     */
+    public function caculatecard($cardid, $dispatch_price, $totalprice, $discountprice = 0, $isdiscountprice = 0)
+    {
+        if( empty($cardid) )
+        {
+            return ['status'=>1,'msg'=>'参数不完整','data'=>[]];
+        }
+        $plugin_membercard = p("membercard");
+        if( !$plugin_membercard )
+        {
+            return NULL;
+        }
+        $card = $plugin_membercard->getMemberCard($cardid);
+        if( empty($card) )
+        {
+            return NULL;
+        }
+        if( $card["isdelete"] )
+        {
+            return ['status'=>AppError::$CardisDel,'msg'=>'','data'=>[]];
+        }
+        if( $card["shipping"] )
+        {
+            $dispatch_price = 0;
+        }
+        $discount_rate = floatval($card["discount_rate"]);
+        if( empty($card["member_discount"]) && $discount_rate == 0 )
+        {
+            $discount_rate = 10;
+        }
+        if( 0 < $isdiscountprice && empty($card["discount"]) )
+        {
+            $totalprice += $isdiscountprice;
+            $isdiscountprice = 0;
+        }
+        else
+        {
+            if( 0 < $discountprice && empty($card["discount"]) )
+            {
+                $totalprice += $discountprice;
+                $discountprice = 0;
+            }
+        }
+        $carddiscountprice = round($totalprice * (10 - $discount_rate) * 0.1, 2);
+        $carddiscount_rate = $discount_rate;
+        $totalprice -= $carddiscountprice;
+        $return_array = array( );
+        $return_array["carddiscount_rate"] = $carddiscount_rate;
+        $return_array["carddiscountprice"] = $carddiscountprice;
+        $return_array["dispatch_price"] = $dispatch_price;
+        $return_array["totalprice"] = $totalprice;
+        $return_array["discountprice"] = $discountprice;
+        $return_array["isdiscountprice"] = $isdiscountprice;
+        $return_array["cardname"] = $card["name"];
+        $return_array["cardid"] = $cardid;
+        return $return_array;
+    }
+
+    /**
+     * @param $couponid
+     * @param $goodsarr
+     * @param $totalprice
+     * @param $discountprice
+     * @param $isdiscountprice
+     * @param int $isSubmit
+     * @param array $discountprice_array
+     * @param int $merchisdiscountprice
+     * @param int $real_price
+     * @return array
+     */
+    public function caculatecoupon($couponid, $goodsarr, $totalprice, $discountprice, $isdiscountprice, $isSubmit = 0, $discountprice_array = array( ), $merchisdiscountprice = 0, $real_price = 0)
+    {
+        global $_W;
+        $openid = $_W["openid"];
+        $uniacid = $_W["uniacid"];
+        if( empty($goodsarr) )
+        {
+            return false;
+        }
+        $sql = "SELECT d.id,d.couponid,c.enough,c.backtype,c.deduct,c.discount,c.backmoney,c.backcredit,c.backredpack,c.merchid,c.limitgoodtype,c.limitgoodcatetype,c.limitgoodids,c.limitgoodcateids,c.limitdiscounttype  FROM " . tablename("ewei_shop_coupon_data") . " d";
+        $sql .= " left join " . tablename("ewei_shop_coupon") . " c on d.couponid = c.id";
+        $sql .= " where d.id=:id and d.uniacid=:uniacid and d.openid=:openid and d.used=0  limit 1";
+        $data = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $couponid, ":openid" => $openid ));
+        $merchid = intval($data["merchid"]);
+        if( empty($data) )
+        {
+            return NULL;
+        }
+        //店主专享商品大于一件禁止购买
+        if($data['couponid']==2 && count($goodsarr)>1) return NULL;
+        if( is_array($goodsarr) )
+        {
+            $goods = array( );
+            foreach( $goodsarr as $g )
+            {
+                if( empty($g) )
+                {
+                    continue;
+                }
+                if( 0 < $merchid && $g["merchid"] != $merchid )
+                {
+                    continue;
+                }
+                $cates = explode(",", $g["cates"]);
+                $limitcateids = explode(",", $data["limitgoodcateids"]);
+                $limitgoodids = explode(",", $data["limitgoodids"]);
+                $pass = 0;
+                if( $data["limitgoodcatetype"] == 0 && $data["limitgoodtype"] == 0 )
+                {
+                    $pass = 1;
+                }
+                if( $data["limitgoodcatetype"] == 1 )
+                {
+                    $result = array_intersect($cates, $limitcateids);
+                    if( 0 < count($result) )
+                    {
+                        $pass = 1;
+                    }
+                }
+                if( $data["limitgoodtype"] == 1 )
+                {
+                    $isin = in_array($g["goodsid"], $limitgoodids);
+                    if( $isin )
+                    {
+                        $pass = 1;
+                    }
+                }
+                if( $pass == 1 )
+                {
+                    $goods[] = $g;
+                }
+            }
+            $limitdiscounttype = intval($data["limitdiscounttype"]);
+            $coupongoodprice = 0;
+            $gprice = 0;
+            foreach( $goods as $k => $g )
+            {
+                $gprice = (double) $g["marketprice"] * (double) $g["total"];
+                switch( $limitdiscounttype )
+                {
+                    case 1: $coupongoodprice += $gprice - (double) $g["discountunitprice"] * (double) $g["total"];
+                        $discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice - (double) $g["discountunitprice"] * (double) $g["total"];
+                        if( $g["discounttype"] == 1 )
+                        {
+                            $isdiscountprice -= (double) $g["isdiscountunitprice"] * (double) $g["total"];
+                            $discountprice += (double) $g["discountunitprice"] * (double) $g["total"];
+                            if( $isSubmit == 1 )
+                            {
+                                $totalprice = $totalprice - $g["ggprice"] + $g["price2"];
+                                $discountprice_array[$g["merchid"]]["ggprice"] = $discountprice_array[$g["merchid"]]["ggprice"] - $g["ggprice"] + $g["price2"];
+                                $goodsarr[$k]["ggprice"] = $g["price2"];
+                                $discountprice_array[$g["merchid"]]["isdiscountprice"] -= (double) $g["isdiscountunitprice"] * (double) $g["total"];
+                                $discountprice_array[$g["merchid"]]["discountprice"] += (double) $g["discountunitprice"] * (double) $g["total"];
+                                if( !empty($data["merchsale"]) )
+                                {
+                                    $merchisdiscountprice -= (double) $g["isdiscountunitprice"] * (double) $g["total"];
+                                    $discountprice_array[$g["merchid"]]["merchisdiscountprice"] -= (double) $g["isdiscountunitprice"] * (double) $g["total"];
+                                }
+                            }
+                        }
+                        break;
+                    case 2: $coupongoodprice += $gprice - (double) $g["isdiscountunitprice"] * (double) $g["total"];
+                        $discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice - (double) $g["isdiscountunitprice"] * (double) $g["total"];
+                        if( $g["discounttype"] == 2 )
+                        {
+                            $discountprice -= (double) $g["discountunitprice"] * (double) $g["total"];
+                            if( $isSubmit == 1 )
+                            {
+                                $totalprice = $totalprice - $g["ggprice"] + $g["price1"];
+                                $discountprice_array[$g["merchid"]]["ggprice"] = $discountprice_array[$g["merchid"]]["ggprice"] - $g["ggprice"] + $g["price1"];
+                                $goodsarr[$k]["ggprice"] = $g["price1"];
+                                $discountprice_array[$g["merchid"]]["discountprice"] -= (double) $g["discountunitprice"] * (double) $g["total"];
+                            }
+                        }
+                        break;
+                    case 3: $coupongoodprice += $gprice;
+                        $discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice;
+                        if( $g["discounttype"] == 1 )
+                        {
+                            $isdiscountprice -= (double) $g["isdiscountunitprice"] * (double) $g["total"];
+                            if( $isSubmit == 1 )
+                            {
+                                $totalprice = $totalprice - $g["ggprice"] + $g["price0"];
+                                $discountprice_array[$g["merchid"]]["ggprice"] = $discountprice_array[$g["merchid"]]["ggprice"] - $g["ggprice"] + $g["price0"];
+                                $goodsarr[$k]["ggprice"] = $g["price0"];
+                                if( !empty($data["merchsale"]) )
+                                {
+                                    $merchisdiscountprice -= $g["isdiscountunitprice"] * (double) $g["total"];
+                                    $discountprice_array[$g["merchid"]]["merchisdiscountprice"] -= $g["isdiscountunitprice"] * (double) $g["total"];
+                                }
+                                $discountprice_array[$g["merchid"]]["isdiscountprice"] -= $g["isdiscountunitprice"] * (double) $g["total"];
+                            }
+                        }
+                        else
+                        {
+                            if( $g["discounttype"] == 2 )
+                            {
+                                $discountprice -= (double) $g["discountunitprice"] * (double) $g["total"];
+                                if( $isSubmit == 1 )
+                                {
+                                    $totalprice = $totalprice - $g["ggprice"] + $g["price0"];
+                                    $goodsarr[$k]["ggprice"] = $g["price0"];
+                                    $discountprice_array[$g["merchid"]]["ggprice"] = $discountprice_array[$g["merchid"]]["ggprice"] - $g["ggprice"] + $g["price0"];
+                                    $discountprice_array[$g["merchid"]]["discountprice"] -= (double) $g["discountunitprice"] * (double) $g["total"];
+                                }
+                            }
+                        }
+                        break;
+                    default: if( $g["discounttype"] == 1 )
+                    {
+                        $coupongoodprice += $gprice - (double) $g["isdiscountunitprice"] * (double) $g["total"];
+                        $discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice - (double) $g["isdiscountunitprice"] * (double) $g["total"];
+                    }
+                    else
+                    {
+                        if( $g["discounttype"] == 2 )
+                        {
+                            $coupongoodprice += $gprice - (double) $g["discountunitprice"] * (double) $g["total"];
+                            $discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice - (double) $g["discountunitprice"] * (double) $g["total"];
+                        }
+                        else
+                        {
+                            if( $g["discounttype"] == 0 )
+                            {
+                                $coupongoodprice += $gprice;
+                                $discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice;
+                            }
+                        }
+                    }
+                        break;
+                }
+            }
+            $deduct = (double) $data["deduct"];
+            $discount = (double) $data["discount"];
+            $backtype = (double) $data["backtype"];
+            $deductprice = 0;
+            $coupondeduct_text = "";
+            if( $real_price )
+            {
+                $coupongoodprice = $real_price;
+            }
+            if( 0 < $deduct && $backtype == 0 && 0 < $coupongoodprice )
+            {
+                if( $coupongoodprice < $deduct )
+                {
+                    $deduct = $coupongoodprice;
+                }
+                if( $deduct <= 0 )
+                {
+                    $deduct = 0;
+                }
+                $deductprice = $deduct;
+                $coupondeduct_text = "优惠券优惠";
+                foreach( $discountprice_array as $key => $value )
+                {
+                    $discountprice_array[$key]["deduct"] = (double) $value["coupongoodprice"] / (double) $coupongoodprice * $deduct;
+                }
+            }
+            else
+            {
+                if( 0 < $discount && $backtype == 1 )
+                {
+                    $deductprice = $coupongoodprice * (1 - $discount / 10);
+                    if( $coupongoodprice < $deductprice )
+                    {
+                        $deductprice = $coupongoodprice;
+                    }
+                    if( $deductprice <= 0 )
+                    {
+                        $deductprice = 0;
+                    }
+                    foreach( $discountprice_array as $key => $value )
+                    {
+                        $discountprice_array[$key]["deduct"] = (double) $value["coupongoodprice"] * (1 - $discount / 10);
+                    }
+                    if( 0 < $merchid )
+                    {
+                        $coupondeduct_text = "店铺优惠券折扣(" . $discount . "折)";
+                    }
+                    else
+                    {
+                        $coupondeduct_text = "优惠券折扣(" . $discount . "折)";
+                    }
+                }
+            }
+        }
+        $totalprice -= $deductprice;
+        $return_array = array( );
+        $return_array["isdiscountprice"] = $isdiscountprice;
+        $return_array["discountprice"] = $discountprice;
+        $return_array["deductprice"] = $deductprice;
+        $return_array["coupongoodprice"] = $coupongoodprice;
+        $return_array["coupondeduct_text"] = $coupondeduct_text;
+        $return_array["totalprice"] = $totalprice;
+        $return_array["discountprice_array"] = $discountprice_array;
+        $return_array["merchisdiscountprice"] = $merchisdiscountprice;
+        $return_array["couponmerchid"] = $merchid;
+        $return_array["goodsarr"] = $goodsarr;
+        if($data['couponid']==2) {
+
+            //$return_array["deductprice"] = $totalprice;
+        }
+        return $return_array;
+    }
 }
 ?>

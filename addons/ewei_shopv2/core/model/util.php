@@ -92,9 +92,9 @@ class Util_EweiShopV2Model
 		return $found;
 	}
 
-	/**
-     * ¼ÆËãÁ½×é¾­Î³¶È×ø±ê Ö®¼äµÄ¾àÀë
-     * params £ºlat1 Î³¶È1£» lng1 ¾­¶È1£» lat2 Î³¶È2£» lng2 ¾­¶È2£» len_type £¨1:m or 2:km);
+    /**
+     * è®¡ç®—ä¸¤ç»„ç»çº¬åº¦åæ ‡ ä¹‹é—´çš„è·ç¦»
+     * params ï¼šlat1 çº¬åº¦1ï¼› lng1 ç»åº¦1ï¼› lat2 çº¬åº¦2ï¼› lng2 ç»åº¦2ï¼› len_type ï¼ˆ1:m or 2:km);
      * return m or km
      */
 	public function GetDistance($lat1, $lng1, $lat2, $lng2, $len_type = 1, $decimal = 2)
@@ -245,48 +245,48 @@ class Util_EweiShopV2Model
 	}
 
     /**
-     * ¼ÆËãÖÜ¿ªÊ¼ ºÍ  ÖÜ½áÊø
+     * è®¡ç®—å‘¨å¼€å§‹ å’Œ  å‘¨ç»“æŸ
      * @param $time
      * @return array
      */
-	public function week($time)
-	{
-		//½ñÌìĞÇÆÚ¼¸
-		$week = date('w',$time);
-		//Èç¹ûÊÇÖÜÈÕ  ÊÇ0  È»ºó  ¼õ6  ·ñÔò  ¼õÈ¥  ÖÜ¼¸ - 1
-		$w = $week  == 0 ? 6 : $week - 1;
-		$week_days = 7 - $w;
-		//½ñÌìµÄ0µãÊ±¼ä´Á
-		$today = date('Ymd',$time);
-		//¼ÆËã±¾ÖÜµÄ¿ªÊ¼ºÍ½áÊøÊ±¼ä
-		$week_start = strtotime('-'.$w.'days',strtotime($today));
-		$week_end = strtotime('+'.$week_days.'days',strtotime($today));
-		return ['start'=>$week_start,'end'=>$week_end];
-	}
+    public function week($time)
+    {
+        //ä»Šå¤©æ˜ŸæœŸå‡ 
+        $week = date('w',$time);
+        //å¦‚æœæ˜¯å‘¨æ—¥  æ˜¯0  ç„¶å  å‡6  å¦åˆ™  å‡å»  å‘¨å‡  - 1
+        $w = $week  == 0 ? 6 : $week - 1;
+        $week_days = 7 - $w;
+        //ä»Šå¤©çš„0ç‚¹æ—¶é—´æˆ³
+        $today = date('Ymd',$time);
+        //è®¡ç®—æœ¬å‘¨çš„å¼€å§‹å’Œç»“æŸæ—¶é—´
+        $week_start = strtotime('-'.$w.'days',strtotime($today));
+        $week_end = strtotime('+'.$week_days.'days',strtotime($today));
+        return ['start'=>$week_start,'end'=>$week_end];
+    }
 
     /**
-     * ¶şÎ¬Êı×é¸ù¾İÄ³¸öÖµµÄ½øĞĞÈ¥ÖØ
+     * äºŒç»´æ•°ç»„æ ¹æ®æŸä¸ªå€¼çš„è¿›è¡Œå»é‡
      * @param $arr
      * @param $key
      * @return array
      */
-	public function array_unique_unset($arr,$key)
-	{
-		$res = [];
-		foreach ($arr as $value) {
-			//²é¿´ÓĞÃ»ÓĞÖØ¸´Ïî
-			
-			if(isset($res[$value[$key]])){
-				//ÓĞ£ºÏú»Ù
-				unset($value[$key]);
-			} else{
-				$res[$value[$key]] = $value;
-			}
-		}
-		return $res;
-	}
+    public function array_unique_unset($arr,$key)
+    {
+        $res = [];
+        foreach ($arr as $value) {
+            //æŸ¥çœ‹æœ‰æ²¡æœ‰é‡å¤é¡¹
+
+            if(isset($res[$value[$key]])){
+                //æœ‰ï¼šé”€æ¯
+                unset($value[$key]);
+            } else{
+                $res[$value[$key]] = $value;
+            }
+        }
+        return $res;
+    }
     /**
-     * ¼ì²âÊÇ·ñÎªÎ¥½ûÉ«ÇéÍ¼Æ¬
+     * æ£€æµ‹æ˜¯å¦ä¸ºè¿ç¦è‰²æƒ…å›¾ç‰‡
      * @param $fileName
      * @return bool
      */
@@ -315,7 +315,7 @@ class Util_EweiShopV2Model
     }
 
     /**
-     * ±£´æÍ¼Ïñº¯Êı
+     * ä¿å­˜å›¾åƒå‡½æ•°
      * @param $fileName
      * @return mixed
      */
@@ -339,7 +339,7 @@ class Util_EweiShopV2Model
     }
 
     /**
-     * RGB ×ª YCbCrÉ«²Ê
+     * RGB è½¬ YCbCrè‰²å½©
      * @param $r
      * @param $g
      * @param $b
@@ -353,6 +353,52 @@ class Util_EweiShopV2Model
         $cb = (1 / 1.772) * ($b - $y) + 128;
         $cr = (1 / 1.402) * ($r - $y) + 128;
         return array('y'=>$y,'cb'=>$cb,'cr'=>$cr);
+    }
+
+    /**
+     * æ—¶é—´å¤„ç†
+     * @param $time
+     * @return false|string
+     */
+    public function transform_time($time)
+    {
+        $sub_time = time() - $time;
+        $day = floor($sub_time/3600/24);
+        $hour = floor($sub_time/3600);
+        $minute = floor($sub_time/60);
+        if($hour >= 24 && $day >0 && $day <3){
+            return $day."å¤©å‰";
+        }elseif($hour < 24 && $hour >= 1){
+            return $hour."å°æ—¶å‰";
+        }elseif($minute < 60 && $minute > 0){
+            return $minute."åˆ†é’Ÿå‰";
+        }elseif($minute <= 0){
+            return "åˆšåˆš";
+        }else{
+            return date('Y-m-d H:i:s',$time);
+        }
+    }
+
+    /**
+     * @param $string
+     * @return int
+     */
+    function sensitives($string){
+        //è·å–æ•æ„Ÿè¯
+        $notice=pdo_get("ewei_shop_member_devote",array("id"=>2));
+        $list=unserialize($notice["content"]);
+        $count = 0; //è¿è§„è¯çš„ä¸ªæ•°
+        $sensitiveWord = '';  //è¿è§„è¯
+        $stringAfter = $string;  //æ›¿æ¢åçš„å†…å®¹
+        $pattern = "/".implode("|",$list)."/i"; //å®šä¹‰æ­£åˆ™è¡¨è¾¾å¼
+        if(preg_match_all($pattern, $string, $matches)){ //åŒ¹é…åˆ°äº†ç»“æœ
+            $patternList = $matches[0];  //åŒ¹é…åˆ°çš„æ•°ç»„
+            $count = count($patternList);
+            $sensitiveWord = implode(',', $patternList); //æ•æ„Ÿè¯æ•°ç»„è½¬å­—ç¬¦ä¸²
+            $replaceArray = array_combine($patternList,array_fill(0,count($patternList),'*')); //æŠŠåŒ¹é…åˆ°çš„æ•°ç»„è¿›è¡Œåˆå¹¶ï¼Œæ›¿æ¢ä½¿ç”¨
+            $stringAfter = strtr($string, $replaceArray); //ç»“æœæ›¿æ¢
+        }
+        return $count;
     }
 }
 

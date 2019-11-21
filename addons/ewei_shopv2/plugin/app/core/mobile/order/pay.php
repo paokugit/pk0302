@@ -63,6 +63,9 @@ class Pay_EweiShopV2Page extends AppMobilePage
 		{
 			$credit = array( "success" => true, "current" => $member["credit2"] );
 		}
+		//RVC支付
+		$RVC = array( "success" => true, "current" => $member["RVC"] );
+
 		$wechat = array( "success" => false );
 		if( !empty($set["pay"]["wxapp"]) && 0 < $order["price"] && $this->iswxapp ) 
 		{
@@ -105,7 +108,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
 				$alipay = array( "success" => true, "payinfo" => $res );
 			}
 		}
-		app_json(array( "order" => array( "id" => $order["id"], "ordersn" => $order["ordersn"], "price" => $order["price"], "title" => $set["shop"]["name"] . "订单" ), "credit" => $credit, "wechat" => $wechat, "alipay" => $alipay, "cash" => $cash ));
+		app_json(array( "order" => array( "id" => $order["id"], "ordersn" => $order["ordersn"], "price" => $order["price"], "title" => $set["shop"]["name"] . "订单" ), "credit" => $credit,"RVC" => $RVC, "wechat" => $wechat, "alipay" => $alipay, "cash" => $cash ));
 	}
 	public function complete() 
 	{
@@ -119,7 +122,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			app_error(AppError::$ParamsError);
 		}
 		$type = trim($_GPC["type"]);
-		if( !in_array($type, array( "wechat", "alipay", "credit", "cash" )) ) 
+		if( !in_array($type, array( "wechat", "alipay", "credit", "cash", "RVC" )) )
 		{
 			app_error(AppError::$OrderPayNoPayType);
 		}
@@ -271,7 +274,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			$fee = floatval($ps["fee"]);
 			$shopset = m("common")->getSysset("shop");
 			$result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee ));
-			$this->creditpay_log($openid, $fee, $orderid);
+			$this->creditpay_log($openid, $fee, $orderid,'credit');
 			if( is_error($result) ) 
 			{
 				app_error(AppError::$OrderPayFail, $result["message"]);
@@ -295,90 +298,127 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			$pay_result = m("order")->payResult($ret);
 			$this->success($orderid);
 		}
-		else 
-		{
-			if( $type == "wechat" ) 
-			{
-				if( empty($set["pay"]["wxapp"]) && $this->iswxapp ) 
-				{
-					app_error(AppError::$OrderPayFail, "未开启微信支付");
-				}
-				$ordersn = $order["ordersn"];
-				if( !empty($order["ordersn2"]) ) 
-				{
-					$ordersn .= "GJ" . sprintf("%02d", $order["ordersn2"]);
-				}
-				$payquery = $this->model->isWeixinPay($ordersn, $order["price"]);
-				if( !is_error($payquery) ) 
-				{
-					$record = array( );
-					$record["status"] = "1";
-					$record["type"] = "wechat";
-					pdo_update("core_paylog", $record, array( "plid" => $log["plid"] ));
-					m("order")->setOrderPayType($order["id"], 21);
-					$ret = array( );
-					$ret["result"] = "success";
-					$ret["type"] = "wechat";
-					$ret["from"] = "return";
-					$ret["tid"] = $log["tid"];
-					$ret["user"] = $log["openid"];
-					$ret["fee"] = $log["fee"];
-					$ret["weid"] = $log["weid"];
-					$ret["uniacid"] = $log["uniacid"];
-					$ret["deduct"] = intval($_GPC["deduct"]) == 1;
-					$pay_result = m("order")->payResult($ret);
-					@session_start();
-					$_SESSION[EWEI_SHOPV2_PREFIX . "_order_pay_complete"] = 1;
-					pdo_update("ewei_shop_order", array( "apppay" => 2 ), array( "id" => $order["id"] ));
-					$this->success($orderid);
-				}
-				app_error(AppError::$OrderPayFail);
-			}
-			else 
-			{
-				if( $type == "alipay" ) 
-				{
-					if( empty($set["pay"]["nativeapp_alipay"]) ) 
-					{
-						app_error(AppError::$OrderPayFail, "未开启支付宝支付");
-					}
-					$sec = m("common")->getSec();
-					$sec = iunserializer($sec["sec"]);
-					$public_key = $sec["nativeapp"]["alipay"]["public_key"];
-					if( empty($public_key) ) 
-					{
-						app_error(AppError::$OrderPayFail, "支付宝公钥为空");
-					}
-					$alidata = htmlspecialchars_decode($_GPC["alidata"]);
-					$alidata = json_decode($alidata, true);
-					$newalidata = $alidata["alipay_trade_app_pay_response"];
-					$newalidata["sign_type"] = $alidata["sign_type"];
-					$newalidata["sign"] = $alidata["sign"];
-					$alisign = m("finance")->RSAVerify($newalidata, $public_key, false, true);
-					if( $alisign ) 
-					{
-						$record = array( );
-						$record["status"] = "1";
-						$record["type"] = "alipay";
-						pdo_update("core_paylog", $record, array( "plid" => $log["plid"] ));
-						$ret = array( );
-						$ret["result"] = "success";
-						$ret["type"] = "alipay";
-						$ret["from"] = "return";
-						$ret["tid"] = $log["tid"];
-						$ret["user"] = $log["openid"];
-						$ret["fee"] = $log["fee"];
-						$ret["weid"] = $log["weid"];
-						$ret["uniacid"] = $log["uniacid"];
-						$ret["deduct"] = intval($_GPC["deduct"]) == 1;
-						m("order")->setOrderPayType($order["id"], 22);
-						$pay_result = m("order")->payResult($ret);
-						pdo_update("ewei_shop_order", array( "apppay" => 2 ), array( "id" => $order["id"] ));
-						$this->success($order["id"]);
-					}
-				}
-			}
-		}
+		else {
+            if ($type == "RVC") {
+                if ($ps["fee"] < 0) {
+                    app_error(AppError::$OrderPayFail, "金额错误");
+                }
+                $credits = $this->member["RVC"];
+                if ($credits < $ps["fee"]) {
+                    app_error(AppError::$OrderPayFail, "RVC不足,请充值");
+                }
+                //礼包商品的支付
+                if (pdo_exists('ewei_shop_gift_log', ['order_sn' => $order['ordersn']])) {
+                    $gift = pdo_get('ewei_shop_gift_log', ['order_sn' => $order['ordersn']]);
+                    //查看这个礼包记录的周始末
+                    $week = m('util')->week($gift['createtime']);
+                    //如果当前时间在周始末  则可以领取  并更新状态为2 领取成功 如果不在也更新状态  为0 取消
+                    if (time() >= $week['start'] && $week['end'] >= time()) {
+                        pdo_update('ewei_shop_gift_log', ['status' => 2], ['order_sn' => $order['ordersn']]);
+                    } else {
+                        pdo_update('ewei_shop_gift_log', ['status' => 0], ['order_sn' => $order['ordersn']]);
+                        app_error(AppError::$OrderPayFail, "该订单是" . $week['start'] . "--" . $week['end'] . "礼包的商品，已经过了购买期");
+                    }
+                }
+                $fee = floatval($ps["fee"]);
+                $shopset = m("common")->getSysset("shop");
+                $result = m("member")->setCredit($openid, "RVC", 0 - $fee, array($_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee));
+                $this->creditpay_log($openid, $fee, $orderid,'RVC');
+                if (is_error($result)) {
+                    app_error(AppError::$OrderPayFail, $result["message"]);
+                }
+                $record = array();
+                $record["status"] = "1";
+                $record["type"] = "cash";
+                pdo_update("core_paylog", $record, array("plid" => $log["plid"]));
+                $ret = array();
+                $ret["result"] = "success";
+                $ret["type"] = $log["type"];
+                $ret["from"] = "return";
+                $ret["tid"] = $log["tid"];
+                $ret["user"] = $log["openid"];
+                $ret["fee"] = $log["fee"];
+                $ret["weid"] = $log["weid"];
+                $ret["uniacid"] = $log["uniacid"];
+                @session_start();
+                $_SESSION[EWEI_SHOPV2_PREFIX . "_order_pay_complete"] = 1;
+                m("order")->setOrderPayType($order["id"], 6);
+                $pay_result = m("order")->payResult($ret);
+                $this->success($orderid);
+            } else {
+                if ($type == "wechat") {
+                    if (empty($set["pay"]["wxapp"]) && $this->iswxapp) {
+                        app_error(AppError::$OrderPayFail, "未开启微信支付");
+                    }
+                    $ordersn = $order["ordersn"];
+                    if (!empty($order["ordersn2"])) {
+                        $ordersn .= "GJ" . sprintf("%02d", $order["ordersn2"]);
+                    }
+                    $payquery = $this->model->isWeixinPay($ordersn, $order["price"]);
+                    if (!is_error($payquery)) {
+                        $record = array();
+                        $record["status"] = "1";
+                        $record["type"] = "wechat";
+                        pdo_update("core_paylog", $record, array("plid" => $log["plid"]));
+                        m("order")->setOrderPayType($order["id"], 21);
+                        $ret = array();
+                        $ret["result"] = "success";
+                        $ret["type"] = "wechat";
+                        $ret["from"] = "return";
+                        $ret["tid"] = $log["tid"];
+                        $ret["user"] = $log["openid"];
+                        $ret["fee"] = $log["fee"];
+                        $ret["weid"] = $log["weid"];
+                        $ret["uniacid"] = $log["uniacid"];
+                        $ret["deduct"] = intval($_GPC["deduct"]) == 1;
+                        $pay_result = m("order")->payResult($ret);
+                        @session_start();
+                        $_SESSION[EWEI_SHOPV2_PREFIX . "_order_pay_complete"] = 1;
+                        pdo_update("ewei_shop_order", array("apppay" => 2), array("id" => $order["id"]));
+                        $this->success($orderid);
+                    }
+                    app_error(AppError::$OrderPayFail);
+                } else {
+                    if ($type == "alipay") {
+                        if (empty($set["pay"]["nativeapp_alipay"])) {
+                            app_error(AppError::$OrderPayFail, "未开启支付宝支付");
+                        }
+                        $sec = m("common")->getSec();
+                        $sec = iunserializer($sec["sec"]);
+                        $public_key = $sec["nativeapp"]["alipay"]["public_key"];
+                        if (empty($public_key)) {
+                            app_error(AppError::$OrderPayFail, "支付宝公钥为空");
+                        }
+                        $alidata = htmlspecialchars_decode($_GPC["alidata"]);
+                        $alidata = json_decode($alidata, true);
+                        $newalidata = $alidata["alipay_trade_app_pay_response"];
+                        $newalidata["sign_type"] = $alidata["sign_type"];
+                        $newalidata["sign"] = $alidata["sign"];
+                        $alisign = m("finance")->RSAVerify($newalidata, $public_key, false, true);
+                        if ($alisign) {
+                            $record = array();
+                            $record["status"] = "1";
+                            $record["type"] = "alipay";
+                            pdo_update("core_paylog", $record, array("plid" => $log["plid"]));
+                            $ret = array();
+                            $ret["result"] = "success";
+                            $ret["type"] = "alipay";
+                            $ret["from"] = "return";
+                            $ret["tid"] = $log["tid"];
+                            $ret["user"] = $log["openid"];
+                            $ret["fee"] = $log["fee"];
+                            $ret["weid"] = $log["weid"];
+                            $ret["uniacid"] = $log["uniacid"];
+                            $ret["deduct"] = intval($_GPC["deduct"]) == 1;
+                            m("order")->setOrderPayType($order["id"], 22);
+                            $pay_result = m("order")->payResult($ret);
+                            pdo_update("ewei_shop_order", array("apppay" => 2), array("id" => $order["id"]));
+                            $this->success($order["id"]);
+                        }
+                    }
+                }
+            }
+        }
 	}
 	protected function success($orderid) 
 	{
@@ -553,7 +593,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
 		$str = str_replace("'", "", $str);
 		return $str;
 	}
-	protected function creditpay_log($openid = "", $fee = 0, $orderid = 0) 
+	protected function creditpay_log($openid = "", $fee = 0, $orderid = 0,$type = "credit")
 	{
 		global $_W;
 		global $_GPC;
@@ -576,7 +616,12 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			return false;
 		}
 		$log_data = array( "uniacid" => $uniacid, "openid" => $openid, "type" => 2, "logno" => $order["ordersn"], "title" => "小程序商城消费", "createtime" => TIMESTAMP, "status" => 1, "money" => 0 - $fee, "rechargetype" => "wxapp", "remark" => "小程序端余额支付" );
-		pdo_insert("ewei_shop_member_log", $log_data);
+		if($type == 'credit'){
+            pdo_insert("ewei_shop_member_log", $log_data);
+        }elseif ($type == 'RVC'){
+            pdo_insert("ewei_shop_member_RVClog", $log_data);
+        }
+
 	}
 
     public function complete2()

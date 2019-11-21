@@ -9,9 +9,10 @@ class Game_EweiShopV2Model{
      * @param $type
      * @param $openid
      * @param $money
-     * @return int|string
+     * @param $credit
+     * @return array
      */
-      public function prize($data,$type,$openid,$money)
+      public function prize($data,$type,$openid,$money,$credit = 'credit1')
       {
             $array = [];
             foreach (iunserializer($data['sets']) as $key=>$val){
@@ -22,17 +23,17 @@ class Game_EweiShopV2Model{
             $num = array_sum($array);
             $rand = rand(1,$num);
             //扣除抽奖的钱的日志  $type == 2免费  $type == 0 花钱
-            $this->addlog($openid,$type,-$money,$data['game_type'],'幸运转盘抽奖');
+            $this->addlog($openid,$type,-$money,$data['game_type'],'幸运转盘抽奖',$credit);
             //抽奖  就减去对应的东西
-            $this->addcredit($openid,$money,'sub',$data['game_type']);
+            $this->addcredit($openid,$money,'sub',$data['game_type'],$credit);
             foreach ($array as $key=>$value){
                 if($rand <= $value){
                     $item = explode('_',$key);
                     preg_match('/\d+/',$item[1],$arr);
                     //添加中奖日志
-                    $this->addlog($openid,1,$arr[0],$data['game_type'],"抽中".$item[1]);
+                    $this->addlog($openid,1,$arr[0],$data['game_type'],"抽中".$item[1],$credit);
                     //如果$data['type']  == 1 就是卡路里   == 2 就是折扣宝
-                    $this->addcredit($openid,$arr[0],"add",$data['game_type']);
+                    $this->addcredit($openid,$arr[0],"add",$data['game_type'],$credit);
                     return ['location'=>$item[0],'num'=>$arr[0]];
                     break;
                 }else{
@@ -47,21 +48,22 @@ class Game_EweiShopV2Model{
      * @param $money
      * @param $add
      * @param $game_type
+     * @param $credit
      */
-      public function addcredit($openid,$money,$add,$game_type){
+      public function addcredit($openid,$money,$add,$game_type,$credit){
           $member = pdo_get('ewei_shop_member',['openid'=>$openid]);
           //如果是减得话  说明是抽奖  抽奖只能用卡路里  所以 减卡路里
           if($add == "sub"){
-              $credit = $member['credit1'] - $money;
-              pdo_update('ewei_shop_member',['credit1'=>$credit],['openid'=>$openid]);
+              $credit_num = $member[$credit] - $money;
+              pdo_update('ewei_shop_member',[$credit=>$credit_num],['openid'=>$openid]);
           }elseif($add == "add"){
               //如果是加的话  就是中奖 中奖分卡路里 和 折扣宝
               if($game_type == 1){
-                  $credit = $member["credit1"] + $money;
-                  pdo_update('ewei_shop_member',['credit1'=>$credit],['openid'=>$openid]);
+                  $credit_num = $member[$credit] + $money;
+                  pdo_update('ewei_shop_member',['credit1'=>$credit_num],['openid'=>$openid]);
               }elseif ($game_type == 2){
-                  $credit = $member["credit3"] + $money;
-                  pdo_update('ewei_shop_member',['credit3'=>$credit],['openid'=>$openid]);
+                  $credit_num = $member[$credit] + $money;
+                  pdo_update('ewei_shop_member',[$credit=>$credit_num],['openid'=>$openid]);
               }
           }
       }
@@ -72,9 +74,10 @@ class Game_EweiShopV2Model{
      * @param $type  $type == 0普通的开支   1中奖   2免费抽奖
      * @param $money
      * @param $datatype
+     * @param $credit
      * @param $remark
      */
-      public function addlog($openid,$type,$money,$datatype,$remark)
+      public function addlog($openid,$type,$money,$datatype,$remark,$credit)
       {
           global $_W;
           $add = [
@@ -85,7 +88,7 @@ class Game_EweiShopV2Model{
               'uniacid'=>$_W['uniacid'],
               'createtime'=>time(),
               'remark'=>$remark,
-              'credittype'=>"credit1"
+              'credittype'=>$credit
           ];
           //如果是中奖的话  给加中奖日志 也就是加如果转盘是折扣宝转盘 就加折扣宝  卡路里转盘 就加卡路里
           if($type == 1){
@@ -400,5 +403,67 @@ class Game_EweiShopV2Model{
 //            }
         }
         return $goods;
+    }
+
+    /**
+     * 判断该商品是否符合领取礼包
+     * @param $openid
+     * @param $goods_id
+     * @return bool
+     */
+    public function gift_check($openid,$goods_id)
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $week = m('util')->week(time());
+        //查所有的礼包
+        $gifts = pdo_getall('ewei_shop_gift_bag',['status'=>1,'uniacid'=>$uniacid]);
+        //查找用户信息
+        $member = m('member')->getMember($openid);
+        //再查他的领取情况
+        $log = pdo_fetchall('select * from '.tablename('ewei_shop_gift_log').'where (openid = :openid or user_id = :user_id) and status > 0 and uniacid = "'.$uniacid.'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$member['openid'],':user_id'=>$member['id']]);
+        //设置$flag  为 false
+        $flag = false;
+        $gift = [];
+        foreach ($gifts as $item){
+            //把每个礼包里面包含的商品解析成数组
+            $goods = explode(',',$item['goodsid']);
+            //判断该商品是不是在这个礼包里面
+            if(in_array($goods_id,$goods)){
+                //把这个礼包里面的允许领取等级解析成数组
+                $levels = explode(',',$item['levels']);
+                //查看本周是否领取过该礼包
+                if(!pdo_fetch('select * from '.tablename('ewei_shop_gift_log').' where (openid = :openid or user_id = :user_id) and status > 0 and gift_id = "'.$item['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$member['openid'],':user_id'=>$member['id']])){
+                    //当前等级够不够格领取该礼包
+                    if($member['agentlevel'] >= min($levels)){
+                        $flag = $item['id'];
+                        $gift = $item;
+                        break;
+                    }else{
+                        $flag = false;
+                    }
+                }
+            }
+        }
+        //设置需要的人数为0  然后 按要求加数量
+        $num = 0;
+        if(count($log) == 0){
+            //如果他没领取过  需要邀请新人数量等于当前的领取礼包的数量
+            $num += $gift['member'];
+        }else {
+            foreach ($log as $item) {
+                //如果领取过了  需要加上已经领取过的礼包需要的数量
+                $num += pdo_getcolumn('ewei_shop_gift_bag', ['id' => $item['gift_id'], 'uniacid' => $_W['uniacid']], 'member');
+            }
+            //然后加上的这次领的礼包需要的人数
+            $num += $gift['member'];
+        }
+        //计算他在活动期间的邀请新人数量
+        $count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
+        //如果邀请数量不足  则返回false
+        if($count < $num){
+            $flag = false;
+        }
+        return $flag;
     }
 }

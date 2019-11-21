@@ -275,7 +275,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
             $list[$k]["avatar"]=$m["avatar"];
             //判断是否带赞
 //             $support=pdo_get("ewei_shop_member_drsupport",array("type"=>2,"content_id"=>$v["id"],"openid"=>$openid));
-            $support=pdo_fetch("select * from ".tablename("ewei_shop_member_drsupport")." where type=2 and content_id=:content_id and (openid=:openid or user_id=:user_id) limit 1",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
+            $support=pdo_fetch("select * from ".tablename("ewei_shop_member_drsupport")." where type=2 and content_id=:content_id and (openid=:openid or user_id=:user_id) limit 1",array(":content_id"=>$v['id'],":openid"=>$member["openid"],":user_id"=>$member["id"]));
             if ($support){
                 $list[$k]["support"]=1;
             }else{

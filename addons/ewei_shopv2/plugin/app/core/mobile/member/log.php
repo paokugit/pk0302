@@ -137,7 +137,10 @@ class Log_EweiShopV2Page extends AppMobilePage
 
         app_json(array('info' => $data));
     }
-
+    
+    /**
+    * 余额收支明细
+    */
     public function money_log(){
         global $_W;
         global $_GPC;
@@ -181,6 +184,85 @@ class Log_EweiShopV2Page extends AppMobilePage
         app_json(array('list' => $newList, 'total' => $total, 'pagesize' => $psize, 'page' => $pindex, 'type' => $type, 'isopen' => $_W['shopset']['trade']['withdraw'], 'moneytext' => $_W['shopset']['trade']['moneytext']));
     }
 
+    /**
+     * 会员RVC信息首页
+     */
+    public function member_RVC()
+    {
+        global $_W;
+        global $_GPC;
+        //修改
+        $openid=$_GPC["openid"];
+        if ($_GPC["type"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (empty($member)){
+            app_error(1,"无此用户");
+        }
+
+        $data['id'] = $member['id'];
+        $data['openid'] = $member['openid'];
+        $data['RVC'] = $member['RVC'];//RVC余额
+        //累计消费
+        $sql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_RVClog')." where (openid=:openid or user_id=:user_id) and type=2 and status = 1";
+        $params = array(':openid' =>$member["openid"],":user_id"=>$member["id"]);
+        $data['sale_total'] = pdo_fetchcolumn($sql, $params);//成功提现金额
+
+        //累计收入
+        $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_RVClog')." where (openid=:openid or user_id=:user_id) and type=0 and status = 1";
+        $comeparams = array(':openid' =>$member["openid"],":user_id"=>$member["id"]);
+        $data['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计推荐收入
+
+        app_json(array('info' => $data));
+    }
+    
+    /**
+    * RVC收支明细
+    */
+    public function RVC_log(){
+        global $_W;
+        global $_GPC;
+        //修改
+        $openid=$_GPC["openid"];
+        if ($_GPC["apptype"]==1){
+            $member_id=m('member')->getLoginToken($openid);
+            if ($member_id==0){
+                app_error(1,"无此用户");
+            }
+            $openid=$member_id;
+        }
+        $member=m("member")->getMember($openid);
+        if (empty($member)){
+            app_error(1,"无此用户");
+        }
+        $type = intval($_GPC['type']);
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 10;
+        if($_GPC['type']==1){// 收入
+            $condition = ' and (openid=:openid or user_id=:user_id) and type = 0';
+        }else{// 支出
+            $condition = ' and (openid=:openid or user_id=:user_id) and type = 2 ';
+        }
+        $params = array( ':openid' => $member['openid'],':user_id'=>$member["id"]);
+        $list = pdo_fetchall('select * from ' . tablename('ewei_shop_member_RVClog') . (' where 1 ' . $condition . ' order by createtime desc LIMIT ') . ($pindex - 1) * $psize . ',' . $psize, $params);
+        $total = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_RVClog') . (' where 1 ' . $condition), $params);
+        $newList = array();
+        if (is_array($list) && !empty($list)) {
+            foreach ($list as $row) {
+                if($row['type'] == 1){
+                    //$row['money'] = -$row['money'];
+                    $row['money'] = $row['realmoney'];
+                }
+                $newList[] = array('id' => $row['id'], 'title'=>$row['title'],'type' => $row['type'], 'money' => $row['money'], 'status' => $row['status'], 'deductionmoney' => $row['deductionmoney'], 'realmoney' => $row['realmoney'], 'rechargetype' => $row['rechargetype'], 'createtime' => date('Y-m-d H:i', $row['createtime']),'refuse_reason'=>$row["refuse_reason"]);
+            }
+        }
+        app_json(array('list' => $newList, 'total' => $total, 'pagesize' => $psize, 'page' => $pindex, 'type' => $type, 'isopen' => $_W['shopset']['trade']['withdraw'], 'moneytext' => $_W['shopset']['trade']['moneytext']));
+    }
 }
 
 ?>
