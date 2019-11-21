@@ -549,7 +549,54 @@ class Merch_EweiShopV2Page extends AppMobilePage
         show_json(0,$data);
 
     }
-
+    /**
+     * 获取来源店铺信息
+     */
+    public function get_from_storenew(){
+        
+        global $_GPC;
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $member = m('member')->getMember($_GPC['openid']);
+        $memberMerchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where member_id=:member_id Limit 1', array(':member_id' => $member['id']));
+        $data = array();
+        if($member['agentid']>0){
+            $agentMerchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where member_id=:member_id Limit 1', array(':member_id' => $member['agentid']));
+        }
+        if($memberMerchInfo) {//店主
+            $args['merchid'] = $memberMerchInfo['id'];
+            $merchInfo = $memberMerchInfo;
+        }elseif($member && $member['from_merchid']>0){//存在来源店铺
+            $merchInfo = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where id=:merchid and uniacid=:uniacid Limit 1', array(':uniacid' => $_W['uniacid'], ':merchid' => $member['from_merchid']));
+            $goodsNum = pdo_count("ewei_shop_goods", "deleted =0 and status=1 and uniacid = " . $uniacid . " and merchid = " . $member['from_merchid']);
+            if($merchInfo){//获取推荐商品
+                $args['merchid'] = $member['from_merchid'];
+            }else{//推荐附近商店
+                $merchInfo = $this->get_near_merch(1);
+                $args['merchid'] = $merchInfo['id'];
+            }
+            if($goodsNum<3){//推荐其他商品数量大于三的店铺
+                $merchInfo = $this->get_near_merch(1);
+                $args['merchid'] = $merchInfo['id'];
+            }
+            
+        }elseif($agentMerchInfo){//查看推荐人是否有店铺
+            $args['merchid'] = $agentMerchInfo['id'];
+            $merchInfo = $agentMerchInfo;
+        }else{//推荐附近商店
+            $merchInfo = $this->get_near_merch(1);
+            $args['merchid'] = $merchInfo['id'];
+        }
+        $args['order'] = 'sort desc,isrecommand';
+        $args["deduct_type"]=2;
+        $args["merchid"]=285;
+        $goodList = m('goods')->getList($args);
+        $merchInfo['logo'] = tomedia($merchInfo['logo']);
+        $data['merchInfo'] = $merchInfo;
+        $data['goodList'] = $goodList;
+        show_json(0,$data);
+        
+    }
     /**
      * 获取最近的店铺
      * @return mixed

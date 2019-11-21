@@ -341,9 +341,9 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            apperror(1,"无此用户");
        }
        $pindex = max(1, intval($_GPC['page']));
-       $psize = 10;
-       $first=($pindex-1)*10;
-       $list=pdo_fetchall("select * from ".tablename("ewei_shop_member_history")." where (openid=:openid or user_id=:user_id) and deleted=0 order by createtime desc limit ".$first.",10",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
+       $psize = 20;
+       $first=($pindex-1)*20;
+       $list=pdo_fetchall("select * from ".tablename("ewei_shop_member_history")." where (openid=:openid or user_id=:user_id) and deleted=0 order by createtime desc limit ".$first.",20",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
 //        var_dump($list);
        $month=array();
        $monthi=0;
@@ -472,6 +472,12 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            }
        }
        $res["list"]=$l;
+       //获取总条数
+       $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_member_history")." where (openid=:openid or user_id=:user_id) and deleted=0 ",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
+       $res["page"]=$pindex;
+       $res["pagetotal"]=ceil($total/20);
+       $res["pagesize"]=20;
+       $res["total"]=$total;
        apperror(0,"",$res);
    }
    //判断时间阶段
@@ -496,12 +502,12 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
                    $resault["res"]=date("Y.m.d",$time);
                }else{
                    $resault["type"]=2;
-                   $resault["res"]=$month;
+                   $resault["res"]=$year."年".$month;
                }
                
            }else{
                $resault["type"]=2;
-               $resault["res"]=$month;
+               $resault["res"]=$year."年".$month;
            }
        }else{
            $resault["type"]=3;
@@ -510,5 +516,20 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        }
        return $resault;
    }
-   
+   //购物车--列表
+   public function cart(){
+       global $_W;
+       global $_GPC;
+      
+       $openid = $_GPC['openid'];
+       $type=$_GPC["type"]?$_GPC["type"]:0;//1表示app接口
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       //获取商家id
+       $merchid=pdo_query("select merchid from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and deleted=0",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
+       var_dump($merchid);
+       
+   }
 }

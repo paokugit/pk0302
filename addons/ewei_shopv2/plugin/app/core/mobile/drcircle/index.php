@@ -11,18 +11,18 @@ class Index_EweiShopV2Page extends AppMobilePage{
         global $_GPC;
         $openid=$_GPC["openid"];
         if (empty($openid)){
-            app_error(1,"未传openid");
+            apperror(1,"未传openid");
         }
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (!$member){
-            app_error(1,"不存在该用户");
+            apperror(1,"不存在该用户");
         }
         
         
@@ -104,7 +104,11 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $l["list"]=$list;
         $a=pdo_fetch("select count(*) as a from ".tablename("ewei_shop_member_drcircle")."  where is_del=0 and is_view=0 ");
         $l["total"]=$a["a"];
+        if ($_GPC["type"]==1){
+            apperror(0,"",$l);
+        }else{
         app_error(0,$l);
+        }
     }
     //详情
     public function detail(){
@@ -113,28 +117,28 @@ class Index_EweiShopV2Page extends AppMobilePage{
         $openid=$_GPC["openid"];
         
         if (empty($openid)){
-            app_error(1,"未传openid");
+            apperror(1,"未传openid");
         }
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (!$member){
-            app_error(1,"不存在该用户");
+            apperror(1,"不存在该用户");
         }
         
         
         $ciclre_id=$_GPC["ciclre_id"];
         $detail=pdo_get("ewei_shop_member_drcircle",array("id"=>$ciclre_id));
         if (empty($detail)){
-            app_error(1,"不存在该动态");
+            apperror(1,"不存在该动态");
         }
         if ($detail["is_del"]==1||$detail["is_view"]==1){
-            app_error(1,"该动态已被删除");
+            apperror(1,"该动态已被删除");
         }
         //更新查看数目
         $update["view_count"]=$detail["view_count"]+1;
@@ -197,8 +201,11 @@ class Index_EweiShopV2Page extends AppMobilePage{
             $detail["zan_list"][$k]=$mem["avatar"];
         }
         
-       
+       if ($_GPC["type"]==1){
+           apperror(0,"",$detail);
+       }else{
        app_error(0,$detail);
+       }
     }
     
     function timeFormat( $timestamp ) {
@@ -241,13 +248,13 @@ class Index_EweiShopV2Page extends AppMobilePage{
         if ($_GPC["apptype"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (!$member){
-            app_error(1,"不存在该用户");
+            apperror(1,"不存在该用户");
         }
         
         
@@ -307,7 +314,11 @@ class Index_EweiShopV2Page extends AppMobilePage{
         }
         $l["list"]=$list;
         $l["total"]=$total["a"];
+        if ($_GPC["type"]==1){
+            apperror(0,"",$l);
+        }else{
         app_error(0,$l);
+        }
     }
     //评论详情
     public function comment_detail(){
@@ -315,25 +326,25 @@ class Index_EweiShopV2Page extends AppMobilePage{
         global $_GPC;
         $openid=$_GPC["openid"];
         if (empty($openid)){
-            app_error(1,"请填写openid");
+            apperror(1,"请填写openid");
         }
         if ($_GPC["apptype"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (!$member){
-            app_error(1,"不存在该用户");
+            apperror(1,"不存在该用户");
         }
         
         
         $comment_id=$_GPC["comment_id"];
         $detail=pdo_get("ewei_shop_member_drcomment",array("id"=>$comment_id,"is_view"=>0,"is_del"=>0,"type"=>1));
         if (empty($detail)){
-            app_error(1,"不存在该评论");
+            apperror(1,"不存在该评论");
         }
         
         $detail["create_time"]=$this->timeFormat($detail["create_time"]);
@@ -403,7 +414,11 @@ class Index_EweiShopV2Page extends AppMobilePage{
         
         
         }
+        if ($_GPC["type"]==1){
+            apperror(0,"",$detail);
+        }else{
         app_error(0,$detail);
+        }
     }
     
     //热评
@@ -417,22 +432,22 @@ class Index_EweiShopV2Page extends AppMobilePage{
         if ($_GPC["type"]){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (!$member){
-            app_error(1,"不存在该用户");
+            apperror(1,"不存在该用户");
         }
         
         $ciclre_id=$_GPC["ciclre_id"];
         $detail=pdo_get("ewei_shop_member_drcircle",array("id"=>$ciclre_id));
         if (empty($detail)){
-            app_error(1,"不存在该动态");
+            apperror(1,"不存在该动态");
         }
         if ($detail["is_del"]==1||$detail["is_view"]==1){
-            app_error(1,"该动态已被删除");
+            apperror(1,"该动态已被删除");
         }
         //获取热评
         $comemnt=pdo_fetchall("select id,openid,user_id,content,comment_count,zan_count,create_time from ".tablename("ewei_shop_member_drcomment")." where is_view=0 and is_del=0 and type=1 and comment_count>=10 and parent_id=:parent_id order by comment_count desc limit 3",array(":parent_id"=>$ciclre_id));
@@ -460,7 +475,11 @@ class Index_EweiShopV2Page extends AppMobilePage{
                 $detail["hot"][$k]["support"]=0;
             }
         }
+        if ($_GPC["type"]==1){
+            apperror(0,"",$detail);
+        }else{
         app_error(0,$detail);
+        }
         
     }
     public function cs(){

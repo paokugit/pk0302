@@ -246,6 +246,9 @@ class My_EweiShopV2Page extends AppMobilePage
         $set = m("common")->getPluginset("coupon");
         if ($_GPC["type"]==1){
             $res["list"]=$coupons;
+            $res["pagesize"]=$psize;
+            $res["total"]=$total;
+            $res["pindex"]=$pindex;
             apperror(0,"",$res);
         }else{
         app_json(array( "list" => $coupons, "pagesize" => $psize, "total" => $total, "closecenter" => intval($set["closecenter"]) ));

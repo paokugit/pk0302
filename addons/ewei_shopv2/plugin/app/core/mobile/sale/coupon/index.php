@@ -371,31 +371,33 @@ class Index_EweiShopV2Page extends AppMobilePage
     {
         global $_W;
         global $_GPC;
-        $openid = $_W["openid"];
+        $openid = $_GPC["openid"];
+        $type=$_GPC["type"]?$_GPC["type"]:0;
+        $member=m("appnews")->member($openid,$type);
         $id = intval($_GPC["id"]);
         $goodsdetail = intval($_GPC["goodsdetail"]);
         $coupon = pdo_fetch("select * from " . tablename("ewei_shop_coupon") . " where id=:id and uniacid=:uniacid  limit 1", array( ":id" => $id, ":uniacid" => $_W["uniacid"] ));
         $coupon = com("coupon")->setCoupon($coupon, time());
         if( empty($coupon["gettype"]) ) 
         {
-            app_error(AppError::$CouponCanNotBuy, "无法" . $coupon["gettypestr"]);
+            apperror(1, "无法" . $coupon["gettypestr"]);
         }
 
         if( $coupon["total"] != -1 && $coupon["total"] <= 0 ) 
         {
-            app_error(AppError::$CouponCanNotBuy, "优惠券数量不足");
+            apperror(1, "优惠券数量不足");
         }
 
         if( !$coupon["canget"] ) 
         {
-            app_error(AppError::$CouponCanNotBuy, "您已超出" . $coupon["gettypestr"] . "次数限制");
+            apperror(1, "您已超出" . $coupon["gettypestr"] . "次数限制");
         }
 
         if( $goodsdetail ) 
         {
             if( 0 < $coupon["money"] || 0 < $coupon["credit"] ) 
             {
-                app_error(AppError::$CouponCanNotBuy, "此优惠券需要前往领卷中心兑换");
+                apperror(1, "此优惠券需要前往领卷中心兑换");
             }
 
         }
@@ -406,7 +408,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $credit = $this->member["credit1"];
                 if( $credit < intval($coupon["credit"]) ) 
                 {
-                    app_error(AppError::$CouponCanNotBuy, "您的卡路里不足，无法" . $coupon["gettypestr"] . "!");
+                    apperror(1, "您的卡路里不足，无法" . $coupon["gettypestr"] . "!");
                 }
 
             }
@@ -414,82 +416,98 @@ class Index_EweiShopV2Page extends AppMobilePage
             $needpay = false;
             if( 0 < $coupon["money"] ) 
             {
-                pdo_delete("ewei_shop_coupon_log", array( "couponid" => $id, "openid" => $openid, "status" => 0, "paystatus" => 0 ));
+                //购买
+//                 pdo_delete("ewei_shop_coupon_log", array( "couponid" => $id, "openid" => $openid, "status" => 0, "paystatus" => 0 ));
+                pdo_query("delete from ".tablename("ewei_shop_coupon_log")." where (user_id=:user_id or openid=:openid) and couponid=:couponid and status=0 and paystatus=0",array("user_id"=>$member["id"],":openid"=>$member["openid"],":couponid"=>$id));
                 $needpay = true;
-                $lastlog = pdo_fetch("select * from " . tablename("ewei_shop_coupon_log") . " where couponid=:couponid and openid=:openid  and status=0 and paystatus=1 and uniacid=:uniacid limit 1", array( ":couponid" => $id, ":openid" => $openid, ":uniacid" => $_W["uniacid"] ));
+                $lastlog = pdo_fetch("select * from " . tablename("ewei_shop_coupon_log") . " where couponid=:couponid and (openid=:openid or user_id=:user_id)  and status=0 and paystatus=1 and uniacid=:uniacid limit 1", array( ":couponid" => $id, ":openid" => $member["openid"],":user_id"=>$member["id"], ":uniacid" => $_W["uniacid"] ));
+               
                 if( !empty($lastlog) ) 
                 {
+                    if ($_GPC["type"]==1){
+                      $res["logid"]=$lastlog["id"];
+                      apperror(0,"",$res);
+                    }else{
                     app_json(array( "logid" => $lastlog["id"] ));
+                    }
+                    
                 }
 
             }
             else
             {
-                pdo_delete("ewei_shop_coupon_log", array( "couponid" => $id, "openid" => $openid, "status" => 0 ));
+//                 pdo_delete("ewei_shop_coupon_log", array( "couponid" => $id, "openid" => $openid, "status" => 0 ));
+                pdo_query("delete from ".tablename("ewei_shop_coupon_log")." where couponid=:couponid and (openid=:openid or user_id=:user_id) and status=0",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":couponid"=>$id));
             }
 
         }
 
         $logno = m("common")->createNO("coupon_log", "logno", "CC");
-        $log = array( "uniacid" => $_W["uniacid"], "merchid" => $coupon["merchid"], "openid" => $openid, "logno" => $logno, "couponid" => $id, "status" => 0, "paystatus" => (0 < $coupon["money"] ? 0 : -1), "creditstatus" => (0 < $coupon["credit"] ? 0 : -1), "createtime" => time(), "getfrom" => 1 );
+        $log = array( "uniacid" => $_W["uniacid"], "merchid" => $coupon["merchid"], "openid" => $member["openid"],"user_id"=>$member["id"], "logno" => $logno, "couponid" => $id, "status" => 0, "paystatus" => (0 < $coupon["money"] ? 0 : -1), "creditstatus" => (0 < $coupon["credit"] ? 0 : -1), "createtime" => time(), "getfrom" => 1 );
         pdo_insert("ewei_shop_coupon_log", $log);
         $logid = pdo_insertid();
-        if( $goodsdetail ) 
-        {
-            $result = com("coupon")->payResult($log["logno"]);
-            if( is_error($result) ) 
-            {
-                app_error(AppError::$CouponCanNotBuy, $result["message"]);
-            }
+//         if( $goodsdetail ) 
+//         {
+//             $result = com("coupon")->payResult($log["logno"]);
+//             if( is_error($result) ) 
+//             {
+//                 apperror(1, $result["message"]);
+//             }
 
-            app_json(array( "url" => $result["url"], "dataid" => $result["dataid"], "coupontype" => $result["coupontype"] ));
-        }
-        else
-        {
-            if( $needpay ) 
-            {
-                $useweixin = true;
-                if( !empty($coupon["usecredit2"]) ) 
-                {
-                    $money = $this->member["credit2"];
-                    if( $coupon["money"] <= $money ) 
-                    {
-                        $useweixin = false;
-                    }
+//             app_json(array( "url" => $result["url"], "dataid" => $result["dataid"], "coupontype" => $result["coupontype"] ));
+//         }
+//         else
+//         {
+//             if( $needpay ) 
+//             {
+//                 $useweixin = true;
+//                 if( !empty($coupon["usecredit2"]) ) 
+//                 {
+//                     $money = $this->member["credit2"];
+//                     if( $coupon["money"] <= $money ) 
+//                     {
+//                         $useweixin = false;
+//                     }
 
-                }
+//                 }
 
-                pdo_update("ewei_shop_coupon_log", array( "paytype" => ($useweixin ? 1 : 0) ), array( "id" => $logid ));
-                $set = m("common")->getSysset();
-                if( $useweixin ) 
-                {
-                    $wechat = array( "success" => 0 );
-                    if( !empty($set["pay"]["wxapp"]) ) 
-                    {
-                        $payinfo = array( "openid" => $openid, "title" => $set["shop"]["name"] . "优惠券领取单号:" . $log["logno"], "tid" => $log["logno"], "fee" => $coupon["money"] );
-                        $res = $this->model->wxpay($payinfo, 16);
-                        if( !is_error($res) ) 
-                        {
-                            $wechat = array( "success" => true, "payinfo" => $res );
-                            app_json(array( "logid" => $logid, "wechat" => $wechat ));
-                        }
-                        else
-                        {
-                            app_error(AppError::$WxPayParamsError);
-                        }
+//                 pdo_update("ewei_shop_coupon_log", array( "paytype" => ($useweixin ? 1 : 0) ), array( "id" => $logid ));
+//                 $set = m("common")->getSysset();
+//                 if( $useweixin ) 
+//                 {
+//                     $wechat = array( "success" => 0 );
+//                     if( !empty($set["pay"]["wxapp"]) ) 
+//                     {
+//                         $payinfo = array( "openid" => $openid, "title" => $set["shop"]["name"] . "优惠券领取单号:" . $log["logno"], "tid" => $log["logno"], "fee" => $coupon["money"] );
+//                         $res = $this->model->wxpay($payinfo, 16);
+//                         if( !is_error($res) ) 
+//                         {
+//                             $wechat = array( "success" => true, "payinfo" => $res );
+//                             app_json(array( "logid" => $logid, "wechat" => $wechat ));
+//                         }
+//                         else
+//                         {
+//                             app_error(AppError::$WxPayParamsError);
+//                         }
 
-                    }
-                    else
-                    {
-                        app_error(AppError::$WxPayNotOpen, "未开启微信支付");
-                    }
+//                     }
+//                     else
+//                     {
+//                         app_error(AppError::$WxPayNotOpen, "未开启微信支付");
+//                     }
 
-                }
+//                 }
 
-            }
-
-            app_json(array( "logid" => $logid ));
-        }
+//             }
+               
+//             app_json(array( "logid" => $logid ));
+//         }
+          if ($type==1){
+              $res["logid"]=$logid;
+              apperror(0,"",$res);
+          }else{
+              app_json(array( "logid" => $logid ));
+          }
 
     }
 
@@ -590,15 +608,19 @@ class Index_EweiShopV2Page extends AppMobilePage
         $param[":uniacid"] = $_W["uniacid"];
         $sql = "select id,timelimit,coupontype,timedays,timestart,timeend,thumb,couponname,enough,backtype,deduct,discount,backmoney,backcredit,backredpack,bgcolor,thumb,credit,money,getmax,merchid,total as t,tagtitle,settitlecolor,titlecolor from " . tablename("ewei_shop_coupon") . " c ";
         $sql .= " where uniacid=:uniacid";
+        $sqll="select count(*) from " . tablename("ewei_shop_coupon") . " c ";
+        $sqll.="where uniacid=:uniacid";
         if( $is_openmerch == 0 ) 
         {
             $sql .= " and merchid=0";
+            $sqll .= " and merchid=0";
         }
         else
         {
             if( !empty($_GPC["merchid"]) ) 
             {
                 $sql .= " and merchid=:merchid";
+                $sqll .= " and merchid=:merchid";
                 $param[":merchid"] = intval($_GPC["merchid"]);
             }
 
@@ -611,12 +633,14 @@ class Index_EweiShopV2Page extends AppMobilePage
             if( empty($plugin_com_set["level"]) ) 
             {
                 $sql .= " and ( limitagentlevels = \"\" or  limitagentlevels is null )";
+                $sqll .= " and ( limitagentlevels = \"\" or  limitagentlevels is null )";
             }
 
         }
         else
         {
             $sql .= " and ( limitagentlevels = \"\" or  limitagentlevels is null )";
+            $sqll .= " and ( limitagentlevels = \"\" or  limitagentlevels is null )";
         }
 
         $plugin_globonus = p("globonus");
@@ -626,12 +650,14 @@ class Index_EweiShopV2Page extends AppMobilePage
             if( empty($plugin_globonus_set["open"]) ) 
             {
                 $sql .= " and ( limitpartnerlevels = \"\"  or  limitpartnerlevels is null )";
+                $sqll .= " and ( limitpartnerlevels = \"\"  or  limitpartnerlevels is null )";
             }
 
         }
         else
         {
             $sql .= " and ( limitpartnerlevels = \"\"  or  limitpartnerlevels is null )";
+            $sqll .= " and ( limitpartnerlevels = \"\"  or  limitpartnerlevels is null )";
         }
 
         $plugin_abonus = p("abonus");
@@ -641,23 +667,28 @@ class Index_EweiShopV2Page extends AppMobilePage
             if( empty($plugin_abonus_set["open"]) ) 
             {
                 $sql .= " and ( limitaagentlevels = \"\" or  limitaagentlevels is null )";
+                $sqll .= " and ( limitaagentlevels = \"\" or  limitaagentlevels is null )";
             }
 
         }
         else
         {
             $sql .= " and ( limitaagentlevels = \"\" or  limitaagentlevels is null )";
+            $sqll .= " and ( limitaagentlevels = \"\" or  limitaagentlevels is null )";
         }
 
         $sql .= " and gettype=1 and (total=-1 or total>0) and ( timelimit = 0 or  (timelimit=1 and timeend>unix_timestamp()))";
+        $sqll .= " and gettype=1 and (total=-1 or total>0) and ( timelimit = 0 or  (timelimit=1 and timeend>unix_timestamp()))";
         if( !empty($cateid) ) 
         {
             $sql .= " and catid=" . $cateid;
+            $sqll .= " and catid=" . $cateid;
         }
-
-        $total = pdo_fetchcolumn($sql, $param);
+        
+        $total = pdo_fetchcolumn($sqll, $param);
         $sql .= " order by displayorder desc, id desc  LIMIT " . ($pindex - 1) * $psize . "," . $psize;
         $coupons = set_medias(pdo_fetchall($sql, $param), "thumb");
+        
         if( empty($coupons) ) 
         {
             $coupons = array(  );
@@ -809,7 +840,16 @@ class Index_EweiShopV2Page extends AppMobilePage
             $newCoupons[] = $newCoupon;
         }
         unset($row);
+        if ($_GPC["type"]){
+            $res["list"]=$newCoupons;
+            $res["pagesize"]=$psize;
+            $res["total"]=$total;
+            $res["page"]=$pindex;
+            $res["pagetotal"]=ceil($total/$psize);
+            apperror(0,"",$res);
+        }else{
         app_json(array( "list" => $newCoupons, "pagesize" => $psize, "total" => $total ));
+        }
     }
 
     public function getdetail()

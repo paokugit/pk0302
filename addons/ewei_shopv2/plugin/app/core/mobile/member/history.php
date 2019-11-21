@@ -65,7 +65,7 @@ class History_EweiShopV2Page extends AppMobilePage
         }
         $del=$_GPC["del"];
         if ($del==1){
-            $sql = 'update ' . tablename('ewei_shop_member_history') . ' set deleted=1 where (openid=:openid or user_id=:user_id) ';
+            $sql = 'delete from ' . tablename('ewei_shop_member_history') . '  where (openid=:openid or user_id=:user_id) ';
         }else{
             
             $ids = $_GPC['ids'];
@@ -73,7 +73,7 @@ class History_EweiShopV2Page extends AppMobilePage
                 app_error(AppError::$ParamsError);
             }
             
-		$sql = 'update ' . tablename('ewei_shop_member_history') . ' set deleted=1 where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';
+		$sql = 'delete from ' . tablename('ewei_shop_member_history') . '  where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';
         }
 		pdo_query($sql, array(':openid' => $member["openid"],':user_id'=>$member["id"]));
 		if ($_GPC["type"]==1){

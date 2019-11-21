@@ -107,7 +107,7 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		global $_GPC;
 		$set = $_W['shopset']['trade'];
 		if (empty($set['withdraw'])) {
-			app_error(1, '系统未开启提现!');
+			apperror(1, '系统未开启提现!');
 		}
 
 		$set_array = array();
@@ -120,24 +120,24 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		    
 		    $member_id=m('member')->getLoginToken($openid);
 		    if ($member_id==0){
-		        app_error(1,"无此用户");
+		        apperror(1,"无此用户");
 		    }
 		    $openid=$member_id;
 		    
 		}
 		$member=m("member")->getMember($openid);
 		if (empty($member)){
-		    app_error(1,"无此用户");
+		    apperror(1,"无此用户");
 		}
 		
 		$credit = $member["credit2"];
 
 		if ($money <10 ) {
-			app_error(2, '提现金额不能低于10元!');
+			apperror(1, '提现金额不能低于10元!');
 		}
 
 		if ($credit < $money) {
-			app_error(3, '提现金额过大!');
+			apperror(1, '提现金额过大!');
 		}
 
 		$apply = array();
@@ -161,7 +161,7 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		$applytype = intval($_GPC['applytype']);
 
 		if (!array_key_exists($applytype, $type_array)) {
-			app_error(0, '未选择提现方式，请您选择提现方式后重试!');
+			apperror(1, '未选择提现方式，请您选择提现方式后重试!');
 		}
 
 		if ($applytype == 2) {
@@ -170,19 +170,19 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 			$alipay1 = trim($_GPC['alipay1']);
 
 			if (empty($realname)) {
-				app_error(AppError::$ParamsError, '请填写姓名');
+				apperror(1, '请填写姓名');
 			}
 
 			if (empty($alipay)) {
-				app_error(AppError::$ParamsError, '请填写支付宝帐号');
+				apperror(1, '请填写支付宝帐号');
 			}
 
 			if (empty($alipay1)) {
-				app_error(AppError::$ParamsError, '请填写确认帐号');
+				apperror(1, '请填写确认帐号');
 			}
 
 			if ($alipay != $alipay1) {
-				app_error(AppError::$ParamsError, '支付宝帐号与确认帐号不一致');
+				apperror(1, '支付宝帐号与确认帐号不一致');
 			}
 
 			$apply['realname'] = $realname;
@@ -196,23 +196,23 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 				$bankcard1 = trim($_GPC['bankcard1']);
 
 				if (empty($realname)) {
-					app_error(AppError::$ParamsError, '请填写姓名!');
+					apperror(1, '请填写姓名!');
 				}
 
 				if (empty($bankname)) {
-					app_error(AppError::$ParamsError, '请选择银行');
+					apperror(1, '请选择银行');
 				}
 
 				if (empty($bankcard)) {
-					app_error(AppError::$ParamsError, '请填写银行卡号');
+					apperror(1, '请填写银行卡号');
 				}
 
 				if (empty($bankcard1)) {
-					app_error(AppError::$ParamsError, '请填写确认卡号');
+					apperror(1, '请填写确认卡号');
 				}
 
 				if ($bankcard != $bankcard1) {
-					app_error(AppError::$ParamsError, '银行卡号与确认卡号不一致');
+					apperror(1, '银行卡号与确认卡号不一致');
 				}
 
 				$apply['realname'] = $realname;
@@ -250,7 +250,11 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		pdo_insert('ewei_shop_member_log', $apply);
 		$logid = pdo_insertid();
 		m('notice')->sendMemberLogMessage($logid);
+		if ($_GPC["apptype"]==1){
+		    apperror(0,"成功");
+		}else{
 		app_json();
+		}
 	}
 
 	public function getLastApply($openid, $applytype = -1)
@@ -267,6 +271,14 @@ class Withdraw_EweiShopV2Page extends AppMobilePage
 		$sql .= ' order by id desc Limit 1';
 		$data = pdo_fetch($sql, $params);
 		return $data;
+	}
+	//银行卡
+	public function bank(){
+	    global $_W;
+	    global $_GPC;
+	    $list=pdo_fetchall("select * from ".tablename("ewei_shop_commission_bank")." where status=1 ");
+	    $res["list"]=$list;
+	    apperror(0,"",$res);
 	}
 }
 

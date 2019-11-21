@@ -8,13 +8,15 @@ class Address_EweiShopV2Page extends AppMobilePage
 {
 	public function get_list()
 	{
+	    header('Access-Control-Allow-Origin:*');
+	   
 		global $_W;
 		global $_GPC;
 		if (empty($_GPC['openid'])) {
 		    if ($_GPC["type"]==1){
 		      apperror(1,"openid未传");  
 		    }else{
-			app_error(AppError::$ParamsError);
+		        app_error(1,"openid未传");
 		    }
 			
 		}

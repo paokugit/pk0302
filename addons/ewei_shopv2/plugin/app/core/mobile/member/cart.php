@@ -150,8 +150,8 @@ class Cart_EweiShopV2Page extends AppMobilePage
 			$result['merch_list'] = array( array('merchname' => '', 'merchid' => 0, 'list' => $list) );
 		}
 		if ($type==1){
-		    
-		    apperror(0,"",$result);
+		    $res["list"]=$list;
+		    apperror(0,"",$res);
 		}else{
 		app_json($result);
 		}
@@ -273,7 +273,7 @@ class Cart_EweiShopV2Page extends AppMobilePage
 			if ($type==1){
 			    apperror(1,"商品已下架");
 			}else{
-			    app_error(AppError::$GoodsNotFound);
+			    app_error(1,"商品已下架");
 			}
 		}
 		$diyform_plugin = p('diyform');

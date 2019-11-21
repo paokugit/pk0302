@@ -153,13 +153,13 @@ class Log_EweiShopV2Page extends AppMobilePage
         if ($_GPC["apptype"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (empty($member)){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         
         $type = intval($_GPC['type']);
@@ -174,6 +174,7 @@ class Log_EweiShopV2Page extends AppMobilePage
 //         $params = array( ':openid' => $_W['openid']);
         $params = array( ':openid' => $member['openid'],':user_id'=>$member["id"]);
         $list = pdo_fetchall('select * from ' . tablename('ewei_shop_member_log') . (' where 1 ' . $condition . ' order by createtime desc LIMIT ') . ($pindex - 1) * $psize . ',' . $psize, $params);
+        
         $total = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_log') . (' where 1 ' . $condition), $params);
         $newList = array();
         if (is_array($list) && !empty($list)) {
@@ -185,7 +186,13 @@ class Log_EweiShopV2Page extends AppMobilePage
                 $newList[] = array('id' => $row['id'], 'title'=>$row['title'],'type' => $row['type'], 'money' => $row['money'], 'typestr' => $apply_type[$row['applytype']], 'status' => $row['status'], 'deductionmoney' => $row['deductionmoney'], 'realmoney' => $row['realmoney'], 'rechargetype' => $row['rechargetype'], 'createtime' => date('Y-m-d H:i', $row['createtime']),'refuse_reason'=>$row["refuse_reason"]);
             }
         }
+       
+        $pagetotal=ceil($total/10);
+       if ($_GPC["apptype"]==1){
+         apperror(0,"",array('list' => $newList, 'total' => $total,'pagetotal'=>$pagetotal, 'pagesize' => $psize, 'page' => $pindex, 'type' => $type, 'isopen' => $_W['shopset']['trade']['withdraw'], 'moneytext' => $_W['shopset']['trade']['moneytext']));
+       }else{
         app_json(array('list' => $newList, 'total' => $total, 'pagesize' => $psize, 'page' => $pindex, 'type' => $type, 'isopen' => $_W['shopset']['trade']['withdraw'], 'moneytext' => $_W['shopset']['trade']['moneytext']));
+       }
     }
 
 }

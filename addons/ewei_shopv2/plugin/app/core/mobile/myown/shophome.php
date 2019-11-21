@@ -77,13 +77,14 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         global $_W;
         $merch_id=$_GPC["merch_id"];
         if (empty($merch_id)){
-            app_error(-1,"商户id未传");
+            apperror(-1,"商户id未传");
+            
         }
         $openid=$_GPC["openid"];
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
@@ -94,29 +95,42 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
 //             $merch_follow=pdo_get("ewei_shop_merch_follow",array("openid"=>$openid,"merch_id"=>$merch_id));
             $merch_follow=pdo_fetch("select * from ".tablename("ewei_shop_merch_follow")." where (openid=:openid or user_id=:user_id) and merch_id=:merch_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":merch_id"=>$merch_id)); 
             if ($merch_follow){
-                app_error(-1,"不可重复关注");
+               
+                apperror(-1,"不可重复关注");
+                
+                
             }
             $data["openid"]=$member["openid"];
             $data["user_id"]=$member["id"];
             $data["merch_id"]=$merch_id;
             $data["create_time"]=time();
             if (pdo_insert("ewei_shop_merch_follow",$data)){
-                app_error(0,"关注成功");
+               
+                apperror(0,"关注成功");
+                
             }else{
-                app_error(-1,"关注失败");
+              
+                apperror(-1,"关注失败");
+                
             }
             
         }else{
 //             $merch_follow=pdo_get("ewei_shop_merch_follow",array("openid"=>$openid,"merch_id"=>$merch_id));
             $merch_follow=pdo_fetch("select * from ".tablename("ewei_shop_merch_follow")." where (openid=:openid or user_id=:user_id) and merch_id=:merch_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":merch_id"=>$merch_id)); 
             if (empty($merch_follow)){
-                app_error(-1,"该用户未关注该商户");
+               
+                apperror(-1,"该用户未关注该商户");
+                
             }
 //             if (pdo_delete("ewei_shop_merch_follow",array("openid"=>$openid,"merch_id"=>$merch_id))){
             if (pdo_query("delete from ".tablename("ewei_shop_merch_follow")." where (openid=:openid or user_id=:user_id) and merch_id=:merch_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":merch_id"=>$merch_id))){
-                app_error(0,"取消关注成功");
+               
+                apperror(0,"取消关注成功");
+            
             }else{
-                app_error(-1,"取消关注失败");
+               
+                apperror(-1,"取消关注失败");
+            
             }
         }
     }
@@ -234,21 +248,21 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         $id=$_GPC["id"];
         $detail=pdo_get("ewei_shop_coupon",array("id"=>$id));
         if (empty($detail)){
-            app_error(1,"优惠券id不正确");
+            apperror(1,"优惠券id不正确");
         }
         if ($detail["total"]!=-1&&$detail["total"]==0){
-            app_error(1,"该优惠券已被领取完");
+            apperror(1,"该优惠券已被领取完");
         }
         $openid=$_GPC["openid"];
         $type=$_GPC["type"]?$_GPC["type"]:0;
         $member=m("appnews")->member($openid,$type);
         if (!$member){
-            app_error(1,"用户不存在");
+            apperror(1,"用户不存在");
         }
         //判断用户是否可以多次领取
         $l=pdo_fetch("select * from ".tablename("ewei_shop_coupon_data")." where couponid=:couponid and (openid=:openid or user_id=:user_id) and used=0",array(":couponid"=>$id,":openid"=>$member["openid"],":user_id"=>$member["id"]));
         if ($l){
-            app_error(1,"不可多次领取");
+            apperror(1,"不可多次领取");
         }
         $d["uniacid"]=1;
         $d["openid"]=$member["openid"];
@@ -258,9 +272,9 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         $d["merchid"]=$detail["merchid"];
         $d["user_id"]=$member["id"];
         if (pdo_insert("ewei_shop_coupon_data",$d)){
-            app_error(0,"领取成功");
+            apperror(0,"领取成功");
         }else{
-            app_error(1,"领取失败");
+            apperror(1,"领取失败");
         }
     }
     //推荐

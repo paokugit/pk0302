@@ -704,7 +704,27 @@ class System_EweiShopV2Model {
                                 "route" => "set"
                             )
                         )
+                    ),
+                    array(
+                        "title" => "优品商品",
+                        "route" => "jdgoods",
+                        "items" => array(
+                            array(
+                                "title" => "分类",
+                                "route" => "category"
+                            ) ,
+                            array(
+                                "title" => "商品",
+                                "route" => "goods"
+                            ),
+                            array(
+                                "title" => "banner",
+                                "route" => "banner"
+                            )
+                        )
                     )
+                    
+                   
                 )
             ) ,
             "member" => array(
