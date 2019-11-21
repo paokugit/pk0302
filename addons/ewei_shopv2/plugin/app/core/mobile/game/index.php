@@ -6,6 +6,110 @@ require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
 class Index_EweiShopV2Page extends AppMobilePage 
 {
     /**
+     * RVC充值
+     */
+    public function rvc_pay()
+    {
+        global $_W;
+        global $_GPC;
+        $openid = $_GPC['openid'];
+        $member = m('member')->getMember($openid);
+        //参数
+        $data['amount'] = $_GPC['amount'];
+        $data['nonce'] = random(16);
+        $data['coinType'] = "RVC";
+        $data['category'] = "跑库充值";
+        $data['privateMemo'] = $data['memo'] = $data['category'].$data['amount'].$data['coinType'];
+        $data['redirect'] = "https://www.paokucoin.com/rvc.html";
+        //排序
+        ksort($data);
+        $string = "";
+        //拼接字符串
+        foreach ($data as $key => $item){
+            $string .= $key . '=' . urlencode($item) . '&';
+        }
+        $string = trim($string,'&');
+        $data['accessKey'] = "C1V.0MruASD1js_Qa5GNVkCX0IAJL-g2IgclGPG2ZQEfAl7f";
+        $SecretKey = "Pr2ZPufPFdu43KCNX64cnGNyxNgmgVNddHYPacTv6Aaum1ZvsW/+1xa8W3Vq4QnP";
+        //获得签名
+        $data['signature'] = $signature = hash_hmac("sha1",$string,$SecretKey);
+        //请求
+        $res = $this->curl_post_raw("https://wallet.block-api.dev/api/pay/record",json_encode($data,JSON_UNESCAPED_UNICODE));
+        $res = json_decode($res,true);
+        $price = $res['data']['price'];
+        $add = [
+            'uniacid'=>$_W['uniacid'],
+            'ordersn'=>$res['data']['uuid'],
+            'openid'=>$member['openid'],
+            'user_id'=>$member['id'],
+            'amount'=>$data['amount'],
+            'totalprice'=>bcmul($price,$data['amount'],2),
+            'price'=>$price,
+            'status'=>0,
+            'createtime'=>time(),
+        ];
+        pdo_insert('ewei_shop_member_rvcorder',$add);
+        $status = $res['code'] == "M0000" ? 0 : 1;
+        app_error1($status,$res['message'],$res['data']);
+    }
+
+    /**
+     * @param $url
+     * @param $rawData
+     * @return mixed
+     */
+    function curl_post_raw($url,$rawData){
+        $ch = curl_init($url);
+        curl_setopt_array($ch, array(
+            CURLOPT_POST => TRUE,
+            CURLOPT_RETURNTRANSFER => TRUE,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+            CURLOPT_POSTFIELDS => $rawData
+        ));
+        return $data = curl_exec($ch);
+    }
+
+    /**
+     * 检测RVC充值是否成功
+     */
+    public function check_rvc()
+    {
+        global $_GPC;
+        global $_W;
+        $uuid = $_GPC['uuid'];
+        $uniacid = $_W['uniacid'];
+        $status = pdo_getcolumn('ewei_shop_member_rvcorder',['ordersn'=>$uuid,'uniacid'=>$uniacid],'status');
+        $error = $status == 1 ? 0 :1;
+        $msg = $status == 1 ? "充值成功" : "充值失败";
+        app_error1($error,$msg,['data'=>$status]);
+    }
+
+    public function aaa()
+    {
+        $data['amount'] = "888";
+        $data['nonce'] = "123456";
+        $data['coinType'] = "RVC";
+        $data['category'] = "跑酷充值";
+        $data['privateMemo'] = $data['memo'] = $data['category'].$data['amount'].$data['coinType'];
+        $data['redirect'] = 'https://www.taobao.com';
+        //排序
+        ksort($data);
+        $string = "";
+        //拼接字符串
+        foreach ($data as $key => $item){
+            $string .= $key . '=' . urlencode($item) . '&';
+        }
+        $string = trim($string,'&');
+        $data['accessKey'] = "8I2vdRI2zdMJAYXxex7mMwE4ApRfR_EJ_USjDe2nP_as.S5t";
+        $SecretKey = "KNjwWxd5jYG7BqdClYdUhWX70ezIBbr3u3Xrpi96zWv3SJBJbs2teetIo2cjM+5p";
+        //获得签名
+        $data['signature'] = $signature = hash_hmac("sha1",$string,$SecretKey);
+        var_dump($data);exit;
+    }
+    
+    /**
      * 获取奖项
      */
     public function reward()
@@ -40,8 +144,9 @@ class Index_EweiShopV2Page extends AppMobilePage
             $mobile = substr($item['mobile'],0,3)."****".substr($item['mobile'],7,4);
             $log[$key]['mobile'] = $item['mobile'] == "" ? "" : $mobile;
         }
-        $credit1 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit1');
-        show_json(1,['list'=>$list,'log'=>$log,'num'=>count($user)-count($free) > 0 ? count($user)-count($free) : 0,'credit1'=>$credit1]);
+        //$credit1 = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit1');
+        $member = m('member')->getMember($openid);
+        show_json(1,['list'=>$list,'log'=>$log,'num'=>count($user)-count($free) > 0 ? count($user)-count($free) : 0,'credit1'=>$member['credit1'],'credit3'=>$member['credit3']]);
     }
 
     /**
@@ -53,15 +158,16 @@ class Index_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC['openid'];
         //$type==2  免费抽奖   $type == 0 花钱抽奖
         $type = $_GPC['type'];
-        $game_type = $_GPC['game_type'];
+        $credit = $_GPC['credit'] ? $_GPC['credit'] : "credit1";
         $money = $_GPC['money'];
         $game = pdo_get('ewei_shop_game',['uniacid'=>$_W['uniacid']]);
         if($game['status'] == 0){
             show_json(0,"该活动已关闭");
         }
-        $credit1=pdo_getcolumn('ewei_shop_member',["openid"=>$openid],"credit1");
+        $credit1=pdo_getcolumn('ewei_shop_member',["openid"=>$openid],$credit);
+        $credit_name = $credit == "credit1" ? "卡路里" :"折扣宝";
         if($type==0){
-            if(bccomp($credit1,$money,2)==-1) show_json(0,"小主的卡路里不足啦，赶快邀请好友助力获取卡路里吧");
+            if(bccomp($credit1,$money,2)==-1) show_json(0,"小主的".$credit_name."不足啦，赶快邀请好友助力获取".$credit_name."吧");
         }
 
         //计算今天的免费抽奖次数
@@ -81,14 +187,14 @@ class Index_EweiShopV2Page extends AppMobilePage
             }
         }
         //抽奖的结果
-        $res = m('game')->prize($game,$type,$openid,$money);
+        $res = m('game')->prize($game,$type,$openid,$money,$credit);
         $num = count($user)-count($log) > 0 ? count($user)-count($log) : 0;
         if($type == 2) {
             //如果是免费抽奖 他的记录就又加了一条  所以 再减一
             $num = count($user) - count($log) - 1 > 0 ? count($user) - count($log) - 1 : 0;
         }
         $res['remain'] = $num;
-        $res['credit1'] = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],'credit1');
+        $res[$credit] = pdo_getcolumn('ewei_shop_member',['openid'=>$openid],$credit);
         show_json(1,$res);
     }
 

@@ -26,7 +26,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 //        $sorttype = intval($_GPC['sorttype']);
 //        $keyword = $_GPC['keyword'];
         //消息信息id
-        $level_id = $_GPC['level_id'];
+        $level_id = empty($_GPC['level_id']) ? 5 : $_GPC['level_id'];
         //鉴权验证
         $user_id = m('app')->getLoginToken($token);
         //签到得卡路里 和  年卡会员每日得折扣宝
@@ -50,7 +50,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $choice = m('app')->choice();
         //消息弹窗
         $level = m('app')->notice($user_id,$level_id);
-        app_error(0,['bushu'=>$bushu,'icon'=>$icon,'merch'=>$merch,'near'=>$near,'seckill'=>$seckill,'look_buy'=>$look_buy,'every'=>$every,'choice'=>$choice,'level'=>$level]);
+        app_error1(0,'',['bushu'=>$bushu,'icon'=>$icon,'merch'=>$merch,'near'=>$near,'seckill'=>$seckill,'look_buy'=>$look_buy,'every'=>$every,'choice'=>$choice,'level'=>$level]);
     }
 
     /**
@@ -62,9 +62,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         $token = $_GPC['token'];
         $step_id =$_GPC['step_id'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
-        $data = m('app')->getcredit($user_id,$step_id);
-        app_error($data['status'],$data['msg']);
+        if($user_id == 0) app_error1(2,'登录信息失效',[]);
+        $credit = $_GPC['credit'];
+        $data = m('app')->getcredit($user_id,$step_id,$credit);
+        app_error1($data['status'],$data['msg'],$data[]);
     }
 
     /**
@@ -75,9 +76,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
+        if($user_id == 0) app_error1(2,'登录信息失效',[]);
         $data = m('app')->index_level($user_id);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -88,10 +89,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
+        if($user_id == 0) app_error1(2,'登录信息失效',[]);
         $level_id = empty($_GPC['level_id']) ? 5 :$_GPC['level_id'];
         $data = m('app')->index_level_goods($user_id,$level_id);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -102,10 +103,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
+        if($user_id == 0) app_error1(2,'登录信息失效',[]);
         $page = max($_GPC['page'],1);
         $data = m('app')->index_level_record($user_id,$page);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -119,7 +120,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $level_id = empty($_GPC['id']) ? 5 : $_GPC['id'];
         $level = pdo_get('ewei_shop_member_memlevel',['id'=>$level_id,'uniacid'=>$uniacid]);
         $goods = m('app')->index_level_goods(0,$level_id);
-        app_error(0,['goods'=>$goods,'level'=>$level]);
+        app_error1(0,'',['goods'=>$goods,'level'=>$level]);
     }
 
     /**
@@ -130,7 +131,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,'登录信息失效');
+        if($user_id == 0) app_error1(2,'','登录信息失效');
         $member = m('member')->getMember($user_id);
         $user = [
             'id'=>$member['id'],
@@ -142,7 +143,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         ];
         $user['is_expire'] = $member['is_open'] == 1 && $member['expire_time'] - time() <= 3600*10 ? 1 : 0;
         $user['expire'] = date('Y-m-d',$member['expire_time']);
-        app_error(0,['member'=>$user]);
+        app_error1(0,'',['member'=>$user]);
     }
 
     /**
@@ -153,14 +154,14 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $level_id = empty($_GPC['level_id']) ? 5 : $_GPC['level_id'];
         $address_id = $_GPC['address_id'];
         $money = $_GPC['money'];
         $record_id = $_GPC['record_id'];
         $good_id = $_GPC['good_id'];
         $data = m('app')->index_getLevel($user_id,$level_id,$address_id,$money,$record_id,$good_id);
-        app_error($data['status'],$data['msg']);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 
     /**
@@ -171,12 +172,12 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         //1请求地址列表  并获得默认地址的邮费    2 切换地址
         $type = !empty($_GPC['type']) ? $_GPC['type'] : 1;
         $address_id = !empty($_GPC['address_id']) ? $_GPC['address_id'] : 0;
         $data = m('app')->index_address($user_id,$address_id,$type);
-        app_error($data['status'],$data['msg']);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 
     /**
@@ -187,9 +188,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $data = m('app')->index_gift($user_id);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -200,10 +201,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $page = max($_GPC['page'],1);
         $data = m('app')->index_gift_help($user_id,$page);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -214,10 +215,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $page = max($_GPC['page'],1);
         $data = m('app')->index_gift_record($user_id,$page);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -232,9 +233,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         $imgurl = m('qrcode')->HelpPoster($member,$member['id'],['back'=>'/addons/ewei_shopv2/static/images/gift_share.png','type'=>"giftshare",'title'=>'真的一分钱也不要哟！','desc'=>'快来帮我助力一下吧！','con'=>'周周分享，周周领','url'=>'packageA/pages/gift/gift']);
         if( empty($imgurl))
         {
-            app_error(AppError::$PosterCreateFail, "海报生成失败");
+            app_error1(AppError::$PosterCreateFail, "海报生成失败",[]);
         }
-        app_error(0,array( "url" => $imgurl));
+        app_error1(0,'',array( "url" => $imgurl));
     }
 
     /**
@@ -250,7 +251,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $pindex = ($page-1)*$pageSize;
         $total = pdo_count('ewei_shop_choice',['uniacid'=>$uniacid,'status'=>1]);
         $list = pdo_fetchall('select * from '.tablename('ewei_shop_choice').'where uniacid = :uniacid and status = 1 order by displayorder desc limit '.$pindex.','.$pageSize,[':uniacid'=>$uniacid]);
-        app_error(0,['list'=>$list,'page'=>$page,'total'=>$total,'pageSize'=>$pageSize]);
+        app_error1(0,'',['list'=>$list,'page'=>$page,'total'=>$total,'pageSize'=>$pageSize]);
     }
 
     /**
@@ -263,7 +264,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $user_id = m('app')->getLoginToken($token);
         $id = $_GPC['id'];
         $data = m('app')->index_choice_detail($user_id,$id);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -274,10 +275,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $id = $_GPC['id'];
         $data = m('app')->index_choice_fav($user_id,$id);
-        app_error($data['status'],$data['msg']);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 }
 ?>

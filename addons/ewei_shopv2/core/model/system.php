@@ -1093,6 +1093,10 @@ class System_EweiShopV2Model {
                             array(
                                 "title" => "贡献值明细",
                                 "route" => "credit4"
+                            ),
+                            array(
+                                "title" => "RVC明细",
+                                "route" => "RVC"
                             )
                         )
                     ) ,

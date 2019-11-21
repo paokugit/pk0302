@@ -5,21 +5,21 @@
 require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
 class Create_EweiShopV2Page extends AppMobilePage 
 {
-	protected function merchData() 
+	public function merchData()
 	{
 		$merch_plugin = p("merch");
 		$merch_data = m("common")->getPluginset("merch");
-		if( $merch_plugin && $merch_data["is_openmerch"] ) 
+		if( $merch_plugin && $merch_data["is_openmerch"] )
 		{
 			$is_openmerch = 1;
 		}
-		else 
+		else
 		{
 			$is_openmerch = 0;
 		}
 		return array( "is_openmerch" => $is_openmerch, "merch_plugin" => $merch_plugin, "merch_data" => $merch_data );
 	}
-	protected function diyformData($member) 
+	public function diyformData($member)
 	{
 		global $_W;
 		global $_GPC;
@@ -29,13 +29,13 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$orderdiyformid = 0;
 		$fields = array( );
 		$f_data = array( );
-		if( $diyform_plugin ) 
+		if( $diyform_plugin )
 		{
 			$diyform_set = $_W["shopset"]["diyform"];
-			if( !empty($diyform_set["order_diyform_open"]) ) 
+			if( !empty($diyform_set["order_diyform_open"]) )
 			{
 				$orderdiyformid = intval($diyform_set["order_diyform"]);
-				if( !empty($orderdiyformid) ) 
+				if( !empty($orderdiyformid) )
 				{
 					$order_formInfo = $diyform_plugin->getDiyformInfo($orderdiyformid);
 					$fields = $order_formInfo["fields"];
@@ -44,7 +44,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			}
 		}
 		$appDatas = array( );
-		if( $diyform_plugin ) 
+		if( $diyform_plugin )
 		{
 			$appDatas = $diyform_plugin->wxApp($fields, $f_data, $this->member);
 		}
@@ -96,7 +96,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$diyformdata = $this->diyformData($member);
 			extract($diyformdata);
 			$id = intval($_GPC["id"]);
-			$flag = $this->gift_check($openid,$id);
+			$flag = m('game')->gift_check($openid,$id);
 			$bargain_id = intval($_GPC["bargainid"]);
 			$_SESSION["bargain_id"] = NULL;
 			if( p("bargain") && !empty($bargain_id) ) 
@@ -792,7 +792,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 				$card_info["cardid"] = $default_cardid;
 				if( $default_cardid ) 
 				{
-					$card_result = $this->caculatecard($default_cardid, $dispatch_price, $pure_totalprice, $discountprice, $isdiscountprice);
+					$card_result = m('order')->caculatecard($default_cardid, $dispatch_price, $pure_totalprice, $discountprice, $isdiscountprice);
 					if( $card_result ) 
 					{
 						$card_info["dispatch_price"] = $dispatch_price;
@@ -1210,240 +1210,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$result = $this->caculatecoupon($couponid, $goodsarr, $goodsprice, $discountprice, $isdiscountprice, 0, array( ), 0, $real_price);
 		app_json($result);
 	}
-	public function caculatecoupon($couponid, $goodsarr, $totalprice, $discountprice, $isdiscountprice, $isSubmit = 0, $discountprice_array = array( ), $merchisdiscountprice = 0, $real_price = 0) 
-	{
-		global $_W;
-		$openid = $_W["openid"];
-		$uniacid = $_W["uniacid"];
-		if( empty($goodsarr) ) 
-		{
-			return false;
-		}
-		$sql = "SELECT d.id,d.couponid,c.enough,c.backtype,c.deduct,c.discount,c.backmoney,c.backcredit,c.backredpack,c.merchid,c.limitgoodtype,c.limitgoodcatetype,c.limitgoodids,c.limitgoodcateids,c.limitdiscounttype  FROM " . tablename("ewei_shop_coupon_data") . " d";
-		$sql .= " left join " . tablename("ewei_shop_coupon") . " c on d.couponid = c.id";
-		$sql .= " where d.id=:id and d.uniacid=:uniacid and d.openid=:openid and d.used=0  limit 1";
-		$data = pdo_fetch($sql, array( ":uniacid" => $uniacid, ":id" => $couponid, ":openid" => $openid ));
-		$merchid = intval($data["merchid"]);
-		if( empty($data) ) 
-		{
-			return NULL;
-		}
-		//店主专享商品大于一件禁止购买
-		if($data['couponid']==2 && count($goodsarr)>1) return NULL;
-		if( is_array($goodsarr) ) 
-		{
-			$goods = array( );
-			foreach( $goodsarr as $g ) 
-			{
-				if( empty($g) ) 
-				{
-					continue;
-				}
-				if( 0 < $merchid && $g["merchid"] != $merchid ) 
-				{
-					continue;
-				}
-				$cates = explode(",", $g["cates"]);
-				$limitcateids = explode(",", $data["limitgoodcateids"]);
-				$limitgoodids = explode(",", $data["limitgoodids"]);
-				$pass = 0;
-				if( $data["limitgoodcatetype"] == 0 && $data["limitgoodtype"] == 0 ) 
-				{
-					$pass = 1;
-				}
-				if( $data["limitgoodcatetype"] == 1 ) 
-				{
-					$result = array_intersect($cates, $limitcateids);
-					if( 0 < count($result) ) 
-					{
-						$pass = 1;
-					}
-				}
-				if( $data["limitgoodtype"] == 1 ) 
-				{
-					$isin = in_array($g["goodsid"], $limitgoodids);
-					if( $isin ) 
-					{
-						$pass = 1;
-					}
-				}
-				if( $pass == 1 ) 
-				{
-					$goods[] = $g;
-				}
-			}
-			$limitdiscounttype = intval($data["limitdiscounttype"]);
-			$coupongoodprice = 0;
-			$gprice = 0;
-			foreach( $goods as $k => $g ) 
-			{
-				$gprice = (double) $g["marketprice"] * (double) $g["total"];
-				switch( $limitdiscounttype ) 
-				{
-					case 1: $coupongoodprice += $gprice - (double) $g["discountunitprice"] * (double) $g["total"];
-					$discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice - (double) $g["discountunitprice"] * (double) $g["total"];
-					if( $g["discounttype"] == 1 ) 
-					{
-						$isdiscountprice -= (double) $g["isdiscountunitprice"] * (double) $g["total"];
-						$discountprice += (double) $g["discountunitprice"] * (double) $g["total"];
-						if( $isSubmit == 1 ) 
-						{
-							$totalprice = $totalprice - $g["ggprice"] + $g["price2"];
-							$discountprice_array[$g["merchid"]]["ggprice"] = $discountprice_array[$g["merchid"]]["ggprice"] - $g["ggprice"] + $g["price2"];
-							$goodsarr[$k]["ggprice"] = $g["price2"];
-							$discountprice_array[$g["merchid"]]["isdiscountprice"] -= (double) $g["isdiscountunitprice"] * (double) $g["total"];
-							$discountprice_array[$g["merchid"]]["discountprice"] += (double) $g["discountunitprice"] * (double) $g["total"];
-							if( !empty($data["merchsale"]) ) 
-							{
-								$merchisdiscountprice -= (double) $g["isdiscountunitprice"] * (double) $g["total"];
-								$discountprice_array[$g["merchid"]]["merchisdiscountprice"] -= (double) $g["isdiscountunitprice"] * (double) $g["total"];
-							}
-						}
-					}
-					break;
-					case 2: $coupongoodprice += $gprice - (double) $g["isdiscountunitprice"] * (double) $g["total"];
-					$discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice - (double) $g["isdiscountunitprice"] * (double) $g["total"];
-					if( $g["discounttype"] == 2 ) 
-					{
-						$discountprice -= (double) $g["discountunitprice"] * (double) $g["total"];
-						if( $isSubmit == 1 ) 
-						{
-							$totalprice = $totalprice - $g["ggprice"] + $g["price1"];
-							$discountprice_array[$g["merchid"]]["ggprice"] = $discountprice_array[$g["merchid"]]["ggprice"] - $g["ggprice"] + $g["price1"];
-							$goodsarr[$k]["ggprice"] = $g["price1"];
-							$discountprice_array[$g["merchid"]]["discountprice"] -= (double) $g["discountunitprice"] * (double) $g["total"];
-						}
-					}
-					break;
-					case 3: $coupongoodprice += $gprice;
-					$discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice;
-					if( $g["discounttype"] == 1 ) 
-					{
-						$isdiscountprice -= (double) $g["isdiscountunitprice"] * (double) $g["total"];
-						if( $isSubmit == 1 ) 
-						{
-							$totalprice = $totalprice - $g["ggprice"] + $g["price0"];
-							$discountprice_array[$g["merchid"]]["ggprice"] = $discountprice_array[$g["merchid"]]["ggprice"] - $g["ggprice"] + $g["price0"];
-							$goodsarr[$k]["ggprice"] = $g["price0"];
-							if( !empty($data["merchsale"]) ) 
-							{
-								$merchisdiscountprice -= $g["isdiscountunitprice"] * (double) $g["total"];
-								$discountprice_array[$g["merchid"]]["merchisdiscountprice"] -= $g["isdiscountunitprice"] * (double) $g["total"];
-							}
-							$discountprice_array[$g["merchid"]]["isdiscountprice"] -= $g["isdiscountunitprice"] * (double) $g["total"];
-						}
-					}
-					else 
-					{
-						if( $g["discounttype"] == 2 ) 
-						{
-							$discountprice -= (double) $g["discountunitprice"] * (double) $g["total"];
-							if( $isSubmit == 1 ) 
-							{
-								$totalprice = $totalprice - $g["ggprice"] + $g["price0"];
-								$goodsarr[$k]["ggprice"] = $g["price0"];
-								$discountprice_array[$g["merchid"]]["ggprice"] = $discountprice_array[$g["merchid"]]["ggprice"] - $g["ggprice"] + $g["price0"];
-								$discountprice_array[$g["merchid"]]["discountprice"] -= (double) $g["discountunitprice"] * (double) $g["total"];
-							}
-						}
-					}
-					break;
-					default: if( $g["discounttype"] == 1 ) 
-					{
-						$coupongoodprice += $gprice - (double) $g["isdiscountunitprice"] * (double) $g["total"];
-						$discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice - (double) $g["isdiscountunitprice"] * (double) $g["total"];
-					}
-					else 
-					{
-						if( $g["discounttype"] == 2 ) 
-						{
-							$coupongoodprice += $gprice - (double) $g["discountunitprice"] * (double) $g["total"];
-							$discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice - (double) $g["discountunitprice"] * (double) $g["total"];
-						}
-						else 
-						{
-							if( $g["discounttype"] == 0 ) 
-							{
-								$coupongoodprice += $gprice;
-								$discountprice_array[$g["merchid"]]["coupongoodprice"] += $gprice;
-							}
-						}
-					}
-					break;
-				}
-			}
-			$deduct = (double) $data["deduct"];
-			$discount = (double) $data["discount"];
-			$backtype = (double) $data["backtype"];
-			$deductprice = 0;
-			$coupondeduct_text = "";
-			if( $real_price ) 
-			{
-				$coupongoodprice = $real_price;
-			}
-			if( 0 < $deduct && $backtype == 0 && 0 < $coupongoodprice ) 
-			{
-				if( $coupongoodprice < $deduct ) 
-				{
-					$deduct = $coupongoodprice;
-				}
-				if( $deduct <= 0 ) 
-				{
-					$deduct = 0;
-				}
-				$deductprice = $deduct;
-				$coupondeduct_text = "优惠券优惠";
-				foreach( $discountprice_array as $key => $value ) 
-				{
-					$discountprice_array[$key]["deduct"] = (double) $value["coupongoodprice"] / (double) $coupongoodprice * $deduct;
-				}
-			}
-			else 
-			{
-				if( 0 < $discount && $backtype == 1 ) 
-				{
-					$deductprice = $coupongoodprice * (1 - $discount / 10);
-					if( $coupongoodprice < $deductprice ) 
-					{
-						$deductprice = $coupongoodprice;
-					}
-					if( $deductprice <= 0 ) 
-					{
-						$deductprice = 0;
-					}
-					foreach( $discountprice_array as $key => $value ) 
-					{
-						$discountprice_array[$key]["deduct"] = (double) $value["coupongoodprice"] * (1 - $discount / 10);
-					}
-					if( 0 < $merchid ) 
-					{
-						$coupondeduct_text = "店铺优惠券折扣(" . $discount . "折)";
-					}
-					else 
-					{
-						$coupondeduct_text = "优惠券折扣(" . $discount . "折)";
-					}
-				}
-			}
-		}
-		$totalprice -= $deductprice;
-		$return_array = array( );
-		$return_array["isdiscountprice"] = $isdiscountprice;
-		$return_array["discountprice"] = $discountprice;
-		$return_array["deductprice"] = $deductprice;
-		$return_array["coupongoodprice"] = $coupongoodprice;
-		$return_array["coupondeduct_text"] = $coupondeduct_text;
-		$return_array["totalprice"] = $totalprice;
-		$return_array["discountprice_array"] = $discountprice_array;
-		$return_array["merchisdiscountprice"] = $merchisdiscountprice;
-		$return_array["couponmerchid"] = $merchid;
-		$return_array["goodsarr"] = $goodsarr;
-        if($data['couponid']==2) {
 
-           //$return_array["deductprice"] = $totalprice;
-        }
-		return $return_array;
-	}
 	public function caculate() 
 	{
 		global $_W;
@@ -1495,7 +1262,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		}
 	        $flag = false;
 	        if(count($goodsarr) == 1){
-	            $flag = $this->gift_check($openid,$goodsarr[0]['id']);
+	            $flag = m('game')->gift_check($openid,$goodsarr[0]['id']);
 	        }
 		if( $_GPC["cardid"] ) 
 		{
@@ -1835,7 +1602,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 				$select_cardid = 0;
 				if( $plugin_membercard && $cardid ) 
 				{
-					$card_result = $this->caculatecard($cardid, $dispatch_price, $pure_totalprice, $discountprice, $isdiscountprice);
+					$card_result = m('order')->caculatecard($cardid, $dispatch_price, $pure_totalprice, $discountprice, $isdiscountprice);
 					if( $card_result ) 
 					{
 						$card_info["dispatch_price"] = $dispatch_price;
@@ -1999,7 +1766,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		if( $couponid ) 
 		{
 			$express_fee = $dispatch_price + $seckill_dispatchprice;
-			$coupon_price = $this->caculatecoupon($couponid, $goodsdata_coupon, $totalprice, $discountprice, $isdiscountprice, 0, array( ), 0, $realprice - $express_fee);
+			$coupon_price = m('order')->caculatecoupon($couponid, $goodsdata_coupon, $totalprice, $discountprice, $isdiscountprice, 0, array( ), 0, $realprice - $express_fee);
 			$coupon_deductprice = $coupon_price["deductprice"];
 			//lihanwen
             		$sql = "SELECT d.id,d.couponid,c.enough,c.backtype,c.deduct,c.discount,c.backmoney,c.backcredit,c.backredpack,c.merchid,c.limitgoodtype,c.limitgoodcatetype,c.limitgoodids,c.limitgoodcateids,c.limitdiscounttype  FROM " . tablename("ewei_shop_coupon_data") . " d";
@@ -2232,7 +1999,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		}
 		$flag = false;
 		if(count($goods) == 1){
-		   $flag = $this->gift_check($openid,$goods[0]['id']);
+		   $flag = m('game')->gift_check($openid,$goods[0]['id']);
 		}
 		$is_remote = 1;
 		foreach( $goods as $g ) 
@@ -2705,7 +2472,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$pure_totalprice = $totalprice;
 		if( $plugin_membercard && $cardid ) 
 		{
-			$card_result = $this->caculatecard($cardid, $dispatch_price, $pure_totalprice, $discountprice, $isdiscountprice);
+			$card_result = m('order')->caculatecard($cardid, $dispatch_price, $pure_totalprice, $discountprice, $isdiscountprice);
 			if( $card_result ) 
 			{
 				$card_info["dispatch_price"] = $dispatch_price;
@@ -2801,7 +2568,7 @@ class Create_EweiShopV2Page extends AppMobilePage
 				}
 			}
 		}
-		$return_array = $this->caculatecoupon($couponid, $goodsdata_coupon, $totalprice, $discountprice, $isdiscountprice, 1, $discountprice_array, $merchisdiscountprice, $totalprice);
+		$return_array = m('order')->caculatecoupon($couponid, $goodsdata_coupon, $totalprice, $discountprice, $isdiscountprice, 1, $discountprice_array, $merchisdiscountprice, $totalprice);
 		$couponprice = 0;
 		$coupongoodprice = 0;
 		if( !empty($return_array) ) 
@@ -3553,141 +3320,19 @@ class Create_EweiShopV2Page extends AppMobilePage
 		$goodsprice = $_GPC["goodsprice"];
 		$discountprice = $_GPC["discountprice"];
 		$isdiscountprice = $_GPC["isdiscountprice"];
-		$result = $this->caculatecard($cardid, $dispatch_price, $goodsprice, $discountprice, $isdiscountprice);
+		$result = m('order')->caculatecard($cardid, $dispatch_price, $goodsprice, $discountprice, $isdiscountprice);
 		app_json($result);
 	}
-	public function caculatecard($cardid, $dispatch_price, $totalprice, $discountprice = 0, $isdiscountprice = 0) 
-	{
-		global $_W;
-		$openid = $_W["openid"];
-		$uniacid = $_W["uniacid"];
-		if( empty($cardid) ) 
-		{
-			return false;
-		}
-		$plugin_membercard = p("membercard");
-		if( !$plugin_membercard ) 
-		{
-			return NULL;
-		}
-		$card = $plugin_membercard->getMemberCard($cardid);
-		if( empty($card) ) 
-		{
-			return NULL;
-		}
-		if( $card["isdelete"] ) 
-		{
-			app_error(AppError::$CardisDel);
-		}
-		$carddiscountprice = 0;
-		$carddiscount_rate = 0;
-		if( $card["shipping"] ) 
-		{
-			$dispatch_price = 0;
-		}
-		$discount_rate = floatval($card["discount_rate"]);
-		if( empty($card["member_discount"]) && $discount_rate == 0 ) 
-		{
-			$discount_rate = 10;
-		}
-		if( 0 < $isdiscountprice && empty($card["discount"]) ) 
-		{
-			$totalprice += $isdiscountprice;
-			$isdiscountprice = 0;
-		}
-		else 
-		{
-			if( 0 < $discountprice && empty($card["discount"]) ) 
-			{
-				$totalprice += $discountprice;
-				$discountprice = 0;
-			}
-		}
-		$carddiscountprice = round($totalprice * (10 - $discount_rate) * 0.1, 2);
-		$carddiscount_rate = $discount_rate;
-		$totalprice -= $carddiscountprice;
-		$return_array = array( );
-		$return_array["carddiscount_rate"] = $carddiscount_rate;
-		$return_array["carddiscountprice"] = $carddiscountprice;
-		$return_array["dispatch_price"] = $dispatch_price;
-		$return_array["totalprice"] = $totalprice;
-		$return_array["discountprice"] = $discountprice;
-		$return_array["isdiscountprice"] = $isdiscountprice;
-		$return_array["cardname"] = $card["name"];
-		$return_array["cardid"] = $cardid;
-		return $return_array;
-	}
+
 
 
 
     public function reward(){
         global $_GPC;
         $res = m('reward')->addReward($_GPC['openid']);
-        //$res = $this->gift_check($_GPC['openid'],$_GPC['goods_id']);
+        //$res = m('game')->gift_check($_GPC['openid'],$_GPC['goods_id']);
         var_dump($res);
     }
 
-    /**
-     * 判断该商品是否符合领取礼包
-     * @param $openid
-     * @param $goods_id
-     * @return bool
-     */
-    public function gift_check($openid,$goods_id)
-    {
-        global $_W;
-        $uniacid = $_W['uniacid'];
-        $week = m('util')->week(time());
-        //查所有的礼包
-        $gifts = pdo_getall('ewei_shop_gift_bag',['status'=>1,'uniacid'=>$uniacid]);
-        //$gifts = pdo_getall('ewei_shop_gift_bag',['uniacid'=>$uniacid]);
-        //查找用户信息
-        $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid]);
-        //再查他的领取情况
-        $log = pdo_fetchall('select * from '.tablename('ewei_shop_gift_log').'where openid = :openid and status > 0 and uniacid = "'.$uniacid.'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid]);
-        //设置$flag  为 false
-        $flag = false;
-        $gift = [];
-        foreach ($gifts as $item){
-            //把每个礼包里面包含的商品解析成数组
-            $goods = explode(',',$item['goodsid']);
-            //判断该商品是不是在这个礼包里面
-            if(in_array($goods_id,$goods)){
-                //把这个礼包里面的允许领取等级解析成数组
-                $levels = explode(',',$item['levels']);
-                //查看本周是否领取过该礼包
-                if(!pdo_fetch('select * from '.tablename('ewei_shop_gift_log').' where openid = :openid and status > 0 and gift_id = "'.$item['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"',[':openid'=>$openid])){
-                    //当前等级够不够格领取该礼包
-                    if($member['agentlevel'] >= min($levels)){
-                        $flag = $item['id'];
-                        $gift = $item;
-                        break;
-                    }else{
-                        $flag = false;
-                    }
-                }
-            }
-        }
-        //设置需要的人数为0  然后 按要求加数量
-        $num = 0;
-        if(count($log) == 0){
-            //如果他没领取过  需要邀请新人数量等于当前的领取礼包的数量
-            $num += $gift['member'];
-        }else {
-            foreach ($log as $item) {
-                //如果领取过了  需要加上已经领取过的礼包需要的数量
-                $num += pdo_getcolumn('ewei_shop_gift_bag', ['id' => $item['gift_id'], 'uniacid' => $_W['uniacid']], 'member');
-            }
-            //然后加上的这次领的礼包需要的人数
-            $num += $gift['member'];
-        }
-        //计算他在活动期间的邀请新人数量
-        $count = pdo_count('ewei_shop_member','agentid = "'.$member['id'].'" and createtime between "'.$week['start'].'" and "'.$week['end'].'"');
-        //如果邀请数量不足  则返回false
-        if($count < $num){
-            $flag = false;
-        }
-        return $flag;
-    }
 }
 ?>

@@ -25,6 +25,7 @@ function app_error($errcode = 0, $message = '')
 	exit(json_encode($res));
 }
 
+
 function apperror($errcode = 0, $message = '',$data=array())
 {
     global $iswxapp;
@@ -33,6 +34,15 @@ function apperror($errcode = 0, $message = '',$data=array())
     $res = array('error' => $errcode, 'message' => empty($message) ? AppError::getError($errcode) : $message,'data'=>$data);
     
     exit(json_encode($res));
+}
+
+
+
+function app_error1($errcode = 0, $message = '',$data = [])
+{
+	$data = empty($data) ?  new \ArrayObject() : $data;
+	$res = array('error' => $errcode, 'message' =>empty($message) ? AppError::getError($errcode) : $message , 'data'=> $data);
+	exit(json_encode($res));
 }
 
 

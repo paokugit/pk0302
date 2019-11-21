@@ -20,7 +20,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $devote_machine = m('app')->devote_machine($user_id);
         //贡献值  和  是否绑定手机号 微信
         $devote = m('app')->devote($user_id);
-        app_error(0,['credit'=>$credit,'devote_machine'=>$devote_machine,'devote'=>$devote]);
+        app_error1(0,'',['credit'=>$credit,'devote_machine'=>$devote_machine,'devote'=>$devote]);
     }
 
     /**
@@ -31,7 +31,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         //查该用户是不是有商家
         $merch_user = pdo_get('ewei_shop_merch_user',['member_id'=>$user_id]);
         if(!empty($merch_user)){
@@ -47,9 +47,9 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         //生成二维码
         $rebate = m('qrcode')->createHelpPoster(['back'=>$rebate_back,'url'=>$rebate_url,'cate'=>2],$mid);
         if(!$rebate ){
-            app_error(1,'生成收款码错误');
+            app_error1(1,'生成收款码错误',[]);
         }
-        app_error(0,['rebate'=>$rebate['qrcode'],'rebate_qr'=>$rebate['qr']]);
+        app_error1(0,'',['rebate'=>$rebate['qrcode'],'rebate_qr'=>$rebate['qr']]);
     }
 
     /**
@@ -61,9 +61,9 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $token = $_GPC['token'];
         $page = max(1,$_GPC['page']);
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $data = m('app')->rebate_get($user_id,$page);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -77,9 +77,9 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $id = $_GPC['id'];
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $data = m('app')->rebate_set($user_id,$money,$fee,$id);
-        app_error($data['status'],$data['msg']);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 
     /**
@@ -91,7 +91,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $type = $_GPC['type'];
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $member = m('member')->getMember($user_id);
         //$type == 1 商家收款码的资金账户
         if($type == 1){
@@ -101,7 +101,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         }else{
             $data = ['credit5'=>$member['credit5']];
         }
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -112,11 +112,11 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getMember($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $money = $_GPC['money'];
         $merchid = $_GPC['merchid'];
         $data = m('app')->rebate_deduct($user_id,$merchid,$money);
-        app_error($data['status'],$data['msg']);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 
     /**
@@ -127,9 +127,9 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $data = m('app')->rebate_record($user_id);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -144,14 +144,14 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $applytype = $_GPC['applytype'];
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         if($money < 10){
-            app_error(1,"最少提现10块");
+            app_error1(1,"最少提现10块",[]);
         }
         //防止联系请求
         $redis = redis();
         if($redis->get($user_id.$money)){
-            show_json(0,"申请处理中，请稍后...");
+            app_error1(1,"申请处理中，请稍后...",[]);
         }else{
             $token = md5($user_id.$money.time());
             $redis->set($user_id.$money,$token,30);
@@ -162,7 +162,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         }else{
             $data = m('app')->rebate_merchdraw($user_id,$applytype);
         }
-        app_error($data['status'],$data['msg']);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 
     /**
@@ -175,13 +175,13 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $type = $_GPC['type'];
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         if($type == 1){
             $data = m('app')->rebate_owndraw_log($user_id,$page);
         }else{
             $data = m('app')->rebate_merchdraw_log($user_id,$page);
         }
-        app_error($data['status'],$data['msg']);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 
     /**
@@ -194,9 +194,9 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $type = $_GPC['type'];
         $page = max(1,$_GPC['page']);
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error(2,"登录信息失效",[]);
         $data = m('app')->rebate_log($user_id,$type,$page);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -205,7 +205,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
     public function rebate_detail()
     {
         $detail = pdo_get("ewei_shop_member_devote",["id"=>1]);
-        app_error(0,$detail);
+        app_error1(0,'',$detail);
     }
 
     /**
@@ -217,17 +217,17 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $token = $_GPC['token'];
         $type = $_GPC['type'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         if($type == 1){
             $mobile = $_GPC['mobile'];
             $msg = $_GPC['msg'];
             //查找短息的发送的记录
             $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'content'=>$msg,'tp_id'=>1]);
             if(!$sms){
-                app_error(1,"短信验证码不正确");
+                app_error1(1,"短信验证码不正确",[]);
             }
             if($sms['result'] == 1){
-                app_error(1,"该短信已验证");
+                app_error1(1,"该短信已验证",[]);
             }
             //更改短信验证码的验证状态
             pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
@@ -237,7 +237,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
             $weixin = $_GPC['weixin'];
             pdo_update("ewei_shop_member",["weixin"=>$weixin],["id"=>$user_id]);
         }
-        app_error(0,'修改成功');
+        app_error1(0,'修改成功',[]);
     }
 
     /**
@@ -253,13 +253,13 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $first=($page-1) * $pageSize;
         //用户信息
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $member = m('member')->getMember($user_id);
         $list=pdo_fetchall("select * from ".tablename("ewei_shop_member_credit_record")." where (openid = :openid or user_id = :user_id) and credittype = :credittype order by createtime desc limit ".$first.",".$pageSize,array(":openid"=>$member['openid'],':user_id'=>$user_id,":credittype"=>"credit4"));
         foreach ($list as $k=>$v){
             $list[$k]["createtime"]=date("Y-m-d H:i:s",$v["createtime"]);
         }
-        app_error(0,$list);
+        app_error1(0,'',$list);
     }
 
     /**
@@ -271,14 +271,14 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $type = $_GPC['type'];
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $member = m('member')->getMember($user_id);
         if($type == 1){
-            app_error(0,['credit1'=>$member['credit1']]);
+            app_error1(0,'',['credit1'=>$member['credit1']]);
         }elseif ($type == 2){
-            app_error(0,['credit3'=>$member['credit3'],'credit4'=>$member['credit4']]);
+            app_error1(0,'',['credit3'=>$member['credit3'],'credit4'=>$member['credit4']]);
         }elseif ($type == 3){
-            app_error(0,['credit3'=>$member['credit3']]);
+            app_error1(0,'',['credit3'=>$member['credit3']]);
         }
     }
 
@@ -290,9 +290,9 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $data = m('app')->rebate_limit($user_id);
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -305,7 +305,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $token = $_GPC['token'];
         $money = $_GPC['money'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         if($type == 1){
             $data = m('app')->rebate_exchange($user_id,$money);
         }elseif ($type == 2){
@@ -314,7 +314,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
             $mobile = $_GPC['mobile'];
             $data = m('app')->rebate_change($user_id,$money,$mobile);
         }
-        app_error($data['status'],$data['msg']);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 
     /**
@@ -326,13 +326,13 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $ids = $_GPC['ids'];
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if($user_id == 0) app_error(2,"登录信息失效");
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $ids = explode(',',$ids);
         $data = m('payment')->devotelog($ids,$user_id);
         if($data){
-            app_error(0,"领取成功");
+            app_error1(0,"领取成功",[]);
         }else{
-            app_error(1,"领取失败");
+            app_error1(1,"领取失败",[]);
         }
     }
     /**
@@ -350,7 +350,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         }else{
             $data = m('app')->get_list1($user_id);
         }
-        app_error(0,$data);
+        app_error1(0,'',$data);
     }
 }
 ?>
