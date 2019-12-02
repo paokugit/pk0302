@@ -506,7 +506,7 @@ class Index_EweiShopV2Page extends AppMobilePage
     public function level_infodiscount($levelid){
         switch ($levelid){
             case 1:
-                $data['one']['info'] = '每天步数可兑换20卡路里，连续20天，到期后每天可兑换10卡路里';
+                $data['one']['info'] = '每天步数可兑换20折扣宝，连续20天，到期后每天可兑换10折扣宝';
                 $data['two']['info'] = '赠送99折扣宝';
                 $data['three']['info'] = '直推奖3元（最高）';
                 $data['one']['img'] = '/member/01@2x.png';
@@ -514,7 +514,7 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $data['three']['img'] = '/member/03@2x.png';
                 return $data;break;
             case 2:
-                $data['one']['info'] = '每天步数可兑换30卡路里，连续20天，到期后，每天可兑换10卡路里';
+                $data['one']['info'] = '每天步数可兑换30折扣宝，连续20天，到期后，每天可兑换10折扣宝';
                 $data['two']['info'] = '赠送990折扣宝';
                 $data['three']['info'] = '直推奖40元（最高）';
                 $data['one']['img'] = '/member/01@2x.png';
@@ -522,8 +522,8 @@ class Index_EweiShopV2Page extends AppMobilePage
                 $data['three']['img'] = '/member/03@2x.png';
                 return $data;break;
             case 3:
-                $data['one']['info'] = '每天可兑换30卡路里，连续20天';
-                $data['two']['info'] = '赠送350卡路里';
+                $data['one']['info'] = '每天可兑换30折扣宝，连续20天';
+                $data['two']['info'] = '赠送350折扣宝';
                 $data['three']['info'] = '直推奖70元（最高）';
                 $data['one']['img'] = '/member/01@2x.png';
                 $data['two']['img'] = '/member/02@2x.png';
@@ -532,7 +532,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             case 5:
                 $data['one']['info'] = '开通小程序智能店铺1个';
                 $data['two']['info'] = '赠送9900折扣宝';
-                $data['three']['info'] = '每天步数可兑换30卡路里，连续30天，到期后，每天可兑换10卡路里';
+                $data['three']['info'] = '每天步数可兑换30折扣宝，连续30天，到期后，每天可兑换10折扣宝';
                 $data['fore']['info'] = '赠送1000-5000元礼包';
                 $data['one']['img'] = '/member/01@2x.png';
                 $data['two']['img'] = '/member/02@2x.png';

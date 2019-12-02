@@ -50,17 +50,17 @@ class History_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                apperror(1,"用户不存在");
+                $d["openid"]=$_GPC["openid"];
+                $d["type"]=$_GPC["type"];
+                $d["ids"]=$_GPC["ids"];
+                apperror(1,"用户不存在",$d);
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (empty($member)){
-            if ($_GPC["type"]==1){
+            
             apperror(1,"用户不存在");    
-            }else{
-            app_error(1,"用户不存在");
-            }
             
         }
         $del=$_GPC["del"];
@@ -70,17 +70,18 @@ class History_EweiShopV2Page extends AppMobilePage
             
             $ids = $_GPC['ids'];
             if (empty($ids) || !is_array($ids)) {
-                app_error(AppError::$ParamsError);
+                    $d["openid"]=$_GPC["openid"];
+                    $d["type"]=$_GPC["type"];
+                    $d["ids"]=$_GPC["ids"];
+                    apperror(1,"ids格式不正确",$d);
             }
             
 		$sql = 'delete from ' . tablename('ewei_shop_member_history') . '  where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';
         }
 		pdo_query($sql, array(':openid' => $member["openid"],':user_id'=>$member["id"]));
-		if ($_GPC["type"]==1){
+		
 		    apperror(0,"");
-		}else{
-		app_error();
-		}
+		
 		
 	}
 }

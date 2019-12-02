@@ -24,6 +24,9 @@ class Favorite_EweiShopV2Page extends AppMobilePage
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
+        if (!$member["openid"]){
+            $member["openid"]=0;
+        }
         $condition = ' and f.uniacid = :uniacid and (f.openid=:openid or f.user_id=:user_id) and f.deleted=0';
         if ($merch_plugin && $merch_data['is_openmerch']) {
             $condition = ' and f.uniacid = :uniacid and (f.openid=:openid or f.user_id=:user_id) and f.deleted=0 and f.type=0';
@@ -155,6 +158,9 @@ class Favorite_EweiShopV2Page extends AppMobilePage
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
+        if (!$member["openid"]){
+            $member["openid"]=0;
+        }
         $condition = ' and  (f.openid=:openid or user_id=:user_id)';
         $params = array(':openid' =>$member["openid"],':user_id'=>$member["id"]);
         $sql = 'SELECT COUNT(*) FROM ' . tablename('ewei_shop_merch_follow') . (' f where 1 ' . $condition);

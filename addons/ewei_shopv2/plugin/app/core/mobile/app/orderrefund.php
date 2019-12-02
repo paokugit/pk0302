@@ -15,21 +15,21 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (empty($member)){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $order_id=$_GPC["order_id"];
         $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
         if (empty($order)){
-            app_error(1,"订单不存在");
+            apperror(1,"订单不存在");
         }else{
             if ($order["openid"]!=$member["openid"]&&$order["user_id"]!=$member["id"]){
-                app_error(1,"无权限访问此订单");
+                apperror(1,"无权限访问此订单");
             }
         }
         //选择商品
@@ -44,17 +44,17 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $goods = set_medias($goods, array( "thumb" ));
         foreach ($goods as $k=>$v){
             $option=pdo_get("ewei_shop_goods_option",array("id"=>$v["optionid"]));
-            var_dump($option);
+//             var_dump($option);
             $spec_item=pdo_get("ewei_shop_goods_spec_item",array("id"=>$option["specs"]));
-            var_dump($spec_item);
+//             var_dump($spec_item);
             $spec=pdo_get("ewei_shop_goods_spec_item",array("id"=>$spec_item["specid"]));
-            var_dump($spec);
+//             var_dump($spec);
             $goods[$k]["spec"]=$spec["title"];
         }
         $res["order_id"]=$order_id;
         $res["status"]=$order["status"];
         $res["goods"]=$goods;
-        app_error(0,$res);
+        apperror(0,"",$res);
     }
     //退款申请
     public function refund_mes(){
@@ -64,21 +64,21 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (empty($member)){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $order_id=$_GPC["order_id"];
         $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
         if (empty($order)){
-            app_error(1,"订单不存在");
+            apperror(1,"订单不存在");
         }else{
             if ($order["openid"]!=$member["openid"]&&$order["user_id"]!=$member["id"]){
-                app_error(1,"无权限访问此订单");
+                apperror(1,"无权限访问此订单");
             }
         }
         $goods_id=$_GPC["order_goodsid"];
@@ -131,7 +131,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         }
         
         $res["goods"]=$goods;
-        app_error(0,$res);
+        apperror(0,"",$res);
     }
     //退款||退货退款
     public function refund_submit(){
@@ -141,30 +141,30 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (empty($member)){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $order_id=$_GPC["order_id"];
         $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
         //订单商品id
         $order_goodsid=$_GPC["order_goodsid"];
         if (empty($order)){
-            app_error(1,"订单不存在");
+            apperror(1,"订单不存在");
         }else{
             if ($order["openid"]!=$member["openid"]&&$order["user_id"]!=$member["id"]){
-                app_error(1,"无权限访问此订单");
+                apperror(1,"无权限访问此订单");
             }
         }
         if ($order['status'] == '-1') {
-            app_error(AppError::$OrderCanNotRefund, '订单已经处理完毕');
+            apperror(1, '订单已经处理完毕');
         }
         if (empty($order_id)||empty($order_goodsid)){
-            app_error(1,"参数不对");
+            apperror(1,"参数不对");
         }
         
        
@@ -173,7 +173,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $count=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_order_goods")." og "."left join ".tablename("ewei_shop_goods")." g on g.id=og.goodsid "." where og.orderid=:orderid and g.status!=2",array(":orderid"=>$order_id));
 //         var_dump($count);die;
         if ($order["refundstate"]!=0){
-            app_error(1,"该订单处于售后中");
+            apperror(1,"该订单处于售后中");
         }
        
         //判断订单商品中是否有已提交售后的
@@ -184,15 +184,15 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         foreach ($order_goods as $k=>$v){
             //判断商品的有效性
            if ($v["status"]==-1){
-               app_error(1,"传入的订单商品id有误");
+               apperror(1,"传入的订单商品id有误");
            }
            if ($v["rstate"]!=0){
-               app_error(1,"提交的订单商品中含有申请售后中");
+               apperror(1,"提交的订单商品中含有申请售后中");
            }
            //已发货
            if ($order["status"]==2){
            if ($v["cannotrefund"]==1){
-               app_error(1,"提交的商品含有不可退换商品");
+               apperror(1,"提交的商品含有不可退换商品");
            }
            }
            $c+=1;
@@ -225,9 +225,9 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
                 pdo_update('ewei_shop_order', array('refundid' => $refundid, 'refundstate' => 1,'refundtime'=>time()), array('id' => $order_id));
                 //更新订单商品
                 pdo_query("update ".tablename("ewei_shop_order_goods")." set refundid=:refundid,rstate=1 where orderid=:order_id",array(":refundid"=>$refundid,":order_id"=>$order_id));
-                app_error(0,"提交成功");
+                apperror(0,"提交成功");
             }else {
-                app_error(1,"提交失败");
+                apperror(1,"提交失败");
             }
         }else{
             //商品单独申请售后
@@ -269,9 +269,9 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
                 $refundid = pdo_insertid();
                 //更新订单商品
                 pdo_query("update ".tablename("ewei_shop_order_goods")." set refundid=:refundid,rstate=1 where orderid=:orderid and (id in (:id)) or (good_giftid in (:goodsid))",array(":refundid"=>$refundid,"orderid"=>$order_id,":id"=>$ordergoodsid,":goodsid"=>$goodsids));
-                app_error(0,"提交成功");
+                apperror(0,"提交成功");
             }else {
-                app_error(1,"提交失败");
+                apperror(1,"提交失败");
             }
             
         }
@@ -286,21 +286,21 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (empty($member)){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $order_id=$_GPC["order_id"];
         $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
         if (empty($order)){
-            app_error(1,"订单不存在");
+            apperror(1,"订单不存在");
         }else{
             if ($order["openid"]!=$member["openid"]&&$order["user_id"]!=$member["id"]){
-                app_error(1,"无权限访问此订单");
+                apperror(1,"无权限访问此订单");
             }
         }
         $res["order_id"]=$order_id;
@@ -313,12 +313,12 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         //获取商品
         $goods = pdo_fetch("select og.id,og.goodsid,og.total,g.title,g.thumb,og.optionname as optiontitle from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:order_id and og.id=:goods_id", array("order_id"=>$order_id,":goods_id"=>$goods_id));
         if (empty($goods)){
-            app_error(1,"订单商品不存在");
+            apperror(1,"订单商品不存在");
         }
         $goods = set_medias($goods, array( "thumb" ));
         $res["goods"]=$goods;
         //获取规格
-        $spec=pdo_fetchall("select * from ".tablename("ewei_shop_goods_spec")." where goodsid=:goodsid",array(":goodsid"=>$goods["goodsid"]));
+        $spec=pdo_fetchall("select * from ".tablename("ewei_shop_goods_spec")." order by id asc where goodsid=:goodsid",array(":goodsid"=>$goods["goodsid"]));
 //          var_dump($spec);
         $res["spec"]=array();
         foreach ($spec as $k=>$v){
@@ -332,7 +332,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
                 $res["spec"][$k]["value"][$kk]["item_name"]=$spec_item["title"];
             }
         }
-        app_error(0,$res);
+        apperror(0,"",$res);
     }
     //换货--提交
     public function exchange_submit(){
@@ -342,43 +342,43 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (empty($member)){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $order_id=$_GPC["order_id"];
         //订单商品id
         $order_goodsid=$_GPC["order_goodsid"];
         if (empty($order_id)||empty($order_goodsid)){
-            app_error(1,"参数传入不准确");
+            apperror(1,"参数传入不准确");
         }
         $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
         if (empty($order)){
-            app_error(1,"订单不存在");
+            apperror(1,"订单不存在");
         }else{
             if ($order["openid"]!=$member["openid"]&&$order["user_id"]!=$member["id"]){
-                app_error(1,"无权限访问此订单");
+                apperror(1,"无权限访问此订单");
             }
         }
         if ($order["status"]!=2){
-            app_error(1,"该订单未发货不可申请");
+            apperror(1,"该订单未发货不可申请");
         } 
         if ($order["refundstate"]!=0){
-            app_error(1,"该订单处于售后申请中");
+            apperror(1,"该订单处于售后申请中");
         }
         $good=pdo_fetch("select og.id,og.goodsid,og.total,g.cannotrefund,og.rstate from ".tablename("ewei_shop_order_goods")." og left join ".tablename("ewei_shop_goods")." g on g.id=og.goodsid "."where og.orderid=:order_id and og.id=:id and og.status=0",array(":order_id"=>$order_id,":id"=>$order_goodsid));
         if (empty($good)){
-            app_error(1,"参数不正确");
+            apperror(1,"参数不正确");
         }
         if ($good["cannotrefund"]==1){
-            app_error(1,"该商品不可退换");
+            apperror(1,"该商品不可退换");
         }
         if ($good["rstate"]!=0){
-            app_error(1,"该商品售后申请中");
+            apperror(1,"该商品售后申请中");
         }
         //提交信息
         $total=$_GPC["total"];
@@ -387,7 +387,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         }
         $spec_id=$_GPC["spec_id"];
         if ($total>$good["total"]){
-            app_error(1,"最多可退换".$good["total"]."件");
+            apperror(1,"最多可退换".$good["total"]."件");
         }
         //规格
         if (!empty($spec_id)){
@@ -425,9 +425,9 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
                 }
                 //更新订单商品
                 pdo_query("update ".tablename("ewei_shop_order_goods")." set refundid=:refundid,rstate=2 where id=:id or good_giftid=:goodsid",array(":refundid"=>$refundid,":id"=>$order_goodsid,":goodsid"=>$good["goodsid"]));
-                app_error(0,"提交成功");
+                apperror(0,"提交成功");
             }else {
-                app_error(1,"提交失败");
+                apperror(1,"提交失败");
             }
     }
     //售后申请--取消
@@ -438,22 +438,22 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
         if (empty($member)){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $refundid=$_GPC["refundid"];
         $refund=pdo_get("ewei_shop_order_refund",array("id"=>$refundid));
         if (empty($refundid)){
-            app_error(1,"无此申请");
+            apperror(1,"无此申请");
         }
         $order=pdo_get("ewei_shop_order",array("id"=>$refund["orderid"]));
         if ($order["openid"]!=$member["openid"]&&$order["user_id"]!=$member["id"]){
-            app_error(1,"无此权限操作");
+            apperror(1,"无此权限操作");
         }
         $d["rstate"]=0;
         $d["refundid"]=0;
@@ -463,9 +463,9 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
             $o["refundid"]=0;
             pdo_update("ewei_shop_order",$o,array("id"=>$refund["orderid"]));
             pdo_delete("ewei_shop_order_refund",array("id"=>$refundid));
-            app_error(0,"取消成功");
+            apperror(0,"取消成功");
         }else{
-            app_error(1,"取消失败");
+            apperror(1,"取消失败");
         }
     }
     //订单列表
@@ -477,18 +477,21 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC["openid"];
         if( empty($openid) )
         {
-            app_error(AppError::$ParamsError);
+            apperror(1,"openid不可为空");
         }
         //修改
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
         $member=m("member")->getMember($openid);
-        
+        if (empty($member["openid"])){
+            $member["openid"]=0;
+            
+        }
         $pindex = max(1, intval($_GPC["page"]));
         $psize = 10;
         $show_status = $_GPC["status"];//待付款：0 待发货：1 待收货：2 已完成：3 退换货：4
@@ -528,6 +531,9 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
 //         var_dump($total);
         $res["list"]=array();
         $res["total"]=$total;
+        $res["page"]=$pindex;
+        $res["pagesize"]=$psize;
+        $res["pagetotal"]=ceil($total/$psize);
         foreach ($list as $k=>$v){
         $res["list"][$k]["id"]=$v["id"];
         $res["list"][$k]["status"]=$v["status"];
@@ -563,7 +569,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         }
         $res["list"][$k]["good"]=$good;
         }
-        app_error(0,$res);
+        apperror(0,"",$res);
     }
     //订单--详情
     public function detail(){
@@ -573,13 +579,13 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $openid = $_GPC["openid"];
         if( empty($openid) )
         {
-            app_error(AppError::$ParamsError);
+            apperror(1,"openid未传");
         }
         //修改
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
@@ -587,10 +593,10 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         
         $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
         if (empty($order)){
-            app_error(1,"订单不存在");
+            apperror(1,"订单不存在");
         }
         if ($order["openid"]!=$member["openid"]&&$order["user_id"]!=$member["id"]){
-            app_error(1,"无权限访问");
+            apperror(1,"无权限访问");
         }
         $res=array("id"=>$order["id"],"status"=>$order["status"],"ordersn"=>$order["ordersn"],"price"=>$order["price"],"expresscom"=>$order["expresscom"],"dispatchprice"=>$order["dispatchprice"],"createtime"=>($order["createtime"]?date("Y-m-d H:i:s",$order["createtime"]):""),"finishtime"=>($order["finishtime"]?date("Y-m-d H:i:s",$order["finishtime"]):""),"paytime"=>($order["paytime"]?date("Y-m-d H:i:s",$order["paytime"]):""),"sendtime"=>($order["sendtime"]?date("Y-m-d H:i:s",$order["sendtime"]):""),"refundtime"=>($order["refundtime"]?date("Y-m-d H:i:s",$order["refundtime"]):""),"canceltime"=>($order["canceltime"]?date("Y-m-d H:i:s",$order["canceltime"]):""),"paytype"=>$order["paytype"],"couponprice"=>$order["couponprice"],"deductprice"=>$order["deductprice"],"discount_price"=>$order["discount_price"],"iscomment"=>$order["iscomment"],"refundstate"=>$order["refundstate"],"refundid"=>$order["refundid"]);
         //获取商家
@@ -621,6 +627,6 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
             
         }
         $res["good"]=$good;
-        app_error(0,$res);
+        apperror(0,"",$res);
     }
 }

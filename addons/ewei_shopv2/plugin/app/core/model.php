@@ -400,7 +400,7 @@ if (!class_exists("AppModel")) {
                                     foreach ($notices as $index => $notice) {
                                         $childid = rand(1000000000, 9999999999);
                                         $childid = 'C' . $childid;
-                                        $item['data'][$childid] = array('id' => $notice['id'], 'title' => $notice['title'], 'linkurl' => '/pages/shop/notice/detail/detail?id=' . $notice['id']);
+                                        $item['data'][$childid] = array('id' => $notice['id'], 'title' => $notice['title'], 'linkurl' => '/packageA/pages/shop/notice/detail/detail?id=' . $notice['id']);
                                     }
                                 }
                             } else if ($item['id'] == 'video') {

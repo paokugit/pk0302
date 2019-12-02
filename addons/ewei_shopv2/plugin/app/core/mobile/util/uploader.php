@@ -12,6 +12,7 @@ class Uploader_EweiShopV2Page extends AppMobilePage
 		global $_GPC;
 		load()->func('file');
 		$field = $_GPC['file'];
+// 		apperror(1,"",$field);die;
 		if (!(empty($_FILES[$field]['name']))) 
 		{
 			if (is_array($_FILES[$field]['name'])) 
@@ -27,7 +28,7 @@ class Uploader_EweiShopV2Page extends AppMobilePage
 					}
 					else 
 					{
-						$ret = array('status' => 1, 'filename' => $ret['path'], 'url' => trim($_W['attachurl'] . $ret['filename']));
+						$ret = array('status' => 1, 'filename' => $ret['filename'], 'url' => trim($_W['attachurl'] . $ret['filename']));
 					}
 					$files[] = $ret;
 				}

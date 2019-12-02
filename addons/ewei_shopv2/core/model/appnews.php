@@ -18,6 +18,9 @@ class Appnews_EweiShopV2Model
         if (empty($member)){
             return false;
         }else {
+            if (!$member["openid"]){
+                $member["openid"]=0;
+            }
             return $member;
         }
     }

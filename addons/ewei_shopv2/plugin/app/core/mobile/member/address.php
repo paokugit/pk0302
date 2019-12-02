@@ -37,7 +37,9 @@ class Address_EweiShopV2Page extends AppMobilePage
 			$psize = 20;
 			$limit = ' LIMIT ' . ($pindex - 1) * $psize . ',' . $psize;
 		}
-
+        if (!$member["openid"]){
+            $member["openid"]=0;
+        }
 		$condition = ' and (openid=:openid or user_id=:user_id) and deleted=0 and  `uniacid` = :uniacid';
 // 		$params = array(':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']);
 		$params = array(':uniacid' => $_W['uniacid'], ':openid' => $member["openid"],':user_id'=>$member["id"]);

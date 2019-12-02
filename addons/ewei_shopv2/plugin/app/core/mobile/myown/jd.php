@@ -62,7 +62,22 @@ class Jd_EweiShopV2Page extends AppMobilePage{
         }
        
     }
-    
+    //商品信息
+    public function detail(){
+        $url="http://www.juheyuncang.com";
+        $url=$url."/api/jd/getDetail";
+        $data["key"]="5R8f1Nb42YFn0ou2";
+        $data["secret"]="F5nuTL9IRtBHcOwRFgGvEzAnvH9wvlxH";
+        $data["queryExts"]="appintroduce,shouhou";
+        $list=pdo_fetchall("select * from " .tablename("ewei_shop_jdgoods")." where id>50000");
+        foreach ($list as $k=>$v){
+            $data["sku"]=$v["sku"];
+            $res=$this->posturl($url, $data);
+            $d=$res["result"];
+            var_dump($d);
+            pdo_update("ewei_shop_jdgoods",$d,array("sku"=>$v["sku"]));
+        }
+    }
     //商品价格
     public function price(){
         $url="http://www.juheyuncang.com";
@@ -74,6 +89,7 @@ class Jd_EweiShopV2Page extends AppMobilePage{
         var_dump($this->posturl($url, $data));
         
     }
+   
     function posturl($url,$data){
         $data  = json_encode($data);
         $headerArray =array("Content-type:application/json;charset='utf-8'","Accept:application/json");

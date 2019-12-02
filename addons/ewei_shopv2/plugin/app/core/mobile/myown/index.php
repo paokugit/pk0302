@@ -65,10 +65,15 @@ class Index_EweiShopV2Page extends AppMobilePage{
 //         var_dump($credit);die;
         if (empty($credit)){
             $resault["credit"]=0;
-            $resault["credit1"]=0;
+            
         }else{
             $resault["credit"]=$credit;
-            $resault["credit1"]=$credit2;
+           
+        }
+        if (empty($credit2)){
+            $resault["credit1"]=0;
+        }else{
+        $resault["credit1"]=$credit2;
         }
         app_error(0,$resault);
     }

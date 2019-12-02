@@ -65,8 +65,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
                $list[$k]["good"]["marketprice"]=$goods["marketprice"];
                $list[$k]["good"]["sales"]=$goods["sales"];
             }else{
-                $list[$k]["good"]=array();
-                
+                $list[$k]["good"]=new ArrayObject();  
             }
             //获取用户信息
             if ($v["openid"]){
@@ -178,7 +177,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
             $detail["good"]["marketprice"]=$goods["marketprice"];
             $detail["good"]["sales"]=$goods["sales"];
         }else{
-            $detail["good"]=array();
+            $detail["good"]=new ArrayObject();
             
         }
         //获取用户信息
@@ -260,7 +259,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
         
         $ciclre_id=$_GPC["ciclre_id"];
         $type=$_GPC["type"];
-        $page=$_GPC["page"];
+        $page=$_GPC["page"]?$_GPC["page"]:1;
         $first=($page-1)*10;
         if ($type==1){
             $sort="desc";
@@ -301,7 +300,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
                 $list[$k]["comment"][$key]["nickname"]=$m["nickname"];
                 if ($val["comment_openid"]){
 //                     $mm=pdo_get("ewei_shop_member",array("openid"=>$val["comment_openid"]));
-                    $mm=pdo_fetch("select * from ".tablename("ewei_shop_member")." where openid=:openid or user_id=:user_id",array(":openid"=>$val["comment_openid"],":user_id"=>$val["comment_openid"]));
+                    $mm=pdo_fetch("select * from ".tablename("ewei_shop_member")." where openid=:openid or id=:user_id",array(":openid"=>$val["comment_openid"],":user_id"=>$val["comment_openid"]));
                     $list[$k]["comment"][$key]["bnickname"]=$mm["nickname"];
                 }else{
                     $list[$k]["comment"][$key]["bnickname"]="";
@@ -458,10 +457,10 @@ class Index_EweiShopV2Page extends AppMobilePage{
         }
         foreach ($detail["hot"] as $k=>$v){
             $detail["hot"][$k]["create_time"]=$this->timeFormat($v["create_time"]);
-            if ($v["member"]){
+            if ($v["openid"]){
             $m=pdo_get("ewei_shop_member",array("openid"=>$v["openid"]));
             }else{
-                $m=pdo_get("ewei_shop_member",array("openid"=>$v["user_id"]));
+            $m=pdo_get("ewei_shop_member",array("id"=>$v["user_id"]));
             }
             $detail["hot"][$k]["nickname"]=$m["nickname"];
             $detail["hot"][$k]["avatar"]=$m["avatar"];

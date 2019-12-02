@@ -14,27 +14,45 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         global $_W;
         $merch_id=$_GPC["merch_id"];
         if (empty($merch_id)){
-            app_error(-1,"商户id未传");
+            apperror(-1,"商户id未传");
         }
         //获取经纬度
         $lng=floatval($_GPC["lng"]);
         $lat=floatval($_GPC["lat"]);
         $openid=$_GPC["openid"];
         //获取商家信息
-        $merch=pdo_fetch("select id,merchname,mobile,wxsignal,salecate,logo,address,lat,lng,shopimg,shopvideo,status from ".tablename("ewei_shop_merch_user")." where id=:id",array(":id"=>$merch_id));
+        $me=pdo_fetch("select * from ".tablename("ewei_shop_merch_user")." where id=:id",array(":id"=>$merch_id));
 		
-        if (empty($merch)){
-            app_error(-1,"不存在该商户");
+        if (empty($me)){
+            apperror(-1,"不存在该商户");
         }
-		if ($merch["status"]==2){
-            app_error(1,"该商户已下架");
+		if ($me["status"]==2){
+            apperror(1,"该商户已下架");
         }
+        $merch["id"]=$me["id"];
+        $merch["merchname"]=$me["merchname"];
+        $merch["mobile"]=$me["mobile"];
+        $merch["wxsignal"]=$me["wxsignal"];
+        $merch["salecate"]=$me["salecate"];
+        $merch["logo"]=$me["logo"];
+        $merch["address"]=$me["address"];
+        $merch["lat"]=$me["lat"];
+        $merch["lng"]=$me["lng"];
+        $merch["shopimg"]=$me["shopimg"];
+        $merch["shopvideo"]=$me["shopvideo"];
+        $merch["status"]=$me["status"];
+        $merch["desc"]=$me["desc"];
 		$type=$_GPC["type"]?$_GPC["type"]:0;
 		 
+		if ($openid){
 		$member=m("appnews")->member($openid,$type);
         if (!$member){
-            app_error(1,"用户不存在");
+            apperror(1,"用户不存在");
         }
+		if (empty($member)){
+		    $member["openid"]=0;
+		}
+		}
 		
         $merch["logo"]=tomedia($merch["logo"]);
         if (!empty($merch["shopimg"])){
@@ -60,16 +78,39 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
             $merch['distance'] ="";
         }
         //获取关注情况
+        if ($openid){
          $follow=pdo_fetch("select * from ".tablename("ewei_shop_merch_follow")." where (openid=:openid or user_id=:user_id) and merch_id=:merchid",array(":openid"=>$member["openid"],":user_id"=>$member["id"],"merchid"=>$merch_id));
-        if (empty($fllow)){
+       
+         if (empty($follow)){
             $merch["follow"]=0;
         }else{
             $merch["follow"]=1;
         }
+        }else{
+            $merch["follow"]=0;
+        }
 		//获取总共有多少人关注
         $count=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_merch_follow")." where merch_id=:merchid",array(":merchid"=>$merch_id));
         $merch["followcount"]=$count;
+        //判断是否有刷新
+        if ($openid){
+        $log=pdo_fetch("select * from ".tablename("ewei_shop_merch_view")." where openid=:openid or user_id=:user_id ",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
+        }
+        if ($log){
+            $g=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_goods")." where status=1 and deleted=0 and merchid=:merchid and createtime>:createtime",array(":merchid"=>$merch_id,":createtime"=>$log["create_time"]));
+            if ($g>0){
+                $merch["news"]=1;
+            }else{
+                $merch["news"]=0;
+            }
+        }else{
+            $merch["news"]=1;
+        }
+        if ($type==1){
+            apperror(0,"",$merch);
+        }else{
         app_error(0,$merch);
+        }
     }
     //店铺关注/取消
     public function follow(){
@@ -186,7 +227,7 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         $m["desc"]=$merch["desc"];
         $m["logo"]=tomedia($merch["logo"]);
         
-        app_error(0,$m);
+        apperror(0,"",$m);
     }
     //店铺公告 --优惠券
     public function shopcoupon(){
@@ -200,10 +241,10 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         $merch=pdo_fetch("select * from ".tablename("ewei_shop_merch_user")." where id=:id",array(":id"=>$merch_id));
         
         if (empty($merch)){
-            app_error(1,"不存在该商户");
+            apperror(1,"不存在该商户");
         }
         if ($merch["status"]==2){
-            app_error(1,"该商户已下架");
+            apperror(1,"该商户已下架");
         }
         //获取公告
         $notice=pdo_fetch("select title from ".tablename("ewei_shop_merch_notice")." where merchid=:merchid",array(":merchid"=>$merch_id));
@@ -211,16 +252,16 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         //获取优惠券
         $coupon=pdo_fetchall("select id,enough,deduct from ".tablename("ewei_shop_coupon")." where merchid=:merchid and status=1 and total>0 and ((timelimit=1 and timestart<=:time and timeend>=:time) or timelimit=0) order by createtime desc limit 2",array(":merchid"=>$merch_id,":time"=>time()));
         $list["coupon"]=$coupon;
-        app_error(0,$list);
+        apperror(0,"",$list);
     }
     //优惠券--详情
     public function coupon_detail(){
         global $_GPC;
         global $_W;
         $id=$_GPC["id"];
-        $detail=pdo_fetch("select id,enough,deduct,total,timelimit,timestart,timeend from ".tablename("ewei_shop_coupon")." where id=:id",array(":id"=>$id));
+        $detail=pdo_fetch("select id,enough,couponname,deduct,total,timelimit,timestart,timeend from ".tablename("ewei_shop_coupon")." where id=:id",array(":id"=>$id));
         if (empty($detail)){
-            app_error(1,"不存在该优惠券");
+            apperror(1,"不存在该优惠券");
         }
         if (!empty($detail["timestart"])){
             $detail["timestart"]=date("Y-m-d",$detail["timestart"]);
@@ -229,9 +270,10 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         //判断是否已领取
         $openid=$_GPC["openid"];
         $type=$_GPC["type"]?$_GPC["type"]:0;
+        if ($openid){
         $member=m("appnews")->member($openid,$type);
         if (!$member){
-            app_error(1,"用户不存在");
+            apperror(1,"用户不存在");
         }
         $l=pdo_fetch("select * from ".tablename("ewei_shop_coupon_data")." where couponid=:couponid and (openid=:openid or user_id=:user_id) and used=0",array(":couponid"=>$id,":openid"=>$member["openid"],":user_id"=>$member["id"]));
         if ($l){
@@ -239,7 +281,10 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         }else{
             $detail["log"]=0;
         }
-        app_error(0,$detail);
+        }else{
+            $detail["log"]=0;
+        }
+        apperror(0,"",$detail);
     }
     //优惠券--领取
     public function coupon_receive(){
@@ -284,23 +329,24 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         $page=$_GPC["page"]?$_GPC["page"]:1;
         $merch_id=$_GPC["merch_id"];
         if (empty($merch_id)){
-            app_error(-1,"商户id未传");
+            apperror(-1,"商户id未传");
         }
         //获取商家信息
         $merch=pdo_fetch("select id,status from ".tablename("ewei_shop_merch_user")." where id=:id",array(":id"=>$merch_id));
         
         if (empty($merch)){
-            app_error(1,"不存在该商户");
+            apperror(1,"不存在该商户");
         }
         if ($merch["status"]==2){
-            app_error(1,"该商户已下架");
+            apperror(1,"该商户已下架");
         }
         $first=($page-1)*20;
-        $condition=" and status=1 and deleted=0 and merchid=:merchid";
-       
+//         $condition=" and status=1 and deleted=0 and merchid=:merchid";
+        $condition=" and status=1 and deleted=0";
         if ($_GPC["recommend"]==1){
             $condition=$condition." and isrecommand=1 ";
-        }else{
+        }
+        
             if ($_GPC["price"]==1){
                 //价格有高到底
                 $order=" order by marketprice desc";
@@ -311,14 +357,21 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
             }elseif ($_GPC["sale"]==2){
                 $order=" order by sales asc";
             }
-        }
+        
         if (empty($order)){
             $order=" order by createtime desc ";
         }
-        $list=pdo_fetchall("select id,title,marketprice,thumb,total,sales,ishot,istime from ".tablename("ewei_shop_goods")." where 1  ".$condition.$order."  limit ".$first.",20",array(":merchid"=>$merch_id));
+//         $list=pdo_fetchall("select id,title,marketprice,thumb,total,sales,ishot,istime from ".tablename("ewei_shop_goods")." where 1  ".$condition.$order."  limit ".$first.",20",array(":merchid"=>$merch_id));
+        $list=pdo_fetchall("select id,title,marketprice,thumb,total,sales,ishot,istime,issendfree,remote_dispatchprice from ".tablename("ewei_shop_goods")." where 1  ".$condition.$order."  limit ".$first.",20");
         
         $list=set_medias($list, array( "thumb" ));
-        app_error(0,$list);
+        $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_goods")." where 1 ".$condition);
+        $res["list"]=$list;
+        $res["total"]=$total;
+        $res["page"]=$page;
+        $res["pagesize"]=20;
+        $res["pagetotal"]=ceil($total/20);
+        apperror(0,"",$res);
     }
     //上新
     public function upgood(){
@@ -326,16 +379,42 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         global $_W;
         $merch_id=$_GPC["merch_id"];
         if (empty($merch_id)){
-            app_error(-1,"商户id未传");
+            apperror(1,"商户id未传");
         }
         //获取商家信息
         $merch=pdo_fetch("select id,status from ".tablename("ewei_shop_merch_user")." where id=:id",array(":id"=>$merch_id));
         if (empty($merch)){
-            app_error(1,"不存在该商户");
+            apperror(1,"不存在该商户");
         }
         if ($merch["status"]==2){
-            app_error(1,"该商户已下架");
+            apperror(1,"该商户已下架");
         }
+        //添加查看记录
+        $type=$_GPC["type"]?$_GPC["type"]:0;
+        $openid=$_GPC["openid"];
+        if ($openid){
+        $member=m("appnews")->member($openid,$type);
+        if (!$member){
+            apperror(1,"用户不存在");
+        }
+        if (empty($member["openid"])){
+            $member["openid"]=0;
+        }
+        }
+        
+      
+        if ($openid){
+        if ($member["openid"]!=0){
+        $log["openid"]=$member["openid"];
+        }
+        pdo_query("delete * from ".tablename("ewei_shop_merch_view")." where openid=:openid or user_id=:user_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
+        
+        $log["user_id"]=$member["id"];
+        $log["merchid"]=$merch_id;
+        $log["create_time"]=time();
+        pdo_insert("ewei_shop_merch_view",$log);
+        }
+        
         $list=pdo_fetchall("select FROM_UNIXTIME(createtime,'%Y-%m-%d') days from ".tablename("ewei_shop_goods")." where status=1 and deleted=0  and merchid=:merchid GROUP BY days order by createtime desc",array(":merchid"=>$merch_id));
         foreach ($list as $k=>$v){
             $start_time=strtotime($v["days"]);
@@ -345,7 +424,8 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
             $goods=set_medias($goods, array( "thumb" ));
             $list[$k]["goods"]=$goods;
         }
-        app_error(0,$list);
+        $res["list"]=$list;
+        apperror(0,"",$res);
     }
 }
  

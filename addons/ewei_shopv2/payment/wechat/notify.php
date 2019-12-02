@@ -203,6 +203,8 @@ class EweiShopWechatPay
                                                                                                         $this->limit();
                                                                                                     }elseif ($this->type=="99"){
                                                                                                         $this->acceleration();
+                                                                                                    }elseif ($this->type=="98"){
+                                                                                                        $this->jdorder();
                                                                                                     }
                                                                                                 }
                                                                                             }
@@ -1329,6 +1331,37 @@ class EweiShopWechatPay
             }
         }
         echo false;  
+    }
+    //京东order
+    public function jdorder(){
+        
+        $input = file_get_contents('php://input');
+        $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $data = json_decode(json_encode($obj), true);
+        if (!$data) {
+            exit("FAIL");
+        }
+        $res = $this->check_sign($data);
+        if (!$res) {
+            exit("FAIL");
+        }
+        
+        $order_sn = $data['out_trade_no'];  //获得订单信息
+       
+        //用ordersn订单号 查订单信息
+        $order=pdo_get("ewei_shop_order",array("ordersn"=>$order_sn));
+        if ($order&&$order["status"]==0){
+            if (pdo_update("ewei_shop_order",array("status"=>1,"paytime"=>time()),array("ordersn"=>$order_sn))){
+               //确认京东
+               $d["jdOrderId"]=$order["jdOrderId"];
+               m("jdgoods")->confirmOrder($d);
+                echo success;
+            }else {
+                echo false;
+            }
+        }
+        echo false;
+        
     }
 }
 ?>

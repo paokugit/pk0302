@@ -343,6 +343,9 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        $pindex = max(1, intval($_GPC['page']));
        $psize = 20;
        $first=($pindex-1)*20;
+       if (!$member["openid"]){
+           $member["openid"]=0;
+       }
        $list=pdo_fetchall("select * from ".tablename("ewei_shop_member_history")." where (openid=:openid or user_id=:user_id) and deleted=0 order by createtime desc limit ".$first.",20",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
 //        var_dump($list);
        $month=array();
@@ -527,9 +530,140 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        if (!$member){
            apperror(1,"用户不存在");
        }
+       if (!$member["openid"]){
+           $member["openid"]=0;
+       }
        //获取商家id
-       $merchid=pdo_query("select merchid from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and deleted=0",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
-       var_dump($merchid);
+       $list=pdo_fetchall("select merchid from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and deleted=0  group by merchid order by createtime desc",array(":openid"=>$member["openid"],":user_id"=>$member["id"]));
+       
+       foreach ($list as $k=>$v){
+           //获取商家
+           if ($v["merchid"]!=0){
+           $merch=pdo_get("ewei_shop_merch_user",array("id"=>$v["merchid"]));
+           $list[$k]["merchname"]=$merch["merchname"];
+           }else{
+               $list[$k]["merchname"]="跑库";
+           }
+           //获取优惠券
+           //获取优惠券
+           $coupon=pdo_fetch("select id,enough,deduct from ".tablename("ewei_shop_coupon")." where merchid=:merchid and status=1 and total>0 and ((timelimit=1 and timestart<=:time and timeend>=:time) or timelimit=0) and coupontype=0 order by deduct desc limit 2",array(":merchid"=>$merch_id,":time"=>time()));
+           if ($coupon){
+           $list[$k]["coupon"]["enough"]=$coupon["enough"];
+           $list[$k]["coupon"]["deduct"]=$coupon["deduct"];
+           }else{
+               $list[$k]["coupon"]["enough"]=0;
+               $list[$k]["coupon"]["deduct"]=0;
+           }
+           //获取列表
+           $goods=pdo_fetchall("select * from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and deleted=0 and merchid=:merchid order by createtime desc",array(":openid"=>$member["openid"],":user_id"=>$member["id"],"merchid"=>$v["merchid"]));
+           foreach ($goods as $kk=>$vv){
+               $list[$k]["goods"][$kk]["id"]=$vv["id"];
+               $list[$k]["goods"][$kk]["goodsid"]=$vv["goodsid"];
+               $list[$k]["goods"][$kk]["total"]=$vv["total"];
+               $list[$k]["goods"][$kk]["marketprice"]=$vv["marketprice"];
+               $list[$k]["goods"][$kk]["optionid"]=$vv["optionid"];
+               $list[$k]["goods"][$kk]["selected"]=$vv["selected"];
+               //获取规格属性
+               if ($vv["optionid"]!=0){
+                   $opt=pdo_get("ewei_shop_goods_option",array("id"=>$vv["optionid"]));
+                   $list[$k]["goods"][$kk]["optionname"]=$opt["title"]; 
+                   $list[$k]["goods"][$kk]["specs"]=explode("_", $opt["specs"]);
+               }else{
+                   $list[$k]["goods"][$kk]["optionname"]="";
+                   $list[$k]["goods"][$kk]["specs"]=array();
+               }
+               //获取商品
+               $g=pdo_get("ewei_shop_goods",array("id"=>$vv["goodsid"]));
+               $list[$k]["goods"][$kk]["goodsname"]=$g["title"];
+               $list[$k]["goods"][$kk]["thumb"]=tomedia($g["thumb"]);
+               //获取商品总归个
+               //获取规格
+               $spec=pdo_fetchall("select * from ".tablename("ewei_shop_goods_spec")."  where goodsid=:goodsid order by id asc",array(":goodsid"=>$vv["goodsid"]));
+               //          var_dump($spec);
+               $list[$k]["goods"][$kk]["spec"]=array();
+               foreach ($spec as $kkk=>$vvv){
+                   $list[$k]["goods"][$kk]["spec"][$kkk]["id"]=$vvv["id"];
+                   $list[$k]["goods"][$kk]["spec"][$kkk]["title"]=$vvv["title"];
+                   $value=unserialize($vvv["content"]);
+                   $list[$k]["goods"][$kk]["spec"][$kkk]["value"]=array();
+                   foreach ($value as $kkkk=>$vvvv){
+                       $spec_item=pdo_get("ewei_shop_goods_spec_item",array("id"=>$vvvv));
+                       $list[$k]["goods"][$kk]["spec"][$kkk]["value"][$kkkk]["item_id"]=$vvvv;
+                       $list[$k]["goods"][$kk]["spec"][$kkk]["value"][$kkkk]["item_name"]=$spec_item["title"];
+                   }
+               }
+               
+           }
+       }
+       $l["list"]=$list;
+       apperror(0,"",$l);
+   }
+   //购物车--更换规格属性
+   public function cart_option(){
+       global $_W;
+       global $_GPC;
+       //规格
+       $spec_id=$_GPC["spec_id"];
+       
+           $count=count($spec_id);
+           if ($count==1){
+               $option=pdo_get("ewei_shop_goods_option",array("specs"=>$spec_id[0]));
+           }else {
+               $specs=implode("_", $spec_id);
+               $option=pdo_get("ewei_shop_goods_option",array("specs"=>$specs));
+           }
+//            var_dump($option);
+           if (empty($option)){
+               apperror(1,"规格id不正确");
+           }
+       $cart_id=$_GPC["cart_id"];
+       $total=$_GPC["total"]?$_GPC["total"]:1;
+       $cart=pdo_get("ewei_shop_member_cart",array("id"=>$cart_id));
+       if (empty($cart)){
+           apperror(1,"购物车id不正确");
+       }
+       //判断该规格的商品是否还有库存
+       if ($option["stock"]!=-1&&$option["stock"]<$cart["total"]){
+           apperror(1,"该规格商品仅剩".$option["stock"]."件");
+       }
+       
+       //判断购物车是否还有此商品
+       if ($cart["user_id"]){
+           $member=m("member")->getMember($cart["user_id"]);
+       }else{
+           $member=m("member")->getMember($cart["openid"]);
+       }
+       if (empty($member["openid"])){
+           $member["openid"]=0;
+       }
+       
+       //判断是否有此规格商品
+       $my=pdo_fetch("select * from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and goodsid=:goodsid and optionid=:optionid and deleted=0",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":goodsid"=>$cart["goodsid"],":optionid"=>$option["id"]));
+       $d["optionid"]=$option["id"];
+       $d["total"]=$total;
+//        var_dump($my);
+//        var_dump($option);
+//        var_dump($cart);die;
+       if (!$my){
+       if (pdo_update("ewei_shop_member_cart",$d,array("id"=>$cart_id))){
+           $list["optionname"]=$option["title"];
+           apperror(0,"",$list);
+       }else{
+           apperror(1,"更新失败");
+       }
+       }else{
+           //由此规格
+           $dd["total"]=$my["total"]+$total;
+           
+           if (pdo_update("ewei_shop_member_cart",$dd,array("id"=>$my["id"]))){
+               $list["optionname"]=$option["title"];
+               $del["deleted"]=1;
+               pdo_update("ewei_shop_member_cart",$del,array("id"=>$cart_id));
+               apperror(0,"",$list);
+           }else{
+               apperror(1,"");
+           }
+       }
        
    }
 }
