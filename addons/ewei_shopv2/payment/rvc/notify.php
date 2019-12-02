@@ -18,6 +18,7 @@ if ($uuid) {
         pdo_update('ewei_shop_member', ['RVC' => $rvc], ['id' => $member['id']]);
         $add = [
             'openid'=>$rvcorder['openid'],
+            'user_id'=>$rvcorder['user_id'],
             'type'=>0,
             'logno'=>$uuid,
             'title'=>"rvc充值",
@@ -29,6 +30,7 @@ if ($uuid) {
             'remark'=>"充值RVC".$rvcorder['amount']."个，价值".$rvcorder['totalprice']."元",
         ];
         pdo_insert('ewei_shop_member_rvclog',$add);
+        m('member')->setCredit($rvcorder['openid'],'RVC',$rvcorder['totalprice'],$add['remark']);
         exit(json_encode(['status'=>200]));
     }
 }

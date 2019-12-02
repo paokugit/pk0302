@@ -1,0 +1,42 @@
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	background: #FFFFFF;
+	font-size:62.5%;
+}
+
+ol{
+	list-style: none !important;
+	padding: 0 1.6rem;
+}
+
+.details{
+	margin: 2rem 0.5rem;
+}
+
+.tit-area{
+	display: flex;
+	align-items: center;
+	padding-left: 0.5rem;
+}
+.tit-img{
+	width: 4rem;
+	height: 4rem;
+}
+.big-tit{
+	font-size: 1.8rem;
+	color: #333333;
+	font-weight: bold;
+	margin-bottom: 0.5rem;
+}
+.small-tit{
+	font-size: 1rem;
+	color: #8b8a99;
+}
+
+.details-area p{
+	color: #282828;
+	font-size: 1.5rem;
+}

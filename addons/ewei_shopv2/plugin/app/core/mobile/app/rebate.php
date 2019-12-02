@@ -10,6 +10,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function main()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -28,6 +29,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_qrcode()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -57,6 +59,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_get()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
         $page = max(1,$_GPC['page']);
@@ -71,6 +74,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_set()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $money = $_GPC['money'];
         $fee = $_GPC['deduct'];
@@ -82,11 +86,31 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         app_error1($data['status'],$data['msg'],$data['data']);
     }
 
+    /*
+     * 删除折扣
+     */
+    public function rebate_delete()
+    {
+        header("Access-Control-Allow-Origin:*");
+        global $_GPC;
+        $ids = $_GPC['ids'];
+        if(empty($ids)) app_error1(1,"没有删除内容",[]);
+        //$ids = explode(',',$ids);
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
+        foreach ($ids as $item){
+            pdo_delete('ewei_shop_deduct_setting',['id'=>$item]);
+        }
+        app_error1(0,'',[]);
+    }
+
     /**
      * 资金账户
      */
     public function rebate_credit()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $type = $_GPC['type'];
         $token = $_GPC['token'];
@@ -109,9 +133,10 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_deduct()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
-        $user_id = m('app')->getMember($token);
+        $user_id = m('app')->getLoginToken($token);
         if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $money = $_GPC['money'];
         $merchid = $_GPC['merchid'];
@@ -124,11 +149,14 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_record()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
         if($user_id == 0) app_error1(2,"登录信息失效",[]);
-        $data = m('app')->rebate_record($user_id);
+        $page = max(1,$_GPC['page']);
+        $type = $_GPC['type'];
+        $data = m('app')->rebate_record($user_id,$page,$type);
         app_error1(0,'',$data);
     }
 
@@ -137,6 +165,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_draw()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         //接受参数
         $money = $_GPC['money'];
@@ -170,6 +199,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_drawlog()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $page = max(1,$_GPC['page']);
         $type = $_GPC['type'];
@@ -189,6 +219,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_log()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
         $type = $_GPC['type'];
@@ -200,12 +231,52 @@ class Rebate_EweiShopV2Page extends AppMobilePage
     }
 
     /**
-     *  贡献值解读
+     * 折扣宝支出详情
      */
     public function rebate_detail()
     {
+        header("Access-Control-Allow-Origin:*");
+        global $_GPC;
+        $id = $_GPC['id'];
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0) app_error(2,"登录信息失效",[]);
+        $data = m('app')->rebate_detail($user_id,$id);
+        app_error1(0,'',$data);
+    }
+
+    /**
+     *  贡献值解读
+     */
+    public function rebate_devote_detail()
+    {
+        header("Access-Control-Allow-Origin:*");
         $detail = pdo_get("ewei_shop_member_devote",["id"=>1]);
+        $detail['content'] = htmlspecialchars_decode($detail['content']);
         app_error1(0,'',$detail);
+    }
+
+    /**
+     * 贡献值首页
+     */
+    public function rebate_devote()
+    {
+        header("Access-Control-Allow-Origin:*");
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLogintoken($token);
+        if($user_id == 0) app_error(2,"登录信息失效",[]);
+        $member = m('member')->getMember($user_id);
+        //用户微信   手机 贡献值多少
+        $res["weixin"] = $member["weixin"];
+        $res["mobile"] = $member["mobile"];
+        $res["credit4"] = $member["credit4"];
+        $res["bind"] = empty($member["weixin"])||empty($member["mobile"]) ? 0 : 1;
+        //折扣宝提现金额
+        $tixian = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where (openid=:openid or user_id = :user_id) and credittype=:credittype and remark like :remark",array(":openid"=>$member['openid'],":user_id"=>$member['id'],":credittype"=>"credit3",":remark"=>'折扣宝提现%'));
+        $res["tixian"] = !$tixian ? 0 : number_format(abs($res['tixian']),2);
+
+        app_error1(0,'',$res);
     }
 
     /**
@@ -213,6 +284,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_bind()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
         $type = $_GPC['type'];
@@ -245,6 +317,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_devote_log()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
         //分页设置
@@ -258,8 +331,11 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $list=pdo_fetchall("select * from ".tablename("ewei_shop_member_credit_record")." where (openid = :openid or user_id = :user_id) and credittype = :credittype order by createtime desc limit ".$first.",".$pageSize,array(":openid"=>$member['openid'],':user_id'=>$user_id,":credittype"=>"credit4"));
         foreach ($list as $k=>$v){
             $list[$k]["createtime"]=date("Y-m-d H:i:s",$v["createtime"]);
+            $list[$k]['num'] = $v['num'] > 0 ? '+'.$v['num'] : $v['num'];
         }
-        app_error1(0,'',$list);
+        $total = pdo_fetchcolumn("select count(1) from ".tablename("ewei_shop_member_credit_record")." where (openid = :openid or user_id = :user_id) and credittype = :credittype ",array(":openid"=>$member['openid'],':user_id'=>$user_id,":credittype"=>"credit4"));
+        $pagetotal = ceil($total/$pageSize);
+        app_error1(0,'',['list'=>$list,'total'=>$total,'page'=>$page,'pagesize'=>$pageSize,'pagetotal'=>$pagetotal]);
     }
 
     /**
@@ -267,17 +343,21 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_getcredit()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $type = $_GPC['type'];
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
         if($user_id == 0) app_error1(2,"登录信息失效",[]);
         $member = m('member')->getMember($user_id);
+        //第一个兑换的卡路里余额
         if($type == 1){
             app_error1(0,'',['credit1'=>$member['credit1']]);
         }elseif ($type == 2){
+            //折扣宝提现页面
             app_error1(0,'',['credit3'=>$member['credit3'],'credit4'=>$member['credit4']]);
         }elseif ($type == 3){
+            //折扣宝转账
             app_error1(0,'',['credit3'=>$member['credit3']]);
         }
     }
@@ -287,6 +367,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_limit()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -300,6 +381,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_change()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $type = $_GPC['type'];
         $token = $_GPC['token'];
@@ -322,6 +404,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function rebate_getdevote()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $ids = $_GPC['ids'];
         $token = $_GPC['token'];
@@ -340,6 +423,7 @@ class Rebate_EweiShopV2Page extends AppMobilePage
      */
     public function exclusive()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
         $type = $_GPC['type'];

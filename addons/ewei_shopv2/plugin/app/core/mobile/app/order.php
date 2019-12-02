@@ -10,6 +10,7 @@ class Order_EweiShopV2Page extends AppMobilePage
      */
    public function order_create()
    {
+       header("Access-Control-Allow-Origin:*");
        global $_GPC;
        $token = $_GPC['token'];
        $user_id = m('app')->getLoginToken($token);
@@ -36,6 +37,7 @@ class Order_EweiShopV2Page extends AppMobilePage
     */
    public function order_caculate()
    {
+       header("Access-Control-Allow-Origin:*");
        global $_GPC;
        $token = $_GPC['token'];
        $user_id = m('app')->getLoginToken($token);
@@ -57,25 +59,70 @@ class Order_EweiShopV2Page extends AppMobilePage
    }
 
    /**
-    * 提交支付  收银台
+    * 提交支付
     */
    public function order_submit()
    {
+       header("Access-Control-Allow-Origin:*");
        global $_GPC;
        $token = $_GPC['token'];
        $user_id = m('app')->getLoginToken($token);
        if(empty($user_id)) app_error1(2,'登录失效',[]);
+       $address_id = $_GPC['address_id'];
+       $goods = $_GPC['goods'];
+       $cardid = $_GPC['cardid'];
+       $packageid = $_GPC['packageid'];
+       $dispatchid = $_GPC['dispatchid'];
+       $dispatchtype = $_GPC['dispatchtype'];
+       $carrierid = $_GPC['carrierid'];
+       $bargain_id = $_GPC['bargain_id'];
+       $giftid = $_GPC['giftid'];
+       $gdid = $_GPC['giftid'];
+       $carrier = $_GPC['carriers'];
+       $mid = $_GPC['mid'];
+       $invoicename = $_GPC['invoicename'];
+       $fromcart = $_GPC['fromcart'];
+       $fromquick = $_GPC["fromquick"];
+       $remark = $_GPC['remark'];
+       $discount1 = $_GPC['discount1'];
+       $receipttime = $_GPC['receipttime'];
+       $deduct1 = $_GPC['deduct1'];
+       $deduct2 = $_GPC['deduct2'];
+       $diydata = $_GPC['diydata'];
+       $couponid = $_GPC['couponid'];
+       $data = m('app')->order_submit($user_id,$address_id,$goods,$cardid,$packageid,$dispatchid,$dispatchtype,$carrierid,$bargain_id,$giftid,$gdid,$carrier,$mid,$invoicename,$fromquick,$fromcart,$discount1,$remark,$receipttime,$deduct1,$deduct2,$diydata,$couponid);
+       app_error1($data['status'],$data['msg'],$data['data']);
    }
 
     /**
-     * 订单支付
+     *  收银台
      */
     public function order_pay()
     {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
         if(empty($user_id)) app_error1(2,'登录失效',[]);
+        $orderid = $_GPC['orderid'];
+        $data = m('app')->order_pay($user_id,$orderid);
+        app_error1($data['status'],$data['msg'],$data['data']);
+    }
+
+    /**
+     * 点击支付
+     */
+    public function order_complete()
+    {
+        header("Access-Control-Allow-Origin:*");
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if(empty($user_id)) app_error1(2,'登录失效',[]);
+        $type = $_GPC['type'];
+        $id = $_GPC['id'];
+        $data = m('app')->order_complete($user_id,$type,$id);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 }
 ?>

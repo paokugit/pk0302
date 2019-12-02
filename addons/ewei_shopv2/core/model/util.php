@@ -385,8 +385,8 @@ class Util_EweiShopV2Model
      */
     function sensitives($string){
         //获取敏感词
-        $notice=pdo_get("ewei_shop_member_devote",array("id"=>2));
-        $list=unserialize($notice["content"]);
+        $notice = pdo_get("ewei_shop_member_devote",array("id"=>2));
+        $list = unserialize($notice["content"]);
         $count = 0; //违规词的个数
         $sensitiveWord = '';  //违规词
         $stringAfter = $string;  //替换后的内容

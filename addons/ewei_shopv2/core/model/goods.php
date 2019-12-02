@@ -1191,5 +1191,29 @@ class Goods_EweiShopV2Model
         }
         return $data;
     }
+
+    /**
+     * 更改会员主图
+     * @param $id
+     * @return string
+     */
+    public function levelurlup($id){
+        switch ($id){
+            case 3:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/XMUU5yU9jJ7yt58CE5O8UW5ogaAUm5.png";
+                break;
+            case 4:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/QT03Aprq37zHAwMt07vhVZP3w0wvht.png";
+                break;
+            case 5:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/a8LsNhn44h183OH00505XL39hS0s37.png";
+                break;
+            case 7:
+                return 'https://'.$_SERVER['SERVER_NAME']."/attachment/images/1/2019/03/Xx7X7pa91M99YofuyfKJOo7P878fa7.png";
+                break;
+            default:
+                return '';
+        }
+    }
 }
 ?>

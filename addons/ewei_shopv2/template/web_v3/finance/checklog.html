@@ -1,6 +1,6 @@
 {template '_header'}
 
-<div class="page-header">当前位置：<span class="text-primary">{if $type=='credit1'}卡路里{elseif $type=='credit3'}折扣宝{elseif $type=='credit2'}余额{elseif $type=='credit4'}贡献值{elseif $type=='RVC'}RVC{/if}明细</span></div>
+<div class="page-header">当前位置：<span class="text-primary">{$time}对账明细</span></div>
 
 <div class="page-content">
 
@@ -14,7 +14,7 @@
 
         <input type="hidden" name="do" value="web" />
 
-        <input type="hidden" name="r" value="finance.credit.{$type}" />
+        <input type="hidden" name="r" value="finance.credit.rvc_checklog" />
 
         <div class="page-toolbar">
 
@@ -22,86 +22,17 @@
 
                 <span class="pull-left">
 
-                    {php echo tpl_daterange('time', array('sm'=>true,'placeholder'=>'操作时间'),true);}
+                    {php echo tpl_daterange('createtime', array('sm'=>true,'placeholder'=>'操作时间'),true);}
 
                 </span>
 
-                <span class="input-group-select">
-
-                    <select name="groupid" class="form-control" style="width:100px;float: left;"  >
-
-                        <option value="">会员分组</option>
-
-                        {loop $groups $group}
-
-                        <option value="{$group['id']}" {if $_GPC['groupid']==$group['id']}selected{/if}>{$group['groupname']}</option>
-
-                        {/loop}
-
-                    </select>
-
-                </span>
-
-                <span class="input-group-select">
-
-                    <select name="level" class="form-control" style="width:100px;float: left;"  >
-
-                        <option value="">会员等级</option>
-
-                        {loop $levels $level}
-
-                        <option value="{$level['id']}" {if $_GPC['level']==$level['id']}selected{/if}>{$level['levelname']}</option>
-
-                        {/loop}
-
-                    </select>
-
-                </span>
-
-                <input type="text" class="form-control "  name="keyword" value="{$_GPC['keyword']}" placeholder="请输入会员信息/操作人信息" />
+                <!--<input type="text" class="form-control "  name="keyword" value="{$_GPC['keyword']}" placeholder="请输入会员信息/操作人信息" />-->
 
                 <span class="input-group-btn">
 
-                    <button class="btn  btn-primary" type="submit"> 搜索</button>
+                    <input type="hidden" name="time" value="{$_GPC['time']}" />
 
-                    {if $type=='credit1'}
-
-                        {ifp 'finance.credit.credit1.export'}
-
-                        <button type="submit" name="export" value="1" class="btn btn-success ">导出</button>
-
-                        {/if}
-
-                    {elseif $type=='credit3'}
-
-                        {ifp 'finance.credit.credit3.export'}
-
-                        <button type="submit" name="export" value="3" class="btn btn-success ">导出</button>
-
-                        {/if}
-                    {elseif $type=='credit4'}
-
-                        {ifp 'finance.credit.credit4.export'}
-
-                        <button type="submit" name="export" value="4" class="btn btn-success ">导出</button>
-
-                        {/if}
-                    {elseif $type=='RVC'}
-
-                        {ifp 'finance.credit.RVC.export'}
-
-                        <button type="submit" name="export" value="5" class="btn btn-success ">导出</button>
-
-                        {/if}
-                    {else}
-
-                        {ifp 'finance.credit.credit2.export'}
-
-                        <button type="submit" name="export" value="2" class="btn btn-success ">导出</button>
-
-                        {/if}
-
-                    {/if}
+                    <button type="submit" name="export" value="2" class="btn btn-success ">导出</button>
 
                 </span>
 
@@ -133,15 +64,19 @@
 
                 <tr>
 
-                    <th style='width:120px;'>粉丝</th>
+                    <th style='width:100px;'>粉丝</th>
 
-                    <th style='width:100px;'>会员信息</th>
+                    <th style='width:80px;'>会员信息</th>
 
-                    <th style='width:80px;'>{if $type=='credit1'}卡路里{elseif $type=='credit3'}折扣宝{elseif $type=='credit4'}贡献值{elseif $type=='RVC'}RVC{else}余额{/if}变化</th>
+                    <th style='width:120px;'>订单号</th>
+
+                    <th style='width:80px;'>RVC总数</th>
+
+                    <th style='width:80px;'>RVC总价值</th>
 
                     <th style='width:80px;'>备注</th>
 
-                    <th style='width:80px;'>操作人</th>
+                    <th style='width:80px;'>是否对账完成</th>
 
                     <th style='width:100px;'>操作时间</th>
 
@@ -183,29 +118,19 @@
 
                     {/if}
 
-
-
                     </td>
 
                     <td>{$row['realname']}<br/>{$row['mobile']}</td>
 
-                    <td>{if $type == "RVC" && $row['type'] == 0}{$row['realmoney']}{elseif $type == "RVC" && $row['type'] == 2}{$row['money']}{else}{$row['num']}{/if}</td>
+                    <td data-toggle='popover' data-html='true' data-placement='top' data-trigger='hover' data-content='{$row['ordersn']}'>{$row['ordersn']}</td>
 
-                    <td data-toggle='popover' data-html='true' data-placement='top' data-trigger='hover' data-content='{$row['remark']}'>{$row['remark']}</td>
+                    <td>{$row['amount']}</td>
 
-                    <td>
+                    <td>{$row['totalprice']}</td>
 
-                        {if empty($row['username']) || $row['username']=='wechat' || $row['username']=='alipay' || $row['username']=='wxapp'}
+                    <td data-toggle='popover' data-html='true' data-placement='top' data-trigger='hover' data-content='充值RVC{$row['amount']}个，价值{$row['totalprice']}元'>充值RVC{$row['amount']}个，价值{$row['totalprice']}元</td>
 
-                            本人
-
-                        {else}
-
-                            {$row['username']}
-
-                        {/if}
-
-                    </td>
+                    <td>{if $row['is_check'] == 1 }对账完成{else}<span style="color: red">未对账</span>{/if}</td>
 
                     <td>{$row['createtime']}</td>
 

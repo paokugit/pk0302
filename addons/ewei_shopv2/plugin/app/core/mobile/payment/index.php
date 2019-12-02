@@ -499,7 +499,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         $id = $_GPC['id'];
         $openid = $_GPC['openid'];
         if(!$id || !$openid) show_json(0,"请完善参数");
-        $data = pdo_fetch('select openid,num,createtime,remark,merchid from '.tablename('mc_credits_record').' where id=:id and openid=:openid',[':id'=>$id,':openid'=>$openid]);
+        $member = m('member')->getMember($openid);
+        $data = pdo_fetch('select openid,num,createtime,remark,merchid from '.tablename('mc_credits_record').' where id=:id and (openid=:openid or user_id = :user_id) ',[':id'=>$id,':openid'=>$member['openid'],':user_id'=>$member['id']]);
         $data['createtime'] = date('Y-m-d H:i:s',$data['createtime']);
         if($data['merchid'] != 0){
             $data['merch_name'] = pdo_getcolumn('ewei_shop_merch_user',['id'=>$data['merchid']],'merchname');
@@ -513,7 +514,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             }elseif (mb_substr($data['remark'],0,2) == "RV" || mb_substr($data['remark'],0,2) == "外部"){
                 $data['merch_name'] = "RV钱包";
             }else{
-                $data['merch_name'] = pdo_getcolumn('ewei_shop_member',['openid'=>$data['openid']],'nickname');
+                $data['merch_name'] = pdo_fetchcolumn('select nickname from '.tablename('ewei_shop_member').' where openid = :openid or user_id = :user_id ',[':openid'=>$member['openid'],':user_id'=>$member['id']]);
             }
         }
         if(!$data){
