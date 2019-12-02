@@ -511,7 +511,7 @@ class Superior_EweiShopV2Page extends AppMobilePage
       
         $g=pdo_get("ewei_shop_jdgoods",array("id"=>$good["goodsid"]));
          $order["goods"]["imagePath"]=$url.$g["imagePath"];
-      
+         $order["goods"]["name"]=$g["name"];
         //获取收货地址
         $address=pdo_fetch("select realname,mobile,province,city,area,address from ".tablename("ewei_shop_member_address")." where id=:id",array(":id"=>$order["addressid"]));
         $order["address"]=$address;
