@@ -10,66 +10,14 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function rvc_pay()
     {
-        global $_W;
         global $_GPC;
         $openid = $_GPC['openid'];
-        $member = m('member')->getMember($openid);
         //参数
-        $data['amount'] = $_GPC['amount'];
-        $data['nonce'] = random(16);
-        $data['coinType'] = "RVC";
-        $data['category'] = "跑库充值";
-        $data['privateMemo'] = $data['memo'] = $data['category'].$data['amount'].$data['coinType'];
-        $data['redirect'] = "https://www.paokucoin.com/rvc.html";
-        //排序
-        ksort($data);
-        $string = "";
-        //拼接字符串
-        foreach ($data as $key => $item){
-            $string .= $key . '=' . urlencode($item) . '&';
-        }
-        $string = trim($string,'&');
-        $data['accessKey'] = "C1V.0MruASD1js_Qa5GNVkCX0IAJL-g2IgclGPG2ZQEfAl7f";
-        $SecretKey = "Pr2ZPufPFdu43KCNX64cnGNyxNgmgVNddHYPacTv6Aaum1ZvsW/+1xa8W3Vq4QnP";
-        //获得签名
-        $data['signature'] = $signature = hash_hmac("sha1",$string,$SecretKey);
-        //请求
-        $res = $this->curl_post_raw("https://wallet.block-api.dev/api/pay/record",json_encode($data,JSON_UNESCAPED_UNICODE));
-        $res = json_decode($res,true);
-        $price = $res['data']['price'];
-        $add = [
-            'uniacid'=>$_W['uniacid'],
-            'ordersn'=>$res['data']['uuid'],
-            'openid'=>$member['openid'],
-            'user_id'=>$member['id'],
-            'amount'=>$data['amount'],
-            'totalprice'=>bcmul($price,$data['amount'],2),
-            'price'=>$price,
-            'status'=>0,
-            'createtime'=>time(),
-        ];
-        pdo_insert('ewei_shop_member_rvcorder',$add);
-        $status = $res['code'] == "M0000" ? 0 : 1;
-        app_error1($status,$res['message'],$res['data']);
+        $amount= $_GPC['amount'];
+        $data = m('game')->rvc_pay($openid,$amount);
+        app_error1($data['status'],$data['message'],$data['data']);
     }
 
-    /**
-     * @param $url
-     * @param $rawData
-     * @return mixed
-     */
-    function curl_post_raw($url,$rawData){
-        $ch = curl_init($url);
-        curl_setopt_array($ch, array(
-            CURLOPT_POST => TRUE,
-            CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json'
-            ),
-            CURLOPT_POSTFIELDS => $rawData
-        ));
-        return $data = curl_exec($ch);
-    }
 
     /**
      * 检测RVC充值是否成功
@@ -274,7 +222,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where status = 1 and uniacid = "'.$uniacid.'"');
         //$gifts = pdo_fetchall(' select * from '.tablename('ewei_shop_gift_bag').' where uniacid = "'.$uniacid.'"');
         //礼包商品
-        $goods = m('game')->gift($gifts,$openid);
+        $goods = m('game')->gift($gifts);
         //该用户对应的礼包
         $gift = m('game')->get_gift($gifts,$openid);
         //已助力的人数

@@ -156,7 +156,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         $uniacid = $_W['uniacid'];
         $openid = $_GPC['openid'];
         $member = pdo_get('ewei_shop_member',['openid'=>$openid,'uniacid'=>$uniacid],['id','openid','nickname','avatar','realname','is_open','expire_time']);
-        $member['is_expire'] = $member['is_open'] == 1 && $member['expire_time'] - time() <= 3600*10 ? 1 : 0;
+        $member['is_expire'] = $member['is_open'] == 1 && $member['expire_time'] - time() <= 3600*10*24 ? 1 : 0;
 	$member['expire'] = date('Y-m-d',$member['expire_time']);
         show_json(1,['member'=>$member]);
     }
@@ -444,7 +444,7 @@ class Level_EweiShopV2Page extends AppMobilePage
             $good = pdo_get('ewei_shop_goods',['uniacid'=>$uniacid,'id'=>$item],['id','title','thumb','total','productprice','marketprice','bargain']);
             $good['thumb'] = tomedia($good['thumb']);
             $good['image'] = tomedia($img[$key]);
-            $good['is_get'] = !empty($record) ? $record['goods_id'] == $item ? 1 :2 : 0;
+            $good['is_get'] = !empty($record) ?  1 : 0;
             $goods[] = $good;
         }
         show_json(1,['get'=>empty($record)?0:1,'goods'=>$goods]);

@@ -347,7 +347,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         // var_dump($bushu);
         //已兑换的bushu
-        //  $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $_W['openid'],':type'=>2));
+        $jinri = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type and status=1 ", array(':today' => $day, ':openid' => $_W['openid'],':type'=>2));
         //获取今日已兑换的卡路里
         $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
         $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
@@ -375,42 +375,42 @@ class Index_EweiShopV2Page extends AppMobilePage
             if ($i<3){
                 if ($vv["type"]!=2){
                     //步数小于今日步数
-                    if ($step_number<$bushu){
-                        if ($step_number+$vv["step"]>=$bushu){
+                    if ($step_number < $bushu){
+                        if ($step_number+$vv["step"] >= $bushu){
                             //大于
-                            $r[$i]["id"]=$vv["id"];
-                            $r[$i]["step"]=$bushu-$step_number;
-                            $card1=($bushu-$step_number)*$exchange;
-                            if ($card1>0.01){
-                                $r[$i]["currency"]=round($card1,2);
+                            $r[$i]["id"] = $vv["id"];
+                            $r[$i]["step"] = $bushu-$step_number;
+                            $card1 = ($bushu-$step_number)*$exchange;
+                            if ($card1 > 0.01){
+                                $r[$i]["currency"] = round($card1,2);
                             }else{
-                                $r[$i]["currency"]=round($card1,4);
+                                $r[$i]["currency"] = round($card1,4);
                             }
-                            $r[$i]["type"]=$vv["type"];
-                            $step_number=$bushu;
+                            $r[$i]["type"] = $vv["type"];
+                            $step_number = $bushu;
                         }else{
                             //小于
-                            $r[$i]["id"]=$vv["id"];
-                            $r[$i]["step"]=$vv["step"];
-                            $card1=$vv["step"]*$exchange;
+                            $r[$i]["id"] = $vv["id"];
+                            $r[$i]["step"] = $vv["step"];
+                            $card1 = $vv["step"] * $exchange;
                             if ($card1>0.01){
-                                $r[$i]["currency"]=round($card1,2);
+                                $r[$i]["currency"] = round($card1,2);
                             }else{
-                                $r[$i]["currency"]=round($card1,4);
+                                $r[$i]["currency"] = round($card1,4);
                             }
-                            $step_number=$step_number+$vv["step"];
-                            $r[$i]["type"]=$vv["type"];
+                            $step_number=$step_number + $vv["step"];
+                            $r[$i]["type"] = $vv["type"];
                         }
-                        $i=$i+1;
+                        $i = $i+1;
                     }
                     
                 }else{
-                    $r[$i]["id"]=$vv["id"];
-                    $r[$i]["step"]=$vv["step"];
+                    $r[$i]["id"] = $vv["id"];
+                    $r[$i]["step"] = $vv["step"];
                     
-                    $r[$i]["currency"]=2;
-                    $r[$i]["type"]=$vv["type"];
-                    $i=$i+1;
+                    $r[$i]["currency"] = 2;
+                    $r[$i]["type"] = $vv["type"];
+                    $i = $i+1;
                 }
                 
             }
@@ -464,7 +464,9 @@ class Index_EweiShopV2Page extends AppMobilePage
             $yaoqing=0;
         }
         $member['yaoqing']=$yaoqing;
-       
+        $member['credit3'] = $member['credit3'] > 9999 ? bcdiv($member['credit3'],10000,1)."万" : $member['credit3'];
+
+        $member['cate'] = pdo_getall('ewei_shop_category',['uniacid'=>$_W['uniacid'],'parentid'=>171,'enabled'=>1],['id','name']);
         show_json(1, $member);
         
     }

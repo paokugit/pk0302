@@ -915,6 +915,14 @@ class Perm_EweiShopV2ComModel extends ComModel {
                 "edit" => "编辑",
                 "status" => "开关",
                 "delete" => "删除"
+            ),
+            "lookbuy" => array(
+                "text" => "边看边买",
+                "main" => "查看",
+                "add" => "添加",
+                "edit" => "编辑",
+                "status" => "开关",
+                "delete" => "删除"
             )
         );
         if ($this->isopen("sale", true) && $this->is_perm_plugin("sale", true)) {

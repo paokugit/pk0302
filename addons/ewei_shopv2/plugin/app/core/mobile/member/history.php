@@ -45,8 +45,8 @@ class History_EweiShopV2Page extends AppMobilePage
 	{
 		global $_W;
 		global $_GPC;
-		
         $openid=$_GPC["openid"];
+
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
@@ -61,13 +61,12 @@ class History_EweiShopV2Page extends AppMobilePage
         if (empty($member)){
             
             apperror(1,"用户不存在");    
-            
+
         }
         $del=$_GPC["del"];
         if ($del==1){
             $sql = 'delete from ' . tablename('ewei_shop_member_history') . '  where (openid=:openid or user_id=:user_id) ';
         }else{
-            
             $ids = $_GPC['ids'];
             if (empty($ids) || !is_array($ids)) {
                     $d["openid"]=$_GPC["openid"];
@@ -75,8 +74,7 @@ class History_EweiShopV2Page extends AppMobilePage
                     $d["ids"]=$_GPC["ids"];
                     apperror(1,"ids格式不正确",$d);
             }
-            
-		$sql = 'delete from ' . tablename('ewei_shop_member_history') . '  where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';
+			$sql = 'delete from ' . tablename('ewei_shop_member_history') . '  where (openid=:openid or user_id=:user_id) and id in (' . implode(',', $ids) . ')';
         }
 		pdo_query($sql, array(':openid' => $member["openid"],':user_id'=>$member["id"]));
 		
