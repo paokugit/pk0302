@@ -133,6 +133,14 @@ class Login_EweiShopV2Page extends AppMobilePage
             app_error1(0,'登陆成功',['token'=>$token]);
         }
     }
+    /**
+     * 国家区号
+     */
+    public function country()
+    {
+        $data = pdo_fetchall("select id,phonecode,name_zh from ".tablename("sms_country")." where name_zh=:name_zh1 or name_zh=:name_zh2 or name_zh=:name_zh3",array(":name_zh1"=>"中国",":name_zh2"=>"马来西亚",":name_zh3"=>"泰国"));
+        app_error1(0,"",['data'=>$data]);
+    }
 
     /**
      * 发送短信

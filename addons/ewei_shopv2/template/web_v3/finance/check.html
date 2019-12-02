@@ -1,0 +1,142 @@
+{template '_header'}
+<div class="page-header">当前位置：<span class="text-primary">RVC对账</span></div>
+
+<div class="page-content">
+
+    <form action="./index.php" method="get" class="form-horizontal" role="form" id="form1">
+
+        <input type="hidden" name="c" value="site" />
+
+        <input type="hidden" name="a" value="entry" />
+
+        <input type="hidden" name="m" value="ewei_shopv2" />
+
+        <input type="hidden" name="do" value="web" />
+
+        <input type="hidden" name="r" value="finance.credit.rvc_check" />
+
+        <div class="page-toolbar">
+
+            <div class="input-group">
+
+                <span class="pull-left">
+
+                    {php echo tpl_daterange('time', array('sm'=>true,'placeholder'=>'操作时间'),true);}
+
+                </span>
+
+                <!--<input type="text" class="form-control "  name="keyword" value="{$_GPC['keyword']}" placeholder="请输入会员信息/操作人信息" />-->
+
+                <span class="input-group-btn">
+
+                    <button class="btn  btn-primary" type="submit"> 搜索</button>
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </form>
+
+    {if empty($list)}
+
+    <div class="panel panel-default">
+
+        <div class="panel-body empty-data">未查询到相关数据</div>
+
+    </div>
+
+    {else}
+
+
+
+    <div class="row">
+        <span>已对账{$check}天,已对账金额{$check_money}元，未对账{$out_check}天，未对账{$out_check_money}元</span>
+        <div class="col-md-12">
+
+            <table class="table">
+
+                <thead class="navbar-inner">
+
+                <tr>
+
+                    <th style='width:16%;'>日期</th>
+
+                    <th style='width:16%;'>记录数</th>
+
+                    <th style='width:16%;'>Rvc总数</th>
+
+                    <th style='width:16%;'>RVC总价值</th>
+
+                    <th style='width:16%;'>对账状态</th>
+
+                    <th style='width:16%;'>操作</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                {loop $list $row}
+
+                <tr >
+
+                    <td>{$row['time']}</td>
+
+                    <td>{$row['count']}</td>
+
+                    <td>{$row['amount']}</td>
+
+                    <td>{$row['total']}</td>
+
+                    <td>{if $row['check'] == 1}已对账{else}<span style="color: red">未对账</span>{/if}</td>
+
+                    <td>
+                        <a class="btn  btn-op btn-operation" href="{php echo webUrl('finance/credit/rvc_checklog', array('time'=>$row['time']))}" title=''>
+                           <span data-toggle="tooltip" data-placement="top" title="" data-original-title="对账明细"><i class='icow icow-dingdan2'></i></span>
+                        </a>
+                        <a class='btn btn-op btn-operation' data-toggle='ajaxPost' data-confirm="确认处理成已对账吗?" href="{php echo webUrl('finance/credit/check',array('time' => $row['time']));}">
+                           <span data-toggle="tooltip" data-placement="top" title="" data-original-title="处理对账"><i class='icow icow-bianji2'></i></span>
+                        </a>
+                    </td>
+                </tr>
+
+                {/loop}
+
+                </tbody>
+
+                <tfoot>
+
+                <tr>
+
+                    <td>
+
+                        <div class="btn-group"></div>
+
+                    </td>
+
+                    <td colspan="5" style="text-align: right">
+
+                        {$pager}
+
+                    </td>
+
+                </tr>
+
+                </tfoot>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    {/if}
+
+</div>
+
+
+
+{template '_footer'}

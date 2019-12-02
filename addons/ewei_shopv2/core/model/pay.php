@@ -91,6 +91,43 @@ class Pay_EweiShopV2Model
 		}
 		return $string1;
 	}
+
+    /**
+     * @param string $openid
+     * @param int $fee
+     * @param int $orderid
+     * @param string $type
+     * @return bool
+     */
+    public function creditpay_log($openid = "", $fee = 0, $orderid = 0,$type = "credit")
+    {
+        global $_W;
+        $member = m('member')->getMember($openid);
+        $uniacid = $_W["uniacid"];
+        if( empty($member) )
+        {
+            return false;
+        }
+        if( empty($fee) )
+        {
+            return false;
+        }
+        if( empty($orderid) )
+        {
+            return false;
+        }
+        $order = pdo_fetch("select id,ordersn from " . tablename("ewei_shop_order") . " where id=:id AND uniacid=:uniacid LIMIT 1", array( ":id" => $orderid, ":uniacid" => $uniacid ));
+        if( empty($order) )
+        {
+            return false;
+        }
+        $log_data = array( "uniacid" => $uniacid, "openid" => $member['openid'],"user_id" => $member['id'], "type" => 2, "logno" => $order["ordersn"], "title" => "小程序商城消费", "createtime" => TIMESTAMP, "status" => 1, "money" => 0 - $fee, "rechargetype" => "wxapp", "remark" => $type == "credit" ? "小程序端余额支付" :"小程序端RVC支付");
+        if($type == 'credit'){
+            pdo_insert("ewei_shop_member_log", $log_data);
+        }elseif ($type == 'RVC'){
+            pdo_insert("ewei_shop_member_RVClog", $log_data);
+        }
+    }
 }
 
 if (!defined('IN_IA')) {

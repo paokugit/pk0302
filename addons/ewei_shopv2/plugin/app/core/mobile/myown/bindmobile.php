@@ -36,12 +36,11 @@ class Bindmobile_EweiShopV2Page extends AppMobilePage{
         }else{
             app_error(1,$resault["message"]);
         }
-        
     }
+
     //国家区号
     public function country(){
         $list["list"]=pdo_fetchall("select * from ".tablename("sms_country")." where name_zh=:name_zh1 or name_zh=:name_zh2 or name_zh=:name_zh3",array(":name_zh1"=>"中国",":name_zh2"=>"马来西亚",":name_zh3"=>"泰国"));
-        
         app_error(0,$list);
     }
     

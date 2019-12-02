@@ -154,7 +154,6 @@ class AppMobilePage extends PluginMobilePage
 {
 	protected $member;
 	protected $iswxapp = false;
-
 	public function __construct()
 	{
 		global $_GPC;

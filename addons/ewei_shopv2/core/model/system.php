@@ -588,6 +588,11 @@ class System_EweiShopV2Model {
                                 "desc" => "小程序首页广告位"
                             ) ,
                             array(
+                                "title" => "商城首页的图标",
+                                "route" => "image",
+                                "desc" => "商城首页的图标"
+                            ) ,
+                            array(
                                 "title" => "公告管理",
                                 "route" => "notice",
                                 "desc" => "店铺公告管理"
@@ -1097,7 +1102,11 @@ class System_EweiShopV2Model {
                             array(
                                 "title" => "RVC明细",
                                 "route" => "RVC"
-                            )
+                            ),
+                            array(
+                                "title" => "RVC对账",
+                                "route" => "rvc_check"
+                            ),
                         )
                     ) ,
                     array(

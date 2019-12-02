@@ -225,13 +225,12 @@ class Log_EweiShopV2Page extends AppMobilePage
         //累计消费
         $sql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_RVClog')." where (openid=:openid or user_id=:user_id) and type=2 and status = 1";
         $params = array(':openid' =>$member["openid"],":user_id"=>$member["id"]);
-        $data['sale_total'] = pdo_fetchcolumn($sql, $params);//成功提现金额
+        $data['sale_total'] = abs(pdo_fetchcolumn($sql, $params));//成功提现金额
 
         //累计收入
         $comesql = "select ifnull(sum(money),0) from ".tablename('ewei_shop_member_RVClog')." where (openid=:openid or user_id=:user_id) and type=0 and status = 1";
         $comeparams = array(':openid' =>$member["openid"],":user_id"=>$member["id"]);
         $data['come_total'] = pdo_fetchcolumn($comesql, $comeparams);//累计推荐收入
-
         app_json(array('info' => $data));
     }
     
@@ -246,7 +245,7 @@ class Log_EweiShopV2Page extends AppMobilePage
         if ($_GPC["apptype"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }
@@ -267,15 +266,20 @@ class Log_EweiShopV2Page extends AppMobilePage
         $total = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_RVClog') . (' where 1 ' . $condition), $params);
         $newList = array();
         if (is_array($list) && !empty($list)) {
-            foreach ($list as $row) {
+            foreach ($list as &$row) {
                 if($row['type'] == 1){
                     //$row['money'] = -$row['money'];
                     $row['money'] = $row['realmoney'];
                 }
-                $newList[] = array('id' => $row['id'], 'title'=>$row['title'],'type' => $row['type'], 'money' => $row['money'], 'status' => $row['status'], 'deductionmoney' => $row['deductionmoney'], 'realmoney' => $row['realmoney'], 'rechargetype' => $row['rechargetype'], 'createtime' => date('Y-m-d H:i', $row['createtime']),'refuse_reason'=>$row["refuse_reason"]);
+                $newList[] = array('id' => $row['id'], 'title'=>$row['title'],'type' => $row['type'], 'money' => $row['money'], 'status' => $row['status'], 'deductionmoney' => $row['deductionmoney'], 'realmoney' => $row['realmoney'], 'rechargetype' => $row['rechargetype'], 'createtime' => date('Y-m-d H:i', $row['createtime']));
             }
         }
-        app_json(array('list' => $newList, 'total' => $total, 'pagesize' => $psize, 'page' => $pindex, 'type' => $type, 'isopen' => $_W['shopset']['trade']['withdraw'], 'moneytext' => $_W['shopset']['trade']['moneytext']));
+        $pagetotal = ceil($total/$psize);
+        if ($_GPC["apptype"]==1){
+            apperror(0,"",array('list' => $newList, 'total' => $total,'pagetotal'=>$pagetotal, 'pagesize' => $psize, 'page' => $pindex, 'type' => $type));
+        }else{
+            app_json(array('list' => $newList, 'total' => $total, 'pagesize' => $psize,'pagetotal'=>$pagetotal, 'page' => $pindex, 'type' => $type));
+        }
     }
 }
 
