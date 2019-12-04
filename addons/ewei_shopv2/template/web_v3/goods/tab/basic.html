@@ -577,7 +577,17 @@
     </div>
 
 
-
+    <div class="form-group">
+        <label class="col-sm-2 control-label">活动分类</label>
+        <div class="col-sm-8 col-xs-12">
+            <select class="form-control tpl-category-parent select2" id="icon_id" name="icon_id">
+                {if empty($item['icon'])}<option value="0">不选择活动</option>{/if}
+                {loop $icon $cate}
+                    <option value="{$cate['id']}" {if $item['icon_id'] == $cate['id']}selected="true"{/if}>{$cate['title']}</option>
+                {/loop}
+            </select>
+        </div>
+    </div>
 
 
     <div class="form-group">

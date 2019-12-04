@@ -10,6 +10,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function home()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         //鉴权验证的token
         $token = $_GPC['token'];
@@ -43,7 +44,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         //$seckill = m('app')->seckill($seckill_type);
         $seckill = m('app')->seckill(1);
         //边看边买
-        $look_buy = m('app')->look_buy();
+        $look_buy = m('app')->look_buy($user_id,1,8);
         //每日一推
         $every = m('app')->every();
         //跑库精选
@@ -58,6 +59,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_getcredit()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $step_id =$_GPC['step_id'];
@@ -73,6 +75,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_level()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -86,6 +89,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_level_goods()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -100,6 +104,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_level_record()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -114,6 +119,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_level_detail()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         global $_W;
         $uniacid = $_W['uniacid'];
@@ -128,6 +134,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_level_my()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -151,6 +158,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_getLevel()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -169,6 +177,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_address()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -185,6 +194,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_gift()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -198,6 +208,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_gift_help()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -212,6 +223,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_gift_record()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -226,6 +238,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_gift_share()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -243,6 +256,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_choice()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         global $_W;
         $uniacid = $_W['uniacid'];
@@ -251,6 +265,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         $pindex = ($page-1)*$pageSize;
         $total = pdo_count('ewei_shop_choice',['uniacid'=>$uniacid,'status'=>1]);
         $list = pdo_fetchall('select * from '.tablename('ewei_shop_choice').'where uniacid = :uniacid and status = 1 order by displayorder desc limit '.$pindex.','.$pageSize,[':uniacid'=>$uniacid]);
+        foreach ($list as $key=>$value){
+            $list[$key]['content'] = htmlspecialchars_decode($value['content']);
+        }
         app_error1(0,'',['list'=>$list,'page'=>$page,'total'=>$total,'pageSize'=>$pageSize]);
     }
 
@@ -259,6 +276,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_choice_detail()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -272,6 +290,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_choice_fav()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
@@ -286,6 +305,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_seckill()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $type = $_GPC['type'] ? $_GPC['type'] : 1;
         $page = max(1,$_GPC['page']);
@@ -298,13 +318,19 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function look_buy()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
+        //小程序的逻辑  每次一个加载更多   不要了
         $id = $_GPC['id'];
         $type = $_GPC['type'];
-        $data = m('app')->look_buy_detail($user_id,$id,$type);
-        app_error1($data['status'],$data['msg'],$data['data']);
+        //$data = m('app')->look_buy_detail($user_id,$id,$type);
+        //app_error1($data['status'],$data['msg'],$data['data']);
+        //app逻辑
+        $page = max(1,$_GPC['page']);
+        $data = m('app')->look_buy($user_id,$page,6);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -312,6 +338,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function look_buy_zan()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         //如果是点赞视频 就是视频id   如果是点赞商品 也是商品id
         $look_id = $_GPC['look_id'];
@@ -327,6 +354,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function every()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $page = max(1,$_GPC["page"]);
         $data = m('app')->every($page);
@@ -338,6 +366,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function every_detail()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $id = $_GPC['id'];
         $detail=pdo_get("ewei_shop_member_reading",array("id"=>$id));
@@ -356,6 +385,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function every_comment_list()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         //接受文章id  分页信息
         $readid = $_GPC["id"];
@@ -389,6 +419,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function every_comment()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         //接受文章id  和用户的token
         $readid = $_GPC["id"];
@@ -422,6 +453,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function every_comment_delete()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         //接受用户的token  和 评论的id
         $token = $_GPC['token'];
@@ -447,6 +479,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function every_comment_zan()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         //接受用户token  和  评论id
         $token = $_GPC['token'];
@@ -477,8 +510,9 @@ class Index_EweiShopV2Page extends AppMobilePage
     /**
      * 新手攻略  --- 热点关注
      */
-    public function index_red_attention()
+    public function index_attention()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         global $_W;
         $uniacid = $_W['uniacid'];
@@ -500,6 +534,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_help()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         global $_W;
         $uniacid = $_W['uniacid'];
@@ -517,6 +552,7 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_detail()
     {
+        header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $id = $_GPC["id"];
         $type = $_GPC['type'];
@@ -530,6 +566,14 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         $detail["createtime"] = date("Y-m-d H:i:s",$detail["createtime"]);
         app_error1(0,'',$detail);
+    }
+
+    /**
+     * 好友捐赠页面
+     */
+    public function index_friend()
+    {
+
     }
 }
 ?>

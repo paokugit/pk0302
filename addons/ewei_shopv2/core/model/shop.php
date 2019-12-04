@@ -809,7 +809,7 @@ class Shop_EweiShopV2Model
             $params[':keywords'] = '%' . trim($keywords) . '%';
         }
         $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_goods').' where '.$condition.' ',$params);
-        $list = pdo_fetchall('select id,title,thumb,marketprice,productprice,issendfree,total,agant_devote from '.tablename('ewei_shop_goods').' where '.$condition.' order by '.$order.' limit '.$pindex.','.$pageSize,$params);
+        $list = pdo_fetchall('select id,title,thumb,marketprice,productprice,issendfree,total,agent_devote from '.tablename('ewei_shop_goods').' where '.$condition.' order by '.$order.' limit '.$pindex.','.$pageSize,$params);
         foreach ($list as $key =>$value){
             $list[$key]['sendfree'] = $value['issendfree'] == 1 ? "包邮" : $value['total'];
             $order_count = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_order').'o join '.tablename('ewei_shop_order_goods').'og on og.orderid = o.id where og.goodsid = :goodsid and o.uniacid = :uniacid and o.status = 1',[':goodsid'=>$value['id'],':uniacid'=>$uniacid]);
