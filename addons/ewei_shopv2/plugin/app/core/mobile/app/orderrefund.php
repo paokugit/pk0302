@@ -554,7 +554,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         //获取商品总数
         $res["list"][$k]["count"]=pdo_fetchcolumn("select sum(total) from ".tablename("ewei_shop_order_goods")." where orderid=:orderid and status!=-1", array(":orderid"=>$v["id"]));
         //获取商品
-        $good=pdo_fetchall("select og.id,og.goodsid,og.price,og.total,og.optionname,og.refundid,og.rstate,g.thumb,g.title,g.status,g.cannotrefund from ".tablename("ewei_shop_order_goods")." og left join ".tablename("ewei_shop_goods")." g on g.id=og.goodsid "." where og.orderid=:orderid and og.status!=-1",array(":orderid"=>$v["id"]));
+        $good=pdo_fetchall("select og.id,og.goodsid,og.price,og.total,og.optionname,og.refundid,og.rstate,g.thumb,g.title,g.status,g.cannotrefund from ".tablename("ewei_shop_order_goods")." og left join ".tablename("ewei_shop_goods")." g on g.id=og.goodsid "." where og.orderid=:orderid and og.status!=-1 and g.status!=2",array(":orderid"=>$v["id"]));
         $good=set_medias($good, array( "thumb" ));
         foreach ($good as $kk=>$vv){
             if ($vv["rstate"]!=0&&$vv["refundid"]){
@@ -567,7 +567,22 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
             }
             
         }
-        $res["list"][$k]["good"]=$good;
+        $res["list"][$k]["nogift"]=$good;
+        //获取赠品商品
+        $gift=pdo_fetchall("select og.id,og.goodsid,og.price,og.total,og.optionname,og.refundid,og.rstate,g.thumb,g.title,g.status,g.cannotrefund from ".tablename("ewei_shop_order_goods")." og left join ".tablename("ewei_shop_goods")." g on g.id=og.goodsid "." where og.orderid=:orderid and og.status!=-1 and g.status=2",array(":orderid"=>$v["id"]));
+        $gift=set_medias($gift, array( "thumb" ));
+        foreach ($gift as $kk=>$vv){
+            if ($vv["rstate"]!=0&&$vv["refundid"]){
+                //获取售后状态
+                $refund=pdo_get("ewei_shop_order_refund",array("id"=>$vv["refundid"]));
+                
+                $gift[$kk]["refundstatus"]=$refund["status"];
+            }else{
+                $gift[$kk]["refundstatus"]="";
+            }
+            
+        }
+        $res["list"][$k]["gift"]=$gift;
         }
         apperror(0,"",$res);
     }

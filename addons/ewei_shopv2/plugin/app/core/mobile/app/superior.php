@@ -45,7 +45,7 @@ class Superior_EweiShopV2Page extends AppMobilePage
         $page=$_GPC["page"]?$_GPC["page"]:1;
         $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_jdgoods")." where 1  ".$condition,$param);
         $first=($page-1)*20;
-        $list=pdo_fetchall("select id,imagePath,name,ptprice from ".tablename("ewei_shop_jdgoods")." where 1  ".$condition.$order." limit ".$first.",20",$param);
+        $list=pdo_fetchall("select id,imagePath,name,ptprice,jdprice from ".tablename("ewei_shop_jdgoods")." where 1  ".$condition.$order." limit ".$first.",20",$param);
         $url=m("jdgoods")->homeaddr();
         foreach ($list as $k=>$v){
             $list[$k]["imagePath"]=$url.$v["imagePath"];
@@ -268,14 +268,15 @@ class Superior_EweiShopV2Page extends AppMobilePage
         $d[0]["num"]=$num;
         $data["sku"]=json_encode($d);
         $feight=m("jdgoods")->freight($data);
+        
 //         var_dump($feight);
         if ($feight["success"]){
 //         $feight=$feight["result"];
-        $feight=$feight["freight"];
+        $feight=$feight["result"]["freight"];
         }else{
             apperror(1,$feight["resultMessage"]);
         }
-        
+//         var_dump($feight);die;
         //生成本平台订单编号
         $ordersn="JDYP".date("YmdHis") . random(6, true);
         
@@ -335,6 +336,7 @@ class Superior_EweiShopV2Page extends AppMobilePage
          pdo_insert("ewei_shop_order_goods",$order_good);
          $res["orderid"]=$order_id;
          $res["ordersn"]=$ordersn;
+         $res["price"]=$order["price"];
          apperror(0,"",$res);
     }
     //取消未支付订单

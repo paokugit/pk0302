@@ -610,6 +610,33 @@ class Perm_EweiShopV2ComModel extends ComModel {
                     "enabled" => "edit"
                 )
             ) ,
+            "jdgoods" => (
+                array(
+                "text" => "优品",
+                "banner" => array(
+                    "text" => "优品banner",
+                    "main"=>"全部banner",
+                    "add" => "添加",
+                    "edit" => "修改",
+                    "delete" => "删除"
+                ) ,
+                "category" => array(
+                    "text" => "优品分类",
+                    "main"=>"列表",
+                    "add" => "添加",
+                    "edit" => "编辑",
+                    "delete" => "删除"
+                ) ,
+                "goods" => array(
+                    "text" => "优品商品",
+                    "main"=>"全部商品",
+                    "change" => "更新",
+                    "status" => "更新状态",
+                    "delete" => "删除",
+                    "edit" => "编辑"
+                )
+            ) 
+            ),
             "virtual" => ($this->isopen("virtual", true) && $this->is_perm_plugin("virtual", true) ? array(
                 "text" => "虚拟卡密",
                 "temp" => array(
@@ -1073,7 +1100,15 @@ class Perm_EweiShopV2ComModel extends ComModel {
                 "xxx" => array(
                     "changeexpress" => "send"
                 )
-            )
+            ),
+            "superior" => array(
+                "text" => "优品云仓订单管理",
+                "index" => "全部订单",
+                "express" => "京东订单进程",
+                "detail" => "订单详情",
+                "cancel" => "取消订单",
+                "del" => "删除订单"
+                )
         );
     }
     protected function perm_sysset() {

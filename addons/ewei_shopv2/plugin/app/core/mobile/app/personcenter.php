@@ -546,7 +546,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            }
            //获取优惠券
            //获取优惠券
-           $coupon=pdo_fetch("select id,enough,deduct from ".tablename("ewei_shop_coupon")." where merchid=:merchid and status=1 and total>0 and ((timelimit=1 and timestart<=:time and timeend>=:time) or timelimit=0) and coupontype=0 order by deduct desc limit 2",array(":merchid"=>$merch_id,":time"=>time()));
+           $coupon=pdo_fetch("select id,enough,deduct from ".tablename("ewei_shop_coupon")." where merchid=:merchid  and timelimit=1 and timestart<=:time and timeend>=:time and coupontype=0 order by deduct desc limit 1",array(":merchid"=>$merch_id,":time"=>time()));
            if ($coupon){
            $list[$k]["coupon"]["enough"]=$coupon["enough"];
            $list[$k]["coupon"]["deduct"]=$coupon["deduct"];
@@ -665,5 +665,77 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            }
        }
        
+   }
+   //领劵中心
+   public function coupon(){
+       global $_W;
+       global $_GPC;
+       
+       $merchid=$_GPC["merchid"];
+       
+       $condition=" and gettype=1 and timelimit=1 and coupontype=0 and backtype=0 and  timeend>:time and  timestart<=:time ";
+       $param=array(":time"=>time());
+       if ($merchid){
+           $condition=$condition." and merchid=:merchid";
+           $param[":merchid"]=$merchid;
+       }
+       $list=pdo_fetchall("select id,couponname,timestart,timeend,deduct,enough,backtype from ".tablename("ewei_shop_coupon")." where 1 ".$condition,$param);
+       foreach ($list as $k=>$v){
+           $list[$k]["timestart"]=date("Y-m-d",$v["timestart"]);
+           $list[$k]["timeend"]=date("Y-m-d",$v["timeend"]);
+           $list[$k]["deduct"]=(int)$v["deduct"];
+           $list[$k]["enough"]=(int)$v["enough"];
+       }
+       if (!$list){
+           $list=new ArrayObject();
+       }
+       apperror(0,"",$list);
+   }
+   //我的优惠券
+   public function mycoupon(){
+       global $_W;
+       global $_GPC;
+       $openid = $_GPC['openid'];
+       $type=$_GPC["type"]?$_GPC["type"]:0;//1表示app接口
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       if (!$member["openid"]){
+           $member["openid"]=0;
+       }
+       $condition=" and (d.openid=:openid or d.user_id=:user_id) and c.coupontype=0 and c.backtype=0 and c.timelimit=1 and c.uniacid=1";
+       $param=array(":openid"=>$member["openid"],":user_id"=>$member["id"]);
+       //获取类别
+       $use=$_GPC["use"];
+       if ($use==0){
+           $condition=$condition." and d.used=0 and c.timeend>=:time";
+           $param[":time"]=time();
+       }elseif ($use==1){
+           $condition=$condition." and d.used=1";
+       }elseif ($use==2){
+           $condition=$condition." and d.used=0 and c.timeend<:time";
+           $param[":time"]=time();
+       }
+       
+       $list=pdo_fetchall("select c.id,c.enough,c.deduct,c.backtype,c.couponname,c.timestart,c.timeend from ".tablename("ewei_shop_coupon_data")." d "." left join ".tablename("ewei_shop_coupon")." c on d.couponid=c.id where 1 ".$condition,$param);
+       foreach ($list as $k=>$v){
+           
+           $list[$k]["timestart"]=date("Y-m-d",$v["timestart"]);
+           $list[$k]["timeend"]=date("Y-m-d",$v["timeend"]);
+           $list[$k]["deduct"]=(int)$v["deduct"];
+           $list[$k]["enough"]=(int)$v["enough"];
+           
+       }
+       if (!$list){
+           $list=array();
+       }
+       $res["list"]=$list;
+       //未使用的
+       $res["total"]=pdo_fetchcolumn("select count(d.id) from ".tablename("ewei_shop_coupon_data")." d "." left join ".tablename("ewei_shop_coupon")." c on d.couponid=c.id where (d.openid=:openid or d.user_id=:user_id) and c.coupontype=0 and c.backtype=0 and c.timelimit=1 and d.used=0 and c.timeend>=:time",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":time"=>time()));
+       if (!$res["total"]){
+           $res["total"]=0;
+       }
+       apperror(0,"",$res);
    }
 }
