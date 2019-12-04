@@ -495,7 +495,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $pindex = max(1, intval($_GPC["page"]));
         $psize = 10;
         $show_status = $_GPC["status"];//待付款：0 待发货：1 待收货：2 已完成：3 退换货：4
-        $condition = " and (openid=:openid or user_id=:user_id) and ismr=0 and deleted=0 and uniacid=:uniacid ";
+        $condition = " and (openid=:openid or user_id=:user_id) and ismr=0 and deleted=0 and uniacid=:uniacid and jdtype=0";
         $params = array( ":uniacid" => $uniacid, ":openid" => $member["openid"],":user_id"=>$member["id"] );
        
         $condition .= " and merchshow=0 ";

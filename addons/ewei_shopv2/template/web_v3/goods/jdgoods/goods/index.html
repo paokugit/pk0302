@@ -111,7 +111,7 @@
                     <select name="cateid" class='form-control select2' style="width:200px;" data-placeholder="商品分类">
                         <option value="" {if empty($_GPC['cateid'])}selected{/if} >商品分类</option>
                         {loop $category $c}
-                        <option value="{$c['id']}" {if $_GPC['cateid']==$c['id']}selected{/if} >{$c['name']}</option>
+                        <option value="{$c['id']}" {if $_GPC['cateid']==$c['id']}selected{/if} >{$c['catename']}</option>
                         {/loop}
                     </select>
                 </span>

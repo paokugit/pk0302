@@ -11,6 +11,7 @@ class Goods_EweiShopV2Page extends WebPage
         global $_GPC;
         //获取分类
         $category=pdo_fetchall("select * from ".tablename("ewei_shop_jdgoods_cate"));
+//         var_dump($category);
         $pindex = max(1, intval($_GPC['page']));
         $psize = 20;
         $condition='and isdelete=:delete';
@@ -33,7 +34,7 @@ class Goods_EweiShopV2Page extends WebPage
             $condition=$condition." and keyword like %".":keyword"."%";
             $param[":keyword"]=$keyword;
         }
-        $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_jdgoods') . (' WHERE 1 ' . $condition . ' limit ') . ($pindex - 1) * $psize . ',' . $psize, $param);
+        $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_jdgoods') . (' WHERE 1 ' . $condition. " order by id desc " . ' limit ') . ($pindex - 1) * $psize . ',' . $psize, $param);
         $url=m("jdgoods")->homeaddr();
         $sku="";
         foreach ($list as $k=>$v){
@@ -157,15 +158,22 @@ class Goods_EweiShopV2Page extends WebPage
         global $_W;
         global $_GPC;
         $id = intval($_GPC["id"]);
+        $detail=pdo_get("ewei_shop_jdgoods",array("id"=>$id));
         if ($_W['ispost']) {
             $data["cateid"]=$_GPC["cateid"];
+            $data["ptprice"]=$_GPC["ptprice"];
+            if ($data["ptprice"]<$detail["price"]){
+                show_json(0,"售卖价格不可小于成本价");
+            }
+            $data["onsale"]=$_GPC["onsale"];
+            $data["virtual_sales"]=$_GPC["virtual_sales"];
             if (pdo_update("ewei_shop_jdgoods",$data,array("id"=>$id))){
                 show_json(1, array('url' => webUrl('goods/jdgoods/goods')));
             }else{
                 show_json(0,"失败");
             }
         }
-        $detail=pdo_get("ewei_shop_jdgoods",array("id"=>$id));
+       
         $cate=pdo_fetchall("select * from ".tablename("ewei_shop_jdgoods_cate")." order by sort desc");
         include $this->template();
     }

@@ -838,6 +838,16 @@ class System_EweiShopV2Model {
                         )
                     ),
                     array(
+                        "title" => "优品云仓订单",
+                        "items" => array(
+                            array(
+                                "title" => "列表",
+                                "route" => "superior.index",
+                                "desc" => "订单"
+                            )
+                        )
+                    ),
+                    array(
                         "title" => "维权",
                         "route" => "list",
                         "items" => array(

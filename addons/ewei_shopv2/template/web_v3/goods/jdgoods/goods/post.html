@@ -17,7 +17,7 @@
 	<div class="form-group">
 		<label class="col-sm-2 control-label must">分类名称</label>
 		<div class="col-sm-9 col-xs-12">
-			<select name="cateid">
+			<select name="cateid" style="width:150px;height:30px;">
 			{loop $cate $list}
 			<option value="{$list['id']}" {if $list['id']==$detail['cateid']} selected {/if}>{$list["catename"]}</option>
 			{/loop}
@@ -25,7 +25,55 @@
 		</div>
 	</div>
 	
+	<div class="form-group">
+		<label class="col-sm-2 control-label must">销售状态</label>
+		<div class="col-sm-9 col-xs-12">
+			<select name="onsale" style="width:150px;height:30px;">
+			
+			<option value="1" {if $detail['onsale']==1} selected {/if}>上架</option>
+			<option value="0" {if $detail['onsale']==0} selected {/if}>下架</option>
+			</select>
+		</div>
+	</div>
 	
+	<div class="form-group">
+		<label class="col-sm-2 control-label must">成本价格</label>
+		<div class="col-sm-7"  style="padding-right:0;" >
+
+                <input type="text" name="price" id="price" class="form-control" value="{$detail['price']}" data-rule-required="true" readonly="readonly"/>
+
+            </div>
+	</div>
+	<div class="form-group">
+		<label class="col-sm-2 control-label must">京东价格</label>
+		<div class="col-sm-7"  style="padding-right:0;" >
+
+                <input type="text" name="jdprice" id="price" class="form-control" value="{$detail['jdprice']}" data-rule-required="true" readonly="readonly"/>
+
+            </div>
+	</div>
+	<div class="form-group">
+		<label class="col-sm-2 control-label must">售卖价格</label>
+		<div class="col-sm-7"  style="padding-right:0;" >
+
+                <input type="text" name="ptprice" id="ptprice" class="form-control" value="{$detail['ptprice']}" data-rule-required="true"/>
+
+            </div>
+	</div>
+	<div class="form-group">
+		<label class="col-sm-2 control-label must">虚拟销量</label>
+		<div class="col-sm-7"  style="padding-right:0;" >
+
+                <input type="text" name="virtual_sales" id="price" class="form-control" value="{$detail['virtual_sales']}" data-rule-required="true"/>
+
+            </div>
+	</div>
+	<div class="form-group">
+		<label class="col-sm-2 control-label must">商品详情</label>
+		<div class="col-sm-9 col-xs-12">
+			{$detail["appintroduce"]}
+		</div>
+	</div>
 	
 	
 	<div class="form-group">

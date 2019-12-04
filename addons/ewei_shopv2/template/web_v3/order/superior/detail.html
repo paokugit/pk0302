@@ -1,0 +1,779 @@
+{template '_header'}
+<meta charset="UTF-8">
+<style type='text/css'>
+
+    .ordertable { width:100%;position: relative;margin-bottom:10px}
+
+    .ordertable tr td:first-child { text-align: right }
+
+    .ordertable tr td {padding:10px 5px 0;vertical-align: top}
+
+    .ordertable1 tr td { text-align: right; }
+
+    .ops .btn { padding:5px 10px;}
+
+    .order-container{
+
+        display: -webkit-box;
+
+        display: -webkit-flex;
+
+        display: -ms-flexbox;
+
+        display: flex;
+
+    }
+
+    .order-container-left{
+
+        -webkit-box-flex: 1;
+
+        -webkit-flex: 1;
+
+        -ms-flex: 1;
+
+        flex: 1;
+
+    }
+
+    .order-container-static{
+
+        -webkit-box-flex: 1;
+
+        -webkit-flex: 1;
+
+        -ms-flex: 1;
+
+        flex: 1;
+
+        padding: 30px 50px 20px;
+
+    }
+
+    .font18{
+
+        font-size:20px;
+
+        font-weight:bold;;
+
+    }
+
+    .trbagpack span{
+
+        margin: 0 10px;
+
+        display: inline-block;
+
+        vertical-align: middle;
+
+    }
+
+    .trbagpack span.address{
+
+        width:150px;
+
+        overflow: hidden;
+
+        text-overflow:ellipsis;
+
+        white-space: nowrap;
+
+    }
+
+    tfoot .price{
+
+        float: right;
+
+    }
+
+    tfoot .price-inner{
+
+        display: inline-block;
+
+        vertical-align: middle;
+
+        width:100px;
+
+        text-align: right;
+
+    }
+
+    .packbag-group{
+
+        border:1px solid #efefef;
+
+    }
+
+    .packbag{
+
+        padding: 0 30px;
+
+    }
+
+    .packbag-title{
+
+    line-height: 33px;
+
+    }
+
+    .packbag-group .packbag-list{
+
+        padding: 20px 33px;
+
+        border-bottom: 1px solid #efefef;
+
+        display: flex;
+
+       align-items: center;
+
+    }
+
+    .packbag-list .packbag-media{
+
+        width:100px;
+
+    }
+
+    .packbag-list .packbag-inner{
+
+        border-left:1px solid #efefef;
+
+        -webkit-box-flex: 1;
+
+        -webkit-flex: 1;
+
+        -ms-flex: 1;
+
+        flex: 1;
+
+    }
+
+    .packbag-goods-list{
+
+        display: flex;
+
+        flex-wrap: wrap;
+
+        width:100%;
+
+    }
+
+    .packbag-goods{
+
+        width:25%;
+
+        display: flex;
+
+        display: -webkit-flex;
+
+        margin: 10px 0 5px;
+
+    }
+
+    .packbag-goods-media{
+
+        width:52px;
+
+        height: 52px;
+
+        margin-right: 10px;
+
+    }
+
+   .packbag-goods-media img{
+
+       width:52px;
+
+       height: 52px;
+
+       border: 1px solid #efefef;
+
+    }
+
+    .packbag-goods-inner{
+
+        flex:1;
+
+        -webkit-box-flex: 1;
+
+        -webkit-flex: 1;
+
+        -ms-flex: 1;
+
+        flex: 1;
+
+        overflow: hidden;
+
+    }
+
+    .packbag-goods-inner p{
+
+    color: #999;
+
+    }
+
+    .packbag-goods-inner .title{
+
+        width:100%;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+
+        white-space: nowrap;
+
+    }
+
+    .table .trorder td{
+
+        border-right:1px solid #efefef;
+
+    }
+
+    .table .trorder td:nth-of-type(1){
+
+        border:none;
+
+    }
+
+</style>
+
+<div class="page-header">
+
+    当前位置：<span class="text-primary">订单详情</span>
+
+</div>
+
+<div class="page-content">
+
+   
+
+    <form class="form-horizontal form" action="" method="post">
+
+        <input type="hidden" name="id" value="{$item['id']}" />
+
+        <input type="hidden" name="dispatchid" value="{$dispatch['id']}" />
+
+
+
+        <!--<h3 class="order-title">订单信息</h3>-->
+
+        <div class="row order-container">
+
+            <div class="order-container-left" style="border-right: 1px solid #efefef">
+
+                <div class="row">
+
+                    <div class="col-md-12">
+
+                        <ul class="">
+
+                            <li class="text"><span class="col-sm">订单编号：</span><span class="text-default">{$item['ordersn']}</span></li>
+
+                            <li class="text"><span class="col-sm">京东单号：</span><span class="text-default">{$item['jdOrderId']}</span></li>
+
+                           
+                            <li class="text">
+
+                                <span class="col-sm">付款方式：</span>
+
+                                <span class="text-default">
+
+                                    {if $item['paytype'] == 0}未支付{/if}
+
+                                    {if $item['paytype'] == 1}余额支付{/if}
+
+                                    {if $item['paytype'] == 11}后台付款{/if}
+
+                                    {if $item['paytype'] == 21}微信支付{/if}
+
+                                    {if $item['paytype'] == 22}支付宝支付{/if}
+
+                                    {if $item['paytype'] == 23}银联支付{/if}
+
+                                    {if $item['paytype'] == 3}货到付款{/if}
+
+                                </span>
+
+                            </li>
+
+
+
+                            <li class="text">
+
+
+
+
+
+                                <span class="col-sm">买家：</span>
+
+                                <span class="text-default">
+
+                                    <a href="{php echo webUrl('member/list/detail',array('id'=>$member['id']))}" target='_blank' class="text-primary">{$member['nickname']}</a> &nbsp;&nbsp;<a data-toggle='popover' data-html='true' data-trigger='hover' data-placement='right'
+
+                                                                                                                                                                                               data-content="<table style='width:100%;'>
+
+                    <tr>
+
+                        <td  style='border:none;text-align:right;' colspan='2'><img src='{$member['avatar']}' style='width:100px;height:100px;padding:1px;border:1px solid #ccc'  onerror='this.src='../addons/ewei_shopv2/static/images/noface.png''/></td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td  style='border:none;text-align:right;'>ID：</td>
+
+                        <td  style='border:none;text-align:right;'>{$member['id']}</td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td  style='border:none;text-align:right;'>昵称</td>
+
+                        <td  style='border:none;text-align:right;'>
+
+                        {if empty($member['nickname'])}未填写{else} {$member['nickname']}{/if}
+
+
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td  style='border:none;text-align:right;'>姓名：</td>
+
+                        <td  style='border:none;text-align:right;'>
+
+                         {if empty($member['realname'])}未填写{else}{$member['realname']}{/if}
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td  style='border:none;text-align:right;'>手机号：</td>
+
+
+
+                        <td  style='border:none;text-align:right;'> {if empty($member['mobile'])}未填写{else}{$member['mobile']}{/if}</td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td  style='border:none;text-align:right;'>微信号：</td>
+
+                        <td  style='border:none;text-align:right;'>{if empty($member['weixin'])}未填写{else}{$member['weixin']}{/if}</td>
+
+                    </tr>
+
+                    </table>
+
+    "><i class='icow icow-help' style="font-size: 13px;color: #2f3434;margin-left: -3px"></i></a>
+
+                                </span>
+
+                            </li>
+
+                            
+                            <li class="text">
+
+                                <span class="col-sm">配送方式：</span>
+
+                                <span class="text-default">
+                                                                                                            京东配送
+                                </span>
+
+                            </li>
+
+                            {if !empty($item['addressid'])}
+
+                            <li class="text">
+
+                                <span class="col-sm">收货人：</span>
+
+                                <span class="text-default">
+
+                                    {$user['address']}, {$user['realname']}, {$user['mobile']} <a class='text-primary op js-clip' data-url="{$user['address']}, {$user['realname']}, {$user['mobile']}">复制</a>
+
+                                </span>
+
+                            </li>
+                            {/if}
+
+                            {if !empty($item['remark'])}
+
+                            <li class="text"><span class="col-sm">买家备注：</span><span class="text-default">{$item['remark']}</span></li>
+
+                            {/if}
+
+
+
+                        </ul>
+
+                    </div>
+
+                   
+                </div>
+
+
+
+            </div>
+
+            <div class=" order-container-static">
+
+                <div class=" status">
+
+                    <span class="text"> 订单状态：</span>
+
+                    {if $item['status'] == 0}
+
+                    {if $item['paytype']==3}
+
+                    <span class="text-warning font18">待发货</span>
+
+                    {else}
+
+                    <span class="text-danger font18">待付款</span>
+
+                    {/if}
+
+                    {/if}
+
+                    {if $item['status'] == 1}
+
+                    <span class="text-warning font18">
+
+                    {if $item['isverify'] == 1}
+
+                        待使用
+
+                    {else if empty($item['addressid'])}
+
+                        待取货
+
+                    {else}
+
+                        {if $item['sendtype'] > 0}部分发货{else}待发货{/if}
+
+                    {/if}
+
+                    </span>
+
+                    {/if}
+
+                    {if $item['status'] == 2}<span class="text-warning font18">待收货</span>{/if}
+
+                    {if $item['status'] == 3}<span class="text-success font18">交易完成</span>{/if}
+
+                    {if $item['status'] == -1}
+
+                    <span class="text-default font18">已关闭</span>
+
+                    {/if}
+
+                    <i>{if $item['status'] == 0}
+
+                        {if $item['paytype']==3}
+
+                        （此订单为货到付款订单）
+
+                        {else}
+
+                       （ 等待买家付款）
+
+                        {/if}
+
+                        {/if}
+
+                        {if $item['status'] == 1 && $item['sendtype'] == 0}（买家已经付款）{/if}
+
+                    </i>
+
+                </div>
+    <div class=" status">
+
+                    <span class="text"> 京东订单状态描述：</span>
+
+                   
+                    <span class="text-warning font18">{$jdstatus_msg}</span>
+
+                   
+                    
+
+                </div>
+                <div class="ops  col-md-12" style="padding: 0;">
+
+                   
+                   
+                    {ifp 'order.op.remarksaler'}
+
+                    <a class="text-primary" data-toggle="ajaxModal" href="{php echo webUrl('order/op/remarksaler', array('id' => $item['id']))}"  >
+
+                        {if !empty($item['remarksaler'])}查看备注
+
+                         {else}
+
+                        添加备注
+
+                        {/if}
+
+                    </a>
+
+                    {/if}
+
+                   
+
+                </div>
+
+                {if $item['status'] >0}
+
+                <div class="order-container-footer text col-md-12" style="border: none;padding: 0">
+
+                    友情提示：
+
+                    {if $item['status'] == 0}
+
+                    {if $item['paytype']==3}
+
+                    订单为货到付款，请您务必联系买家确认后再进行发货
+
+                    {else}
+
+                    您可以联系买家进行付款，否则订单会根据设置自动关闭
+
+                    {/if}
+
+                    {/if}
+
+                    {if $item['status'] == 1}
+
+                    如果无法进行发货，请及时联系买家进行妥善处理;
+
+                    {/if}
+
+                    {if $item['status'] == 2}
+
+                    请及时关注物流状态，确保买家及时收到商品;
+
+                    如果买家未收到货物或有退换货请求，请及时联系买家妥善处理
+
+                    {/if}
+
+                    {if $item['status']==3}
+
+                    交易成功，如买家有售后申请，请与买家进行协商，妥善处理
+
+                    {/if}
+
+                </div>
+
+                {/if}
+
+            </div>
+
+        </div>
+
+
+
+        <h3 class="order-title">商品信息</h3>
+
+        <table class="table ">
+
+            <thead>
+
+            <tr class="trorder" style="background: #fff">
+
+                <th class="" style="width: 75px;text-align: right;padding-right: 0">
+
+                    商品标题
+
+                </th>
+
+                <th style="">
+
+
+
+                </th>
+
+                <th style="padding-left: 20px">京东编号、条形码</th>
+                  
+                <th style="text-align: center;width: 10%">单价</th>
+
+                <th style="text-align: center;width: 10%">数量</th>
+               
+               
+              
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+
+
+            {php $i=0;}
+
+            {loop $order_goods $goods}
+
+                <tr class="trorder" style="background: #fff">
+
+                    <td style="text-align: right;padding-right: 0">
+
+                        <img src="{$goods['imagePath']}" style='width:52px;height:52px;border:1px solid #efefef; padding:1px;'onerror="this.src='../addons/ewei_shopv2/static/images/nopic.png'">
+
+                    </td>
+
+                    <td style="min-width: 300px">
+
+                        <a target="_blank" href="{php echo webUrl('goods/edit', array('id' => $goods['id']))}"title="查看" style="display: block;line-height: 22px;max-width: 250px;white-space: nowrap;
+
+        overflow: hidden;text-overflow: ellipsis;">{$goods['name']}</a>
+
+                      
+
+                    </td>
+
+                    <td style="padding: 10px 20px">
+
+                        <p style="white-space:normal;">
+
+                        京东编码：<span class="label label-primary" data-container="body" data-toggle="popover" data-placement="right" data-content="{$goods['optionname']}">{$goods['sku']}</span>
+
+                        </p>
+
+                        <p>
+
+                          条形码：<span>{$goods['upc']}</span>
+
+                        </p>
+
+                      
+                    <td style="text-align: center">
+
+                        <p>￥{php echo number_format($goods['price'],2)}</p>
+
+                    </td>
+
+                    <td style="text-align: center">
+
+                        <p>{$goods['total']}个</p>
+
+                    </td>
+                   <!-- 维权 -->
+                   
+                   
+
+                   
+
+                </tr>
+
+                
+
+
+                {php $i++;}
+
+            {/loop}
+
+            </tbody>
+
+
+
+            <tfoot style="padding-top: 20px">
+
+            <tr class="trorder">
+
+               
+
+
+                <td colspan="5" style="padding-right: 60px">
+
+                    <div class="price">
+
+                        <p> <span class="price-inner">商品小计：</span><span style="font-weight: bold">￥{$item['goodsprice']}</span></p>
+
+                        <p><span class="price-inner">运费：</span>￥{$item['dispatchprice']}</p>
+
+                        
+
+                        <p><span class="price-inner">实付款：</span><span style="font-size: 14px;font-weight: bold;color: #e4393c">￥{$item['price']}</span></p>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            </tfoot>
+
+        </table>
+
+
+    </form>
+
+</div>
+
+
+
+<script language='javascript'>
+
+    $(function () {
+
+        $("#showdiymore1").click(function () {
+
+            $(".diymore1").show();
+
+            $(".diymore11").hide();
+
+        });
+
+
+
+        $("#showdiymore2").click(function () {
+
+            $(".diymore2").show();
+
+            $(".diymore22").hide();
+
+        });
+
+    });
+
+
+
+    function showDiyInfo(obj){
+
+        var data = $(obj).attr('data');
+
+        var id = "diyinfo_" + data;
+
+        var hide = $(obj).attr('hide');
+
+        if(hide=='1'){
+
+            $("#"+id).show();
+
+            $(obj).text('点击收起');
+
+        }else{
+
+            $("#"+id).hide();
+
+            $(obj).text('点击展开');
+
+        }
+
+        $(obj).attr('hide',hide=='1'?'0':'1');
+
+    }
+
+</script>
+
+
+
+{template '_footer'}

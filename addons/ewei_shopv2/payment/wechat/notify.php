@@ -1351,10 +1351,16 @@ class EweiShopWechatPay
         //用ordersn订单号 查订单信息
         $order=pdo_get("ewei_shop_order",array("ordersn"=>$order_sn));
         if ($order&&$order["status"]==0){
-            if (pdo_update("ewei_shop_order",array("status"=>1,"paytime"=>time()),array("ordersn"=>$order_sn))){
+            if (pdo_update("ewei_shop_order",array("status"=>1,"paytime"=>time(),"paytype"=>21),array("ordersn"=>$order_sn))){
                //确认京东
                $d["jdOrderId"]=$order["jdOrderId"];
                m("jdgoods")->confirmOrder($d);
+               //更新商品销量
+               $order_goods=pdo_get("ewei_shop_order_goods",array("orderid"=>$order["id"]));
+               $good=pdo_get("ewei_shop_jdgoods",array("id"=>$order_goods["goodsid"]));
+               $dd["sale"]=$good["sale"]+$order_goods["total"];
+               pdo_update("ewei_shop_jdgoods",$dd,array("id"=>$order_goods["goodsid"]));
+               
                 echo success;
             }else {
                 echo false;

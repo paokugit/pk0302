@@ -333,6 +333,15 @@ class Jdgoods_EweiShopV2Model
         $res=$this->posturl($url, $data);
         return $res;
     }
+    //合作商余额
+    public function money(){
+        $url="http://www.juheyuncang.com";
+        $url=$url."/api/jd/getPartnerMoney";
+        $data["key"]="5R8f1Nb42YFn0ou2";
+        $data["secret"]="F5nuTL9IRtBHcOwRFgGvEzAnvH9wvlxH";
+        $res=$this->posturl($url, $data);
+        return $res;
+    }
     public function posturl($url,$data){
         $data  = json_encode($data);
         $headerArray =array("Content-type:application/json;charset='utf-8'","Accept:application/json");

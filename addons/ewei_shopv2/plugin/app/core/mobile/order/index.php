@@ -77,7 +77,7 @@ class Index_EweiShopV2Page extends AppMobilePage
 			$condition .= " and userdeleted=0 ";
 		}
 		$com_verify = com("verify");
-		$list = pdo_fetchall("select id,ordersn,price,userdeleted,isparent,refundstate,paytype,status,addressid,refundid,isverify,dispatchtype,verifytype,verifyinfo,verifycode,iscomment,iscycelbuy,verified from " . tablename("ewei_shop_order") . " where 1 " . $condition . " order by createtime desc LIMIT " . ($pindex - 1) * $psize . "," . $psize, $params);
+		$list = pdo_fetchall("select id,jdtype,jdOrderId,ordersn,price,userdeleted,isparent,refundstate,paytype,status,addressid,refundid,isverify,dispatchtype,verifytype,verifyinfo,verifycode,iscomment,iscycelbuy,verified from " . tablename("ewei_shop_order") . " where 1 " . $condition . " order by createtime desc LIMIT " . ($pindex - 1) * $psize . "," . $psize, $params);
 		$total = pdo_fetchcolumn("select count(*) from " . tablename("ewei_shop_order") . " where 1 " . $condition, $params);
 		$refunddays = intval($_W["shopset"]["trade"]["refunddays"]);
 		if( $is_openmerch == 1 ) 
@@ -98,7 +98,10 @@ class Index_EweiShopV2Page extends AppMobilePage
 				$scondition = " og.orderid=:orderid";
 				$param[":orderid"] = $row["id"];
 			}
-			
+			if ($row["jdtype"]==0){
+			    $row["jdOrderState"]="";
+			    $row["jdstatus_msg"]="";
+			    
 			$sql = "SELECT og.goodsid,og.total,og.rstate,og.refundid,g.title,g.thumb,g.type, og.price,og.optionname as optiontitle,og.optionid,op.specs,g.merchid,g.status,g.cannotrefund FROM " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on og.goodsid = g.id " . " left join " . tablename("ewei_shop_goods_option") . " op on og.optionid = op.id " . " where " . $scondition ." and og.status=0". " order by og.id asc";
 			$goods = pdo_fetchall($sql, $param);
 			$goods = set_medias($goods, array( "thumb" ));
@@ -135,6 +138,48 @@ class Index_EweiShopV2Page extends AppMobilePage
 					$isonlyverifygoods = true;
 				}
 			}
+			}else{
+			    //京东订单
+			    //获取京东详情
+			    $jddata["jdOrderId"]=$row["jdOrderId"];
+			    $jddata["queryExts"]="orderType,jdOrderState";
+			    $res=m("jdgoods")->selectJdOrder($jddata);
+			    //获取状态
+			    $row["jdOrderState"]=$res["result"]["jdOrderState"];
+			    $row["jdstatus_msg"]=m("jdgoods")->status($res["result"]["jdOrderState"]);
+			    
+			    $sql = "SELECT og.goodsid,og.total,og.rstate,og.refundid,g.name as titale,g.imagePath as thumb, og.price,g.onsale as status,g.is7ToReturn as cannotrefund FROM " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_jdgoods") . " g on og.goodsid = g.id "  . " where " . $scondition ." and og.status=0". " order by og.id asc";
+			    $goods = pdo_fetchall($sql, $param);
+			   
+			    $ismerch = 0;
+			    $merch_array = array( );
+			    $g = 0;
+			    $nog = 0;
+			    $row["gift"]=array();
+			    $url=m("jdgoods")->homeaddr();
+			    foreach( $goods as &$r )
+			    {
+			        $r["type"]=0;
+			        $r["optiontitle"]="";
+			        $r["optionid"]=0;
+			        $r["specs"]="";
+			        $r["merchid"]=0;
+			        $r["thumb"]=$url.$r["thumb"];
+			        
+			        $merchid = $r["merchid"];
+			        $merch_array[$merchid] = $merchid;
+			       
+			        $row["nogift"][$nog] = $r;
+			        $nog++;
+			        
+			        if( $r["type"] == 5 )
+			        {
+			            $isonlyverifygoods = true;
+			        }
+			    }
+			    
+			}
+			
 			unset($r);
 			if( !empty($merch_array) && 1 < count($merch_array) ) 
 			{
