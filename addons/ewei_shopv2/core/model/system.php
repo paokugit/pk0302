@@ -593,6 +593,16 @@ class System_EweiShopV2Model {
                                 "desc" => "商城首页的图标"
                             ) ,
                             array(
+                                "title" => "跑库精选",
+                                "route" => "choice",
+                                "desc" => "跑库精选"
+                            ) ,
+                            array(
+                                "title" => "店铺的动态分类",
+                                "route" => "merchcate",
+                                "desc" => "店铺的动态分类"
+                            ) ,
+                            array(
                                 "title" => "公告管理",
                                 "route" => "notice",
                                 "desc" => "店铺公告管理"
@@ -835,6 +845,16 @@ class System_EweiShopV2Model {
                                 "route" => "accelerate",
                                 "desc" => "加速宝订单"
                             ) 
+                        )
+                    ),
+                    array(
+                        "title" => "扫码付订单",
+                        "items" => array(
+                            array(
+                                "title" => "列表",
+                                "route" => "code",
+                                "desc" => "扫码付订单"
+                            )
                         )
                     ),
                     array(

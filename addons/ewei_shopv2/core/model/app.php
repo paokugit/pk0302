@@ -40,8 +40,8 @@ class App_EweiShopV2Model
 		//用户信息
         $member = m('member')->getMember($user_id);
         //用户的折扣宝  卡路里
-        $data['credit1'] = $member['credit1'];
-        $data['credit3'] = $member['credit3'];
+        $data['credit1'] = $member['credit1'] ? $member['credit1'] : 0;
+        $data['credit3'] = $member['credit3'] ? $member['credit3'] : 0;
         //今天的时间
         $day = date('Y-m-d');
         //自身步数
@@ -417,15 +417,25 @@ class App_EweiShopV2Model
 
     /**
      * 边看边买
+     * @param $user_id
+     * @param $page
+     * @param $pageSize
      * @return array
      */
-    public function look_buy()
+    public function look_buy($user_id,$page,$pageSize)
     {
+        //用户信息
+        $member = m('member')->getMember($user_id);
+        $pindex = ($page - 1) * $pageSize;
+        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_look_buy').'where status = 1');
         //查看有视频的  有库存的  在售的所有商品
-        $list = pdo_fetchall('select * from '.tablename('ewei_shop_look_buy').'where status = 1 order by displayorder desc,id desc limit 8 ');
+        $list = pdo_fetchall('select * from '.tablename('ewei_shop_look_buy').'where status = 1 order by displayorder desc,id desc limit '.$pindex.','.$pageSize);
         foreach ($list as $key=>$item){
             //音频和图片
             $list[$key]['video'] = tomedia($item['video']);
+            $list[$key]['video'] = "https://www.paokucoin.com/attachment/".$item['video'];
+            $list[$key]['video_thumb'] = tomedia($item['video_thumb']);
+            $list[$key]['video_thumb'] = "https://www.paokucoin.com/attachment/".$item['video_thumb'];
             $list[$key]['thumb'] = tomedia($item['thumb']);
             //视频对应的商品
             $goods = pdo_get('ewei_shop_goods',['id'=>$item['goods_id']]);
@@ -435,8 +445,34 @@ class App_EweiShopV2Model
             $list[$key]['sales'] = $goods['sales']+$goods['realsales'];
             //商品类型 卡路里  还是  折扣宝
             $list[$key]['deduct'] = $goods['deduct_type'];
+            //评论
+            $list[$key]['comment'] = pdo_fetchall('select nickname,content,headimgurl from '.tablename('ewei_shop_order_comment').' where goodsid = :goods_id and level > 3 ',[':goods_id' => $item['goods_id']]);
+            //点赞是否  点赞视频
+            $favorite = pdo_fetch('select * from '.tablename('ewei_shop_look_buy_zan').' where (openid = :openid or user_id = :user_id) and lid = :lid and status = 1 ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':lid'=>$item['id']]);
+            //点赞是否  点赞商品
+            //$favorite = pdo_fetch('select * from '.tablename('ewei_shop_goods_zan').' where (openid = :openid or user_id = :user_id) and goodsid = :goodsid and status = 1 ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':goodsid'=>$detail['goods_id']]);
+            //如果没有记录  如果 有的话  status  == 0  就是0
+            $list[$key]['fav'] = empty($favorite) || $favorite['status'] == 0 ? 0 : 1;
+            //点赞人数   点赞商品
+            $list[$key]['fav_count'] = pdo_count('ewei_shop_look_buy_zan',['lid' => $item['id'],'status'=>1]);
+            //点赞人数   点赞商品
+            //$list[$key]['fav_count'] = pdo_count('ewei_shop_goods_zan',['goodsid' => $item['goods_id'],'status'=>1]);
+            //转换销量  和  点赞数量
+            if($list[$key]['sales'] > 9999){
+                $list[$key]['sales'] = $list[$key]['sales']/10000 ."万";
+            }
+            if($list[$key]['fav_count'] > 9999){
+                $list[$key]['fav_count'] = $list[$key]['fav_count']/10000 ."W";
+            }
+            $list[$key]['createtime'] = date('Y-m-d H:i:s',$item['createtime']);
         }
-        return $list;
+        $pagetotal = ceil($total/$pageSize);
+        if($pageSize == 8){
+            return $list;
+        }else{
+            return ['list'=>$list,'total'=>$total,'page'=>$page,'pagesize'=>$pageSize,'pagetotal'=>$pagetotal];
+        }
+
     }
 
     /**
@@ -475,14 +511,16 @@ class App_EweiShopV2Model
         $detail['productprice'] = $goods['productprice'];
         //评论
         $comment = pdo_fetchall('select oc.nickname,oc.content,oc.headimgurl from '.tablename('ewei_shop_order_comment').'oc join '.tablename('ewei_shop_order_goods').('g on g.goodsid = oc.goodsid').' where oc.goodsid = :goods_id and oc.level > 3',[':goods_id'=>$detail['goods_id']]);
-        //点赞是否
-        //$favorite = pdo_fetch('select * from '.tablename('ewei_shop_look_buy_zan').' where (openid = :openid or user_id = :user_id) and lid = :lid and status = 1 ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':lid'=>$detail['id']]);
-        $favorite = pdo_fetch('select * from '.tablename('ewei_shop_goods_zan').' where (openid = :openid or user_id = :user_id) and goodsid = :goodsid and status = 1 ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':goodsid'=>$detail['goods_id']]);
+        //点赞是否  点赞视频
+        $favorite = pdo_fetch('select * from '.tablename('ewei_shop_look_buy_zan').' where (openid = :openid or user_id = :user_id) and lid = :lid and status = 1 ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':lid'=>$detail['id']]);
+        //点赞是否  点赞商品
+        //$favorite = pdo_fetch('select * from '.tablename('ewei_shop_goods_zan').' where (openid = :openid or user_id = :user_id) and goodsid = :goodsid and status = 1 ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':goodsid'=>$detail['goods_id']]);
         //如果没有记录  如果 有的话  status  == 0  就是0
         $detail['fav'] = empty($favorite) || $favorite['status'] == 0 ? 0 : 1;
-        //点赞人数
-        //$detail['fav_count'] = pdo_count('ewei_shop_look_buy_zan',['lid'=>$detail['id'],'status'=>1]);
-        $detail['fav_count'] = pdo_count('ewei_shop_goods_zan',['goodsid'=>$detail['goods_id'],'status'=>1]);
+        //点赞人数  点赞视频
+        $detail['fav_count'] = pdo_count('ewei_shop_look_buy_zan',['lid'=>$detail['id'],'status'=>1]);
+        //点赞是否  点赞商品
+        //$detail['fav_count'] = pdo_count('ewei_shop_goods_zan',['goodsid'=>$detail['goods_id'],'status'=>1]);
         //视频信息
         $detail['video'] = tomedia($detail['video']);
         //边看边买对应的商品的销量
@@ -499,6 +537,7 @@ class App_EweiShopV2Model
         return ['status'=>0,'msg'=>'','data'=>['detail'=>$detail,'comment'=>$comment]];
     }
 
+
     /**
      * 边看边买的点赞
      * @param $user_id
@@ -508,19 +547,24 @@ class App_EweiShopV2Model
     public function look_buy_zan($user_id,$look_id)
     {
         $member = m('member')->getMember($user_id);
-        //$zan = pdo_fetch('select * from '.tablename('ewei_shop_look_buy_zan').' where (openid = :openid or user_id = :user_id) and lid = :look_id ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':look_id'=>$look_id]);
-        //$look_id  如果是点赞视频就是 视频id   如果是点赞商品 就是商品id
-        $zan = pdo_fetch('select * from '.tablename('ewei_shop_goods_zan').' where (openid = :openid or user_id = :user_id) and goodsid = :goodsid ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':goodsid'=>$look_id]);
+        //$look_id  如果是点赞视频就是 视频id
+        $zan = pdo_fetch('select * from '.tablename('ewei_shop_look_buy_zan').' where (openid = :openid or user_id = :user_id) and lid = :look_id ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':look_id'=>$look_id]);
+        //如果是点赞商品 就是商品id
+        //$zan = pdo_fetch('select * from '.tablename('ewei_shop_goods_zan').' where (openid = :openid or user_id = :user_id) and goodsid = :goodsid ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':goodsid'=>$look_id]);
         if(!empty($zan)){
             $status = $zan['status'] == 1 ? 0 : 1;
             $msg = $zan['status'] == 1 ? "取消点赞成功" : "点赞成功";
+            //$look_id  如果是点赞视频就是 视频id
             pdo_update('ewei_shop_look_buy_zan',['status'=>$status],['id'=>$zan['id']]);
+            //如果是点赞商品 就是商品id
+            //pdo_update('ewei_shop_goods_zan',['status'=>$status],['id'=>$zan['id']]);
         }else{
             $status = 1;
             $msg = "点赞成功";
-            //点赞视频
-            //pdo_insert('ewei_shop_look_buy_zan',['status'=>1,'openid'=>$member['openid'],'user_id'=>$member['id'],'uniacid'=>1,'lid'=>$look_id,'createtime'=>time()]);
-            pdo_insert('ewei_shop_goods_zan',['status'=>1,'openid'=>$member['openid'],'user_id'=>$member['id'],'uniacid'=>1,'goodsid'=>$look_id,'createtime'=>time()]);
+            //$look_id  如果是点赞视频就是 视频id
+            pdo_insert('ewei_shop_look_buy_zan',['status'=>1,'openid'=>$member['openid'],'user_id'=>$member['id'],'uniacid'=>1,'lid'=>$look_id,'createtime'=>time()]);
+            //如果是点赞商品 就是商品id
+            //pdo_insert('ewei_shop_goods_zan',['status'=>1,'openid'=>$member['openid'],'user_id'=>$member['id'],'uniacid'=>1,'goodsid'=>$look_id,'createtime'=>time()]);
         }
         return ['status'=>0,'msg'=>$msg,'data'=>[]];
     }
@@ -698,14 +742,14 @@ class App_EweiShopV2Model
     public function get_list()
     {
        //$goods = pdo_fetchall('select * from '.tablename('ewei_shop_goods').'where status = 1 and deleted = 0 and id in (3,4,5,7)');
-       $goods = pdo_fetchall('select id,thumb,sales,salesreal,agentlevel,content from '.tablename('ewei_shop_goods').'where status = 1 and deleted = 0 and id in (3,4,5,7)');
+       $goods = pdo_fetchall('select id,title,subtitle,thumb,sales,salesreal,agentlevel,content from '.tablename('ewei_shop_goods').'where status = 1 and deleted = 0 and id in (3,4,5,7)');
        foreach ($goods as $key=>$good){
            $goods[$key]['memberthumb'] = tomedia($good['thumb']);
            $goods[$key]['thumb'] = m('goods')->levelurlup($good['id']);
            $goods[$key]['salesreal'] = $goods[$key]['sales'] = $good['salesreal'] * 21 + rand(0,10);
            $agentlevel = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where id=:id limit 1", array( ":id" => $good['agentlevel']));
            $goods[$key]['available'] = $agentlevel['available'];
-           $goods[$key]['content'] = strip_tags($good['content']);
+           $goods[$key]['content'] = strip_tags($agentlevel['content']);
        }
        return $goods;
     }
@@ -722,13 +766,11 @@ class App_EweiShopV2Model
         $member = m('member')->getMember($user_id);
         //获得达人中心的所有图标
         $list = pdo_get("ewei_shop_small_set",array("id"=>$id));
-        $list["icon"] = unserialize($list["icon"]);
+        //$list["icon"] = unserialize($list["icon"]);
         $list["backgroup"] = tomedia($list["backgroup"]);
         $list["banner"] = tomedia($list["banner"]);
-        foreach ($list["icon"] as $k=>$v){
-            $list["icon"][$k]["img"] = tomedia($v["img"]);
-            $list["icon"][$k]["icon"] = tomedia($v["icon"]);
-        }
+
+        $list["icon"] = m('member')->level_infodiscount($member['agentlevel']);
 
         $level = pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
         //加速日期
@@ -736,8 +778,11 @@ class App_EweiShopV2Model
         $dd = m("member")->acceleration($user_id);
         //加速剩余天数
         $resault["surplus_day"] = $dd["day"];
+        //加速总天数
         $resault["give_day"] = $dd["give_day"];
+        //已加速时间
         $resault["accelerate_day"] = $dd["accelerate_day"];
+        //type == 1加速期内   0加速结束
         $resault["type"] = $dd["type"];
 
         //获取用户加速期间的卡路里
@@ -754,7 +799,7 @@ class App_EweiShopV2Model
         }else{
             $resault["credit"]=$credit;
         }
-        return ['icon'=>$list,'accelerate'=>$resault,'member'=>['avatar'=>$member['avatar'],'nickname'=>$member['nickname'],'levelname'=>$member['levelname']]];
+        return ['icon'=>$list,'accelerate'=>$resault,'member'=>['avatar'=>$member['avatar'],'nickname'=>$member['nickname'],'levelname'=>$level['levelname']]];
     }
 
     /**
@@ -1609,6 +1654,7 @@ class App_EweiShopV2Model
         //当前用户是否关注
         $fav = pdo_fetch('select * from '.tablename('ewei_shop_choice_fav').'where (openid = :openid or user_id = :user_id) and uniacid = :uniacid',[':openid'=>$member['openid'],':user_id'=>$member['id'],':uniacid'=>$uniacid]);
         $detail['is_fav'] = empty($fav) || $fav['status'] == 0 ? 0 : 1;
+        $detail['content'] = htmlspecialchars_decode($detail['content']);
         return $detail;
     }
 
@@ -1886,6 +1932,7 @@ class App_EweiShopV2Model
         $member = m("member")->getMember($user_id);
         $merch_plugin = p("merch");
         $merch_data = m("common")->getPluginset("merch");
+        //是否开启店铺功能
         if( $merch_plugin && $merch_data["is_openmerch"] )
         {
             $is_openmerch = 1;
@@ -1900,6 +1947,7 @@ class App_EweiShopV2Model
         $showlevels = ($goods["showlevels"] != "" ? explode(",", $goods["showlevels"]) : array( ));
         $showgroups = ($goods["showgroups"] != "" ? explode(",", $goods["showgroups"]) : array( ));
         $showgoods = 0;
+        //没有用户信息  显示商品
         if( !empty($member) )
         {
             if( !empty($showlevels) && in_array($member["agentlevel"], $showlevels) || !empty($showgroups) && in_array($member["groupid"], $showgroups) || empty($showlevels) && empty($showgroups) )
@@ -1938,14 +1986,9 @@ class App_EweiShopV2Model
         //单位和城市
         $goods["unit"] = (empty($goods["unit"]) ? "件" : $goods["unit"]);
         $citys = m("dispatch")->getNoDispatchAreas($goods);
-        if( !empty($citys) && is_array($citys) )
-        {
-            $has_city = 1;
-        }
-        else
-        {
-            $has_city = 0;
-        }
+
+        $has_city = !empty($citys) && is_array($citys) ? 1 :0;
+
         $goods["citys"] = $citys;
         $goods["has_city"] = $has_city;
         $goods["seckillinfo"] = false;
@@ -2364,7 +2407,7 @@ class App_EweiShopV2Model
         //是否商品收藏
         $goods["isfavorite"] = m("goods")->isFavorite($id,$user_id);
         //购物车数量
-        $goods["cartcount"] = m("goods")->getCartCount($user_id);
+        $goods["cartcount"] = m("goods")->getCartCount($user_id) ? m("goods")->getCartCount($user_id) : 0;
         //加入浏览足迹
         m("goods")->addHistory($user_id,$id);
         $shop = set_medias(m("common")->getSysset("shop"), "logo");
@@ -2540,6 +2583,26 @@ class App_EweiShopV2Model
         unset($goods["taobaoid"]);
         unset($goods["taobaourl"]);
         unset($goods["updatetime"]);
+        //新加注释去掉字段
+        unset($goods["detail_logo"]);
+        unset($goods["detail_shopname"]);
+        unset($goods["detail_totaltitle"]);
+        unset($goods["detail_btntext1"]);
+        unset($goods["detail_btnurl1"]);
+        unset($goods["detail_btntext2"]);
+        unset($goods["detail_btnurl2"]);
+        unset($goods["saleupdate37975"]);
+        unset($goods["saleupdate51117"]);
+        unset($goods["buyagain_price"]);
+        unset($goods["unite_total"]);
+        unset($goods["threen"]);
+        unset($goods["tempid"]);
+        unset($goods["isstoreprice"]);
+        unset($goods["beforehours"]);
+        unset($goods["agentlevel"]);
+        unset($goods["sort"]);
+        unset($goods["buycontentshow"]);
+        //结束
         unset($goods["noticeopenid"]);
         unset($goods["noticetype"]);
         unset($goods["ccates"]);
@@ -2589,11 +2652,16 @@ class App_EweiShopV2Model
         unset($goods["storeids"]);
         unset($goods["share_icon"]);
         unset($goods["share_title"]);
+        unset($goods["share_title"]);
+        unset($goods["share_title"]);
+        unset($goods["share_title"]);
+        unset($goods["share_title"]);
+        unset($goods["share_title"]);
         //商品图库
-        if( !empty($goods["thumb_url"]) )
-        {
-            $goods["thumb_url"] = iunserializer($goods["thumb_url"]);
-        }
+//        if( !empty($goods["thumb_url"]) )
+//        {
+//            $goods["thumb_url"] = iunserializer($goods["thumb_url"]);
+//        }
         //门店
         $goods["stores"] = $stores;
         if( !empty($shopdetail) )
@@ -2916,16 +2984,17 @@ class App_EweiShopV2Model
             $goods["commission"]=0;
         }else{
             $merch=pdo_get("ewei_shop_merch_user",array('id'=>$merchid));
-            if ($merch["reward_type"]==0){
-                $goods["reward"]=0;
-                $goods["share_price"]=0;
-                $goods["click_price"]=0;
-                $goods["commission"]=0;
+            //是不是赏金任务   1指定商品赏金任务   2全部商品的赏金任务
+            if ($merch["reward_type"] == 0){
+                $goods["reward"] = 0;
+                $goods["share_price"] = 0;
+                $goods["click_price"] = 0;
+                $goods["commission"] = 0;
             }else{
-                if ($merch["reward_type"]==1){
+                if ($merch["reward_type"] == 1){
                     //指定商品
                     //获取商家赏金
-                    $reward=pdo_fetchall('select * from'.tablename('ewei_shop_merch_reward').'where is_end=0 and type=1 and merch_id=:merchid',array(':merchid'=>$merchid));
+                    $reward = pdo_fetchall('select * from'.tablename('ewei_shop_merch_reward').'where is_end=0 and type=1 and merch_id=:merchid',array(':merchid'=>$merchid));
 
                     $g=array();
                     if (!empty($reward)){
@@ -2969,7 +3038,7 @@ class App_EweiShopV2Model
                 }
             }
         }
-        $goods['showshare'] = 0;
+        //$goods['showshare'] = 0;
         //商品的展示价格
         $goods['showprice'] = sprintf('%.2f',$minprice-$goods['deduct']);
         //商品虚拟销量和真实销量
@@ -2982,6 +3051,12 @@ class App_EweiShopV2Model
         return ['status'=>0,'msg'=>'','data'=>$goods];
     }
 
+    /**
+     * 获取属性
+     * @param $user_id
+     * @param $id
+     * @return array
+     */
     public function shop_goods_options($user_id,$id)
     {
         global $_W;

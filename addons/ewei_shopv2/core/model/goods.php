@@ -563,11 +563,13 @@ class Goods_EweiShopV2Model
 		unset($row);
 		return $list;
 	}
-	public function isFavorite($id = '') 
+	public function isFavorite($id = '',$user_id = "")
 	{
 		global $_W;
-		$count = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_favorite') . ' where goodsid=:goodsid and deleted=0 and openid=:openid and uniacid=:uniacid limit 1', array(':goodsid' => $id, ':openid' => $_W['openid'], ':uniacid' => $_W['uniacid']));
-		return 0 < $count;
+		$uniacid = $_W['uniacid'];
+		$member = m('member')->getMember($user_id);
+		$count = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_favorite') . ' where goodsid=:goodsid and deleted=0 and (openid=:openid or user_id = :user_id) and uniacid=:uniacid limit 1', array(':goodsid' => $id, ':openid' => $member['openid'], ':user_id' => $member['id'], ':uniacid' => $uniacid));
+		return 0 < $count ? 1 : 0;
 	}
 	public function addHistory($goodsid = 0) 
 	{

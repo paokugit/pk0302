@@ -1741,6 +1741,76 @@ class Member_EweiShopV2Model
         $member = pdo_get('ewei_shop_member',['id'=>$data[0]]);
         return $member['app_salt'] == $data[1] ? $data[0] : 0;
     }
-   
+
+    /**
+     * @param $levelid
+     * @return bool
+     */
+    public function level_infodiscount($levelid){
+        switch ($levelid){
+            case 1:
+                $data[] = [
+                    'info'=>'每天步数可兑换20折扣宝，连续20天，到期后每天可兑换10折扣宝',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/01@2x.png'
+                ];
+                $data[] = [
+                    'info'=>'赠送99折扣宝',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/02@2x.png'
+                ];
+                $data[] = [
+                    'info'=>'直推奖3元（最高）',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/03@2x.png'
+                ];
+                return $data;break;
+            case 2:
+                $data[] = [
+                    'info'=>'每天步数可兑换30折扣宝，连续20天，到期后，每天可兑换10折扣宝',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/01@2x.png'
+                ];
+                $data[] = [
+                    'info'=>'直推奖40元',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/02@2x.png'
+                ];
+                $data[] = [
+                    'info'=>'直推奖40元（最高）',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/03@2x.png'
+                ];
+                return $data;break;
+            case 3:
+                $data[] = [
+                    'info'=>'每天可兑换30折扣宝，连续20天',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/01@2x.png'
+                ];
+                $data[] = [
+                    'info'=>'赠送350折扣宝',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/02@2x.png'
+                ];
+                $data[] = [
+                    'info'=>'直推奖70元（最高）',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/03@2x.png'
+                ];
+                return $data;break;
+            case 5:
+                $data[] = [
+                    'info'=>'开通小程序智能店铺1个',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/01@2x.png'
+                ];
+                $data[] = [
+                    'info'=>'赠送9900折扣宝',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/02@2x.png'
+                ];
+                $data[] = [
+                    'info'=>'每天步数可兑换30折扣宝，连续30天，到期后，每天可兑换10折扣宝',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/03@2x.png'
+                ];
+                $data[] = [
+                    'info'=>'赠送1000-5000元礼包',
+                    'img'=>'https://www.paokucoin.com/img/backgroup/member/04@2x.png'
+                ];
+                return $data;break;
+            default:
+                return false;
+        }
+    }
 }
 ?>

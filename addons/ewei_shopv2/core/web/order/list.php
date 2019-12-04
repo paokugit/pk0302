@@ -30,7 +30,7 @@ class List_EweiShopV2Page extends WebPage
 			$st = "." . $st;
 		}
 		$sendtype = (!isset($_GPC["sendtype"]) ? 0 : $_GPC["sendtype"]);
-		$condition = " o.uniacid = :uniacid and o.ismr=0 and o.deleted=0 and o.isparent=0 and o.istrade=0 and iscycelbuy=0";
+		$condition = " o.uniacid = :uniacid and o.ismr=0 and o.deleted=0 and o.isparent=0 and o.istrade=0 and iscycelbuy=0 and type = 0";
 		$uniacid = $_W["uniacid"];
 		$paras = $paras1 = array( ":uniacid" => $uniacid );
 		$merch_data = m("common")->getPluginset("merch");

@@ -25,7 +25,7 @@ class Image_EweiShopV2Page extends WebPage{
 
         if(!empty($type)){
             $condition .= ' and type = :type';
-            $params[':type'] = $type;
+            $params[':keyword'] = $type;
         }
 
         $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_icon') . (' WHERE 1 ' . $condition . ' limit ') . ($pindex - 1) * $psize . ',' . $psize, $params);
@@ -84,7 +84,7 @@ class Image_EweiShopV2Page extends WebPage{
         
         foreach ($items as $item) {
             pdo_delete('ewei_shop_icon', array('id' => $item['id']));
-            plog('shop.image.delete', '删除商城图标 ID: ' . $item['id']);
+            plog('shop.image.delete', '删除幻灯片 ID: ' . $item['id']);
         }
         
         show_json(1, array('url' => referer()));
@@ -105,7 +105,7 @@ class Image_EweiShopV2Page extends WebPage{
             $status = $item['status'] == 1 ? 0 : 1;
             $msg = $item['status'] == 1 ? "关闭" : "开启";
             pdo_update('ewei_shop_icon', ['status'=>$status] , array('id' => $item['id']));
-            plog('shop.image.enabled', '修改商城图标 ID: ' . $item['id'] . '的状态为'.$msg);
+            plog('shop.image.enabled', '修改幻灯片 ID: ' . $item['id'] . '的状态为'.$msg);
         }
 
         show_json(1, array('url' => referer()));

@@ -400,6 +400,18 @@ class Util_EweiShopV2Model
         }
         return $count;
     }
+
+    /**
+     * @param $file
+     * @param $time
+     * @param $name
+     * @return bool|string
+     */
+    public function getVideoCover($file,$time = 1,$name = "") {
+        $strlen = strlen($file);
+        $str = "ffmpeg -i ".$file." -y -f mjpeg -ss 3 -t ".$time." -s 320x240 ".$name;
+        return system($str);
+    }
 }
 
 if (!defined('IN_IA')) {

@@ -1,0 +1,143 @@
+{template '_header'}
+<div class="page-header">当前位置：<span class="text-primary">跑库精选</span></div>
+
+<div class="page-content">
+
+    <form action="./index.php" method="get" class="form-horizontal form-search" role="form">
+        <input type="hidden" name="c" value="site" />
+        <input type="hidden" name="a" value="entry" />
+        <input type="hidden" name="m" value="ewei_shopv2" />
+        <input type="hidden" name="do" value="web" />
+        <input type="hidden" name="r"  value="shop.choice" />
+
+        <div class="page-toolbar">
+            <div class="pull-left">
+                {ifp 'shop.choice.add'}
+                    <a class='btn btn-primary btn-sm' href="{php echo webUrl('shop/choice/add')}"><i class='fa fa-plus'></i> 图标</a>
+                {/if}
+            </div>
+            <div class="pull-right col-md-6">
+                <div class="input-group">
+                    <div class="input-group-select">
+                        <select name="status" class='form-control'>
+                            <option value="" {if $_GPC['status'] == ''} selected{/if}>状态</option>
+                            <option value="1" {if $_GPC['status']== '1'} selected{/if}>显示</option>
+                            <option value="0" {if $_GPC['status'] == '0'} selected{/if}>隐藏</option>
+                        </select>
+                    </div>
+                    <input type="text" class="form-control" name='keyword' value="{$_GPC['keyword']}" placeholder="请输入关键词" />
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="submit"> 搜索</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {if empty($list)}
+        <div class="panel panel-default">
+            <div class="panel-body empty-data">未查询到相关数据</div>
+        </div>
+    {else}
+        <form action="" method="post">
+            <div class="page-table-header">
+                <input type='checkbox' />
+                <div class="btn-group">
+                    {ifp 'shop.choice.edit'}
+                    <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch' data-href="{php echo webUrl('shop/choice/enabled',array('status'=>1))}"><i class='icow icow-xianshi'></i> 显示</button>
+                    <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch'  data-href="{php echo webUrl('shop/choice/enabled',array('status'=>0))}"><i class='icow icow-yincang'></i> 隐藏</button>
+                    {/if}
+                    {ifp 'shop.choice.delete'}
+                    <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch-remove' data-confirm="确认要删除?" data-href="{php echo webUrl('shop/choice/delete')}">
+                        <i class='icow icow-shanchu1'></i> 删除</button>
+                    {/if}
+                </div>
+            </div>
+            <table class="table table-responsive table-hover" >
+                <thead class="navbar-inner">
+                    <tr>
+                        <th style="width:25px;"></th>
+                        <th style='width:50px'>顺序</th>
+                        <th style="width: 120px;">标题</th>
+                        <th style="width: 100px;">精选分类</th>
+                        <th style="width: 180px;">列表图</th>
+                        <th style="width: 200px;">详情图</th>
+                        <th style='width:60px'>显示</th>
+                        <th style="width: 65px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $list $row}
+                        <tr>
+                            <td>
+                                <input type='checkbox'   value="{$row['id']}"/>
+                            </td>
+                            <td>
+                                {ifp 'shop.choice.edit'}
+                                    <a href='javascript:;' data-toggle='ajaxEdit' data-href="{php echo webUrl('shop/choice/displayorder',array('id'=>$row['id']))}" >{$row['displayorder']}</a>
+                                {else}
+                                    {$row['displayorder']}
+                                {/if}
+                            </td>
+                            <td>{$row['title']}</td>
+                            <td>{$row['cate']}</td>
+                            <td><img class="img-responsive img-thumbnail" width=150 src="{php echo tomedia($row['thumb'])}"></td>
+                            <td><img class="img-responsive img-thumbnail" width=150 src="{php echo tomedia($row['image'])}"></td>
+                            <td>
+                                <span class='label {if $row['status']==1}label-primary{else}label-default{/if}'
+                                      {ifp 'shop.choice.edit'}
+                                          data-toggle='ajaxSwitch'
+                                          data-switch-value='{$row['status']}'
+                                          data-switch-value0='0|隐藏|label label-default|{php echo webUrl('shop/choice/enabled',array('status'=>1,'id'=>$row['id']))}'
+                                          data-switch-value1='1|显示|label label-primary|{php echo webUrl('shop/choice/enabled',array('status'=>0,'id'=>$row['id']))}'
+                                      {/if} >
+                                      {if $row['status']==1}显示{else}隐藏{/if}
+                                </span>
+                            </td>
+                            <td style="text-align:left;">
+                                {ifp 'shop.choice.view|shop.choice.edit'}
+                                    <a href="{php echo webUrl('shop/choice/edit', array('id' => $row['id']))}" class="btn btn-op btn-operation" >
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="{ifp 'shop.image.edit'}修改{else}查看{/if}">
+                                                <i class='icow icow-bianji2'></i>
+                                            </span>
+                                    </a>
+                                {/if}
+                                {ifp 'shop.image.delete'}
+                                    <a data-toggle='ajaxRemove' href="{php echo webUrl('shop/choice/delete', array('id' => $row['id']))}"class="btn btn-op btn-operation" data-confirm='确认要删除此幻灯片吗?'>
+                                        <span data-toggle="tooltip" data-placement="top" data-original-title="删除">
+                                               <i class='icow icow-shanchu1'></i>
+                                            </span>
+                                    </a>
+                                {/if}
+                            </td>
+                        </tr>
+                    {/loop}
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td colspan="3">
+                        <div class="btn-group">
+                            {ifp 'shop.choice.edit'}
+                                <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch' data-href="{php echo webUrl('shop/choice/enabled',array('status'=>1))}"><i class='icow icow-xianshi'></i> 显示</button>
+                                <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch'  data-href="{php echo webUrl('shop/choice/enabled',array('status'=>0))}"><i class='icow icow-yincang'></i> 隐藏</button>
+                            {/if}
+                            {ifp 'shop.choice.delete'}
+                                <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch-remove' data-confirm="确认要删除?" data-href="{php echo webUrl('shop/choice/delete')}">
+                                    <i class='icow icow-shanchu1'></i> 删除</button>
+                            {/if}
+                        </div>
+                    </td>
+                    <td colspan="2" style="text-align: right">
+                        {$pager}
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </form>
+    {/if}
+
+</div>
+
+{template '_footer'}
+<!--6Z2S5bKb5piT6IGU5LqS5Yqo572R57uc56eR5oqA5pyJ6ZmQ5YWs5Y+4-->

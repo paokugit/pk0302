@@ -13,7 +13,7 @@
 
 .img-item {
     width: 100%;
-    height: auto
+    height: auto;
     font-size:0
 }
 
@@ -223,7 +223,6 @@
     font-size: 25px;
     color: #fff;
     margin-left: 3px;
-    margin-left: 3px
 }
 
 .part-other,

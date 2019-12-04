@@ -429,11 +429,16 @@ class Rebate_EweiShopV2Page extends AppMobilePage
         $type = $_GPC['type'];
         $user_id = m('app')->getLoginToken($token);
         $member = m('member')->getMember($user_id);
-        if(empty($user_id) || $member['agentlevel'] == 0 || $type == 1){
-            $data = m('app')->get_list();
-        }else{
-            $data = m('app')->get_list1($user_id);
-        }
+        //用户为空
+//        if(empty($user_id) || $member['agentlevel'] == 0 || $type == 1){
+//            $data['goods'] = m('app')->get_list();
+//            $data['type'] = 1;
+//        }else{
+//            $data = m('app')->get_list1($user_id);
+//            $data['type'] = 2;
+//        }
+        $data = m('app')->get_list1($user_id);
+        $data['goods'] = empty($user_id) || $member['agentlevel'] == 0 || $type == 1 ? m('app')->get_list() : [];
         app_error1(0,'',$data);
     }
 }
