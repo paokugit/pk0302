@@ -199,6 +199,157 @@ class App_EweiShopV2Model
     }
 
     /**
+     * 运动日记
+     * @param $user_id
+     * @param int $num
+     * @return mixed
+     */
+    public function index_sport($user_id,$num = 0)
+    {
+        global $_W;
+        $uniacid = $_W["uniacid"];
+        $member = m("member")->getMember($user_id);
+        $day = date("Y-m-d",time());
+        //获取今日模板
+        $sport_style = pdo_fetch("select * from ".tablename("ewei_shop_member_sport")." where date=:day and is_default!=1",array(':day'=>$day));
+
+        if (empty($num)){
+            //获取今天生成的海报
+            $log = pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid=:openid or user_id = :user_id) and day=:day order by num desc limit 1",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day));
+            if ($log){
+                $num = $log["num"] + 1;
+                //获取兑换步数
+                $getstep = pdo_fetchall("select * from ".tablename("mc_credits_record")."where (openid=:openid or user_id = :user_id) and credittype = :credittype and num > :num and uniacid = :uniacid and createtime > :createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$log["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+                if ($getstep){
+                    //新生成模板
+                    if (empty($sport_style)){
+                        //获取默认模板
+                        $sport_styledefault = pdo_fetch("select * from ".tablename("ewei_shop_member_sport")."where is_default=:is_default order by id asc limit 1",array(':is_default'=>1));
+                        $sport_id = $sport_styledefault["id"];
+                        $url = m('qrcode')->createposter($member['openid'],$sport_styledefault["thumb"]);
+                    }else{
+                        $sport_id = $sport_style["id"];
+                        $url = m('qrcode')->createposter($member['openid'],$sport_style["thumb"]);
+                    }
+                }else{
+                    if (empty($sport_style)){
+                        $sport_id = $log["sport_id"];
+                        $url = $log["url"];
+
+                    }else{
+                        $default_log = pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid = :openid or user_id = :user_id) and day=:day and sport_id=:sport_id order by num desc limit 1",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day,':sport_id'=>$sport_style["id"]));
+                        if ($default_log){
+                            $sport_id = $default_log["sport_id"];
+                            $url = $default_log["url"];
+                        }else{
+                            $sport_id = $sport_style["id"];
+                            $url = m('qrcode')->createposter($member['openid'],$sport_style["thumb"]);
+                        }
+                    }
+                }
+            }else{
+                //无今日记录
+                $num = 1;
+                if (empty($sport_style)){
+                    //获取默认
+                    $sport_styledefault = pdo_fetch("select * from ".tablename("ewei_shop_member_sport")."where is_default=:is_default order by id asc limit 1",array(':is_default'=>1));
+                    $sport_id = $sport_styledefault["id"];
+                    $url = m('qrcode')->createposter($member['openid'],$sport_styledefault["thumb"]);
+                }else{
+                    $sport_id = $sport_style["id"];
+                    $url = m('qrcode')->createposter($member['openid'],$sport_style["thumb"]);
+                }
+            }
+        }else{
+            //传递有num
+            //获取今天生成的海报
+            $log = pdo_fetchall("select * from ".tablename("ewei_shop_member_sportlog")." where (openid=:openid or user_id = :user_id) and day=:day and num=:num",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day,':num'=>$num));
+            $sportids = array();
+            foreach ($log as $k=>$v){
+                $sportids[$k] = $v["sport_id"];
+            }
+
+            //获取不在这个海报中样式
+            $style = pdo_fetch("select * from ".tablename("ewei_shop_member_sport")." where id not in(".implode(",", $sportids).") and (is_default=1 or date=:day)",array(':day'=>$day));
+            //所有模板已生成
+            if (empty($style)){
+                //获取兑换步数
+                //获取今天生成的海报
+                $logg = pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid=:openid or user_id = :user_id) and day=:day and num=:num order by create_time desc limit 1",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day,':num'=>$num));
+
+                $getstep = pdo_fetchall("select * from ".tablename("mc_credits_record")."where (openid = :openid or user_id = :user_id) and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$logg["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+
+                $num = $num + 1;
+                if ($getstep){
+                    //新生成模板
+                    if (empty($sport_style)){
+                        //获取默认模板
+                        $sport_styledefault = pdo_fetch("select * from ".tablename("ewei_shop_member_sport")."where is_default=:is_default order by id asc limit 1",array(':is_default'=>1));
+                        $sport_id = $sport_styledefault["id"];
+                        $url = m('qrcode')->createposter($member['openid'],$sport_styledefault["thumb"]);
+                    }else{
+                        $sport_id = $sport_style["id"];
+                        $url = m('qrcode')->createposter($member['openid'],$sport_style["thumb"]);
+                    }
+                }else{
+                    if (empty($sport_style)){
+                        $sport_id = $logg["sport_id"];
+                        $url = $logg["url"];
+                    }else{
+                        $default_log = pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid = :openid or user_id = :user_id) and day=:day and sport_id=:sport_id order by num desc limit 1",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day,':sport_id'=>$sport_style["id"]));
+                        if ($default_log){
+                            $sport_id = $default_log["sport_id"];
+                            $url = $default_log["url"];
+                        }else{
+                            $sport_id = $sport_style["id"];
+                            $url = m('qrcode')->createposter($member['openid'],$sport_style["thumb"]);
+                        }
+                    }
+                }
+            }else{
+                if ($num == 1){
+                    //生成新海报
+                    $sport_id = $style["id"];
+                    $url = m('qrcode')->createposter($member['openid'],$style["thumb"]);
+
+                }else{
+                    //获取上次生成海报
+                    $last_sport = pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid = :openid or user_id = :user_id) and num=:num and sport_id=:sport_id and day=:day",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':num'=>$num-1,':sport_id'=>$style["id"],':day'=>$day));
+
+                    $getstep = pdo_fetchall("select * from ".tablename("mc_credits_record")."where (openid = :openid or user_id = :user_id) and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$last_sport["create_time"]));
+
+                    if ($getstep){
+                        //生成新海报
+                        $sport_id = $style["id"];
+                        $url = m('qrcode')->createposter($member['openid'],$style["thumb"]);
+                    }else{
+                        if ($last_sport){
+                            $sport_id = $last_sport["sport_id"];
+                            $url = $last_sport["url"];
+                        }else{
+                            $sport_id = $style["id"];
+                            $url = m('qrcode')->createposter($member['openid'],$style["thumb"]);
+                        }
+                    }
+                }
+            }
+        }
+        var_dump($url);exit;
+        //记录
+        $data["openid"] = $member['openid'];
+        $data["user_id"] = $member['id'];
+        $data["sport_id"] = $sport_id;
+        $data["num"] = $num;
+        $data["url"] = $url;
+        $data["day"] = $day;
+        $data["create_time"] = time();
+        pdo_insert("ewei_shop_member_sportlog",$data);
+        $resault["url"] = $_W["siteroot"] .$url;
+        $resault["num"] = $num;
+        return $resault;
+    }
+
+    /**
      * 门店服务
      * @param $user_id
      * @return array
@@ -793,7 +944,7 @@ class App_EweiShopV2Model
             $starttime = strtotime($member["accelerate_start"]);
             $endtime = strtotime($member["accelerate_end"]);
         }
-        $credit = pdo_fetchcolumn("select sum(num) from ".tablename('mc_credits_record')."where credittype = :credittype and (user_id = :user_id or openid = :openid) and createtime >= :starttime and createtime <= :endtime and (remark like :remark or remark like :cc)",array('credittype'=>"credit1",':user_id'=>$user_id,':openid'=>$member['openid'],':starttime'=>$starttime,':endtime'=>$endtime,':remark'=>'%'.'步数兑换',':cc'=>'好友助力'));
+        $credit = pdo_fetchcolumn(" select sum(num) from ".tablename('mc_credits_record')."where credittype = :credittype and (user_id = :user_id or openid = :openid) and createtime >= :starttime and createtime <= :endtime and (remark like :remark or remark like :cc)",array('credittype'=>"credit1",':user_id'=>$user_id,':openid'=>$member['openid'],':starttime'=>$starttime,':endtime'=>$endtime,':remark'=>'%'.'步数兑换',':cc'=>'好友助力'));
         if (empty($credit)){
             $resault["credit"]=0;
         }else{
@@ -1685,7 +1836,98 @@ class App_EweiShopV2Model
     }
 
     /**
+     * 转盘信息
+     * @param $user_id
+     * @param int $type
+     * @return array
+     */
+    public function index_game($user_id,$type = 1)
+    {
+        $member = m('member')->getMember($user_id);
+        global $_W;
+        //奖励奖项
+        $sets = pdo_getcolumn('ewei_shop_game',['status'=>1,'game_type'=>$type,'uniacid'=>$_W['uniacid']],'sets');
+        $list = iunserializer($sets);
+        foreach ($list as $key=>$item){
+            preg_match('/\d+/',$item['reward'.($key+1)],$arr);
+            $list[$key]['reward'.($key+1)] = $arr[0];
+        }
+        //如果type == 1 是指卡路里转盘   $type == 2 折扣宝转盘
+        if($type == 1){
+            $cate = "credit1";
+        }elseif ($type == 2){
+            $cate = "credit3";
+        }
+        //今日的邀请的新用户  也就是免费抽奖次数
+        $today = strtotime(date('Y-m-d'));
+        $tomorrow = $today + 60*60*24;
+        $user = pdo_fetchall('select * from '.tablename('ewei_shop_member').' where agentid = "'.$member['id'].'" and createtime > "'.$today.'" and createtime < "'.$tomorrow.'" limit 5');
+        //免费抽奖记录抽奖次数
+        $free = pdo_fetchall('select * from '.tablename('mc_credits_record').' where createtime > "'.$today.'" and createtime < "'.$tomorrow.'" and (openid = :openid or user_id = :user_id) and type = 2',[':openid'=>$member['openid'],':user_id'=>$member['id'],]);
+        //抽奖记录
+        $log = pdo_fetchall('select m.nickname,m.mobile,c.num,c.remark from '.tablename('mc_credits_record').'c join '.tablename('ewei_shop_member').'m on c.openid = m.openid or c.user_id = m.id '.' where type = 1 and credittype = "'.$cate.'" order by c.id desc limit 20');
+        foreach ($log as $key=>$item) {
+            $mobile = substr($item['mobile'],0,3)."****".substr($item['mobile'],7,4);
+            $log[$key]['mobile'] = $item['mobile'] == "" ? "" : $mobile;
+        }
+        return ['list'=>$list,'log'=>$log,'num'=>count($user)-count($free) > 0 ? count($user)-count($free) : 0,'credit1'=>$member['credit1'] ? $member['credit1'] : (string)0,'credit3'=>$member['credit3'] ? $member['credit3'] : (string)0];
+    }
+
+    /**
+     * 点击转盘玩游戏
+     * @param $user_id
+     * @param $type
+     * @param string $credit
+     * @param $money
+     * @return array
+     */
+    public function index_getreward($user_id,$type,$credit = 'credit1',$money)
+    {
+        global $_W;
+        $member = m('member')->getMember($user_id);
+        $game = pdo_get('ewei_shop_game',['uniacid'=>$_W['uniacid']]);
+        if($game['status'] == 0){
+            return ['status'=>1,'msg'=>"该活动已关闭",'data'=>[]];
+        }
+        //用户的卡路里 或者 折扣宝余额
+        $credit1 = $member[$credit];
+        //用户的账户名
+        $credit_name = $credit == "credit1" ? "卡路里" :"折扣宝";
+        if($type==0){
+            if(bccomp($credit1,$money,2)==-1) return ['status'=>1,'msg'=>"小主的".$credit_name."不足啦，赶快邀请好友助力获取".$credit_name."吧",'data'=>[]];
+        }
+        //计算今天的免费抽奖次数
+        $today = strtotime(date('Y-m-d'));
+        $tomorrow = $today + 60*60*24;
+        //获得今天推荐人的个数
+        $user = pdo_fetchall('select * from '.tablename('ewei_shop_member').' where agentid = "'.$member['id'].'" and createtime > "'.$today.'" and createtime < "'.$tomorrow.'" limit 5');
+        $log = pdo_fetchall('select * from '.tablename('mc_credits_record').' where createtime > "'.$today.'" and createtime < "'.$tomorrow.'" and (openid = :openid or user_id = :user_id) and type = 2',[':openid'=>$member['openid'],':user_id'=>$member['id']]);
+        if($type == 2){
+            //如果今天没有邀请新用户 就提示
+            if(count($user) <= 0){
+                return ['status'=>0,'msg'=>"您今天还没邀请新用户",'data'=>[]];
+            }elseif(bccomp(count($user),count($log),2) != 1){
+                //今天邀请的人数  小于等于  记录数量  就说用完了
+                return ['status'=>1,'msg'=>"免费抽奖次数".count($user)."已用完",'data'=>[]];
+            }
+        }
+        //抽奖的结果
+        $res = m('game')->prize($game,$type,$member['openid'],$money,$credit);
+        $num = count($user)-count($log) > 0 ? count($user)-count($log) : 0;
+        if($type == 2) {
+            //如果是免费抽奖 他的记录就又加了一条  所以 再减一
+            $num = count($user) - count($log) - 1 > 0 ? count($user) - count($log) - 1 : 0;
+        }
+        //免费剩余次数
+        $res['remain'] = $num;
+        //用户剩余折扣宝余额
+        $res[$credit] = m('member')->getMember($user_id)[$credit];
+        return ['status'=>0,'msg'=>'','data'=>$res];
+    }
+
+    /**
      * 商城首页图标
+     * @return array
      * @return array
      */
     public function shop_adv()
@@ -2630,6 +2872,7 @@ class App_EweiShopV2Model
         unset($goods["hidecommission"]);
         unset($goods["diysave"]);
         unset($goods["diysaveid"]);
+        //余额抵扣
         unset($goods["deduct2"]);
         unset($goods["shopid"]);
         unset($goods["shorttitle"]);
@@ -2651,11 +2894,6 @@ class App_EweiShopV2Model
         unset($goods["dispatchid"]);
         unset($goods["storeids"]);
         unset($goods["share_icon"]);
-        unset($goods["share_title"]);
-        unset($goods["share_title"]);
-        unset($goods["share_title"]);
-        unset($goods["share_title"]);
-        unset($goods["share_title"]);
         unset($goods["share_title"]);
         //商品图库
 //        if( !empty($goods["thumb_url"]) )
@@ -3362,13 +3600,8 @@ class App_EweiShopV2Model
             }
         }
         unset($option);
-        $appDatas = array( "fields" => array( ), "f_data" => array( ) );
-        if( $diyform_plugin )
-        {
-            $appDatas = $diyform_plugin->wxApp($fields, $f_data, $member);
-        }
-        var_dump($goods,$seckillinfo,$specs,$options,$appDatas);exit;
-        app_json(array( "goods" => $goods, "seckillinfo" => $seckillinfo, "specs" => $specs, "options" => $options, "diyform" => array( "fields" => $appDatas["fields"], "lastdata" => $appDatas["f_data"] ) ));
+        $data = ["goods" => $goods];
+        return [ "specs" => $specs, "options" => $options];
     }
 
     /**
@@ -4439,7 +4672,7 @@ class App_EweiShopV2Model
             }
             else
             {
-                $address = pdo_fetch("select * from " . tablename("ewei_shop_member_address") . " where (openid=:openid or user_:user_id) and deleted=0 and isdefault=1  and uniacid=:uniacid limit 1", array( ":uniacid" => $uniacid, ":openid" => $member['openid'], ":user_id" => $member['id'] ));
+                $address = pdo_fetch("select * from " . tablename("ewei_shop_member_address") . " where (openid=:openid or user_id = :user_id) and deleted=0 and isdefault=1  and uniacid=:uniacid limit 1", array( ":uniacid" => $uniacid, ":openid" => $member['openid'], ":user_id" => $member['id'] ));
                 if( !empty($carrier_list) )
                 {
                     $carrier = $carrier_list[0];
@@ -4881,7 +5114,8 @@ class App_EweiShopV2Model
         if ($credit3<$discount){
             $discount=$credit3;
         }
-        $result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "showTab" => 0 < count($carrier_list) && !$isverify && !$isvirtual, "showAddress" => !$isverify && !$isvirtual, "isverify" => $isverify, "isvirtual" => $isvirtual, "set_realname" => $sysset["set_realname"], "set_mobile" => $sysset["set_mobile"], "carrierInfo" => (!empty($carrier_list) ? $carrier_list[0] : false), "storeInfo" => false, "address" => $address, "goods" => $allgoods, "merchid" => $merch_id, "packageid" => $packageid, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle, "changenum" => $changenum, "hasinvoice" => (bool) $hasinvoice, "invoicename" => $invoicename, "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "discount"=>$discount,"deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" =>$flag == true? 0 :$goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => $flag == true ? $dispatch_price :round($realprice, 2), "total" => $total, "buyagain" => round($buyagain, 2), "fromcart" => (int) $fromcart, "isonlyverifygoods" => $isonlyverifygoods, "isforceverifystore" => $isforceverifystore, "city_express_state" => (empty($dispatch_array["city_express_state"]) ? 0 : $dispatch_array["city_express_state"]), "canusecard" => $canusecard, "card_info" => $card_info, "carddiscountprice" => $carddiscountprice, "card_free_dispatch" => $card_free_dispatch );
+        //$result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "showTab" => 0 < count($carrier_list) && !$isverify && !$isvirtual, "showAddress" => !$isverify && !$isvirtual, "isverify" => $isverify, "isvirtual" => $isvirtual, "set_realname" => $sysset["set_realname"], "set_mobile" => $sysset["set_mobile"], "carrierInfo" => (!empty($carrier_list) ? $carrier_list[0] : false), "storeInfo" => false, "address" => $address, "goods" => $allgoods, "merchid" => $merch_id, "packageid" => $packageid, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle, "changenum" => $changenum, "hasinvoice" => (bool) $hasinvoice, "invoicename" => $invoicename, "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "discount"=>$discount,"deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" =>$flag == true? 0 :$goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => $flag == true ? $dispatch_price :round($realprice, 2), "total" => $total, "buyagain" => round($buyagain, 2), "fromcart" => (int) $fromcart, "isonlyverifygoods" => $isonlyverifygoods, "isforceverifystore" => $isforceverifystore, "city_express_state" => (empty($dispatch_array["city_express_state"]) ? 0 : $dispatch_array["city_express_state"]), "canusecard" => $canusecard, "card_info" => $card_info, "carddiscountprice" => $carddiscountprice, "card_free_dispatch" => $card_free_dispatch );
+        $result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "address" => $address, "goods" => $allgoods, "merchid" => $merch_id, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle,  "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "discount"=>$discount,"deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" =>$flag == true? 0 :$goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => $flag == true ? $dispatch_price :round($realprice, 2), "total" => $total,  "fromcart" => (int) $fromcart);
         if( $iscycel )
         {
             $cycelset = m("common")->getSysset("cycelbuy");
@@ -4894,11 +5128,11 @@ class App_EweiShopV2Model
             $result["receipttime"] = $selectDate;
             $result["scope"] = $cycelset["days"];
         }
-        $result["fromquick"] = intval($fromquick);
-        $result["fullbacktext"] = m("sale")->getFullBackText();
-        $result["seckill_dispatchprice"] = intval($seckill_dispatchprice);
-        $result["seckill_price"] = intval($seckill_price);
-        $result["seckill_payprice"] = intval($seckill_payprice);
+//        $result["fromquick"] = intval($fromquick);
+//        $result["fullbacktext"] = m("sale")->getFullBackText();
+//        $result["seckill_dispatchprice"] = intval($seckill_dispatchprice);
+//        $result["seckill_price"] = intval($seckill_price);
+//        $result["seckill_payprice"] = intval($seckill_payprice);
         $result['isdispatcharea'] = $isdispatcharea;
         $result['remote_dispatchprice'] = $remote_dispatchprice;
         //当是偏远地区  外加不支持发货的时候  才为0  其他  都为1

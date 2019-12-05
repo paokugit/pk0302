@@ -17,17 +17,17 @@ class Order_EweiShopV2Page extends AppMobilePage
        if(empty($user_id)) app_error1(2,'登录失效',[]);
        //商品id
        $id = $_GPC['id'];
-       $goods = $_GPC['goods'];
-       $packageid = $_GPC['packageid'];
+       $goods = $_GPC['goods'] ? $_GPC['goods'] : [];
+       $packageid = $_GPC['packageid'] ? $_GPC['packageid'] : 0;
        //商品属性id
        $optionid = $_GPC['optionid'];
-       $bargain_id = $_GPC['bargain_id'];
+       $bargain_id = $_GPC['bargain_id'] ? $_GPC['bargain_id'] : 0;
        //购买数量
        $total = $_GPC['total'];
-       $giftid = $_GPC['giftid'];
-       $fromquick = $_GPC['fromquick'];
-       $selectDate = $_GPC['selectDate'];
-       $gdid = $_GPC['gdid'];
+       $giftid = $_GPC['giftid'] ? $_GPC['giftid'] : 0;
+       $fromquick = $_GPC['fromquick'] ? $_GPC['fromquick'] : 0;
+       $selectDate = $_GPC['selectDate'] ? $_GPC['selectDate'] : 0;
+       $gdid = $_GPC['gdid'] ? $_GPC['gdid'] :0;
        $data = m('app')->order_create($user_id,$id,$goods,$packageid,$optionid,$bargain_id,$total,$giftid,$fromquick,$selectDate,$gdid);
        app_error1($data['status'],$data['msg'],$data['data']);
    }

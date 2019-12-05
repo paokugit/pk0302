@@ -573,7 +573,108 @@ class Index_EweiShopV2Page extends AppMobilePage
      */
     public function index_friend()
     {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        $token = $_GPC['token'];
+        //获得用户id
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
+        //获取用户信息
+        $member = m('member')->getMember($user_id);
+        if ($member["agentlevel"] == 0){
+            $exchange = 0.5/1500;
+        }else{
+            $level = pdo_get('ewei_shop_commission_level',array('id'=>$member["agentlevel"],'uniacid'=>1));
+            $exchange = $level["subscription_ratio"]/1500;
+        }
+        $exchange_step = m("member")->exchange_step($user_id);
+        $step_count = ceil($exchange_step/$exchange);
+        //获取用户今天总步数
+        $day = date("Y-m-d",time());
+        $step_today = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  (openid=:openid or user_id = :user_id) and type!=:type", array(':today' => $day, ':openid' => $member['openid'], ':user_id' => $member['id'],':type'=>2));
+        $data["step_today"] = empty($step_today) ? 0 : $step_today;
+        //还差多少步数
+        $data["step"] = $step_count - $step_today < 0 ? 0 : $step_count - $step_today;
+        $data["openid"] = $member['openid'];
+        $data["user_id"] = $member['id'];
+        //用户每日可最多兑换步数
+        $data["step_count"] = $step_count;
+        //累计邀请人数
+        $ste_today = pdo_fetchcolumn("select count(*) from (select count(*) from " . tablename('ewei_shop_member_getstep') . " where (openid=:openid or user_id = :user_id) and type=:type group by bang) as a", array(':openid' => $member['openid'],':user_id' => $member['id'],':type'=>1));
+        $data['friend_today'] = empty($ste_today) ? 0 : $ste_today;
+        //助力获取的总卡路里
+        $credit = m('credits')->get_sum_credit(1,$user_id);
+        $data['credit_price'] = $data['credit_sum'] = $credit ? $credit : 0;
+        //获取折扣宝奖励
+        $discount=m('credits')->get_sum_creditdiscount(1,$user_id);
+        $data['credit_pricediscount'] = $data['credit_sumdiscount'] = $discount ? $discount : 0;
+        app_error1(0,'',$data);
+    }
 
+    /**
+     * 好友助力助力榜
+     */
+    public function index_friend_list()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        $token = $_GPC['token'];
+        //获得用户id
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
+        //用户信息
+        $memberInfo = m('member')->getMember($user_id);
+        //助力榜列表
+        $helpList = m('getstep')->getHelpList($memberInfo["openid"]);
+        app_error1(0,'',$helpList);
+    }
+
+    /**
+     * 运动日记
+     */
+    public function index_sport()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        $token = $_GPC['token'];
+        //获得用户id
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
+        $num = (int)$_GPC['num'] ? (int)$_GPC['num'] : 0;
+        $data = m('app')->index_sport($user_id,$num);
+        app_error1(0,'',$data);
+    }
+
+    /**
+     * 转盘游戏
+     */
+    public function index_game()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        $type = $_GPC['type'] ? $_GPC['type'] : 2;
+        $data = m('app')->index_game($user_id,$type);
+        app_error1(0,'',$data);
+    }
+
+    /**
+     * 点击转盘
+     */
+    public function index_getreward()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
+        //$type==2  免费抽奖   $type == 0 花钱抽奖
+        $type = $_GPC['type'];
+        $credit = $_GPC['credit'] ? $_GPC['credit'] : "credit1";
+        $money = $_GPC['money'];
+        $data = m('app')->index_getreward($user_id,$type,$credit,$money);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
 }
 ?>

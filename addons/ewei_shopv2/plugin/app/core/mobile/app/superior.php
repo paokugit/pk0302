@@ -12,7 +12,11 @@ class Superior_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         global $_W;
         //获取bannenr
-        $list["banner"]=pdo_fetchall("select * from ".tablename("ewei_shop_jdbanner")." order by sort desc");
+        $banner=pdo_fetchall("select * from ".tablename("ewei_shop_jdbanner")." order by sort desc");
+        foreach ($banner as $k=>$v){
+            $banner[$k]["banner"]=tomedia($v["banner"]);
+        }
+        $list["banner"]=$banner;
         //获取分类
         $list["cate"]=pdo_fetchall("select * from ".tablename("ewei_shop_jdgoods_cate")." order by sort desc");
         apperror(0,"",$list);
@@ -487,8 +491,8 @@ class Superior_EweiShopV2Page extends AppMobilePage
             //更新用户余额
             m('member')->setCredit($member["id"], 'credit2', -$order["price"], "商城购买优品云仓商品，订单编号为：".$order["ordersn"]);
             //确认优品
-//             $d["jdOrderId"]=$order["jdOrderId"];
-//             m("jdgoods")->confirmOrder($d);
+            $d["jdOrderId"]=$order["jdOrderId"];
+            m("jdgoods")->confirmOrder($d);
             //更新商品销量
             $order_goods=pdo_get("ewei_shop_order_goods",array("orderid"=>$order_id));
             $good=pdo_get("ewei_shop_jdgoods",array("id"=>$order_goods["goodsid"]));
@@ -894,9 +898,50 @@ class Superior_EweiShopV2Page extends AppMobilePage
             apperror(1,"用户不存在");
         }
         $res["credit2"]=$member["credit2"];
+        $res["rvc"]=$member["rvc"]?$member["rvc"]:0;
         apperror(0,"",$res);
     }
-    
+    //rvc支付
+    public function rvc_pay(){
+        global $_GPC;
+        global $_W;
+        $order_id=$_GPC["orderid"];
+        $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
+        if (empty($order)){
+            apperror(1,"订单id不正确");
+        }
+        if ($order["status"]==-1){
+            apperror(1,"该订单已被取消");
+        }
+        //获取用户信息
+        if ($order["user_id"]){
+            $member=pdo_get("ewei_shop_member",array("id"=>$order["user_id"]));
+        }else{
+            $member=pdo_get("ewei_shop_member",array("openid"=>$order["openid"]));
+        }
+        if ($member["rvc"]<$order["price"]){
+            apperror(1,"rvc余额不足");
+        }
+        //订单
+        $data["status"]=1;
+        $data["paytime"]=time();
+        $data["paytype"]=1;
+        if (pdo_update("ewei_shop_order",$data,array("id"=>$order_id))){
+            //更新用户余额
+            m('member')->setCredit($member["id"], 'rvc', -$order["price"], "商城购买优品云仓商品，订单编号为：".$order["ordersn"]);
+            //确认优品
+                        $d["jdOrderId"]=$order["jdOrderId"];
+                        m("jdgoods")->confirmOrder($d);
+            //更新商品销量
+            $order_goods=pdo_get("ewei_shop_order_goods",array("orderid"=>$order_id));
+            $good=pdo_get("ewei_shop_jdgoods",array("id"=>$order_goods["goodsid"]));
+            $dd["sale"]=$good["sale"]+$order_goods["total"];
+            pdo_update("ewei_shop_jdgoods",$dd,array("id"=>$order_goods["goodsid"]));
+            apperror(0,"支付成功");
+        }else{
+            apperror(1,"支付失败");
+        }
+    }
     public function comfim(){
         $data["jdOrderId"]="107216381949";
         $res=m("jdgoods")->money();

@@ -134,7 +134,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         //生成订单号
         $order_sn = "LEV".date('YmdHis').random(12);
         //添加订单
-        $order_id = $this->addorder($openid,$order_sn,$money,$member,'','购买年卡id=5');
+        $order_id = $this->addorder($openid,$order_sn,$money,$member,'','购买年卡id=5',2);
         //微信支付
         $payinfo = array( "openid" => substr($openid,7), "title" => "购买年卡", "tid" => $order_sn, "fee" =>$money );
         $res = $this->model->wxpay($payinfo, 32);
@@ -209,7 +209,7 @@ class Level_EweiShopV2Page extends AppMobilePage
         //生成订单号
         $order_sn = "LQ".$level_id.date('YmdHis').random(12);
         //添加订单
-        $order_id = $this->addorder($openid,$order_sn,$money,$member,$address_id,"领取年卡".$record["month"]."权益",$goods);
+        $order_id = $this->addorder($openid,$order_sn,$money,$member,$address_id,"领取年卡".$record["month"]."权益",0,$goods);
         //如果是第一次支付   金额为零 不用唤醒支付  直接改变状态   然后 架订单的时候 也判断了  让status=1
         if($money == 0){
              pdo_update('ewei_shop_level_record',['goods_id'=>$good_id,'status'=>1,'updatetime'=>time()],['id'=>$record_id]);
@@ -315,10 +315,11 @@ class Level_EweiShopV2Page extends AppMobilePage
      * @param $member
      * @param $address_id
      * @param $remark
+     * @param $type
      * @param $goods
      * @return bool
      */
-    public function addorder($openid,$order_sn,$money,$member,$address_id = "",$remark = "",$goods = [])
+    public function addorder($openid,$order_sn,$money,$member,$address_id = "",$remark = "",$type = 0,$goods = [])
     {
         global $_W;
         $uniacid = $_W['uniacid'];
@@ -335,6 +336,7 @@ class Level_EweiShopV2Page extends AppMobilePage
             'addressid'=>$address_id?:0,
             'address'=>$address,
             'dispatchprice'=>$money,
+            'type'=>$type,
             'remark'=>$remark,
         ];
         $data['status'] = $money == 0 ? 1 :0;

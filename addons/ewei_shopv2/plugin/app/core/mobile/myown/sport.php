@@ -45,15 +45,14 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         //获取今日模板
         $sport_style=pdo_fetch("select * from ".tablename("ewei_shop_member_sport")." where date=:day and is_default!=1",array(':day'=>$day));
         
-//         var_dump($sport_style);die;
+         //var_dump($sport_style);die;
         if (empty($num)){
             //获取今天生成的海报
-            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day order by num desc limit 1",array(':openid'=>$openid,':day'=>$day));
-           
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid = :openid or user_id = :user_id) and day=:day order by num desc limit 1",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day));
             if ($log){
                 $num=$log["num"]+1;
                 //获取兑换步数
-                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$log["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where (openid = :openid or user_id = :user_id) and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$log["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
 
 //                 var_dump($getstep);die;
                 if ($getstep){
@@ -73,7 +72,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                         $url=$log["url"];
                         
                     }else{
-                        $default_log=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day and sport_id=:sport_id order by num desc limit 1",array(':openid'=>$openid,':day'=>$day,':sport_id'=>$sport_style["id"]));
+                        $default_log=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid = :openid or user_id = :user_id) and day=:day and sport_id=:sport_id order by num desc limit 1",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day,':sport_id'=>$sport_style["id"]));
                         if ($default_log){
                         $sport_id=$default_log["sport_id"];
                         $url=$default_log["url"];
@@ -100,7 +99,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         }else{
             //传递有num
             //获取今天生成的海报
-            $log=pdo_fetchall("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day and num=:num",array(':openid'=>$openid,':day'=>$day,':num'=>$num));
+            $log=pdo_fetchall("select * from ".tablename("ewei_shop_member_sportlog")." where (openid = :openid or user_id = :user_id) and day=:day and num=:num",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day,':num'=>$num));
             $sportids=array();
             foreach ($log as $k=>$v){
                 $sportids[$k]=$v["sport_id"];
@@ -115,9 +114,9 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                 
                 //获取兑换步数
                 //获取今天生成的海报
-                $logg=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day and num=:num order by create_time desc limit 1",array(':openid'=>$openid,':day'=>$day,':num'=>$num));
+                $logg=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid = :openid or user_id = :user_id) and day=:day and num=:num order by create_time desc limit 1",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day,':num'=>$num));
                 
-                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$logg["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+                $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where (openid = :openid or user_id = :user_id) and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$logg["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
                 
                 $num=$num+1;
                 if ($getstep){
@@ -137,7 +136,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                         $url=$logg["url"];
                         
                     }else{
-                        $default_log=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and day=:day and sport_id=:sport_id order by num desc limit 1",array(':openid'=>$openid,':day'=>$day,':sport_id'=>$sport_style["id"]));
+                        $default_log=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid = :openid or user_id = :user_id) and day=:day and sport_id=:sport_id order by num desc limit 1",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day,':sport_id'=>$sport_style["id"]));
                         if ($default_log){
                             $sport_id=$default_log["sport_id"];
                             $url=$default_log["url"];
@@ -155,9 +154,9 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                    
                }else{
                    //获取上次生成海报
-                   $last_sport=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where openid=:openid and num=:num and sport_id=:sport_id and day=:day",array(':openid'=>$openid,':num'=>$num-1,':sport_id'=>$style["id"],':day'=>$day));
+                   $last_sport=pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid = :openid or user_id = :user_id) and num=:num and sport_id=:sport_id and day=:day",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':num'=>$num-1,':sport_id'=>$style["id"],':day'=>$day));
                    
-                   $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where openid=:openid and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime",array(':openid'=>$openid,':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$last_sport["create_time"]));
+                   $getstep=pdo_fetchall("select * from ".tablename("mc_credits_record")."where (openid = :openid or user_id = :user_id) and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$last_sport["create_time"]));
                    
                    if ($getstep){
                        //生成新海报
@@ -180,12 +179,13 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             }
         }
         //记录
-        $data["openid"]=$openid;
-        $data["sport_id"]=$sport_id;
-        $data["num"]=$num;
-        $data["url"]=$url;
-        $data["day"]=$day;
-        $data["create_time"]=time();
+        $data["openid"] = $member['openid'];
+        $data["user_id"] = $member['id'];
+        $data["sport_id"] = $sport_id;
+        $data["num"] = $num;
+        $data["url"] = $url;
+        $data["day"] = $day;
+        $data["create_time"] = time();
         pdo_insert("ewei_shop_member_sportlog",$data);
         
         $resault["url"]=$_W["siteroot"] .$url;
@@ -210,15 +210,18 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         imagepng($qrcode,$filepath);
        
     }
+    /**
+     * @param string $openid
+     * @param string $backgroup
+     * @return string
+     */
     public function createposter($openid="",$backgroup="")
     {
         global $_W;
-        
         set_time_limit(0);
         $goods = array( );
-//         $openid="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
-        $member =pdo_fetch("select * from ".tablename("ewei_shop_member")." where openid=:openid",array(':openid'=>$openid));
-        
+        $member = m('member')->getMember($openid);
+
         @ini_set("memory_limit", "256M");
         $path = IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/" ;
         if( !is_dir($path) )
@@ -227,28 +230,23 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             mkdirs($path);
         }
         $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "openid" => $member["openid"], "goodstitle" => $goods["title"], "goodprice" => $goods["minprice"], "version" => 1 )));
-        $filename = $openid."_".time() . ".png";
+        $filename = $member['openid']."_".time() . ".png";
         $filepath = $path . $filename;
-        
-//         $backgroup=IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/1.png";
+
         $target = imagecreatetruecolor(750, 1334);
-        /*imagecolorallocate ( resource $image , int $red , int $green , int $blue )
-         为一幅图像分配颜色*/
+        //imagecolorallocate ( resource $image , int $red , int $green , int $blue )  为一幅图像分配颜色
         $white = imagecolorallocate($target, 255, 255, 255);
         imagefill($target, 0, 0, $white);
-        
+
         //填充背景图
         $thumb = $this->createImage(tomedia($backgroup));
-        /*imagecopyresized — 拷贝部分图像并调整大小
-         dst_image  目标图象连接资源。 src_image源图象连接资源。 dst_x x-coordinate of destination point.dst_y y-coordinate of destination point. src_x x-coordinate of source point. src_y y-coordinate of source point. dst_w Destination width. dst_h Destination height.  src_w源图象的宽度。src_h 源图象的高度。
-         */
+        //imagecopyresized — 拷贝部分图像并调整大小  dst_image  目标图象连接资源。 src_image源图象连接资源。 dst_x x-coordinate of destination point.dst_y y-coordinate of destination point. src_x x-coordinate of source point. src_y y-coordinate of source point. dst_w Destination width. dst_h Destination height.  src_w源图象的宽度。src_h 源图象的高度。
         imagecopyresized($target, $thumb, 0, 0, 0, 0, 750, 1200, imagesx($thumb), imagesy($thumb));
-        
+
         //添加底部字体
-        /*imagecolorallocate ( resource $image , int $red , int $green , int $blue )
-         为一幅图像分配颜色*/
+        //imagecolorallocate ( resource $image , int $red , int $green , int $blue ) 为一幅图像分配颜色
         $nameColor = imagecolorallocate($target, 102, 102, 102);
-        /*imagettftext ( resource $image , float $size , float $angle , int $x , int $y , int $color , string $fontfile , string $text )*/
+        //imagettftext ( resource $image , float $size , float $angle , int $x , int $y , int $color , string $fontfile , string $text )
         $PINGFANG_LIGHT = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_LIGHT.ttf";
         if( !is_file($PINGFANG_LIGHT) )
         {
@@ -256,16 +254,14 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         }
         $footer="长按识别小程序码进入跑库，开启健康小收入";
         imagettftext($target, 18, 0, 144, 1274, $nameColor, $PINGFANG_LIGHT, $footer);
-        
+
         //添加底部背景
-        $footer_backgroup=IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/floor.png";
-        $thumb=$this->createImage(tomedia($footer_backgroup));
+        $footer_backgroup = IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/floor.png";
+        $thumb = $this->createImage(tomedia($footer_backgroup));
         imagecopyresized($target, $thumb, 34, 926, 0, 0, 680, 260, imagesx($thumb), imagesy($thumb));
-        
+
         //头像
-        /*imageistruecolor() 检查 image 图像是否为真彩色图像。
-         * *
-         */
+        //imageistruecolor() 检查 image 图像是否为真彩色图像。
         $avatartarget = imagecreatetruecolor(70, 70);
         $avatarwhite = imagecolorallocate($avatartarget, 255, 255, 255);
         imagefill($avatartarget, 0, 0, $avatarwhite);
@@ -275,7 +271,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         //imagecopyresized — 拷贝部分图像并调整大小
         //dst_image  目标图象连接资源。 src_image源图象连接资源。 dst_x x-coordinate of destination point.dst_y y-coordinate of destination point. src_x x-coordinate of source point. src_y y-coordinate of source point. dst_w Destination width. dst_h Destination height.  src_w源图象的宽度。src_h 源图象的高度。
         imagecopyresized($target, $image, 54, 946, 0, 0, 70, 70, 70, 70);
-        
+
         //名称
         $nameColor = imagecolorallocate($target, 51, 51, 51);
         /*imagettftext ( resource $image , float $size , float $angle , int $x , int $y , int $color , string $fontfile , string $text )*/
@@ -284,55 +280,44 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         {
             $PINGFANG_BOLD = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
         }
-        $name="我叫".$member["nickname"];
+        $name = "我叫".$member["nickname"];
         imagettftext($target, 20, 0, 144, 966, $nameColor, $PINGFANG_BOLD, $name);
-        
-        
+
+
         //卡路里
         //获取今日已兑换的卡路里
-        $starttime=strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
-        $endtime=strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
-        $count_list=pdo_fetchall("select num from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark like :remark1 or remark like :remark2) order by id desc",array(':openid'=>$openid,':credittype'=>"credit3",":starttime"=>$starttime,':endtime'=>$endtime,':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
-        //var_dump($count_list);
-        $count=array_sum(array_column($count_list, 'num'));
+        $starttime = strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
+        $endtime = strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
+        $count_list = pdo_fetchall("select num from ".tablename("mc_credits_record")." where (openid=:openid or user_id = :user_id) and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark like :remark1 or remark like :remark2) order by id desc",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>"credit3",":starttime"=>$starttime,':endtime'=>$endtime,':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+
+        $count = array_sum(array_column($count_list, 'num'));
         if (empty($count)){
             $count=0;
         }
-        $count=round($count,1);
-        $name="今日步数已兑换".$count."折扣宝=";
+        $count = round($count,1);
+        $name = "今日步数已兑换".$count."折扣宝=";
         $nameColor = imagecolorallocate($target, 51, 51, 51);
         imagettftext($target, 18, 0, 144, 998, $nameColor, $PINGFANG_LIGHT, $name);
-        $name=$count."元";
+        $name = $count."元";
         $nameColor = imagecolorallocate($target, 176, 6, 16);
         imagettftext($target, 18, 0, 446, 998, $nameColor, $PINGFANG_BOLD, $name);
         //获取剩余卡路里未兑换
-        $exchange=m("member")->exchange_step($openid);
-        $surplus=$exchange-$count;
+        $exchange = m("member")->exchange_step($member['openid']);
+        $surplus = $exchange - $count;
         if ($surplus<0){
-            $surplus=0;
+            $surplus = 0;
         }
-        $name="剩余".$surplus."元"."未兑换";
+        $name = "剩余".$surplus."元"."未兑换";
         $nameColor = imagecolorallocate($target, 51, 51, 51);
         imagettftext($target, 18, 0, 144, 1028, $nameColor, $PINGFANG_LIGHT, $name);
         //签到天数
-        $sign=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_member_getstep")." where openid=:openid and type=2",array(':openid'=>$openid));
-        $name="签到（天）";
+        $sign = pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_member_getstep")." where (openid = :openid or user_id = :user_id) and type=2",array(':openid'=>$member['openid'],':user_id'=>$member['id']));
+        $name = "签到（天）";
         $nameColor = imagecolorallocate($target, 51, 51, 51);
         imagettftext($target, 20, 0, 80, 1090, $nameColor, $PINGFANG_LIGHT, $name);
         $nameColor = imagecolorallocate($target, 51, 51, 51);
         imagettftext($target, 18, 0, 108, 1128, $nameColor, $PINGFANG_BOLD, $sign);
-        //收入
 
-     //   $count=pdo_fetchcolumn("select sum(num) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and num>0",array(':openid'=>$openid,':credittype'=>"credit1"));
-//         if (empty($count)){
-//             $count=0;
-//         }
-//         $count=round($count,1);
-//         $name="收入（元）";
-//         $nameColor = imagecolorallocate($target, 51, 51, 51);
-//         imagettftext($target, 20, 0, 300, 1090, $nameColor, $PINGFANG_LIGHT, $name);
-//         $nameColor = imagecolorallocate($target, 51, 51, 51);
-//         imagettftext($target, 18, 0, 298, 1128, $nameColor, $PINGFANG_BOLD, $count);
 
         //二维码
         $boxstr = file_get_contents(IA_ROOT . "/addons/ewei_shopv2/plugin/app/static/images/poster/goodsbox.png");
@@ -341,15 +326,15 @@ class Sport_EweiShopV2Page extends AppMobilePage{
         //dst_image 目标图象连接资源。src_image 源图象连接资源。dst_x 目标 X 坐标点。dst_y  目标 Y 坐标点。src_x 源的 X 坐标点。src_y源的 Y 坐标点。dst_w目标宽度。dst_h目标高度。src_w 源图象的宽度。src_h源图象的高度。
         imagecopyresampled($target, $box, 546, 1004, 0, 0, 140, 140, 176, 176);
         $qrcode = p("app")->getCodeUnlimit(array( "scene" =>$member["id"], "page" => "pages/index/index" ));
-        
+
         if( !is_error($qrcode) )
         {
             $qrcode = imagecreatefromstring($qrcode);
             imagecopyresized($target, $qrcode, 546, 1004, 0, 0, 140, 140, imagesx($qrcode), imagesy($qrcode));
         }
-        
+
         imagepng($target,$filepath);
-        
+
         imagedestroy($target);
         return $this->getImgUrl($filename);
     }

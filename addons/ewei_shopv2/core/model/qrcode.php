@@ -437,6 +437,134 @@ class Qrcode_EweiShopV2Model
             return $text;
         }
     }
+
+    /**
+     * @param string $openid
+     * @param string $backgroup
+     * @return string
+     */
+    public function createposter($openid="",$backgroup="")
+    {
+        global $_W;
+        set_time_limit(0);
+        $goods = array( );
+        $member = m('member')->getMember($openid);
+        @ini_set("memory_limit", "256M");
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/" ;
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"], "openid" => $member["openid"], "goodstitle" => $goods["title"], "goodprice" => $goods["minprice"], "version" => 1 )));
+        $filename = $member['openid']."_".time() . ".png";
+        $filepath = $path . $filename;
+
+        $target = imagecreatetruecolor(750, 1334);
+        //imagecolorallocate ( resource $image , int $red , int $green , int $blue )  为一幅图像分配颜色
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+
+        //填充背景图
+        $thumb = $this->createImage(tomedia($backgroup));
+        //imagecopyresized — 拷贝部分图像并调整大小  dst_image  目标图象连接资源。 src_image源图象连接资源。 dst_x x-coordinate of destination point.dst_y y-coordinate of destination point. src_x x-coordinate of source point. src_y y-coordinate of source point. dst_w Destination width. dst_h Destination height.  src_w源图象的宽度。src_h 源图象的高度。
+        imagecopyresized($target, $thumb, 0, 0, 0, 0, 750, 1200, imagesx($thumb), imagesy($thumb));
+
+        //添加底部字体
+        //imagecolorallocate ( resource $image , int $red , int $green , int $blue ) 为一幅图像分配颜色
+        $nameColor = imagecolorallocate($target, 102, 102, 102);
+        //imagettftext ( resource $image , float $size , float $angle , int $x , int $y , int $color , string $fontfile , string $text )
+        $PINGFANG_LIGHT = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_LIGHT.ttf";
+        if( !is_file($PINGFANG_LIGHT) )
+        {
+            $PINGFANG_LIGHT = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
+        }
+        $footer="长按识别小程序码进入跑库，开启健康小收入";
+        imagettftext($target, 18, 0, 144, 1274, $nameColor, $PINGFANG_LIGHT, $footer);
+
+        //添加底部背景
+        $footer_backgroup = IA_ROOT . "/addons/ewei_shopv2/data/poster_wxapp/sport/floor.png";
+        $thumb = $this->createImage(tomedia($footer_backgroup));
+        imagecopyresized($target, $thumb, 34, 926, 0, 0, 680, 260, imagesx($thumb), imagesy($thumb));
+
+        //头像
+        //imageistruecolor() 检查 image 图像是否为真彩色图像。
+        $avatartarget = imagecreatetruecolor(70, 70);
+        $avatarwhite = imagecolorallocate($avatartarget, 255, 255, 255);
+        imagefill($avatartarget, 0, 0, $avatarwhite);
+        $memberthumb = tomedia($member["avatar"]);
+        $avatar = preg_replace("/\\/0\$/i", "/96", $memberthumb);
+        $image = $this->mergeImage($avatartarget, array( "type" => "avatar", "style" => "circle" ), $avatar);
+        //imagecopyresized — 拷贝部分图像并调整大小
+        //dst_image  目标图象连接资源。 src_image源图象连接资源。 dst_x x-coordinate of destination point.dst_y y-coordinate of destination point. src_x x-coordinate of source point. src_y y-coordinate of source point. dst_w Destination width. dst_h Destination height.  src_w源图象的宽度。src_h 源图象的高度。
+        imagecopyresized($target, $image, 54, 946, 0, 0, 70, 70, 70, 70);
+
+        //名称
+        $nameColor = imagecolorallocate($target, 51, 51, 51);
+        /*imagettftext ( resource $image , float $size , float $angle , int $x , int $y , int $color , string $fontfile , string $text )*/
+        $PINGFANG_BOLD = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_BOLD.ttf";
+        if( !is_file($PINGFANG_BOLD) )
+        {
+            $PINGFANG_BOLD = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
+        }
+        $name = "我叫".$member["nickname"];
+        imagettftext($target, 20, 0, 144, 966, $nameColor, $PINGFANG_BOLD, $name);
+
+
+        //卡路里
+        //获取今日已兑换的卡路里
+        $starttime = strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
+        $endtime = strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
+        $count_list = pdo_fetchall("select num from ".tablename("mc_credits_record")." where (openid=:openid or user_id = :user_id) and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark like :remark1 or remark like :remark2) order by id desc",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>"credit3",":starttime"=>$starttime,':endtime'=>$endtime,':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+
+        $count = array_sum(array_column($count_list, 'num'));
+        if (empty($count)){
+            $count=0;
+        }
+        $count = round($count,1);
+        $name = "今日步数已兑换".$count."折扣宝=";
+        $nameColor = imagecolorallocate($target, 51, 51, 51);
+        imagettftext($target, 18, 0, 144, 998, $nameColor, $PINGFANG_LIGHT, $name);
+        $name = $count."元";
+        $nameColor = imagecolorallocate($target, 176, 6, 16);
+        imagettftext($target, 18, 0, 446, 998, $nameColor, $PINGFANG_BOLD, $name);
+        //获取剩余卡路里未兑换
+        $exchange = m("member")->exchange_step($member['openid']);
+        $surplus = $exchange - $count;
+        if ($surplus<0){
+            $surplus = 0;
+        }
+        $name = "剩余".$surplus."元"."未兑换";
+        $nameColor = imagecolorallocate($target, 51, 51, 51);
+        imagettftext($target, 18, 0, 144, 1028, $nameColor, $PINGFANG_LIGHT, $name);
+        //签到天数
+        $sign = pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_member_getstep")." where (openid = :openid or user_id = :user_id) and type=2",array(':openid'=>$member['openid'],':user_id'=>$member['id']));
+        $name = "签到（天）";
+        $nameColor = imagecolorallocate($target, 51, 51, 51);
+        imagettftext($target, 20, 0, 80, 1090, $nameColor, $PINGFANG_LIGHT, $name);
+        $nameColor = imagecolorallocate($target, 51, 51, 51);
+        imagettftext($target, 18, 0, 108, 1128, $nameColor, $PINGFANG_BOLD, $sign);
+
+
+        //二维码
+        $boxstr = file_get_contents(IA_ROOT . "/addons/ewei_shopv2/plugin/app/static/images/poster/goodsbox.png");
+        $box = imagecreatefromstring($boxstr);
+        //imagecopyresampled() 将一幅图像中的一块正方形区域拷贝到另一个图像中，平滑地插入像素值，因此，尤其是，减小了图像的大小而仍然保持了极大的清晰度
+        //dst_image 目标图象连接资源。src_image 源图象连接资源。dst_x 目标 X 坐标点。dst_y  目标 Y 坐标点。src_x 源的 X 坐标点。src_y源的 Y 坐标点。dst_w目标宽度。dst_h目标高度。src_w 源图象的宽度。src_h源图象的高度。
+        imagecopyresampled($target, $box, 546, 1004, 0, 0, 140, 140, 176, 176);
+        $qrcode = p("app")->getCodeUnlimit(array( "scene" =>$member["id"], "page" => "pages/index/index" ));
+
+        if( !is_error($qrcode) )
+        {
+            $qrcode = imagecreatefromstring($qrcode);
+            imagecopyresized($target, $qrcode, 546, 1004, 0, 0, 140, 140, imagesx($qrcode), imagesy($qrcode));
+        }
+
+        imagepng($target,$filepath);
+
+        imagedestroy($target);
+        return "addons/ewei_shopv2/data/poster_wxapp/sport"."/" .$filename;
+    }
 }
 
 if (!defined('IN_IA')) {

@@ -97,6 +97,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
         $data = m('app')->shop_goods_options($user_id,$id);
+        app_error1(0,'',$data);
     }
 
     /**

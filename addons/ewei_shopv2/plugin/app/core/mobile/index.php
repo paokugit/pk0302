@@ -950,7 +950,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         //获取用户今天总步数
         $day=date("Y-m-d",time());
-        $step_today = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  openid=:openid and type!=:type", array(':today' => $day, ':openid' => $openid,':type'=>2));
+        $step_today = pdo_fetchcolumn("select sum(step) from " . tablename('ewei_shop_member_getstep') . " where `day`=:today and  (openid=:openid or user_id = :user_id) and type!=:type", array(':today' => $day, ':openid' => $openid, ':user_id' => $member['id'],':type'=>2));
         if (empty($step_today)){
             $step_today=0;
         }
