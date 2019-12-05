@@ -325,7 +325,7 @@ class Goods_EweiShopV2Page extends PluginWebPage
 		$psize = 8;
 		$params = array( );
 		$params[":uniacid"] = $_W["uniacid"];
-		$condition = " and uniacid=:uniacid and merchid = 0 and type = 1 and status = 1 and deleted = 0 ";
+		$condition = " and uniacid=:uniacid and merchid = 0 and type = 1 and status = 1 and deleted = 0 and istime=0";
 		if( !empty($kwd) ) 
 		{
 			$condition .= " AND `title` LIKE :keyword";

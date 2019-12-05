@@ -1011,14 +1011,18 @@ class Index_EweiShopV2Page extends AppMobilePage
 		    
 		    $member_id=m('member')->getLoginToken($openid);
 		    if ($member_id==0){
-		        app_error(1,"无此用户");
+		        apperror(1,"无此用户");
 		    }
 		    $openid=$member_id;
 		    
 		}
 		if( empty($orderid) ) 
 		{
+		    if ($_GPC["type"]==1){
+		        apperror(1,"订单id不可为空");
+		    }else{
 			app_error(AppError::$OrderNotFound);
+		    }
 		}
 		if( !empty($cycelid) ) 
 		{
@@ -1031,15 +1035,28 @@ class Index_EweiShopV2Page extends AppMobilePage
 		    
 		    if( empty($order) ) 
 			{
+			    if ($_GPC["type"]==1){
+			        apperror(1,"订单不存在");
+			    }else{
 				app_error(AppError::$OrderNotFound);
+			    }
+				
 			}
 			if( empty($order["addressid"]) ) 
 			{
+			    if ($_GPC["type"]==1){
+			        apperror(1,"地址不存在");
+			    }else{
 				app_error(AppError::$OrderNoExpress);
+			    }
 			}
 			if( $order["status"] < 2 ) 
 			{
+			    if ($_GPC["type"]==1){
+			        apperror(1,"该订单未发货无物流");
+			    }else{
 				app_error(AppError::$OrderNoExpress);
+			    }
 			}
 		}
 		$bundlelist = array( );
@@ -1097,8 +1114,12 @@ class Index_EweiShopV2Page extends AppMobilePage
 				}
 			}
 		}
+		if ($_GPC["type"]==1){
+		    apperror(0,"",array( "com" => $order["expresscom"], "sn" => $order["expresssn"], "status" => $status, "count" => count($goods), "thumb" => tomedia($goods[0]["thumb"]), "expresslist" => $expresslist, "bundlelist" => $bundlelist ));   
+		}else{
 		app_json(array( "com" => $order["expresscom"], "sn" => $order["expresssn"], "status" => $status, "count" => count($goods), "thumb" => tomedia($goods[0]["thumb"]), "expresslist" => $expresslist, "bundlelist" => $bundlelist ));
-	}
+		}
+		}
 	public function cycelbuy_list() 
 	{
 		global $_GPC;

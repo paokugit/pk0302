@@ -187,6 +187,7 @@ class Order_EweiShopV2Page extends PluginWebPage
 			unset($r);
 			m("excel")->export($exportlist, array( "title" => "订单数据-" . date("Y-m-d-H-i", time()), "columns" => $columns ));
 		}
+		
 		include($this->template());
 	}
 	public function detail() 

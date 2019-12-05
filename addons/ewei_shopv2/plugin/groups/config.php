@@ -14,8 +14,8 @@ return array(
 		'icon'      => 'page',
 		'items'     => array(
 			array('title' => '商品管理', 'route' => 'goods'),
-			array('title' => '分类管理', 'route' => 'category'),
-			array('title' => '幻灯片管理', 'route' => 'adv'),
+		    array('title' => '分类管理', 'route' => 'category', 'hidemerch' => 'true'),
+		    array('title' => '幻灯片管理', 'route' => 'adv', 'hidemerch' => 'true'),
 			array(
 				'title'  => '订单管理',
 				'route'  => 'order',
@@ -51,6 +51,7 @@ return array(
 				'title'  => '核销查询',
 				'route'  => 'verify',
 				'extend' => 'groups.verify.detail',
+			    'hidemerch' => 'true',
 				'items'  => array(
 					array(
 						'title' => '未核销',
@@ -70,6 +71,7 @@ return array(
 				'title'  => '拼团管理',
 				'route'  => 'team',
 				'extend' => 'groups.team.detail',
+			    'hidemerch' => 'true',
 				'items'  => array(
 					array(
 						'title' => '拼团成功',
@@ -107,15 +109,17 @@ return array(
 			array(
 				'title' => '基础设置',
 				'items' => array(
-					array('title' => '入口设置', 'route' => 'cover'),
-					array('title' => '通知入口', 'route' => 'notice'),
-					array('title' => '基础设置', 'route' => 'set'),
+				    array('title' => '入口设置', 'route' => 'cover', 'hidemerch' => 'true'),
+				    array('title' => '通知入口', 'route' => 'notice', 'hidemerch' => 'true'),
+				    array('title' => '基础设置', 'route' => 'set', 'hidemerch' => 'true'),
 					array(
 						'title'   => '快递打印',
 						'route'   => 'exhelper',
-						'extends' => array('groups.exhelper.short', 'groups.exhelper.express', 'groups.exhelper.invoice', 'groups.exhelper.sender', 'groups.exhelper.single', 'groups.exhelper.batch', 'groups.exhelper.senderadd')
-						),
-					array('title' => '批量发货', 'route' => 'batchsend')
+						'extends' => array('groups.exhelper.short', 'groups.exhelper.express', 'groups.exhelper.invoice', 'groups.exhelper.sender', 'groups.exhelper.single', 'groups.exhelper.batch', 'groups.exhelper.senderadd'),
+					     'hidemerch' => 'true'
+					    
+					),
+				    array('title' => '批量发货', 'route' => 'batchsend', 'hidemerch' => 'true')
 					)
 				)
 			)

@@ -1,7 +1,7 @@
 {template '_header_base'}
 
 {php $system=m('system')->init()}
-{php $sysmenus = m('system')->getMenu(true)}
+{php $sysmenus = m('system')->getMenu(true); }
 {php $notice_redis_click = m('common')->getSysset('notice_redis')}
 <!--多商户图片选择器删除图片没有方法解决  只能在此隐藏-->
 {if strpos( $_W['script_name'] , 'merchant' ) != false}

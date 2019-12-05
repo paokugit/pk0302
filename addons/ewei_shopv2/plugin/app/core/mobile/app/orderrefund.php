@@ -539,16 +539,25 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $res["list"][$k]["status"]=$v["status"];
         //1表示虚拟商品
         $res["list"][$k]["isvirtual"]=$v["isvirtual"];
+        $res["list"][$k]["price"]=$v["price"];
         //获取商家
         if ($v["merchid"]!=0){
             $merch=pdo_get("ewei_shop_merch_user",array("id"=>$v["merchid"]));
             $res["list"][$k]["merchname"]=$merch["merchname"];
+           
         }else {
             $res["list"][$k]["merchname"]="跑库专享";
         }
         //获取售后
         $res["list"][$k]["refundstate"]=$v["refundstate"];
         $res["list"][$k]["refundid"]=$v["refundid"];
+        //判断
+        if ($v["refundid"]&&$v["refundstatus"]!=0){
+        $r=pdo_get("ewei_shop_order_refund",array("id"=>$v["refundid"]));
+        $res["list"][$k]["rtype"]=$r["rtype"];// 0 退款(仅退款不退货) 1 退款退货 2 换货
+        }else{
+            $res["list"][$k]["rtype"]=0;
+        }
         //获取评价
         $res["list"][$k]["iscomment"]=$v["iscomment"];//评价状态 status 3,4 后允许评价 0 可评价 1 可追加评价 2 已评价
         //获取商品总数
@@ -563,7 +572,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
            
             $good[$kk]["refundstatus"]=$refund["status"];
             }else{
-             $good[$kk]["refundstatus"]="";
+             $good[$kk]["refundstatus"]=0;
             }
             
         }
@@ -578,7 +587,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
                 
                 $gift[$kk]["refundstatus"]=$refund["status"];
             }else{
-                $gift[$kk]["refundstatus"]="";
+                $gift[$kk]["refundstatus"]=0;
             }
             
         }

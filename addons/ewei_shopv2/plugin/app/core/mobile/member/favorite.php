@@ -120,7 +120,7 @@ class Favorite_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $ids = $_GPC['ids'];
         if (empty($ids) || !is_array($ids)) {
-            app_error(AppError::$ParamsError);
+            app_error(1,"ids格式不正确");
         }
         //修改
         $openid=$_GPC["openid"];

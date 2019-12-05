@@ -636,11 +636,19 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        if (empty($member["openid"])){
            $member["openid"]=0;
        }
-       
+//        var_dump($option);die;
        //判断是否有此规格商品
-       $my=pdo_fetch("select * from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and goodsid=:goodsid and optionid=:optionid and deleted=0",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":goodsid"=>$cart["goodsid"],":optionid"=>$option["id"]));
+       if ($option){
+       $my=pdo_fetch("select * from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and goodsid=:goodsid and optionid=:optionid and deleted=0 and id!=:id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":goodsid"=>$cart["goodsid"],":optionid"=>$option["id"],":id"=>$cart_id));
        $d["optionid"]=$option["id"];
        $d["total"]=$total;
+       }else{
+           $my=pdo_fetch("select * from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and goodsid=:goodsid  and deleted=0 and id!=:id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":goodsid"=>$cart["goodsid"],":id"=>$cart_id));
+           
+           $d["optionid"]=0;
+           $d["total"]=$total;
+       }
+       
 //        var_dump($my);
 //        var_dump($option);
 //        var_dump($cart);die;
@@ -656,9 +664,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            $dd["total"]=$my["total"]+$total;
            
            if (pdo_update("ewei_shop_member_cart",$dd,array("id"=>$my["id"]))){
-               $list["optionname"]=$option["title"];
-               $del["deleted"]=1;
-               pdo_update("ewei_shop_member_cart",$del,array("id"=>$cart_id));
+               pdo_delete("ewei_shop_member_cart",array("id"=>$cart_id));
                apperror(0,"",$list);
            }else{
                apperror(1,"");
@@ -679,10 +685,15 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            $condition=$condition." and merchid=:merchid";
            $param[":merchid"]=$merchid;
        }
-       $list=pdo_fetchall("select id,couponname,timestart,timeend,deduct,enough,backtype from ".tablename("ewei_shop_coupon")." where 1 ".$condition,$param);
+       $list=pdo_fetchall("select id,couponname,timestart,timeend,deduct,enough,backtype,merchid from ".tablename("ewei_shop_coupon")." where 1 ".$condition,$param);
        foreach ($list as $k=>$v){
            $list[$k]["timestart"]=date("Y-m-d",$v["timestart"]);
            $list[$k]["timeend"]=date("Y-m-d",$v["timeend"]);
+           if ($list[$k]["timeend"]==date("Y-m-d")){
+               $list[$k]["expire"]=1;
+           }else{
+               $list[$k]["expire"]=0;
+           }
            $list[$k]["deduct"]=(int)$v["deduct"];
            $list[$k]["enough"]=(int)$v["enough"];
        }
@@ -718,14 +729,18 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            $param[":time"]=time();
        }
        
-       $list=pdo_fetchall("select c.id,c.enough,c.deduct,c.backtype,c.couponname,c.timestart,c.timeend from ".tablename("ewei_shop_coupon_data")." d "." left join ".tablename("ewei_shop_coupon")." c on d.couponid=c.id where 1 ".$condition,$param);
+       $list=pdo_fetchall("select c.id,c.enough,c.deduct,c.backtype,c.couponname,c.timestart,c.timeend,c.merchid from ".tablename("ewei_shop_coupon_data")." d "." left join ".tablename("ewei_shop_coupon")." c on d.couponid=c.id where 1 ".$condition,$param);
        foreach ($list as $k=>$v){
            
            $list[$k]["timestart"]=date("Y-m-d",$v["timestart"]);
            $list[$k]["timeend"]=date("Y-m-d",$v["timeend"]);
            $list[$k]["deduct"]=(int)$v["deduct"];
            $list[$k]["enough"]=(int)$v["enough"];
-           
+           if ($list[$k]["timeend"]==date("Y-m-d")){
+               $list[$k]["expire"]=1;
+           }else{
+               $list[$k]["expire"]=0;
+           }
        }
        if (!$list){
            $list=array();

@@ -18,14 +18,18 @@ class Op_EweiShopV2Page extends AppMobilePage
 		$orderid = intval($_GPC['id']);
 
 		if (empty($orderid)) {
+		    if ($_GPC["type"]==1){
+		        apperror(1,"订单id不正确");
+		    }else{
 			app_error(AppError::$ParamsError);
+		    }
 		}
 		//修改
         $openid=$_GPC["openid"];
         if ($_GPC["type"]==1){
             $member_id=m('member')->getLoginToken($openid);
             if ($member_id==0){
-                app_error(1,"无此用户");
+                apperror(1,"无此用户");
             }
             $openid=$member_id;
         }  
@@ -34,19 +38,34 @@ class Op_EweiShopV2Page extends AppMobilePage
 		$order = pdo_fetch('select id,ordersn,openid,user_id,status,deductcredit,deductcredit2,deductprice,discount_price,couponid,`virtual`,`virtual_info`,merchid  from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid  limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid']));
 
 		if (empty($order)) {
-		   
+		    if ($_GPC["type"]==1){
+		        apperror(1,"订单不存在");
+		    }else{
 			app_error(AppError::$OrderNotFound);
+		    }
 		}
         if ($order["openid"]!=$member["openid"]&&$order["user_id"]!=$member["id"]){
-           
+            if ($_GPC["type"]==1){
+                apperror(1,"无权限");
+            }else{
             app_error(AppError::$OrderNotFound);
+            }
+            
         }
 		if (0 < $order['status']) {
+		    if ($_GPC["type"]==1){
+		        apperror(1,"该订单不可取消");
+		    }else{
 			app_error(AppError::$OrderCannotCancel);
+		    }
 		}
 
 		if ($order['status'] < 0) {
+		    if ($_GPC["type"]==1){
+		        apperror(1,"订单不可取消");
+		    }else{
 			app_error(AppError::$OrderCannotCancel);
+		    }
 		}
 
 		if (!empty($order['virtual']) && $order['virtual'] != 0) {
@@ -91,7 +110,11 @@ class Op_EweiShopV2Page extends AppMobilePage
 		    //app
 		    
 		}
+		if ($_GPC["type"]==1){
+		    apperror(0,"成功");
+		}else{
 		app_json();
+		}
 	}
 
 	/**
@@ -106,13 +129,17 @@ class Op_EweiShopV2Page extends AppMobilePage
 		$orderid = intval($_GPC['id']);
 
 		if (empty($orderid)) {
+		    if ($_GPC["type"]==1){
+		        apperror(1,"订单id未传");
+		    }else{
 			app_error(AppError::$ParamsError);
+		    }
 		}
         $openid=$_GPC["openid"];
         if ($_GPC["type"]==1){
         $member_id=m('member')->getLoginToken($openid);
         if ($member_id==0){
-            app_error(1,"无此用户");
+            apperror(1,"无此用户");
         }
         $openid=$member_id;
         }
@@ -121,11 +148,19 @@ class Op_EweiShopV2Page extends AppMobilePage
 		$order = pdo_fetch('select id,ordersn,status,price,merchid,openid,user_id,couponid,refundstate,refundid,share_price,share_id from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and (openid=:openid or user_id=:user_id) limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid'],':openid'=>$member["openid"],':user_id'=>$member["id"]));
         
 		if (empty($order)) {
+		    if ($_GPC["type"]==1){
+		        apperror(1,"订单不存在");
+		    }else{
 			app_error(AppError::$OrderNotFound);
+		    }
 		}
 
 		if ($order['status'] != 2) {
+		    if ($_GPC["type"]==1){
+		        apperror(1,"订单不可操作");
+		    }else{
 			app_error(AppError::$OrderCannotFinish);
+		    }
 		}
          //获取订单商品
         $good=pdo_fetchall("select * from ".tablename("ewei_shop_order_goods")." where orderid=:orderid and refundstatus!=1",array(":orderid"=>$order["id"]));
@@ -214,8 +249,11 @@ class Op_EweiShopV2Page extends AppMobilePage
 		if (p('commission')) {
 			p('commission')->checkOrderFinish($orderid);
 		}
-
+		if ($_GPC["type"]==1){
+		    apperror(0,"成功");
+		}else{
 		app_json();
+		}
 	}
 
 	/**
@@ -229,25 +267,41 @@ class Op_EweiShopV2Page extends AppMobilePage
 		global $_GPC;
 		$orderid = intval($_GPC['id']);
 		$userdeleted = intval($_GPC['userdeleted']);
-
+        $type=$_GPC["type"]; 
 		if (empty($orderid)) {
+		    if ($type==1){
+		        apperror(1,"orderid不正确");
+		    }else{
 			app_error(AppError::$ParamsError);
+		    }
 		}
 
 		$order = pdo_fetch('select id,status,refundstate,refundid from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid  limit 1', array(':id' => $orderid, ':uniacid' => $_W['uniacid']));
 
 		if (empty($order)) {
+		    if ($type==1){
+		        apperror(1,"订单不存在");
+		    }else{
 			app_error(AppError::$OrderNotFound);
+		    }
 		}
 
 		if ($userdeleted == 0) {
 			if ($order['status'] != 3) {
+			    if ($type==1){
+			        apperror(1,"该订单不可删除");
+			    }else{
 				app_error(AppError::$OrderCannotRestore);
+			    }
 			}
 		}
 		else {
 			if ($order['status'] != 3 && $order['status'] != -1) {
-				app_error(AppError::$OrderCannotDelete);
+				if ($type==1){
+				    apperror(1,"该订单不可删除");
+				}else{
+			    app_error(AppError::$OrderCannotDelete);
+				}
 			}
 
 			if (0 < $order['refundstate'] && !empty($order['refundid'])) {
@@ -259,7 +313,11 @@ class Op_EweiShopV2Page extends AppMobilePage
 		}
 
 		pdo_update('ewei_shop_order', array('userdeleted' => $userdeleted, 'refundstate' => 0), array('id' => $order['id'], 'uniacid' => $_W['uniacid']));
+		if ($type==1){
+		    apperror(0,"删除成功");
+		}else{
 		app_json();
+		}
 	}
 }
 

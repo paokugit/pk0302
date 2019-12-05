@@ -1,4 +1,4 @@
-@@ -0,0 +1,523 @@
+
 <?php  if( !defined("IN_IA") ) 
 {
 	exit( "Access Denied" );
@@ -12,20 +12,21 @@ class Goods_EweiShopV2Page extends MerchWebPage
 		global $_GPC;
 		$pindex = max(1, intval($_GPC["page"]));
 		$psize = 20;
-		$condition = " g.uniacid = :uniacid and g.merchid=".$_W["merchid"];
-		$params = array( ":uniacid" => $_W["uniacid"] );
+		$condition = " g.uniacid = :uniacid and g.merchid=:merchid";
+		
+		$params = array( ":uniacid" => $_W["uniacid"],":merchid"=>$_W["merchid"] );
 		$type = $_GPC["type"];
 		switch( $type ) 
 		{
-			case "sale": $condition .= " and g.deleted = 0 and g.stock > 0 and g.status = 1 ";
+			case "sale": $condition .= " and deleted = 0 and stock > 0 and status = 1 ";
 			break;
-			case "sold": $condition .= " and g.deleted = 0 and g.stock <= 0 and g.status = 1 ";
+			case "sold": $condition .= " and deleted = 0 and stock <= 0 and status = 1 ";
 			break;
-			case "store": $condition .= " and g.deleted = 0 and g.status = 0 ";
+			case "store": $condition .= " and deleted = 0 and status = 0 ";
 			break;
-			case "recycle": $condition .= " and g.deleted = 1 ";
+			case "recycle": $condition .= " and deleted = 1 ";
 			break;
-			default: $condition .= " and g.deleted = 0 and g.stock > 0 and g.status = 1 ";
+			default: $condition .= " and deleted = 0 and stock > 0 and status = 1 ";
 		}
 		if( !empty($_GPC["keyword"]) ) 
 		{
@@ -89,6 +90,7 @@ class Goods_EweiShopV2Page extends MerchWebPage
 		if( $_W["ispost"] ) 
 		{
 			$data = array( "uniacid" => $_W["uniacid"], "displayorder" => intval($_GPC["displayorder"]), "gid" => intval($_GPC["gid"]), "title" => trim($_GPC["title"]), "category" => intval($_GPC["category"]), "thumb" => "", "thumb_url" => "", "price" => floatval($_GPC["price"]), "groupsprice" => floatval($_GPC["groupsprice"]), "single" => intval($_GPC["single"]), "singleprice" => floatval($_GPC["singleprice"]), "goodsnum" => (intval($_GPC["goodsnum"]) < 1 ? 1 : intval($_GPC["goodsnum"])), "purchaselimit" => intval($_GPC["purchaselimit"]), "units" => trim($_GPC["units"]), "stock" => intval($_GPC["stock"]), "showstock" => intval($_GPC["showstock"]), "sales" => intval($_GPC["sales"]), "teamnum" => intval($_GPC["teamnum"]), "dispatchtype" => intval($_GPC["dispatchtype"]), "freight" => floatval($_GPC["freight"]), "status" => intval($_GPC["status"]), "isindex" => intval($_GPC["isindex"]), "groupnum" => intval($_GPC["groupnum"]), "endtime" => intval($_GPC["endtime"]), "description" => trim($_GPC["description"]), "goodssn" => trim($_GPC["goodssn"]), "productsn" => trim($_GPC["productsn"]), "content" => m("common")->html_images($_GPC["content"]), "createtime" => $_W["timestamp"], "share_title" => trim($_GPC["share_title"]), "share_icon" => trim($_GPC["share_icon"]), "share_desc" => trim($_GPC["share_desc"]), "followneed" => intval($_GPC["followneed"]), "followtext" => trim($_GPC["followtext"]), "followurl" => trim($_GPC["followurl"]), "goodsid" => intval($_GPC["goodsid"]), "deduct" => floatval($_GPC["deduct"]), "isdiscount" => intval($_GPC["isdiscount"]), "discount" => intval($_GPC["discount"]), "headstype" => intval($_GPC["headstype"]), "headsmoney" => floatval($_GPC["headsmoney"]), "headsdiscount" => intval($_GPC["headsdiscount"]), "isverify" => intval($_GPC["isverify"]), "verifytype" => intval($_GPC["verifytype"]), "verifynum" => intval($_GPC["verifynum"]), "storeids" => (is_array($_GPC["storeids"]) ? implode(",", $_GPC["storeids"]) : ""), "more_spec" => intval($_GPC["more_spec"]), "is_ladder" => intval($_GPC["is_ladder"]),"merchid"=>$_W["merchid"]);
+			
 			if( $data["is_ladder"] == 1 && $data["more_spec"] == 1 ) 
 			{
 				show_json(0, "多规格和团购不能同时开启");
@@ -327,7 +329,7 @@ class Goods_EweiShopV2Page extends MerchWebPage
 		$psize = 8;
 		$params = array( );
 		$params[":uniacid"] = $_W["uniacid"];
-		$condition = " and uniacid=:uniacid and merchid = 0 and type = 1 and status = 1 and deleted = 0 ";
+		$condition = " and uniacid=:uniacid and merchid = 0 and type = 1 and status = 1 and deleted = 0 and istime=0";
 		if( !empty($kwd) ) 
 		{
 			$condition .= " AND `title` LIKE :keyword";
