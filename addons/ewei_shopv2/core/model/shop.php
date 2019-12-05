@@ -464,7 +464,7 @@ class Shop_EweiShopV2Model
         $time = time();
         $param = array( );
         $param[":uniacid"] = $_W["uniacid"];
-        $sql = "select id,timelimit,coupontype,timedays,timestart,timeend,thumb,couponname,enough,backtype,deduct,discount,backmoney,backcredit,backredpack,bgcolor,thumb,credit,money,getmax,merchid,total as t,islimitlevel,limitmemberlevels,limitagentlevels,limitpartnerlevels,limitaagentlevels,limitgoodcatetype,limitgoodcateids,limitgoodtype,limitgoodids,tagtitle,settitlecolor,titlecolor from " . tablename("ewei_shop_coupon") . " c ";
+        $sql = "select id,timestart,timedays,timeend,couponname,enough,backtype,deduct,getmax,merchid,total from " . tablename("ewei_shop_coupon") . " c ";
         $sql .= " where uniacid=:uniacid and money=0 and credit = 0 and coupontype=0";
         if( $is_openmerch == 0 )
         {
@@ -529,7 +529,8 @@ class Shop_EweiShopV2Model
         }
         $sql .= " and gettype=1 and (total=-1 or total>0) and ( timelimit = 0 or  (timelimit=1 and timeend>" . $time . "))";
         $sql .= " order by displayorder desc, id desc  ";
-        $list = set_medias(pdo_fetchall($sql, $param), "thumb");
+        $list = pdo_fetchall($sql, $param);
+        //$list = set_medias($list"thumb");
         if( empty($list) )
         {
             $list = array( );
@@ -548,7 +549,7 @@ class Shop_EweiShopV2Model
             foreach( $list as $key => &$row )
             {
                 $row = com("coupon")->setCoupon($row, time());
-                $row["thumb"] = tomedia($row["thumb"]);
+                //$row["thumb"] = tomedia($row["thumb"]);
                 $row["timestr"] = "永久有效";
                 if( empty($row["timelimit"]) )
                 {
@@ -572,15 +573,15 @@ class Shop_EweiShopV2Model
                 {
                     $row["backstr"] = "立减";
                     $row["backmoney"] = (double) $row["deduct"];
-                    $row["backpre"] = true;
-                    if( $row["enough"] == "0" )
-                    {
-                        $row["color"] = "org ";
-                    }
-                    else
-                    {
-                        $row["color"] = "blue";
-                    }
+                    //$row["backpre"] = true;
+//                    if( $row["enough"] == "0" )
+//                    {
+//                        $row["color"] = "org ";
+//                    }
+//                    else
+//                    {
+//                        $row["color"] = "blue";
+//                    }
                 }
                 else
                 {
@@ -588,25 +589,25 @@ class Shop_EweiShopV2Model
                     {
                         $row["backstr"] = "折";
                         $row["backmoney"] = (double) $row["discount"];
-                        $row["color"] = "red ";
+                        //$row["color"] = "red ";
                     }
                     else
                     {
                         if( $row["backtype"] == 2 )
                         {
-                            if( $row["coupontype"] == "0" )
-                            {
-                                $row["color"] = "red ";
-                            }
-                            else
-                            {
-                                $row["color"] = "pink ";
-                            }
+//                            if( $row["coupontype"] == "0" )
+//                            {
+//                                $row["color"] = "red ";
+//                            }
+//                            else
+//                            {
+//                                $row["color"] = "pink ";
+//                            }
                             if( 0 < $row["backredpack"] )
                             {
                                 $row["backstr"] = "返现";
                                 $row["backmoney"] = (double) $row["backredpack"];
-                                $row["backpre"] = true;
+                                //$row["backpre"] = true;
                             }
                             else
                             {
@@ -614,7 +615,7 @@ class Shop_EweiShopV2Model
                                 {
                                     $row["backstr"] = "返利";
                                     $row["backmoney"] = (double) $row["backmoney"];
-                                    $row["backpre"] = true;
+                                    //$row["backpre"] = true;
                                 }
                                 else
                                 {

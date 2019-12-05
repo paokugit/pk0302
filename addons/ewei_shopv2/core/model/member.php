@@ -1744,7 +1744,7 @@ class Member_EweiShopV2Model
 
     /**
      * @param $levelid
-     * @return bool
+     * @return array
      */
     public function level_infodiscount($levelid){
         switch ($levelid){
@@ -1809,7 +1809,7 @@ class Member_EweiShopV2Model
                 ];
                 return $data;break;
             default:
-                return false;
+                return [];
         }
     }
 }

@@ -23,11 +23,13 @@ class Index_EweiShopV2Page extends AppMobilePage{
                 $data = array(
                     'timestamp' => time(),
                     'openid' => trim($pid["openid"]),
+                    'user_id' => trim($pid["id"]),
                     'day' => date('Y-m-d'),
                     'uniacid' => $_W['uniacid'],
                     'step' => $_GPC['step'],
                     'type' => 1,
                     'bang' => $_GPC['openid'],
+                    'bang_user_id' => pdo_getcolumn('ewei_shop_member',['openid'=>$_GPC['openid']],'id'),
                     'remark'=>$_GPC['message']
                 );
                pdo_insert('ewei_shop_member_getstep', $data);
