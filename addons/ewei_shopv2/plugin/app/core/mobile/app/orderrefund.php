@@ -636,8 +636,21 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $res["realname"]=$address["realname"];
         $res["mobile"]=$address["mobile"];
         $res["address"]=$address["province"].$address["city"].$address["area"].$address["address"];
+        //获取物流信息
+        
+        if ($res["status"]>=2){
+            $expresslist = m("util")->getExpressList($order["express"], $order["expresssn"]);
+            if ($expresslist){
+            $res["logistics"]["time"]=$expresslist[0]["time"];
+            $res["logistics"]["step"]=$expresslist[0]["step"];
+            }
+        }
+        if (empty($res["logistics"])){
+            $res["logistics"]=new ArrayObject();
+        }
+        $res["goods_price"]=0;
         //获取商品列表
-        $good=pdo_fetchall("select og.id,og.goodsid,og.price,og.total,og.optionname,og.refundid,og.rstate,og.refundstatus,g.thumb,g.title,g.status,g.cannotrefund from ".tablename("ewei_shop_order_goods")." og left join ".tablename("ewei_shop_goods")." g on g.id=og.goodsid "." where og.orderid=:orderid and og.status!=-1",array(":orderid"=>$order_id));
+        $good=pdo_fetchall("select og.id,og.goodsid,og.price,og.total,og.optionname,og.refundid,og.rstate,og.refundstatus,g.thumb,g.title,g.status,g.cannotrefund from ".tablename("ewei_shop_order_goods")." og left join ".tablename("ewei_shop_goods")." g on g.id=og.goodsid "." where og.orderid=:orderid and og.status!=-1 order by g.status asc",array(":orderid"=>$order_id));
         $good=set_medias($good, array( "thumb" ));
         foreach ($good as $kk=>$vv){
             if ($vv["rstate"]!=0&&$vv["refundid"]){
@@ -648,7 +661,10 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
             }else{
                 $good[$kk]["refundstatus"]="";
             }
-            
+           if ($vv["status"]!=2){
+               $res["goods_price"]=$res["goods_price"]+$vv["price"]*$vv["total"];
+           } 
+           
         }
         $res["good"]=$good;
         apperror(0,"",$res);

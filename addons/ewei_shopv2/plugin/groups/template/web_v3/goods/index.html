@@ -24,14 +24,14 @@
             </div>
             <div class="col-sm-6 pull-right">
                 <div class="input-group">
-                    <div class="input-group-select">
+                   <!--  <div class="input-group-select">
                         <select name="category" class='form-control' style="width:120px;">
                             <option value="" {if empty($_GPC['category'])}selected{/if} >商品分类</option>
                             {loop $category $cate}
                             <option value="{$cate['id']}" {if $_GPC['category']==$cate['id']}selected{/if}>{$cate['name']}</option>
                             {/loop}
                         </select>
-                    </div>
+                    </div>--> 
                     <div class="input-group-select">
                         <select name='status' class='form-control  input-sm' style='width:100px;'>
                             <option value='' {if $_GPC['status']==''}selected{/if}>状态</option>

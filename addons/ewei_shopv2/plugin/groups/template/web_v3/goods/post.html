@@ -22,9 +22,9 @@
         <li {if $_GPC['tab']=='basic' || empty($_GPC['tab'])}class="active"{/if} ><a href="#tab_basic">商品</a></li>
         <li {if $_GPC['tab']=='stock'}class="active"{/if} ><a href="#tab_stock">库存及编码</a></li>
         <li {if $_GPC['tab']=='info'}class="active"{/if} ><a href="#tab_info">详情</a></li>
-          <li {if $_GPC['tab']=='marketing'}class="active"{/if} ><a href="#tab_marketing">营销</a></li>
+       <!--   <li {if $_GPC['tab']=='marketing'}class="active"{/if} ><a href="#tab_marketing">营销</a></li>
         <li {if $_GPC['tab']=='verify'}class="active"{/if}><a href="#tab_verify">线下核销</a></li>
-        <li {if $_GPC['tab']=='share'}class="active"{/if}><a href="#tab_share">关注及分享</a></li>
+        <li {if $_GPC['tab']=='share'}class="active"{/if}><a href="#tab_share">关注及分享</a></li>-->
     </ul>
     <div class="tab-content">
         <div class="tab-pane  {if $_GPC['tab']=='basic' || empty($_GPC['tab'])}active{/if}" id="tab_basic">{template 'groups/goods/basic'}</div>
@@ -33,6 +33,7 @@
          <div class="tab-pane  {if $_GPC['tab']=='marketing'}active{/if}" id="tab_marketing">{template 'groups/goods/marketing'}</div>
         <div class="tab-pane  {if $_GPC['tab']=='verify'}active{/if}" id="tab_verify">{template 'groups/goods/verify'}</div> 
         <div class="tab-pane  {if $_GPC['tab']=='share'}active{/if}" id="tab_share">{template 'groups/goods/share'}</div>
+       
     </div>
     <div class="form-group"></div>
     <div class="form-group">

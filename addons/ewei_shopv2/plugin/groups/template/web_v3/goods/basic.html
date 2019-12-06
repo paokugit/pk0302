@@ -49,7 +49,7 @@
 <div class="form-group">
     <label class="col-lg control-label must">分类</label>
     <div class="col-sm-9 col-xs-12">
-        {ife 'groups.goods' $item}
+       <!--  {ife 'groups.goods' $item}
         <select class='form-control' name='category' data-rule-required='true' data-msg-required='请选择分类'>
             <option value=''>--请选择分类--</option>
             {loop $category $cate}
@@ -58,8 +58,8 @@
         </select>
         {else}
         <div class='form-control-static'>{$item['catename']}</div>
-        {/if}
-    </div>
+        {/if}-->                 <select id="cates"  name='cates' class="form-control select2" style='width:605px;' multiple='' >                {loop $category $c}                <option value="{$c['id']}" {if $item["ccate"]==$c["id"]}selected{/if} >{$c['name']}</option>                {/loop}            </select>
+    </div>     
 </div>
 <div class="form-group">
     <label class="col-lg control-label must">商品图片</label>
