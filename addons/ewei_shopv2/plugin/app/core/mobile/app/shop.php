@@ -15,7 +15,25 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $adv = m('app')->shop_adv();
         //ta的店
         $shop = m('app')->shop_shop();
-        app_error1(0,"",['adv'=>$adv,'shop'=>$shop]);
+        $cate = [
+            [
+                'cateid'=>0,
+                'cate'=>'全部'
+            ],
+            [
+                'cateid'=>1,
+                'cate'=>'推荐'
+            ],
+            [
+                'cateid'=>2,
+                'cate'=>'上新'
+            ],
+            [
+                'cateid'=>3,
+                'cate'=>'热卖'
+            ],
+        ];
+        app_error1(0,"",['adv'=>$adv,'shop'=>$shop,'cate'=>$cate]);
     }
 
     /**
@@ -26,12 +44,13 @@ class Shop_EweiShopV2Page extends AppMobilePage
         header("Access-Control-Allow-Origin:*");
         global $_GPC;
         //类型  总和3 价格2  销量1 最新0
-        $type = $_GPC['type'];
+        $type = $_GPC['type'] ? $_GPC['type'] : 3;
         //asc升序   降序desc
-        $sort = $_GPC['sort'];
+        $sort = $_GPC['sort'] ? $_GPC['sort'] : "desc";
         $page = max(1,$_GPC['page']);
+        $cate = $_GPC['cate'] ? $_GPC['cate'] : 0;
         //商品列表
-        $goods = m('app')->shop_shop_goods($type,$sort,$page);
+        $goods = m('app')->shop_shop_goods($type,$sort,$page,$cate);
         app_error1(0,"",$goods);
     }
 
@@ -156,6 +175,15 @@ class Shop_EweiShopV2Page extends AppMobilePage
     public function shop_task_list()
     {
         global $_GPC;
+        $token = $_GPC['token'];
+    }
+
+    /**
+     * 同城
+     */
+    public function shop_same_city()
+    {
+        global $_GPC;
 
     }
 
@@ -178,7 +206,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
     }
 
    /**
-    * 他的店详情
+    * 他的店动态详情
     */
    public function shop_shop_detail()
    {

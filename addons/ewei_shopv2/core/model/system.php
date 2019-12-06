@@ -594,6 +594,11 @@ class System_EweiShopV2Model {
                                 "desc" => "商城首页的图标"
                             ) ,
                             array(
+                                "title" => "活动的banner",
+                                "route" => "shopbanner",
+                                "desc" => "活动内的banner"
+                            ) ,
+                            array(
                                 "title" => "跑库精选",
                                 "route" => "choice",
                                 "desc" => "跑库精选"
@@ -602,6 +607,16 @@ class System_EweiShopV2Model {
                                 "title" => "店铺的动态分类",
                                 "route" => "merchcate",
                                 "desc" => "店铺的动态分类"
+                            ) ,
+                            array(
+                                "title" => "任务领钱分类",
+                                "route" => "taskcate",
+                                "desc" => "任务领钱分类"
+                            ) ,
+                            array(
+                                "title" => "任务领钱",
+                                "route" => "task",
+                                "desc" => "任务领钱"
                             ) ,
                             array(
                                 "title" => "公告管理",

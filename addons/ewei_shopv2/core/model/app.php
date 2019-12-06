@@ -1967,9 +1967,10 @@ class App_EweiShopV2Model
      * @param int $type
      * @param string $sort
      * @param int $page
+     * @param int $cate
      * @return mixed
      */
-    public function shop_shop_goods($type = 3,$sort = 'desc',$page = 1)
+    public function shop_shop_goods($type = 3,$sort = 'desc',$page = 1,$cate = 0)
     {
         global $_W;
         $uniacid = $_W['uniacid'];
@@ -1981,6 +1982,13 @@ class App_EweiShopV2Model
             $args = array( "pagesize" =>9, "page" => $page,"deduct_type"=>2,"from" => "miniprogram", "order" =>'sales'.$sort.',(minprice-deduct)'.$sort.',deduct'.$sort );
         }else{   //最新
             $args = array( "pagesize" =>9, "page" => $page,"deduct_type"=>2,"from" => "miniprogram", "order" =>'id'.$sort.',(minprice-deduct)'.$sort.',deduct'.$sort );
+        }
+        if ($cate == 1){
+            $args['isrecommand'] = 1;
+        }elseif ($cate == 2){
+            $args['isnew'] = 1;
+        }elseif ($cate == 3){
+            $args['ishot'] = 1;
         }
         $item['data'] = array();
         $item['data'] = m('goods')->getList($args);
@@ -3325,7 +3333,7 @@ class App_EweiShopV2Model
                 }
             }
         }
-        $goods = pdo_fetch(" select id,thumb,title,marketprice,total,maxbuy,minbuy,unit,isdiscount,isdiscount_time,isdiscount_discounts,hasoption,showtotal,diyformid,diyformtype,diyfields, `type`, isverify, maxprice, minprice, merchsale,hascommission,nocommission,commission,commission1_rate,marketprice,commission1_pay,preselltimestart,presellovertime,presellover,ispresell,preselltimeend,presellprice from " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid limit 1", array( ":id" => $id, ":uniacid" => $_W["uniacid"] ));
+        $goods = pdo_fetch(" select id,thumb,title,total, maxprice, minprice from " . tablename("ewei_shop_goods") . " where id=:id and uniacid=:uniacid limit 1", array( ":id" => $id, ":uniacid" => $_W["uniacid"] ));
         if( empty($goods) )  return ['status'=>AppError::$GoodsNotFound , 'msg'=>'' , 'data'=>[]];
         $goods = set_medias($goods, "thumb");
         $specs = array( );
@@ -3601,7 +3609,7 @@ class App_EweiShopV2Model
         }
         unset($option);
         $data = ["goods" => $goods];
-        return [ "specs" => $specs, "options" => $options];
+        return ["goods" => $goods, "specs" => $specs, "options" => $options];
     }
 
     /**
@@ -3793,13 +3801,15 @@ class App_EweiShopV2Model
         }
         //计算评论数  和  计算点赞数
         $choice['comment'] = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_merch_choice_comment').' where parent_id = "'.$id.'" and type = 1');
-        $choice['fav'] = pdo_fetchcolumn(' select count(1) from '.tablename('ewei_shop_merch_choice_fav').' where chid = :chid and status = 1 and type = 1 and uniacid = :uniacid ',[':uniacid'=>$uniacid,':chid'=>$id]);
+        $choice['fav_count'] = pdo_fetchcolumn(' select count(1) from '.tablename('ewei_shop_merch_choice_fav').' where chid = :chid and status = 1 and type = 1 and uniacid = :uniacid ',[':uniacid'=>$uniacid,':chid'=>$id]);
+        $choice_fav = pdo_fetch(' select count(1) from '.tablename('ewei_shop_merch_choice_fav').' where chid = :chid and status = 1 and type = 1 and uniacid = :uniacid and (openid = :openid or user_id = :user_id) ',[':uniacid'=>$uniacid,':chid'=>$id,':user_id'=>$member['id'],':openid'=>$member['openid']]);
+        $choice['fav'] = empty($merch_fav) ? 0 : 1;
         //更新查看人数
         pdo_update('ewei_shop_merch_choice',['see'=>$choice['see'] + 1],['id'=>$id,'uniacid'=>$uniacid]);
         //上面的店铺信息和关注状态
         $merch = pdo_fetch('select id,merchname,logo from '.tablename('ewei_shop_merch_user').' where id = :id and uniacid = :uniacid',[':id'=>$choice['mer_id'],':uniacid'=>$uniacid]);
-        $fav = pdo_fetch('select * from '.tablename('ewei_shop_merch_follow').' where (openid = :openid or user_id = :user_id) and merch_id = :id',[':openid'=>$member['openid'],':user_id'=>$member['id'],':id'=>$id]);
-        $merch['fav'] = empty($fav) ? 0 : 1;
+        $merch_fav = pdo_fetch('select * from '.tablename('ewei_shop_merch_follow').' where (openid = :openid or user_id = :user_id) and merch_id = :id',[':openid'=>$member['openid'],':user_id'=>$member['id'],':id'=>$id]);
+        $merch['fav'] = empty($merch_fav) ? 0 : 1;
         $merch['logo'] = tomedia($merch['logo']);
         return ['merch'=>$merch,'choice'=>$choice];
     }
@@ -3834,11 +3844,11 @@ class App_EweiShopV2Model
             $list[$k]["comment"]=pdo_fetchall("select  id,openid,comment_openid,user_id,content from ".tablename("ewei_shop_merch_choice_comment")." where type=2 and is_del=0 and is_view=0 and classA_id=:classA_id order by create_time asc limit 2",array(":classA_id"=>$v["id"]));
             foreach ($list[$k]["comment"] as $key => $val){
                 //评论人的用户信息
-                $mem = pdo_fetch(' select * from '.tablename('ewei_shop_member').'where openid = :openid or user_id = :user_id ',[':openid'=>$val['openid'],':user_id'=>$val['user_id']]);
+                $mem = pdo_fetch(' select * from '.tablename('ewei_shop_member').'where openid = :openid or id = :user_id ',[':openid'=>$val['openid'],':user_id'=>$val['user_id']]);
                 $list[$k]["comment"][$key]["nickname"] = $mem["nickname"];
                 //被评论者的用户信息
                 if ($val["comment_openid"]){
-                    $mm = pdo_fetch("select * from ".tablename("ewei_shop_member")." where openid=:openid or user_id=:user_id",array(":openid"=>$val["comment_openid"],":user_id"=>$val["comment_openid"]));
+                    $mm = pdo_fetch("select * from ".tablename("ewei_shop_member")." where openid=:openid or id=:user_id",array(":openid"=>$val["comment_openid"],":user_id"=>$val["comment_openid"]));
                     $list[$k]["comment"][$key]["bnickname"] = $mm["nickname"];
                 }else{
                     $list[$k]["comment"][$key]["bnickname"] = "";

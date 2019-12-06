@@ -1,26 +1,26 @@
 {template '_header'}
 
 <div class="page-header">
-    当前位置：<span class="text-primary">{if !empty($item['id'])}编辑{else}添加{/if}店铺动态分类{if !empty($item['id'])}({$item['cate']}){/if}</span>
+    当前位置：<span class="text-primary">{if !empty($item['id'])}编辑{else}添加{/if}任务领钱分类{if !empty($item['id'])}({$item['cate']}){/if}</span>
 </div>
 
 <div class="page-content">
     <div class="page-sub-toolbar">
          <span class=''>
-            {ifp 'shop.merchcate.add'}
-                <a class="btn btn-primary btn-sm" href="{php echo webUrl('shop/merchcate/add')}">添加店铺动态分类</a>
+            {ifp 'shop.taskcate.add'}
+                <a class="btn btn-primary btn-sm" href="{php echo webUrl('shop/taskcate/add')}">添加任务领钱分类</a>
             {/if}
         </span>
     </div>
-    <form {ife 'shop.merchcate' $item}action="" method="post"{/if} class="form-horizontal form-validate" enctype="multipart/form-data">
+    <form {ife 'shop.taskcate' $item}action="" method="post"{/if} class="form-horizontal form-validate" enctype="multipart/form-data">
         <input type="hidden" name="id" value="{$item['id']}"/>
         <div class="form-group">
-            <label class="col-lg control-label must">店铺动态分类标题</label>
+            <label class="col-lg control-label must">任务领钱分类标题</label>
             <div class="col-sm-9 col-xs-12 ">
-                {ife 'shop.merchcate' $item}
-                <input type="text" id='advname' name="cate" class="form-control" value="{$item['cate']}" data-rule-required="true"/>
+                {ife 'shop.taskcate' $item}
+                <input type="text" id='advname' name="task_cate" class="form-control" value="{$item['task_cate']}" data-rule-required="true"/>
                 {else}
-                <div class='form-control-static'>{$item['cate']}</div>
+                <div class='form-control-static'>{$item['task_cate']}</div>
                 {/if}
             </div>
         </div>
@@ -28,7 +28,7 @@
         <div class="form-group">
             <label class="col-lg control-label">状态</label>
             <div class="col-sm-9 col-xs-12">
-                {ife 'shop.merchcate' $item}
+                {ife 'shop.taskcate' $item}
                 <label class='radio-inline'>
                     <input type='radio' name='status' value=1' {if $item['status']==1}checked{/if} /> 显示
                 </label>
@@ -44,10 +44,10 @@
         <div class="form-group">
             <label class="col-lg control-label"></label>
             <div class="col-sm-9 col-xs-12">
-                {ife 'shop.merchcate' $item}
+                {ife 'shop.taskcate' $item}
                     <input type="submit" value="提交" class="btn btn-primary"/>
                 {/if}
-                    <a class="btn btn-default  btn-sm" href="{php echo webUrl('shop/merchcate')}">返回列表</a>
+                    <a class="btn btn-default  btn-sm" href="{php echo webUrl('shop/taskcate')}">返回列表</a>
             </div>
         </div>
     </form>
