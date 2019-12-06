@@ -1,5 +1,5 @@
 {template '_header'}
-<div class="page-header">当前位置：<span class="text-primary">店铺动态分类</span></div>
+<div class="page-header">当前位置：<span class="text-primary">任务领钱分类</span></div>
 
 <div class="page-content">
 
@@ -8,12 +8,12 @@
         <input type="hidden" name="a" value="entry" />
         <input type="hidden" name="m" value="ewei_shopv2" />
         <input type="hidden" name="do" value="web" />
-        <input type="hidden" name="r"  value="shop.merchcate" />
+        <input type="hidden" name="r"  value="shop.taskcate" />
 
         <div class="page-toolbar">
             <div class="pull-left">
                 {ifp 'shop.merchcate.add'}
-                    <a class='btn btn-primary btn-sm' href="{php echo webUrl('shop/merchcate/add')}"><i class='fa fa-plus'></i> 图标</a>
+                    <a class='btn btn-primary btn-sm' href="{php echo webUrl('shop/taskcate/add')}"><i class='fa fa-plus'></i> 图标</a>
                 {/if}
             </div>
             <div class="pull-right col-md-6">
@@ -43,12 +43,12 @@
             <div class="page-table-header">
                 <input type='checkbox' />
                 <div class="btn-group">
-                    {ifp 'shop.merchcate.edit'}
-                    <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch' data-href="{php echo webUrl('shop/merchcate/enabled',array('status'=>1))}"><i class='icow icow-xianshi'></i> 显示</button>
-                    <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch'  data-href="{php echo webUrl('shop/merchcate/enabled',array('status'=>0))}"><i class='icow icow-yincang'></i> 隐藏</button>
+                    {ifp 'shop.taskcate.edit'}
+                    <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch' data-href="{php echo webUrl('shop/taskcate/enabled',array('status'=>1))}"><i class='icow icow-xianshi'></i> 显示</button>
+                    <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch'  data-href="{php echo webUrl('shop/taskcate/enabled',array('status'=>0))}"><i class='icow icow-yincang'></i> 隐藏</button>
                     {/if}
-                    {ifp 'shop.merchcate.delete'}
-                    <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch-remove' data-confirm="确认要删除?" data-href="{php echo webUrl('shop/merchcate/delete')}">
+                    {ifp 'shop.taskcate.delete'}
+                    <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch-remove' data-confirm="确认要删除?" data-href="{php echo webUrl('shop/taskcate/delete')}">
                         <i class='icow icow-shanchu1'></i> 删除</button>
                     {/if}
                 </div>
@@ -71,25 +71,25 @@
                             <td>{$row['cate']}</td>
                             <td>
                                 <span class='label {if $row['status']==1}label-primary{else}label-default{/if}'
-                                      {ifp 'shop.merchcate.edit'}
+                                      {ifp 'shop.taskcate.edit'}
                                           data-toggle='ajaxSwitch'
                                           data-switch-value='{$row['status']}'
-                                          data-switch-value0='0|隐藏|label label-default|{php echo webUrl('shop/merchcate/enabled',array('status'=>1,'id'=>$row['id']))}'
-                                          data-switch-value1='1|显示|label label-primary|{php echo webUrl('shop/merchcate/enabled',array('status'=>0,'id'=>$row['id']))}'
+                                          data-switch-value0='0|隐藏|label label-default|{php echo webUrl('shop/taskcate/enabled',array('status'=>1,'id'=>$row['id']))}'
+                                          data-switch-value1='1|显示|label label-primary|{php echo webUrl('shop/taskcate/enabled',array('status'=>0,'id'=>$row['id']))}'
                                       {/if} >
                                       {if $row['status']==1}显示{else}隐藏{/if}
                                 </span>
                             </td>
                             <td style="text-align:left;">
-                                {ifp 'shop.merchcate.view|shop.merchcate.edit'}
-                                    <a href="{php echo webUrl('shop/merchcate/edit', array('id' => $row['id']))}" class="btn btn-op btn-operation" >
+                                {ifp 'shop.taskcate.view|shop.taskcate.edit'}
+                                    <a href="{php echo webUrl('shop/taskcate/edit', array('id' => $row['id']))}" class="btn btn-op btn-operation" >
                                         <span data-toggle="tooltip" data-placement="top" data-original-title="{ifp 'shop.merchcate.edit'}修改{else}查看{/if}">
                                                 <i class='icow icow-bianji2'></i>
                                             </span>
                                     </a>
                                 {/if}
-                                {ifp 'shop.merchcate.delete'}
-                                    <a data-toggle='ajaxRemove' href="{php echo webUrl('shop/merchcate/delete', array('id' => $row['id']))}"class="btn btn-op btn-operation" data-confirm='确认要删除此幻灯片吗?'>
+                                {ifp 'shop.taskcate.delete'}
+                                    <a data-toggle='ajaxRemove' href="{php echo webUrl('shop/taskcate/delete', array('id' => $row['id']))}"class="btn btn-op btn-operation" data-confirm='确认要删除此幻灯片吗?'>
                                         <span data-toggle="tooltip" data-placement="top" data-original-title="删除">
                                                <i class='icow icow-shanchu1'></i>
                                             </span>
@@ -104,12 +104,12 @@
                     <td><input type="checkbox"></td>
                     <td colspan="3">
                         <div class="btn-group">
-                            {ifp 'shop.merchcate.edit'}
-                                <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch' data-href="{php echo webUrl('shop/merchcate/enabled',array('status'=>1))}"><i class='icow icow-xianshi'></i> 显示</button>
-                                <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch'  data-href="{php echo webUrl('shop/merchcate/enabled',array('status'=>0))}"><i class='icow icow-yincang'></i> 隐藏</button>
+                            {ifp 'shop.taskcate.edit'}
+                                <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch' data-href="{php echo webUrl('shop/taskcate/enabled',array('status'=>1))}"><i class='icow icow-xianshi'></i> 显示</button>
+                                <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch'  data-href="{php echo webUrl('shop/taskcate/enabled',array('status'=>0))}"><i class='icow icow-yincang'></i> 隐藏</button>
                             {/if}
-                            {ifp 'shop.image.delete'}
-                                <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch-remove' data-confirm="确认要删除?" data-href="{php echo webUrl('shop/merchcate/delete')}">
+                            {ifp 'shop.taskcate.delete'}
+                                <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch-remove' data-confirm="确认要删除?" data-href="{php echo webUrl('shop/taskcate/delete')}">
                                     <i class='icow icow-shanchu1'></i> 删除</button>
                             {/if}
                         </div>

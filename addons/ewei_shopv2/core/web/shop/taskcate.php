@@ -3,7 +3,7 @@ if (!defined('IN_IA')) {
     exit('Access Denied');
 }
 
-class Merchcate_EweiShopV2Page extends WebPage{
+class Taskcate_EweiShopV2Page extends WebPage{
     
     public function main()
     {
@@ -17,13 +17,13 @@ class Merchcate_EweiShopV2Page extends WebPage{
 
         if (!empty($_GPC['keyword'])) {
             $_GPC['keyword'] = trim($_GPC['keyword']);
-            $condition .= ' and cate  like :keyword';
+            $condition .= ' and task_cate  like :keyword';
             $params[':keyword'] = '%' . $_GPC['keyword'] . '%';
         }
 
-        $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_merch_choice_cate') . (' WHERE 1 ' . $condition . ' limit ') . ($pindex - 1) * $psize . ',' . $psize, $params);
+        $list = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_task_money_cate') . (' WHERE 1 ' . $condition . ' limit ') . ($pindex - 1) * $psize . ',' . $psize, $params);
        
-        $total = pdo_fetchcolumn('SELECT count(*) FROM ' . tablename('ewei_shop_merch_choice_cate') . (' WHERE 1 ' . $condition), $params);
+        $total = pdo_fetchcolumn('SELECT count(*) FROM ' . tablename('ewei_shop_task_money_cate') . (' WHERE 1 ' . $condition), $params);
         $pager = pagination2($total, $pindex, $psize);
         include $this->template();
     }
@@ -44,22 +44,22 @@ class Merchcate_EweiShopV2Page extends WebPage{
         $id = intval($_GPC['id']);
         
         if ($_W['ispost']) {
-            $data = array('uniacid' => $_W['uniacid'], 'cate' => trim($_GPC['cate']),'status'=>trim($_GPC['status']));
+            $data = array('uniacid' => $_W['uniacid'], 'task_cate' => trim($_GPC['task_cate']),'status'=>trim($_GPC['status']));
             $data["createtime"]=time();
             
             if (!empty($id)) {
-                pdo_update('ewei_shop_merch_choice_cate', $data, array('id' => $id));
-                plog('shop.merchcate.edit', '修改 ID: ' . $id);
+                pdo_update('ewei_shop_task_money_cate', $data, array('id' => $id));
+                plog('shop.taskcate.edit', '修改 ID: ' . $id);
             }
             else {
-                pdo_insert('ewei_shop_merch_choice_cate', $data);
+                pdo_insert('ewei_shop_task_money_cate', $data);
                 $id = pdo_insertid();
-                plog('shop.merchcate.add', '添加 ID: ' . $id);
+                plog('shop.taskcate.add', '添加 ID: ' . $id);
             }
-            show_json(1, array('url' => webUrl('shop/merchcate')));
+            show_json(1, array('url' => webUrl('shop/taskcate')));
         }
         
-        $item = pdo_fetch('select * from ' . tablename('ewei_shop_merch_choice_cate') . ' where id=:id and uniacid=:uniacid limit 1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
+        $item = pdo_fetch('select * from ' . tablename('ewei_shop_task_money_cate') . ' where id=:id and uniacid=:uniacid limit 1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
         include $this->template();
     }
     
@@ -73,11 +73,11 @@ class Merchcate_EweiShopV2Page extends WebPage{
             $id = is_array($_GPC['ids']) ? implode(',', $_GPC['ids']) : 0;
         }
         
-        $items = pdo_fetchall('SELECT id FROM ' . tablename('ewei_shop_merch_choice_cate') . (' WHERE id in( ' . $id . ' ) AND uniacid=') . $_W['uniacid']);
+        $items = pdo_fetchall('SELECT id FROM ' . tablename('ewei_shop_task_money_cate') . (' WHERE id in( ' . $id . ' ) AND uniacid=') . $_W['uniacid']);
         
         foreach ($items as $item) {
-            pdo_delete('ewei_shop_merch_choice_cate', array('id' => $item['id']));
-            plog('shop.merchcate.delete', '删除幻灯片 ID: ' . $item['id']);
+            pdo_delete('ewei_shop_task_money_cate', array('id' => $item['id']));
+            plog('shop.taskcate.delete', '删除幻灯片 ID: ' . $item['id']);
         }
         
         show_json(1, array('url' => referer()));
@@ -93,12 +93,12 @@ class Merchcate_EweiShopV2Page extends WebPage{
             $id = is_array($_GPC['ids']) ? implode(',', $_GPC['ids']) : 0;
         }
 
-        $items = pdo_fetchall('SELECT id,status FROM ' . tablename('ewei_shop_merch_choice_cate') . (' WHERE id in( ' . $id . ' ) AND uniacid=') . $_W['uniacid']);
+        $items = pdo_fetchall('SELECT id,status FROM ' . tablename('ewei_shop_task_money_cate') . (' WHERE id in( ' . $id . ' ) AND uniacid=') . $_W['uniacid']);
         foreach ($items as $item) {
             $status = $item['status'] == 1 ? 0 : 1;
             $msg = $item['status'] == 1 ? "关闭" : "开启";
             pdo_update('ewei_shop_merch_choice_cate', ['status'=>$status] , array('id' => $item['id']));
-            plog('shop.merchcate.enabled', '修改幻灯片 ID: ' . $item['id'] . '的状态为'.$msg);
+            plog('shop.taskcate.enabled', '修改幻灯片 ID: ' . $item['id'] . '的状态为'.$msg);
         }
 
         show_json(1, array('url' => referer()));
