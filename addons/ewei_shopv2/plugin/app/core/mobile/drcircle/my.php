@@ -752,6 +752,7 @@ class My_EweiShopV2Page extends AppMobilePage{
                 }else{
                 $cnickname=pdo_get("ewei_shop_member",array("openid"=>$comment["user_id"]));
                 }
+                $list[$k]["comment"]["id"]=$v["parent_id"];
                 $list[$k]["comment"]["comment_nickname"]=$cnickname["nickname"];
                 if ($comment["comment_openid"]){
 //                 $bnickname=pdo_get("ewei_shop_member",array("openid"=>$comment["comment_openid"]));
@@ -877,7 +878,7 @@ class My_EweiShopV2Page extends AppMobilePage{
             }
             $mes["avatar"]=$member["avatar"];
             $mes["message"]="点赞成功";
-            if ($_GPC["type"]==1){
+            if ($_GPC["apptype"]==1){
                 apperror(0,"",$mes);
             }else{
             app_error(0,$mes);

@@ -14,7 +14,7 @@ class Team_EweiShopV2Page extends PluginWebPage
 		$type = $_GPC["type"];
 		$sort = $_GPC["sort"];
 		$team = $_GPC["team"];
-		$condition = " o.uniacid=:uniacid and o.paytime > 0 and o.heads = 1 and o.is_team = 1 ";
+		$condition = " o.uniacid=:uniacid and o.paytime > 0 and o.heads = 1 and o.is_team = 1 and o.merchid=".$_W["merchid"];
 		if( $type == "ing" ) 
 		{
 			$condition .= " and o.success = 0 ";

@@ -539,16 +539,25 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $res["list"][$k]["status"]=$v["status"];
         //1表示虚拟商品
         $res["list"][$k]["isvirtual"]=$v["isvirtual"];
+        $res["list"][$k]["price"]=$v["price"];
         //获取商家
         if ($v["merchid"]!=0){
             $merch=pdo_get("ewei_shop_merch_user",array("id"=>$v["merchid"]));
             $res["list"][$k]["merchname"]=$merch["merchname"];
+           
         }else {
             $res["list"][$k]["merchname"]="跑库专享";
         }
         //获取售后
         $res["list"][$k]["refundstate"]=$v["refundstate"];
         $res["list"][$k]["refundid"]=$v["refundid"];
+        //判断
+        if ($v["refundid"]&&$v["refundstatus"]!=0){
+        $r=pdo_get("ewei_shop_order_refund",array("id"=>$v["refundid"]));
+        $res["list"][$k]["rtype"]=$r["rtype"];// 0 退款(仅退款不退货) 1 退款退货 2 换货
+        }else{
+            $res["list"][$k]["rtype"]=0;
+        }
         //获取评价
         $res["list"][$k]["iscomment"]=$v["iscomment"];//评价状态 status 3,4 后允许评价 0 可评价 1 可追加评价 2 已评价
         //获取商品总数
@@ -563,7 +572,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
            
             $good[$kk]["refundstatus"]=$refund["status"];
             }else{
-             $good[$kk]["refundstatus"]="";
+             $good[$kk]["refundstatus"]=0;
             }
             
         }
@@ -578,7 +587,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
                 
                 $gift[$kk]["refundstatus"]=$refund["status"];
             }else{
-                $gift[$kk]["refundstatus"]="";
+                $gift[$kk]["refundstatus"]=0;
             }
             
         }
@@ -627,8 +636,21 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $res["realname"]=$address["realname"];
         $res["mobile"]=$address["mobile"];
         $res["address"]=$address["province"].$address["city"].$address["area"].$address["address"];
+        //获取物流信息
+        
+        if ($res["status"]>=2){
+            $expresslist = m("util")->getExpressList($order["express"], $order["expresssn"]);
+            if ($expresslist){
+            $res["logistics"]["time"]=$expresslist[0]["time"];
+            $res["logistics"]["step"]=$expresslist[0]["step"];
+            }
+        }
+        if (empty($res["logistics"])){
+            $res["logistics"]=new ArrayObject();
+        }
+        $res["goods_price"]=0;
         //获取商品列表
-        $good=pdo_fetchall("select og.id,og.goodsid,og.price,og.total,og.optionname,og.refundid,og.rstate,og.refundstatus,g.thumb,g.title,g.status,g.cannotrefund from ".tablename("ewei_shop_order_goods")." og left join ".tablename("ewei_shop_goods")." g on g.id=og.goodsid "." where og.orderid=:orderid and og.status!=-1",array(":orderid"=>$order_id));
+        $good=pdo_fetchall("select og.id,og.goodsid,og.price,og.total,og.optionname,og.refundid,og.rstate,og.refundstatus,g.thumb,g.title,g.status,g.cannotrefund from ".tablename("ewei_shop_order_goods")." og left join ".tablename("ewei_shop_goods")." g on g.id=og.goodsid "." where og.orderid=:orderid and og.status!=-1 order by g.status asc",array(":orderid"=>$order_id));
         $good=set_medias($good, array( "thumb" ));
         foreach ($good as $kk=>$vv){
             if ($vv["rstate"]!=0&&$vv["refundid"]){
@@ -639,7 +661,10 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
             }else{
                 $good[$kk]["refundstatus"]="";
             }
-            
+           if ($vv["status"]!=2){
+               $res["goods_price"]=$res["goods_price"]+$vv["price"]*$vv["total"];
+           } 
+           
         }
         $res["good"]=$good;
         apperror(0,"",$res);

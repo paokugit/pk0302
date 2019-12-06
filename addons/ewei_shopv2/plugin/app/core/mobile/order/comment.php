@@ -76,7 +76,7 @@ class Comment_EweiShopV2Page extends AppMobilePage
 		if ($_GPC["type"]==1){
 		    $member_id=m('member')->getLoginToken($openid);
 		    if ($member_id==0){
-		        app_error(1,"无此用户");
+		        apperror(1,"无此用户");
 		    }
 		    $openid=$member_id;
 		}
@@ -84,7 +84,11 @@ class Comment_EweiShopV2Page extends AppMobilePage
 		$order = pdo_fetch('select id,status,iscomment from ' . tablename('ewei_shop_order') . ' where id=:id and uniacid=:uniacid and (openid=:openid or user_id=:user_id) limit 1', array(':id' => $orderid, ':uniacid' => $uniacid, ':openid' => $member["openid"],":user_id"=>$member["id"]));
 
 		if (empty($order)) {
+		    if ($_GPC["type"]==1){
+		        apperror(1,"不存在该订单");
+		    }else{
 			app_error(AppError::$OrderNotFound);
+		    }
 		}
 
 		
@@ -96,7 +100,11 @@ class Comment_EweiShopV2Page extends AppMobilePage
 		}
 
 		if (!is_array($comments)) {
+		    if ($_GPC["type"]==1){
+		        apperror(1,"数据出错,请重试!");
+		    }else{
 			app_error(AppError::$SystemError, '数据出错,请重试!');
+		    }
 		}
 
 		$trade = m('common')->getSysset('trade');
@@ -129,7 +137,11 @@ class Comment_EweiShopV2Page extends AppMobilePage
 		}
 
 		pdo_update('ewei_shop_order', $d, array('id' => $orderid, 'uniacid' => $uniacid));
+		if ($_GPC["type"]==1){
+		    apperror(0,"成功");
+		}else{
 		app_json();
+		}
 	}
 }
 

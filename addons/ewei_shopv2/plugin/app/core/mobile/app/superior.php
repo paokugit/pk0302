@@ -46,6 +46,12 @@ class Superior_EweiShopV2Page extends AppMobilePage
         if (empty($order)){
             $order=" order by id desc";
         }
+        $keyword=$_GPC["keyword"];
+        if ($keyword){
+            $condition.=" and name like :name";
+            $param[":name"]="%".$keyword."%";
+        }
+       
         $page=$_GPC["page"]?$_GPC["page"]:1;
         $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_jdgoods")." where 1  ".$condition,$param);
         $first=($page-1)*20;
@@ -72,7 +78,7 @@ class Superior_EweiShopV2Page extends AppMobilePage
             apperror(1,"商品id不可为空");
         }
         //获取商品
-        $detail=pdo_fetch("select id,saleUnit,weight,imagePath,productArea,wareQD,param,sku,brandName,upc,appintroduce,jdprice,ptprice,price,isdelete,onsale from ".tablename("ewei_shop_jdgoods")." where id=:id ",array(":id"=>$id));
+        $detail=pdo_fetch("select id,name,saleUnit,weight,imagePath,productArea,wareQD,param,sku,brandName,upc,appintroduce,jdprice,ptprice,price,isdelete,onsale from ".tablename("ewei_shop_jdgoods")." where id=:id ",array(":id"=>$id));
         if (empty($detail)){
             apperror(1,"商品id不正确");
         }

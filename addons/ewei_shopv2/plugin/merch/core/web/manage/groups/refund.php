@@ -2,7 +2,8 @@
 {
 	exit( "Access Denied" );
 }
-class Refund_EweiShopV2Page extends PluginWebPage 
+require EWEI_SHOPV2_PLUGIN . 'merch/core/inc/page_merch.php';
+class Refund_EweiShopV2Page extends MerchWebPage
 {
 	protected function opData() 
 	{

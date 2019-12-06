@@ -1,8 +1,10 @@
-<?php  if( !defined("IN_IA") ) 
+<?php  
+if( !defined("IN_IA") ) 
 {
 	exit( "Access Denied" );
 }
-class Order_EweiShopV2Page extends PluginWebPage 
+require EWEI_SHOPV2_PLUGIN . 'merch/core/inc/page_merch.php';
+class Order_EweiShopV2Page extends MerchWebPage
 {
 	public function main() 
 	{
@@ -11,8 +13,9 @@ class Order_EweiShopV2Page extends PluginWebPage
 		$status = $_GPC["status"];
 		$pindex = max(1, intval($_GPC["page"]));
 		$psize = 10;
-		$condition = " and o.uniacid=:uniacid and o.isverify = 0  ";
-		$params = array( ":uniacid" => $_W["uniacid"] );
+		$condition = " and o.uniacid=:uniacid and o.isverify = 0 and o.merchid=:merchid ";
+		$params = array( ":uniacid" => $_W["uniacid"],":merchid"=>$_W["merchid"] );
+// 		var_dump($_W["merchid"]);
 		if( intval($status) == 1 ) 
 		{
 			$condition .= " and o.status = :status and (o.success = :success or o.is_team = :is_team) ";
@@ -184,9 +187,11 @@ class Order_EweiShopV2Page extends PluginWebPage
 				$r["goods_total"] = 1;
 				$exportlist[] = $r;
 			}
+			
 			unset($r);
 			m("excel")->export($exportlist, array( "title" => "订单数据-" . date("Y-m-d-H-i", time()), "columns" => $columns ));
 		}
+		
 		include($this->template());
 	}
 	public function detail() 
