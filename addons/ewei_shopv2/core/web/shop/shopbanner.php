@@ -50,7 +50,7 @@ class Shopbanner_EweiShopV2Page extends WebPage
 		$id = intval($_GPC['id']);
 
 		//活动分类
-        $icon = pdo_fetchall('select id,title from '.tablename('ewei_shop_icon').'where cate = 2 ');
+        $icon = pdo_fetchall('select id,title from '.tablename('ewei_shop_icon').'where cate = 2 and status = 1');
 
 		if ($_W['ispost']) {
 			$data = array('uniacid' => $_W['uniacid'], 'bannername' => trim($_GPC['bannername']), 'icon_id' => intval($_GPC['icon_id']),'link' => trim($_GPC['link']), 'status' => intval($_GPC['status']), 'displayorder' => intval($_GPC['displayorder']), 'thumb' => save_media($_GPC['thumb']));

@@ -539,8 +539,8 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        foreach ($list as $k=>$v){
            //获取商家
            if ($v["merchid"]!=0){
-           $merch=pdo_get("ewei_shop_merch_user",array("id"=>$v["merchid"]));
-           $list[$k]["merchname"]=$merch["merchname"];
+               $merch=pdo_get("ewei_shop_merch_user",array("id"=>$v["merchid"]));
+               $list[$k]["merchname"]=$merch["merchname"];
            }else{
                $list[$k]["merchname"]="跑库";
            }

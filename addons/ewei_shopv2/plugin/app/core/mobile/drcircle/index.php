@@ -408,7 +408,6 @@ class Index_EweiShopV2Page extends AppMobilePage{
             }else{
                 $detail["comment"][$k]["support"]=0;
             }
-            
         }
         
         

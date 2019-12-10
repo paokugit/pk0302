@@ -97,7 +97,7 @@ class Taskcate_EweiShopV2Page extends WebPage{
         foreach ($items as $item) {
             $status = $item['status'] == 1 ? 0 : 1;
             $msg = $item['status'] == 1 ? "关闭" : "开启";
-            pdo_update('ewei_shop_merch_choice_cate', ['status'=>$status] , array('id' => $item['id']));
+            pdo_update('ewei_shop_task_money_cate', ['status'=>$status] , array('id' => $item['id']));
             plog('shop.taskcate.enabled', '修改幻灯片 ID: ' . $item['id'] . '的状态为'.$msg);
         }
 

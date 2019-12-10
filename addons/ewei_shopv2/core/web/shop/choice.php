@@ -15,7 +15,7 @@ class Choice_EweiShopV2Page extends WebPage{
         $params = array(':uniacid' => $_W['uniacid']);
 
         //活动分类
-        $icon = pdo_fetchall('select id,title from '.tablename('ewei_shop_icon').'where cate in (1,2) ');
+        $icon = pdo_fetchall('select id,title from '.tablename('ewei_shop_icon').'where cate in (1,2) and status = 1');
 
         if (!empty($_GPC['keyword'])) {
             $_GPC['keyword'] = trim($_GPC['keyword']);
@@ -53,7 +53,7 @@ class Choice_EweiShopV2Page extends WebPage{
         $id = intval($_GPC['id']);
 
         //活动分类
-        $icon = pdo_fetchall('select id,title from '.tablename('ewei_shop_icon').'where cate in (1,2) ');
+        $icon = pdo_fetchall('select id,title from '.tablename('ewei_shop_icon').'where cate in (1,2) and status = 1 ');
 
         if ($_W['ispost']) {
             $data = array('uniacid' => $_W['uniacid'], 'title' => trim($_GPC['title']), 'displayorder' =>$_GPC['displayorder'], 'image' => save_media($_GPC['image']),'thumb' => save_media($_GPC['thumb']),'icon_id'=>$_GPC['icon_id'],'content'=>trim($_GPC['content']));
