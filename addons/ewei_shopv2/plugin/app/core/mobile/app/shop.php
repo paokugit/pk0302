@@ -106,6 +106,14 @@ class Shop_EweiShopV2Page extends AppMobilePage
     }
 
     /**
+     * 商品评价
+     */
+    public function shop_goods_comment_list()
+    {
+
+    }
+
+    /**
      * 获得商品的属性
      */
     public function shop_goods_options()
@@ -135,6 +143,46 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $optionid = $_GPC['optionid'];
         $data = m('app')->shop_add_cart($user_id,$id,$optionid,$total);
         app_error1($data['status'],"",empty($data['data']) ? $data['data'] : []);
+    }
+
+    /**
+     * 购物车列表的选中状态
+     */
+    public function shop_cart_select()
+    {
+        header("Access-Control-Allow-Origin:*");
+        //接受信息
+        global $_GPC;
+        $token = $_GPC['token'];
+        $id = intval($_GPC['id']);
+        $select = intval($_GPC['select']);
+        $merchid = intval($_GPC['merchid']);
+        //获取用户信息
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0) app_error1(2,'登录信息失效',[]);
+        $member = m('member')->getMember($user_id);
+        //如果是单个操作选中否
+        if(!empty($id)){
+            //查找购物车信息  并改变其状态
+            $cart = pdo_fetch('select * from '.tablename('ewei_shop_member_cart').'where id = :id and deleted = 0 ',[':id'=>$id]);
+            if(pdo_update('ewei_shop_member_cart',['selected'=>$select],['id'=>$cart['id']])){
+                app_error1(0,'',[]);
+            }
+        }else{
+            //查询条件
+            $condition = "(openid = :openid or user_id = :user_id)";
+            $param = [':openid'=>$member['openid'],':user_id'=>$member['id']];
+            //如果店铺全选或者全不选  加条件
+            if($merchid){
+                $condition .= 'and merchid = :merchid';
+                $param[':merchid'] = $merchid;
+            }
+            //更新语句
+            $update = pdo_query('update '.tablename('ewei_shop_member_cart').'set selected = "'.$select.'" where '.$condition,$param);
+            if($update){
+                app_error1(0,'',[]);
+            }
+        }
     }
 
     /**
@@ -175,7 +223,11 @@ class Shop_EweiShopV2Page extends AppMobilePage
     public function shop_task_list()
     {
         global $_GPC;
+        global $_W;
         $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        $data = m('app')->shop_task_list($user_id);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -184,7 +236,22 @@ class Shop_EweiShopV2Page extends AppMobilePage
     public function shop_same_city()
     {
         global $_GPC;
-
+//        //用户信息
+//        $token = $_GPC['token'];
+//        $user_id = m('app')->getLoginToken($token);
+//        $member = m('member')->getMember($user_id);
+        //类型  city_type == 1 附近的商店   附近的商品
+        $city_type = $_GPC['city_type'] ? $_GPC['city_type'] : 1;
+        $page = max(1,$_GPC['page']);
+        $keywords = $_GPC['keywords'];
+        //order  类型  综合不传   销量sales  价格 minprice  by  升序asc   降序desc
+        $type = empty($_GPC['type']) ? 3 : $_GPC['type'];
+        $sort = empty($_GPC['sort']) ? "desc" : $_GPC['sort'];
+        $lng = $_GPC['lng'];
+        $lat = $_GPC['lat'];
+        $range = $_GPC['range'] ? $_GPC['range'] : 5;
+        $data = m('app')->shop_same_city($user_id,$city_type,$lng,$lat,$page,$keywords,$type,$sort,$range);
+        app_error1(0,'',$data);
     }
 
     /**
@@ -236,6 +303,26 @@ class Shop_EweiShopV2Page extends AppMobilePage
         app_error1(0,"",$data);
     }
 
+    /**
+     * 评论详情
+     */
+    public function shop_shop_comment_detail()
+    {
+        global $_GPC;
+        //用户的token
+        $token = $_GPC['token'];
+        //获取用户的user_id
+        $user_id = m('app')->getLoginToken($token);
+        //评论的id
+        $comment_id = $_GPC["comment_id"];
+        //排序类型  $type  == 1 倒序  == 2正序
+        $type = $_GPC["type"] ? $_GPC['type'] : 1;
+        //分页信息
+        $page = max($_GPC["page"],1);
+        $data = m('app')->shop_shop_comment_detail($user_id,$comment_id,$page,$type);
+        app_error1($data['status'],$data['msg'],$data['data']);
+    }
+
    /**
     * 动态文章  文章评论的点赞
     */
@@ -249,7 +336,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         //要点赞的文章或者 评论的id
         $id = $_GPC['id'];
         //type  == 1 文章的点赞    == 2评论的点赞
-        $type = $_GPC['type'];
+        $type = $_GPC['type'] ? $_GPC['type'] : 1;
         if(empty($id) || empty($type)) app_error1(1,'参数错误',[]);
         $data = m('app')->shop_choice_fav($user_id,$id,$type);
         app_error1($data['status'],$data['msg'],$data['data']);

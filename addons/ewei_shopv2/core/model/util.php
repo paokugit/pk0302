@@ -412,6 +412,54 @@ class Util_EweiShopV2Model
         $str = "ffmpeg -i ".$file." -y -f mjpeg -ss 3 -t ".$time." -s 320x240 ".$name;
         return system($str);
     }
+
+    /**
+	 * 任务零钱的状态
+     * @param $cid
+     * @param $mark
+     * @param $user_id
+     * @return array
+     */
+    public function task_status($cid,$mark,$user_id)
+	{
+		$member = m('member')->getMember($user_id);
+        $task = pdo_fetch('select * from '.tablename('ewei_shop_task_money').'where mark = :mark',[':mark'=>$mark]);
+        //昨天日期
+        $yesterday = strtotime(date('Y-m-d',time()));
+        //开通任务
+		if($cid == 1){
+			if($mark != "nianka"){
+				$order = pdo_fetch('select * from '.tablename('ewei_shop_order_goods').'g join '.tablename('ewei_shop_order').'o on o.id = g.orderid where g.goodsid = :goodsid and o.status = 3 and (o.openid = :openid or o.user_id = :user_id)',[':goodsid'=>$task['goodsids'],':openid'=>$member['openid'],':user_id'=>$member['id']]);
+				return ['status'=>$order ? 1 : 0,'msg'=>($order ? 1 : 0) .'/' . $task['num']];
+			}else{
+				return ['status'=>$member['is_open'] == 1 ? 1 : 0,'msg'=>($member['is_open'] == 1 ? 1 : 0) .'/'.$task['num']];
+			}
+		}elseif($cid == 2){
+			//绑定任务
+			return ['status'=>empty($member[$mark]) ? 0 : 1,'msg'=>(empty($member[$mark]) ? 0 : 1) .'/'. $task['num']];
+		}elseif($cid == 3){
+			//签到
+			if($mark == "sign"){
+                return ['status'=>$member['qiandao'] == date('Y-m-d',time()) ? 1 : 0,'msg'=>($member['qiandao'] == date('Y-m-d',time()) ? 1 : 0) .'/'. $task['num']];
+			}elseif ($mark == "daren"){
+				//达人圈发帖
+				$daren = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_member_drcircle').'where create_time > :create_time and (openid = :openid or user_id = :user_id) ',[':user_id'=>$member['id'],':openid'=>$member['openid'],':create_time'=>$yesterday]);
+				return ['status'=>$daren > $task['num'] ? 1 : 0,'msg'=>($daren > $task['num'] ? $task['num'] : $daren).'/'.$task['num']];
+			}elseif ($mark == "pingjia"){
+				//达人圈评论
+				$pingjia = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_member_drcomment').'where create_time > :create_time and (openid = :openid or user_id = :user_id) ',[':user_id'=>$member['id'],':openid'=>$member['openid'],':create_time'=>$yesterday]);
+				return ['status'=>$pingjia > $task['num'] ? 1 : 0,'msg'=>($pingjia > $task['num'] ? $task['num'] : $pingjia) .'/'. $task['num']];
+			}elseif ($mark == "order"){
+				//分享的订单被交易
+				$order = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_goods').'where share_id = :share_id and (openid != :openid or user_id = :user_id) and status = 3 and type = 0 and createtime > :createtime ',[':share'=>$member['id'],':user_id'=>$member['id'],':openid'=>$member['openid'],':createtime'=>$yesterday]);
+				return ['status'=>$order > $task['num'] ? 1 : 0,'msg'=>($order > $task['num'] ? $task['num'] : $order) .'/'. $task['num']];
+			}elseif($mark == "share"){
+				//分享记录
+				$share = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_goods_share').' where openid = :openid or user_id = :user_id ',[':openid'=>$member['openid'],':user_id'=>$member['id']]);
+                return ['status'=>$share > $task['num'] ? 1 : 0,'msg'=>($share > $task['num'] ? $task['num'] : $share) .'/'. $task['num']];
+			}
+		}
+	}
 }
 
 if (!defined('IN_IA')) {
