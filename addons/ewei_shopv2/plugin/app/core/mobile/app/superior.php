@@ -144,6 +144,8 @@ class Superior_EweiShopV2Page extends AppMobilePage
         $province=m("jdgoods")->city($id);
         }elseif ($type==2){
         $province=m("jdgoods")->area($id);
+        }elseif ($type==3){
+        $province=m("jdgoods")->twon($id);
         }
         $i=0;
         $list["province"]=array();
@@ -192,16 +194,19 @@ class Superior_EweiShopV2Page extends AppMobilePage
         $data["province"]=$_GPC["province"];
         $data["city"]=$_GPC["city"];
         $data["area"]=$_GPC["area"];
+        $data["street"]=$_GPC["street"];
         $data["address"]=$_GPC["address"];
         $data["province_id"]=$_GPC["province_id"];
         $data["city_id"]=$_GPC["city_id"];
         $data["area_id"]=$_GPC["area_id"];
+        $data["street_id"]=$_GPC["street_id"];
         $data["jdtype"]=1;
         pdo_insert("ewei_shop_member_address",$data);
         $res["address_id"]=pdo_insertid();
         $res["province_id"]=$_GPC["province_id"];
         $res["city_id"]=$_GPC["city_id"];
         $res["area_id"]=$_GPC["area_id"];
+        $res["street_id"]=$_GPC["street_id"];
         apperror(0,"",$res);
     }
     //获取运费
@@ -271,7 +276,7 @@ class Superior_EweiShopV2Page extends AppMobilePage
         $data["province"]=$address["province_id"];
         $data["city"]=$address["city_id"];
         $data["county"]=$address["area_id"];
-        $data["town"]=0;
+        $data["town"]=$address["street_id"];
        
         $num=$total;
         $d[0]["skuId"]=$good["sku"];
@@ -295,7 +300,7 @@ class Superior_EweiShopV2Page extends AppMobilePage
         $jd["province"]=$address["province_id"];
         $jd["city"]=$address["city_id"];
         $jd["county"]=$address["area_id"];
-        $jd["town"]=0;
+        $jd["town"]=$address["street_id"];
         $jd["address"]=$address["address"];
         $jd["mobile"]=$address["mobile"];
         $jd["thirdOrder"]=$ordersn;
@@ -310,7 +315,6 @@ class Superior_EweiShopV2Page extends AppMobilePage
         $jd["remark"]=$_GPC["remark"];
       
         $jdres=m("jdgoods")->order($jd);
-//         var_dump($jdres);die;
         
         if (!$jdres["success"]){
             apperror(1,$jdres["resultMessage"]);

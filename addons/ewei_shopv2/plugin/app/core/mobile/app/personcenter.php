@@ -15,7 +15,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
         if ($member_id==0){
             apperror(1,"无此用户");
         }
-        $member=pdo_fetch("select nickname,avatar,credit2,credit3,credit4,agentlevel,is_open,expire_time,mobile,qiandao from ".tablename("ewei_shop_member")." where id=:id",array(":id"=>$member_id));
+        $member=pdo_fetch("select nickname,avatar,credit1,credit2,credit3,credit4,agentlevel,is_open,expire_time,mobile,weixin,rvc,qiandao,gender from ".tablename("ewei_shop_member")." where id=:id",array(":id"=>$member_id));
        
         //消息条数
         $member["news"]=0;
@@ -554,9 +554,13 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
                $list[$k]["coupon"]["enough"]=0;
                $list[$k]["coupon"]["deduct"]=0;
            }
+           $list[$k]["selected"]=1;
            //获取列表
            $goods=pdo_fetchall("select * from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and deleted=0 and merchid=:merchid order by createtime desc",array(":openid"=>$member["openid"],":user_id"=>$member["id"],"merchid"=>$v["merchid"]));
            foreach ($goods as $kk=>$vv){
+               if ($vv["selected"]==0){
+                   $list[$k]["selected"]=0;
+               }
                $list[$k]["goods"][$kk]["id"]=$vv["id"];
                $list[$k]["goods"][$kk]["goodsid"]=$vv["goodsid"];
                $list[$k]["goods"][$kk]["total"]=$vv["total"];

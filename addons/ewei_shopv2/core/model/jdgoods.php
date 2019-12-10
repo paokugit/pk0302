@@ -114,6 +114,23 @@ class Jdgoods_EweiShopV2Model
         }
         
     }
+    //获取街道
+    public function twon($id){
+        
+        
+        $url="http://www.juheyuncang.com";
+        $url=$url."/api/jd/getTown";
+        $data["key"]="5R8f1Nb42YFn0ou2";
+        $data["secret"]="F5nuTL9IRtBHcOwRFgGvEzAnvH9wvlxH";
+        $data["Id"]=$id;
+        $res=$this->posturl($url, $data);
+        if ($res["success"]){
+            return $res["result"];
+        }else{
+            return false;
+        }
+        
+    }
     //查询运费
     public function freight($data){
         $url="http://www.juheyuncang.com";

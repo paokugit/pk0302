@@ -511,6 +511,8 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
                 break;
                 case 2: $condition .= " and (status=2 or status=0 and paytype=3)";
                 break;
+                case 3:$condition .= " and status=3 and iscomment=0";
+                break;
                 case 4: $condition .= " and refundstate>0";
                 break;
                 case 5: $condition .= " and userdeleted=1 ";

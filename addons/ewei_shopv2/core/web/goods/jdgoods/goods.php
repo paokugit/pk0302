@@ -112,7 +112,7 @@ class Goods_EweiShopV2Page extends WebPage
         }
        
         $result = pdo_update("ewei_shop_jdgoods", array( $type => $value ), array( "id" => $id ));
-        
+        plog('jdgoods.change', '编辑优品商品 ID: ' . $id . '<br>' . "更新".$type);
         show_json(1);
     }
     //更新状态
@@ -128,6 +128,7 @@ class Goods_EweiShopV2Page extends WebPage
         }
          $data["onsale"]=$status;
          pdo_update("ewei_shop_jdgoods",$data,array("id"=>$id));
+         plog('jdgoods.change', '编辑优品商品 ID: ' . $id . '<br>' . "更新状态");
         show_json(1, array( "url" => referer() ));
         
     }
@@ -147,6 +148,7 @@ class Goods_EweiShopV2Page extends WebPage
             pdo_update("ewei_shop_jdgoods", array( "isdelete" => 1 ), array( "id" => $item["id"] ));
            
         }
+        plog('jdgoods.delete', '删除优品商品 ID' );
         show_json(1, array( "url" => referer() ));
         
     }
@@ -168,6 +170,7 @@ class Goods_EweiShopV2Page extends WebPage
             $data["onsale"]=$_GPC["onsale"];
             $data["virtual_sales"]=$_GPC["virtual_sales"];
             if (pdo_update("ewei_shop_jdgoods",$data,array("id"=>$id))){
+                plog('jdgoods.post', '编辑优品商品 ID'.$id );
                 show_json(1, array('url' => webUrl('goods/jdgoods/goods')));
             }else{
                 show_json(0,"失败");
