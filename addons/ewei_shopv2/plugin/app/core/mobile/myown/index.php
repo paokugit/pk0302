@@ -58,8 +58,8 @@ class Index_EweiShopV2Page extends AppMobilePage{
         
 //         var_dump($starttime);
 //         var_dump($endtime);
-        $credit=pdo_fetchcolumn("select sum(num) from ".tablename('mc_credits_record')."where credittype=:credittype and  openid=:openid and createtime>=:starttime and createtime<=:endtime and (remark like :remark or remark like :cc)",array('credittype'=>"credit1",':openid'=>$openid,':starttime'=>$starttime,':endtime'=>$endtime,':remark'=>'%'.'步数兑换',':cc'=>'好友助力'));
-        $credit2=pdo_fetchcolumn("select sum(num) from ".tablename('mc_credits_record')."where credittype=:credittype and  openid=:openid and createtime>=:starttime and createtime<=:endtime and (remark like :remark or remark like :cc)",array('credittype'=>"credit3",':openid'=>$openid,':starttime'=>$starttime,':endtime'=>$endtime,':remark'=>'%'.'步数兑换',':cc'=>'好友助力'));
+        $credit=pdo_fetchcolumn("select sum(num) from ".tablename('mc_credits_record')."where credittype=:credittype and  openid=:openid and createtime>=:starttime and createtime<=:endtime and (remark_type=1 or remark_type=4)",array('credittype'=>"credit1",':openid'=>$openid,':starttime'=>$starttime,':endtime'=>$endtime));
+        $credit2=pdo_fetchcolumn("select sum(num) from ".tablename('mc_credits_record')."where credittype=:credittype and  openid=:openid and createtime>=:starttime and createtime<=:endtime and (remark_type=1 or remark_type=4)",array('credittype'=>"credit3",':openid'=>$openid,':starttime'=>$starttime,':endtime'=>$endtime));
         
 //         $credit=pdo_fetchall("select * from ".tablename('mc_credits_record')."where credittype=:credittype and  openid=:openid and createtime>=:starttime and createtime<=:endtime ",array('credittype'=>"credit1",':openid'=>$openid,':starttime'=>$starttime,':endtime'=>$endtime));
 //         var_dump($credit);die;
@@ -172,7 +172,7 @@ class Index_EweiShopV2Page extends AppMobilePage{
         //获取今日已兑换的卡路里
         $starttime=strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
         $endtime=strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
-        $count_list=pdo_fetchall("select num from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark like :remark1 or remark like :remark2) order by id desc",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime,':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+        $count_list=pdo_fetchall("select num from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark_type=1 or remark_type=4) order by id desc",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime));
         var_dump($count_list);
         $count=array_sum(array_column($count_list, 'num'));
         var_dump($count);

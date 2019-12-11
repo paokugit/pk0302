@@ -515,7 +515,7 @@ class Qrcode_EweiShopV2Model
         //获取今日已兑换的卡路里
         $starttime = strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
         $endtime = strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
-        $count_list = pdo_fetchall("select num from ".tablename("mc_credits_record")." where (openid=:openid or user_id = :user_id) and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark like :remark1 or remark like :remark2) order by id desc",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>"credit3",":starttime"=>$starttime,':endtime'=>$endtime,':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+        $count_list = pdo_fetchall("select num from ".tablename("mc_credits_record")." where (openid=:openid or user_id = :user_id) and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark_type=1 or remark_type=4) order by id desc",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>"credit3",":starttime"=>$starttime,':endtime'=>$endtime));
 
         $count = array_sum(array_column($count_list, 'num'));
         if (empty($count)){

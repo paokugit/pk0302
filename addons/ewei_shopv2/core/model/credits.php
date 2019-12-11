@@ -8,13 +8,13 @@ class Credits_EweiShopV2Model
 			return 0;
 		}elseif ($type==1){
 			//好友助力
-			$addwhere.=" and (remark like '%好友%'";
-			$addwhere.=" or remark like '%邀请%')";
+			$addwhere.=" and (remark_type=1 or remark_type=2)";
+			
 		}elseif ($type==2){
-			$addwhere.=" and remark like '%签到%'";
+			$addwhere.=" and remark_type=3";
 		}elseif ($type==3){
 			//步数兑换
-			$addwhere.=" and remark like '%步数%'";
+			$addwhere.=" and remark_type=4";
 		}elseif ($type==4){
 			//订单消费
 			$addwhere.=" and remark like '%消费%'";
@@ -33,13 +33,13 @@ class Credits_EweiShopV2Model
 	        return 0;
 	    }elseif ($type==1){
 	        //好友助力
-	        $addwhere.=" and (remark like '%好友%'";
-	        $addwhere.=" or remark like '%邀请%')";
+	        $addwhere.=" and (remark_type=1 or remark_type=2)";
+	        
 	    }elseif ($type==2){
-	        $addwhere.=" and remark like '%签到%'";
+	        $addwhere.=" and remark_type=3";
 	    }elseif ($type==3){
 	        //步数兑换
-	        $addwhere.=" and remark like '%步数%'";
+	        $addwhere.=" and remark_type=4";
 	    }elseif ($type==4){
 	        //订单消费
 	        $addwhere.=" and remark like '%消费%'";

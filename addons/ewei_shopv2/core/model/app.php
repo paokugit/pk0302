@@ -77,7 +77,7 @@ class App_EweiShopV2Model
         //获取今日已兑换的卡路里
         $beginToday = mktime(0,0,0,date('m'),date('d'),date('Y'));
         $endToday = mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
-        $cardtoday = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime` >= :beginToday and `createtime` <= :endToday and (user_id = :user_id or openid = :openid) and credittype = :credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit3",":user_id"=>$member['id'],":openid"=>$member['openid'],":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+        $cardtoday = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime` >= :beginToday and `createtime` <= :endToday and (user_id = :user_id or openid = :openid) and credittype = :credittype and (remark_type=1 or remark_type=4)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit3",":user_id"=>$member['id'],":openid"=>$member['openid']));
         $step_number = $jinri = empty($cardtoday) ? 0 : $cardtoday*1500/$subscription_ratio;
         if ($step_number < $bushu) {
             $datault = pdo_fetchall("select * from ".tablename("ewei_shop_member_getstep")." where day = :day and (user_id = :user_id or openid = :openid) and status = 0 order by step asc",array(":day"=>$day,":user_id"=>$member['id'],':openid'=>$member['openid']));
@@ -219,7 +219,7 @@ class App_EweiShopV2Model
             if ($log){
                 $num = $log["num"] + 1;
                 //获取兑换步数
-                $getstep = pdo_fetchall("select * from ".tablename("mc_credits_record")."where (openid=:openid or user_id = :user_id) and credittype = :credittype and num > :num and uniacid = :uniacid and createtime > :createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$log["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+                $getstep = pdo_fetchall("select * from ".tablename("mc_credits_record")."where (openid=:openid or user_id = :user_id) and credittype = :credittype and num > :num and uniacid = :uniacid and createtime > :createtime and (remark_type=1 or remark_type=4)",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$log["create_time"]));
                 if ($getstep){
                     //新生成模板
                     if (empty($sport_style)){
@@ -277,7 +277,7 @@ class App_EweiShopV2Model
                 //获取今天生成的海报
                 $logg = pdo_fetch("select * from ".tablename("ewei_shop_member_sportlog")." where (openid=:openid or user_id = :user_id) and day=:day and num=:num order by create_time desc limit 1",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':day'=>$day,':num'=>$num));
 
-                $getstep = pdo_fetchall("select * from ".tablename("mc_credits_record")."where (openid = :openid or user_id = :user_id) and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark like :remark1 or remark like :remark2)",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$logg["create_time"],':remark1'=>'%步数兑换%',':remark2'=>'%好友助力%'));
+                $getstep = pdo_fetchall("select * from ".tablename("mc_credits_record")."where (openid = :openid or user_id = :user_id) and credittype=:credittype and num>:num and uniacid=:uniacid and createtime>:createtime and (remark_type=1 or remark_type=4)",array(':openid'=>$member['openid'],':user_id'=>$member['id'],':credittype'=>'credit1',':num'=>0,':uniacid'=>$uniacid,':createtime'=>$logg["create_time"]));
 
                 $num = $num + 1;
                 if ($getstep){
@@ -817,13 +817,13 @@ class App_EweiShopV2Model
         $beginToday = strtotime(date('Y-m-d'));
         $endToday = strtotime(date('Y-m-d',strtotime('+1 days')));
         //步数兑换和好友捐赠  今天用户得到了多少卡路里
-        $cardtoday = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime` >= :beginToday and `createtime` <= :endToday and (user_id = :user_id or openid = :openid) and credittype = :credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":user_id"=>$user_id,":openid"=>$member['openid'],":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+        $cardtoday = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime` >= :beginToday and `createtime` <= :endToday and (user_id = :user_id or openid = :openid) and credittype = :credittype and (remark_type=1 or remark_type=4)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":user_id"=>$user_id,":openid"=>$member['openid']));
         $jinri = empty($cardtoday) ? 0 : $cardtoday * 1500 / $subscription_ratio;
         $keduihuan = $jinri + $step['step'] > $bushu ? ($bushu - $jinri) * $exchange : $step['step'] * $exchange;
         if ($step["type"]==0){
-            m('member')->setCredit($user_id, $credit, $keduihuan, "步数兑换");
+            m('member')->setCredit($user_id, $credit, $keduihuan, "步数兑换",4);
         }elseif ($step["type"]==1){
-            m('member')->setCredit($user_id, $credit, $keduihuan, "好友助力");
+            m('member')->setCredit($user_id, $credit, $keduihuan, "好友助力",1);
         }
         pdo_update('ewei_shop_member_getstep', array('status' => 1), array('id' => $step_id));
         return ['status'=>0,'msg'=>'领取成功','data'=>[]];
@@ -943,7 +943,7 @@ class App_EweiShopV2Model
             $starttime = strtotime($member["accelerate_start"]);
             $endtime = strtotime($member["accelerate_end"]);
         }
-        $credit = pdo_fetchcolumn(" select sum(num) from ".tablename('mc_credits_record')."where credittype = :credittype and (user_id = :user_id or openid = :openid) and createtime >= :starttime and createtime <= :endtime and (remark like :remark or remark like :cc)",array('credittype'=>"credit1",':user_id'=>$user_id,':openid'=>$member['openid'],':starttime'=>$starttime,':endtime'=>$endtime,':remark'=>'%'.'步数兑换',':cc'=>'好友助力'));
+        $credit = pdo_fetchcolumn(" select sum(num) from ".tablename('mc_credits_record')."where credittype = :credittype and (user_id = :user_id or openid = :openid) and createtime >= :starttime and createtime <= :endtime and (remark_type=1 or remark_type=4)",array('credittype'=>"credit1",':user_id'=>$user_id,':openid'=>$member['openid'],':starttime'=>$starttime,':endtime'=>$endtime));
         if (empty($credit)){
             $resault["credit"]=0;
         }else{

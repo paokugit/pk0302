@@ -225,7 +225,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
         $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
         
-        $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":openid"=>$openid,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+        $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark_type=1 or remark_type=4)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":openid"=>$openid));
        // var_dump($cardtoday);
         if (empty($cardtoday)){
             $jinri=0;
@@ -352,7 +352,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
         $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
         
-        $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit3",":openid"=>$openid,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+        $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark_type=1 or remark_type=4)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit3",":openid"=>$openid));
         // var_dump($cardtoday);
         if (empty($cardtoday)){
             $jinri=0;
@@ -523,7 +523,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
             $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
             
-            $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":openid"=>$openid,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+            $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark_type=1 or remark_type=4)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit1",":openid"=>$openid));
             
             if (empty($cardtoday)){
                 $jinri=0;
@@ -580,11 +580,11 @@ class Index_EweiShopV2Page extends AppMobilePage
                 }
 
                 if ($step["type"]==0){
-                    m('member')->setCredit($openid, 'credit1', $keduihuan, "步数兑换");
+                    m('member')->setCredit($openid, 'credit1', $keduihuan, "步数兑换",4);
                 }elseif ($step["type"]==1){
-                    m('member')->setCredit($openid, 'credit1', $keduihuan, "好友助力");
+                    m('member')->setCredit($openid, 'credit1', $keduihuan, "好友助力",1);
                 }elseif ($step["type"]==2) {
-                    m('member')->setCredit($openid, 'credit1', $keduihuan, "签到获取");
+                    m('member')->setCredit($openid, 'credit1', $keduihuan, "签到获取",3);
                 }
                 pdo_update('ewei_shop_member_getstep', array('status' => 1), array('id' => $step['id']));
                 app_error(0,$keduihuan);
@@ -651,7 +651,7 @@ class Index_EweiShopV2Page extends AppMobilePage
             $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
             $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
             
-            $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark like :remark1 or remark like :remark2)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit3",":openid"=>$openid,":remark1"=>'%步数兑换%',":remark2"=>'%好友助力%'));
+            $cardtoday=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where `createtime`>=:beginToday and `createtime`<=:endToday and openid=:openid and credittype=:credittype and (remark_type=1 or remark_type=4)",array(":beginToday"=>$beginToday,":endToday"=>$endToday,":credittype"=>"credit3",":openid"=>$openid));
             
             if (empty($cardtoday)){
                 $jinri=0;
@@ -708,11 +708,11 @@ class Index_EweiShopV2Page extends AppMobilePage
                 }
                 
                 if ($step["type"]==0){
-                    m('member')->setCredit($openid, 'credit3', $keduihuan, "步数兑换");
+                    m('member')->setCredit($openid, 'credit3', $keduihuan, "步数兑换",4);
                 }elseif ($step["type"]==1){
-                    m('member')->setCredit($openid, 'credit3', $keduihuan, "好友助力");
+                    m('member')->setCredit($openid, 'credit3', $keduihuan, "好友助力",1);
                 }elseif ($step["type"]==2) {
-                    m('member')->setCredit($openid, 'credit3', $keduihuan, "签到获取");
+                    m('member')->setCredit($openid, 'credit3', $keduihuan, "签到获取",3);
                 }
                 pdo_update('ewei_shop_member_getstep', array('status' => 1), array('id' => $step['id']));
                 app_error(0,$keduihuan);

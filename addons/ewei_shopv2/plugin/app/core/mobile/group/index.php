@@ -63,7 +63,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($goods_id)){
             apperror(1,"","商品id不可为空");
         }
-        $good=pdo_fetch("select id,ccate,title,freight,thumb_url,price,groupsprice,single,singleprice,groupnum,content,more_spec,merchid,gid from ".tablename("ewei_shop_groups_goods")." where id=:goods_id and status=1 and deleted=0",array(":goods_id"=>$goods_id));
+        $good=pdo_fetch("select id,description,ccate,title,freight,thumb_url,price,groupsprice,single,singleprice,groupnum,content,more_spec,merchid,gid from ".tablename("ewei_shop_groups_goods")." where id=:goods_id and status=1 and deleted=0",array(":goods_id"=>$goods_id));
         if (empty($good)){
             apperror(1,"","商品不存在");
         }
@@ -78,7 +78,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $thumb_url=iunserializer($good["thumb_url"]);
         $good["thumb_url"]=array();
         foreach ($thumb_url as $k=>$v){
-            $good["thumb_url"][$k]=tomedia($v);
+            $good["thumb_url"][$k]["image"]=tomedia($v);
         }
         if ($type==1){
             $good["content"]=m("appnews")->img($good["content"]);
