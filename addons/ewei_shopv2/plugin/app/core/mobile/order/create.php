@@ -1260,10 +1260,10 @@ class Create_EweiShopV2Page extends AppMobilePage
 			$goodsstring = htmlspecialchars_decode(str_replace("\\", "", $_GPC["goods"]));
 			$goodsarr = @json_decode($goodsstring, true);
 		}
-	        $flag = false;
-	        if(count($goodsarr) == 1){
-	            $flag = m('game')->gift_check($openid,$goodsarr[0]['id']);
-	        }
+        $flag = false;
+        if(count($goodsarr) == 1){
+            $flag = m('game')->gift_check($openid,$goodsarr[0]['id']);
+        }
 		if( $_GPC["cardid"] ) 
 		{
 			$packageid = 0;

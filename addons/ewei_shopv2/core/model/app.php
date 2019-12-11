@@ -2310,6 +2310,14 @@ class App_EweiShopV2Model
             }
             $thumbs = array_values($thumbs);
         }
+        //详情图图集
+        $app_thumb = iunserializer($goods['app_thumbs']);
+        foreach ($app_thumb as $value){
+            $app_thumbs[] = ['image'=>tomedia($value)];
+           //$app_thumbs[] = ['image'=> "https://www.paokucoin.com/attachment/".$value];
+        }
+        $goods['app_thumbs'] = $app_thumbs;
+        //商品banner图集
         $goods["thumbs"] = set_medias($thumbs);
         $goods["thumbMaxWidth"] = 750;
         $goods["thumbMaxHeight"] = 750;
@@ -2696,10 +2704,14 @@ class App_EweiShopV2Model
             if( $merch_flag == 1 )
             {
                 $shopdetail = array( "logo" => (!empty($goods["detail_logo"]) ? tomedia($goods["detail_logo"]) : tomedia($shop["logo"])), "shopname" => (!empty($goods["detail_shopname"]) ? $goods["detail_shopname"] : $shop["merchname"]), "description" => (!empty($goods["detail_totaltitle"]) ? $goods["detail_totaltitle"] : $shop["desc"]), "btntext1" => trim($goods["detail_btntext1"]), "btnurl1" => (!empty($goods["detail_btnurl1"]) ? $goods["detail_btnurl1"] : mobileUrl("goods")), "btntext2" => trim($goods["detail_btntext2"]), "btnurl2" => (!empty($goods["detail_btnurl2"]) ? $goods["detail_btnurl2"] : mobileUrl("merch", array( "merchid" => $goods["merchid"] ))) );
+                $shopdetail['goods'] = pdo_fetchall('select id,title,thumb,marketprice from '.tablename('ewei_shop_goods').'where status = 1 and deleted = 0 and merchid = :merchid order by isrecommand desc,ishot desc,isnew desc,id desc limit 3',[':merchid'=>$merch_user['id']]);
+                $shopdetail['goods_count'] = pdo_fetchcolumn(' select count(1) from '.tablename('ewei_shop_goods').' where deleted = 0 and status = 1 and merchid = :merchid and total > 0 ',[':merchid'=>$merch_user['id']]);
             }
             else
             {
                 $shopdetail = array( "logo" => (!empty($goods["detail_logo"]) ? tomedia($goods["detail_logo"]) : $shop["logo"]), "shopname" => (!empty($goods["detail_shopname"]) ? $goods["detail_shopname"] : $shop["name"]), "description" => (!empty($goods["detail_totaltitle"]) ? $goods["detail_totaltitle"] : $shop["description"]), "btntext1" => trim($goods["detail_btntext1"]), "btnurl1" => (!empty($goods["detail_btnurl1"]) ? $goods["detail_btnurl1"] : mobileUrl("goods")), "btntext2" => trim($goods["detail_btntext2"]), "btnurl2" => (!empty($goods["detail_btnurl2"]) ? $goods["detail_btnurl2"] : $shop["url"]) );
+                $shopdetail['goods'] = pdo_fetchall('select id,title,thumb,marketprice from '.tablename('ewei_shop_goods').'where status = 1 and deleted = 0 and merchid = 0 order by isrecommand desc,ishot desc,isnew desc,id desc limit 3');
+                $shopdetail['goods_count'] = pdo_fetchcolumn(' select count(1) from '.tablename('ewei_shop_goods').' where deleted = 0 and status = 1 and merchid = 0 and total > 0 ');
             }
             $param = array( ":uniacid" => $_W["uniacid"] );
             if( $merch_flag == 1 )
@@ -2716,7 +2728,6 @@ class App_EweiShopV2Model
                 $goodsids = explode(",", $shop["goodsids"]);
                 $statics = array( "all" => count($goodsids), "new" => pdo_fetchcolumn("select count(1) from " . tablename("ewei_shop_goods") . " where uniacid=:uniacid " . $sqlcon . " and id in( " . $shop["goodsids"] . " ) and isnew=1 and status=1 and deleted=0", $param), "discount" => pdo_fetchcolumn("select count(1) from " . tablename("ewei_shop_goods") . " where uniacid=:uniacid " . $sqlcon . " and id in( " . $shop["goodsids"] . " ) and isdiscount=1 and status=1 and deleted=0", $param) );
             }
-            $shopdetail['goods'] = pdo_fetchall('select id,title,thumb,marketprice from '.tablename('ewei_shop_goods').'where status = 1 and deleted = 0 and merchid = :merchid order by isrecommand desc,ishot desc,isnew desc,id desc limit 3',[':merchid'=>$merch_user['id']]);
             foreach ($shopdetail['goods'] as $key=>$value){
                 $shopdetail['goods'][$key]['thumb'] = tomedia($value['thumb']);
             }
@@ -2733,10 +2744,6 @@ class App_EweiShopV2Model
             {
                 $goodsids = explode(",", $shop["goodsids"]);
                 $statics = array( "all" => count($goodsids), "new" => pdo_fetchcolumn("select count(1) from " . tablename("ewei_shop_goods") . " where uniacid=:uniacid and merchid=:merchid and id in( " . $shop["goodsids"] . " ) and isnew=1 and status=1 and deleted=0", array( ":uniacid" => $_W["uniacid"], ":merchid" => $goods["merchid"] )), "discount" => pdo_fetchcolumn("select count(1) from " . tablename("ewei_shop_goods") . " where uniacid=:uniacid and merchid=:merchid and id in( " . $shop["goodsids"] . " ) and isdiscount=1 and status=1 and deleted=0", array( ":uniacid" => $_W["uniacid"], ":merchid" => $goods["merchid"] )) );
-            }
-            $shopdetail['goods'] = pdo_fetchall('select id,title,thumb,marketprice from '.tablename('ewei_shop_goods').'where status = 1 and deleted = 0 and merchid = 0 order by isrecommand desc,ishot desc,isnew desc,id desc limit 3');
-            foreach ($shopdetail['goods'] as $key=>$value){
-                $shopdetail['goods'][$key]['thumb'] = tomedia($value['thumb']);
             }
         }
         //商品描述 或者短标题
@@ -2928,17 +2935,17 @@ class App_EweiShopV2Model
 //            $goods["thumb_url"] = iunserializer($goods["thumb_url"]);
 //        }
         //门店
-        $goods["stores"] = $stores;
-        if( !empty($shopdetail) )
-        {
-            $shopdetail["btntext1"] = (!empty($shopdetail["btntext1"]) ? $shopdetail["btntext1"] : "全部商品");
-            $shopdetail["btntext2"] = (!empty($shopdetail["btntext2"]) ? $shopdetail["btntext2"] : "进店逛逛");
-            $shopdetail["btnurl1"] = m('shop')->getUrl($shopdetail["btnurl1"]);
-            $shopdetail["btnurl2"] = m('shop')->getUrl($shopdetail["btnurl2"]);
-            $shopdetail["static_all"] = $statics["all"];
-            $shopdetail["static_new"] = $statics["new"];
-            $shopdetail["static_discount"] = $statics["discount"];
-        }
+//        $goods["stores"] = $stores;
+////        if( !empty($shopdetail) )
+////        {
+////            $shopdetail["btntext1"] = (!empty($shopdetail["btntext1"]) ? $shopdetail["btntext1"] : "全部商品");
+////            $shopdetail["btntext2"] = (!empty($shopdetail["btntext2"]) ? $shopdetail["btntext2"] : "进店逛逛");
+////            $shopdetail["btnurl1"] = m('shop')->getUrl($shopdetail["btnurl1"]);
+////            $shopdetail["btnurl2"] = m('shop')->getUrl($shopdetail["btnurl2"]);
+////            $shopdetail["static_all"] = $statics["all"];
+////            $shopdetail["static_new"] = $statics["new"];
+////            $shopdetail["static_discount"] = $statics["discount"];
+////        }
         $shopdetail = set_medias($shopdetail, "logo");
         $goods["shopdetail"] = $shopdetail;
         $goods["share"] = $_W["shopshare"];
@@ -3311,7 +3318,12 @@ class App_EweiShopV2Model
         $goods['salesreal'] = intval($goods['salesreal']);
         //s商品库存
         $goods['total'] = intval($goods['total']);
-        $goods['comment'] = pdo_fetchall('select * from '.tablename('ewei_shop_order_comment').' where goodsid = :goodsid and uniacid = :uniacid order by level desc limit 6',[':goodsid'=>$id,':uniacid'=>$uniacid]);
+        $goods['comment'] = pdo_fetchall('select oc.*,g.optionid from '.tablename('ewei_shop_order_comment').'oc join '.tablename('ewei_shop_order_goods').'g on g.orderid = oc.orderid and g.goodsid = oc.goodsid where oc.goodsid = :goodsid and oc.uniacid = :uniacid and oc.deleted = 0 order by level desc limit 6',[':goodsid'=>$id,':uniacid'=>$uniacid]);
+        foreach ($goods['comment'] as $key => $item){
+            $goods['comment'][$key]['option'] = $item['optionid'] ? pdo_getcolumn('ewei_shop_goods_option',['id'=>$item['optionid']],'title') : "";
+            $goods['comment'][$key]['image'] = unserialize($item['images']);
+            $goods['comment'][$key]['image_count'] = count(unserialize($item['images']));
+        }
         $goods['content'] = htmlspecialchars_decode($goods['content']);
         $goods['relate_goods'] = pdo_fetchall('select id,title,thumb,marketprice from '.tablename('ewei_shop_goods').' where '.$relate_goods_condition.' order by isrecommand desc,ishot desc,isnew desc,id desc limit 3 ',$relate_goods_param);
         foreach ($goods['relate_goods'] as $key=>$val){
@@ -3840,6 +3852,11 @@ class App_EweiShopV2Model
                 }
                 $merch[$key]['disname'] = $disname;
                 $merch[$key]['logo'] = tomedia($val['logo']);
+                $goods = pdo_fetchall('select id,title,thumb,marketprice from '.tablename('ewei_shop_goods').'where status = 1 and deleted = 0 and merchid = :merchid and total > 0',[':merchid'=>$val['id']]);
+                foreach ($goods as $k=>$v){
+                    $goods[$k]['thumb'] = tomedia($v['thumb']);
+                }
+                $merch[$key]['goods'] = $goods;
             }else{
                 unset($merch[$key]);
             }
@@ -3854,7 +3871,7 @@ class App_EweiShopV2Model
             $data['total'] = count($merch);
         }else{
             //满足条件的店铺里面的商品
-            $condition = "uniacid = :uniacid and status = 1 and deleted = 0 and merchid in (".$ids.")";
+            $condition = "uniacid = :uniacid and status = 1 and deleted = 0 and total > 0 and merchid in (".$ids.")";
             $params = [':uniacid'=>$uniacid];
             if(!empty($keywords)){
                 $condition .= "and title like :title ";
@@ -3868,6 +3885,7 @@ class App_EweiShopV2Model
             // 按分页查找附近的商品
             $goods = pdo_fetchall('select id,title,marketprice,productprice,thumb,isnew,issendfree,ishot,merchid from '.tablename('ewei_shop_goods').'where '.$condition.' limit '.$pindex.','.$pageSize,$params);
             foreach ($goods as $key=>$item){
+                $goods[$key]['thumb'] = tomedia($item['thumb']);
                 //该商品的所属店铺
                 $goods[$key]['merchname'] = pdo_fetchcolumn(' select merchname from '.tablename('ewei_shop_merch_user').' where status = 1 and id = :merchid ',[':merchid'=>$item['merchid']]);
                 //是否新品 是否包邮 是否热卖
@@ -5441,7 +5459,7 @@ class App_EweiShopV2Model
         }
         $flag = false;
         if(count($goodsarr) == 1){
-            $flag = m('game')->gift_check($member['openid'],$goodsarr[0]['id']);
+            $flag = m('game')->gift_check($openid,$goodsarr[0]['id']);
         }
         if( $cardid )
         {
