@@ -59,6 +59,7 @@
                 <li  {if $_GPC['tab']=='option'}class="active"{/if} ><a href="#tab_option">库存/规格</a></li>
                 <li {if $_GPC['tab']=='param'}class="active"{/if} ><a href="#tab_param">参数</a></li>
                 <li {if $_GPC['tab']=='des'}class="active"{/if} ><a href="#tab_des">详情</a></li>
+                <li {if $_GPC['tab']=='app'}class="active"{/if} ><a href="#tab_app">app详情</a></li>
                 <li {if $_GPC['tab']=='buy'}class="active"{/if} ><a href="#tab_buy">购买权限</a></li>
                 <li {if $_GPC['tab']=='sale'}class="active"{/if} ><a href="#tab_sale">营销</a></li>
                 <li {if $_GPC['tab']=='discount'}class="active"{/if} ><a href="#tab_discount">会员折扣</a></li>
@@ -100,6 +101,7 @@
                 <div class="tab-pane  {if $_GPC['tab']=='option'}active{/if}" id="tab_option"> <div class="panel-body">{template 'goods/tab/option'}</div></div>
                 <div class="tab-pane {if $_GPC['tab']=='param'}active{/if}" id="tab_param"> <div class="panel-body">{template 'goods/tab/param'}</div></div>
                 <div class="tab-pane {if $_GPC['tab']=='des'}active{/if}" id="tab_des"> <div class="panel-body" style='padding:0;'>{template 'goods/tab/des'}</div></div>
+                <div class="tab-pane {if $_GPC['tab']=='app'}active{/if}" id="tab_app"> <div class="panel-body" style='padding:0;'>{template 'goods/tab/app'}</div></div>
                 <div class="tab-pane {if $_GPC['tab']=='buy'}active{/if}" id="tab_buy"> <div class="panel-body">{template 'goods/tab/buy'}</div></div>
                 <div class="tab-pane {if $_GPC['tab']=='sale'}active{/if}" id="tab_sale" > <div class="panel-body" >{template 'goods/tab/sale'}</div></div>
                 <div class="tab-pane {if $_GPC['tab']=='discount'}active{/if}" id="tab_discount"> <div class="panel-body">{template 'goods/tab/discount'}</div></div>

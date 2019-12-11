@@ -338,6 +338,14 @@ if ($_W['ispost']) {
         unset($thumb_url[0]);
         $data['thumb_url'] = serialize(m('common')->array_images($thumb_url));
     }
+    if (is_array($_GPC['app_thumbs'])) {
+        $app_thumbs = $_GPC['app_thumbs'];
+        $thumb_url = array();
+        foreach ($app_thumbs as $th) {
+            $thumb_url[] = trim($th);
+        }
+        $data['app_thumbs'] = serialize(m('common')->array_images($thumb_url));
+    }
     if (p('threen')) {
         $threen = $_GPC['threen'];
         if (!(empty($threen['discount'])) && !(empty($threen['price']))) {
@@ -777,6 +785,9 @@ if (!(empty($id))) {
     $params = pdo_fetchall('select * from ' . tablename('ewei_shop_goods_param') . ' where goodsid=:id order by displayorder asc', array(':id' => $id));
     if (!(empty($item['thumb']))) {
         $piclist = array_merge(array($item['thumb']), iunserializer($item['thumb_url']));
+    }
+    if (!(empty($item['app_thumbs']))) {
+        $app_list =  iunserializer($item['app_thumbs']);
     }
     $item['content'] = m('common')->html_to_images($item['content']);
     if(in_array($id,array(3,4,5,7))){

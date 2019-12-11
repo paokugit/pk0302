@@ -109,7 +109,7 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         if ($type==1){
             apperror(0,"",$merch);
         }else{
-        app_error(0,$merch);
+            app_error(0,$merch);
         }
     }
     //店铺关注/取消
