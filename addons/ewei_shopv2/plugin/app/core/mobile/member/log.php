@@ -76,7 +76,7 @@ class Log_EweiShopV2Page extends AppMobilePage
             $addwhere.=" and remark_type=4";
         }elseif ($type==4){
             //订单消费
-            $addwhere.=" and remark = 5 ";
+            $addwhere.=" and remark_type = 5 ";
         }
 
          if (empty($member["openid"])){
