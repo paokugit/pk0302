@@ -92,7 +92,8 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         if (empty($goods_id)){
         $goods = pdo_fetchall("select og.id,og.goodsid,og.price,og.deductprice,og.dispatchprice,og.discount_price,og.couponprice,g.title,g.status,g.thumb,og.optionname as optiontitle from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:order_id and og.status=0 and og.rstate=0 and g.cannotrefund=0", array("order_id"=>$order_id));
         }else{
-        $goods = pdo_fetchall("select og.id,og.goodsid,og.price,og.deductprice,og.dispatchprice,og.discount_price,og.couponprice,g.title,g.status,g.thumb,og.optionname as optiontitle from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:order_id and og.id in (:order_goodsid)  and og.status=0 and og.rstate=0 and g.status!=2 and g.cannotrefund=0", array("order_id"=>$order_id,":order_goodsid"=>$goods_id));
+        $goods = pdo_fetchall("select og.id,og.goodsid,og.price,og.deductprice,og.dispatchprice,og.discount_price,og.couponprice,g.title,g.status,g.thumb,og.optionname as optiontitle from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . ' where og.orderid=:order_id and og.id in('.implode(',', $goods_id).')  and og.status=0 and og.rstate=0 and g.status!=2 and g.cannotrefund=0', array(":order_id"=>$order_id));
+
         }
         $goods = set_medias($goods, array( "thumb" ));
         

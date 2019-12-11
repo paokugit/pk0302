@@ -67,19 +67,21 @@ class Log_EweiShopV2Page extends AppMobilePage
 
 		}elseif ($type==1){
 		   //好友助力
-            $addwhere.=" and remark like '%好友%'";
-            $addwhere.=" or remark like '%邀请%'";
+            $addwhere.=" and remark like '好友%'";
+//             $addwhere.=" or remark like '%邀请%'";
         }elseif ($type==2){
-            $addwhere.=" and remark like '%签到%'";
+            $addwhere.=" and remark like '签到%'";
         }elseif ($type==3){
             //步数兑换
-            $addwhere.=" and remark like '%步数%'";
+            $addwhere.=" and remark like '步数%'";
         }elseif ($type==4){
             //订单消费
             $addwhere.=" and remark like '%消费%'";
         }
 
-
+         if (empty($member["openid"])){
+             $member["openid"]=0;
+         }
         $condition = " and (openid=:openid or user_id=:user_id) and uniacid=:uniacid and credittype=:credittype and module=:module   ".$addwhere;
         $params = array(':uniacid' => $_W['uniacid'], ':openid' =>$member["openid"],':user_id'=>$member["id"], ':credittype' => 'credit1', ':module' => 'ewei_shopv2');
 

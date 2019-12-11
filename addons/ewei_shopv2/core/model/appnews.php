@@ -68,12 +68,12 @@ class Appnews_EweiShopV2Model
        $condition="and  checked=0 and deleted=0 and (goodsid=:gid or group_goodsid=:good_id)";
        $param=array(":gid"=>$good["gid"],":good_id"=>$goods_id);
        if ($label){
-           $condition=$condition." and label like :label";
-           $param=array(":label"=>'%'.$label.'%');
+           $condition=$condition." and label like :label"; 
+           $param[":label"]="%".$label."%";
        }
        $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_order_comment")." where 1 ".$condition,$param);
-       $res["total"]=$total;
-       $list=pdo_fetchall("select id,openid,level,type,user_id,content,images,createtime,append_content,anonymous,orderid,group_orderid from ".tablename("ewei_shop_order_comment")." where 1 ".$condition." order by createtime desc limit ".$first.",".$num,$param);
+       
+       $list=pdo_fetchall("select id,openid,level,type,user_id,content,images,createtime,append_content,orderid,group_orderid from ".tablename("ewei_shop_order_comment")." where 1 ".$condition." order by createtime desc limit ".$first.",".$num,$param);
        foreach ($list as $k=>$v){
            if ($v["anonymous"]==0){
                if ($v["user_id"]){
@@ -107,25 +107,43 @@ class Appnews_EweiShopV2Model
        }
        //获取商品规格
        $good_cate=pdo_get("ewei_shop_category",array("id"=>$good["ccate"]));
+       
        if ($good_cate["label"]){
-           $list_label=implode(",", $good_cate["label"]);
+           $list_label=explode(",", $good_cate["label"]);
+           
            foreach ($list_label as $k=>$v){
                //获取评价数目
-               $condition="and  checked=0 and deleted=0 and (goodsid=:gid or group_goodsid=:good_id)";
-               $param=array(":gid"=>$good["gid"],":good_id"=>$goods_id);
-               $condition=$condition." and label like :label";
-               $param=array(":label"=>'%'.$label.'%');
-               $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_order_comment")." where 1 ".$condition,$param);
-               $list["label"][$k]["label"]=$v;
-               $list["label"][$k]["total"]=$total;
+               $c="and  checked=0 and deleted=0 and (goodsid=:gid or group_goodsid=:good_id)";
+               $p=array(":gid"=>$good["gid"],":good_id"=>$goods_id);
+               $c=$c." and label like :label";
+               $p[":label"]="%".$v."%";
+               $t=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_order_comment")." where 1 ".$c,$p);
+               $relabel[$k]["label"]=$v;
+               $relabel[$k]["total"]=$t;
            }
        }else{
-           $list["label"]=array();
+           $relabel["label"]=array();
        }
+       $res["label"]=$relabel;
+      
        $res["list"]=$list;
+       $res["total"]=$total;
        $res["pagetotal"]=ceil($total/$num);
        $res["pagesize"]=$num;
-        var_dump($res);die;
+       //获取好评率
+       $condition="and  checked=0 and deleted=0 and (goodsid=:gid or group_goodsid=:good_id)";
+       $param=array(":gid"=>$good["gid"],":good_id"=>$goods_id);
+       $goodnum=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_order_comment")." where 1 ".$condition,$param);
+
+       if ($total==0){
+           $res["rate"]=100;
+       }else{
+           $res["rate"]=($goodnum%$total)*100;
+       }
+       if ($res["rate"]==0){
+           $res["rate"]=100;
+       }
+      
        return $res;
    }
 }
