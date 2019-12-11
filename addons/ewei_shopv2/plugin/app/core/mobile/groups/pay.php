@@ -159,7 +159,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
 				app_error(1, "余额不足，请充值！");
 			}
 			$fee = floatval($log["fee"]);
-			$result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $member["uid"], $_W["shopset"]["shop"]["name"] . "消费" . $fee ));
+			$result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $member["uid"], $_W["shopset"]["shop"]["name"] . "消费" . $fee ),5);
 			if( is_error($result) ) 
 			{
 				app_error($result["message"]);

@@ -234,16 +234,16 @@ class Index_EweiShopV2Page extends WebPage
 		$data['wsrcount'] = $rcwsql['rcwmoney']?$rcwsql['rcwmoney']:0;
 
 		//折扣宝提现
-		$zssql = pdo_fetch("SELECT sum(money) as wmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
-		$zwsql = pdo_fetch("SELECT sum(money) as wmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zssql = pdo_fetch("SELECT sum(money) as wmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='折扣宝提现' and draw_type=2 and remark_type = 8 ", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zwsql = pdo_fetch("SELECT sum(money) as wmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='折扣宝提现' and draw_type=2 and remark_type = 8 ", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
 		$zdata['swmoney'] = $zssql['wmoney']?$zssql['wmoney']:0;
 		$zdata['wwmoney'] = $zwsql['wmoney']?$zwsql['wmoney']:0;
-		$zcssql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
-		$zcwsql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zcssql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='折扣宝提现' and draw_type=2  and remark_type = 8 ", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zcwsql = pdo_fetch("SELECT count(*) as cwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='折扣宝提现' and draw_type=2  and remark_type = 8 ", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
 		$zdata['scount'] = $zcssql['cwmoney']?$zcssql['cwmoney']:0;
 		$zdata['wcount'] = $zcwsql['cwmoney']?$zcwsql['cwmoney']:0;
-		$zrcssql = pdo_fetch("SELECT count(distinct openid) as rcwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
-		$zrcwsql = pdo_fetch("SELECT count(distinct openid) as rcwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='折扣宝提现' and draw_type=2", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zrcssql = pdo_fetch("SELECT count(distinct openid) as rcwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=1 and title='折扣宝提现' and draw_type=2  and remark_type = 8 ", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
+		$zrcwsql = pdo_fetch("SELECT count(distinct openid) as rcwmoney FROM " . tablename("ewei_shop_member_log") . " WHERE createtime >=:startoday AND createtime<=:endtoday AND status=0 and title='折扣宝提现' and draw_type=2  and remark_type = 8 ", array( ":startoday" => $startoday, ":endtoday" => $endtoday));
 		$zdata['srcount'] = $zrcssql['rcwmoney']?$zrcssql['rcwmoney']:0;
 		$zdata['wsrcount'] = $zrcwsql['rcwmoney']?$zrcwsql['rcwmoney']:0;
 

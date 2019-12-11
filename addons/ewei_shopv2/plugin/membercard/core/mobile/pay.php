@@ -285,7 +285,7 @@ class Pay_EweiShopV2Page extends PluginMobileLoginPage
 				show_json($credits, "余额不足,请充值");
 			}
 			$fee = floatval($log["fee"]);
-			$result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $_W["member"]["uid"], $_W["shopset"]["shop"]["name"] . "消费" . $fee ));
+			$result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $_W["member"]["uid"], $_W["shopset"]["shop"]["name"] . "消费" . $fee ),5);
 			if( is_error($result) ) 
 			{
 				if( $_W["ispost"] ) 

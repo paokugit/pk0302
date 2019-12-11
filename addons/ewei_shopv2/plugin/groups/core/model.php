@@ -81,7 +81,7 @@ class GroupsModel extends PluginModel
 		$order_goods = pdo_fetch("select * from  " . tablename("ewei_shop_groups_goods") . "\r\n\t\t\t\t\twhere id = :id and uniacid=:uniacid ", array( ":uniacid" => $uniacid, ":id" => $order["goodid"] ));
 		if( 0 < $order["credit"] ) 
 		{
-			$result = m("member")->setCredit($openid, "credit1", 0 - $order["credit"], array( $_W["member"]["uid"], $_W["shopset"]["shop"]["name"] . "消费" . $order["credit"] . "卡路里" ));
+			$result = m("member")->setCredit($openid, "credit1", 0 - $order["credit"], array( $_W["member"]["uid"], $_W["shopset"]["shop"]["name"] . "消费" . $order["credit"] . "卡路里" ),5);
 			if( is_error($result) ) 
 			{
 				return $result["message"];

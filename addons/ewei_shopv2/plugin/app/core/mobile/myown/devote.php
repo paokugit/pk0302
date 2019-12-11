@@ -24,7 +24,7 @@ class Devote_EweiShopV2Page extends AppMobilePage{
                 $res["bind"]=1;
             }
             //折扣宝提现金额
-            $res["tixian"]=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$openid,":credittype"=>"credit3",":remark"=>'折扣宝提现%'));
+            $res["tixian"]=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark = :remark",array(":openid"=>$openid,":credittype"=>"credit3",":remark"=>8));
             if (!$res["tixian"]){
                 $res["tixian"]=0;
             }
@@ -104,8 +104,8 @@ class Devote_EweiShopV2Page extends AppMobilePage{
         $log['draw_type'] = 2;
         if (pdo_insert("ewei_shop_member_log",$log)){
             //增加记录
-            m('member')->setCredit($openid, 'credit3', -$money, "折扣宝提现:提现编号".$log["logno"]);
-            m('member')->setCredit($openid, 'credit4', -$money, "折扣宝提现扣除:提现编号".$log["logno"]);
+            m('member')->setCredit($openid, 'credit3', -$money, "折扣宝提现:提现编号".$log["logno"],8);
+            m('member')->setCredit($openid, 'credit4', -$money, "折扣宝提现扣除:提现编号".$log["logno"],8);
            app_error(0,"成功");
         }else{
             app_error(1,"失败");

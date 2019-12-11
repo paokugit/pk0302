@@ -933,7 +933,7 @@ class Pay_EweiShopV2Page extends MobileLoginPage
 				}
 			}
 			$fee = floatval($ps["fee"]);
-			$result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $_W["member"]["uid"], $_W["shopset"]["shop"]["name"] . "消费" . $fee ));
+			$result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $_W["member"]["uid"], $_W["shopset"]["shop"]["name"] . "消费" . $fee ),5);
 			if( is_error($result) ) 
 			{
 				if( $_W["ispost"] ) 

@@ -543,14 +543,14 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                     m('memberoperate')->addlog($add);
                     if (!empty($parent)){
                         //                     $cd=$this->prize();
-                        //                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+                        //                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取",7);
                        
                         //判断今日推荐奖励是否达到50名·
                         $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
                         $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
                         $count=pdo_fetchcolumn("select count(*) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:beginToday and createtime<=:endToday and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit1",":beginToday"=>$beginToday,":endToday"=>$endToday,':remark'=>"推荐新用户获取"));
                         if ($count<50){
-                        m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
+                        m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取",7);
                         }
                         
                         //贡献值奖励
@@ -571,14 +571,14 @@ class Sport_EweiShopV2Page extends AppMobilePage{
                     $parent=m("member")->getmember($parent_id);
                     if (!empty($parent)){
                         //                     $cd=$this->prize();
-                        //                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取");
+                        //                     m('member')->setCredit($parent["openid"], 'credit1', $cd,"推荐新用户获取",7);
                        
                         //判断今日推荐奖励是否达到50名·
                         $beginToday=mktime(0,0,0,date('m'),date('d'),date('Y'));
                         $endToday=mktime(0,0,0,date('m'),date('d')+1,date('Y'))-1;
                         $count=pdo_fetchcolumn("select count(*) from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:beginToday and createtime<=:endToday and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit1",":beginToday"=>$beginToday,":endToday"=>$endToday,':remark'=>"推荐新用户获取"));
                         if ($count<50){
-                            m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取");
+                            m('member')->setCredit($parent["openid"], 'credit1', 1,"推荐新用户获取",7);
                         }
                         
                         
@@ -648,7 +648,7 @@ class Sport_EweiShopV2Page extends AppMobilePage{
             $m = array("uniacid" => $_W["uniacid"],"is_login"=>1,"uid" => 0, "openid" => "sns_wa_".$openid, "openid_wa" =>$openid, "comefrom" => "sns_wa", "createtime" => time(), "status" => 0);
             pdo_insert("ewei_shop_member", $m);
         }
-        m('member')->setCredit("sns_wa_".$openid, 'credit3', 100, "新人专享金");
+        m('member')->setCredit("sns_wa_".$openid, 'credit3', 100, "新人专享金",0);
         show_json(0, "success");
     }
 }

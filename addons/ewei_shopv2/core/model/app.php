@@ -880,7 +880,7 @@ class App_EweiShopV2Model
         $data["credit4"]=$member["credit4"] ? $member['credit4'] : 0;
         $data["bind"] = empty($member["weixin"])||empty($member["mobile"]) ? 0 : 1;
         //折扣宝提现金额
-        $data["tixian"] = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where (user_id = :user_id or openid = :openid) and credittype = :credittype and remark like :remark",array(":user_id"=>$user_id,":openid"=>$member['openid'],":credittype"=>"credit3",":remark"=>'折扣宝提现%'));
+        $data["tixian"] = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where (user_id = :user_id or openid = :openid) and credittype = :credittype and remark = :remark",array(":user_id"=>$user_id,":openid"=>$member['openid'],":credittype"=>"credit3",":remark"=>8));
         $data["tixian"] = $data["tixian"] < 0 ? abs($data["tixian"]) : 0;
         return $data;
     }
@@ -1424,8 +1424,8 @@ class App_EweiShopV2Model
         $log["realmoney"]=bcsub($money,$log['deductionmoney'],2);
         $log["remark"]="折扣宝提现";
         $log['draw_type'] = 2;
-        m('member')->setCredit($member['openid'], 'credit3', -$money, "折扣宝提现:提现编号".$log["logno"]);
-        m('member')->setCredit($user_id, 'credit4', -$money, "折扣宝提现扣除:提现编号".$log["logno"]);
+        m('member')->setCredit($member['openid'], 'credit3', -$money, "折扣宝提现:提现编号".$log["logno"],8);
+        m('member')->setCredit($user_id, 'credit4', -$money, "折扣宝提现扣除:提现编号".$log["logno"],8);
         return ['status'=>0,'msg'=>"成功",'data'=>[]];
     }
 
@@ -7331,12 +7331,12 @@ class App_EweiShopV2Model
         }
         if( 0 < $deductcredit )
         {
-            m("member")->setCredit($member["openid"], "credit1", 0 - $deductcredit, array( "0", $_W["shopset"]["shop"]["name"] . "购物卡路里抵扣 消费卡路里: " . $deductcredit . " 抵扣金额: " . $deductmoney . " 订单号: " . $ordersn ));
+            m("member")->setCredit($member["openid"], "credit1", 0 - $deductcredit, array( "0", $_W["shopset"]["shop"]["name"] . "购物卡路里抵扣 消费卡路里: " . $deductcredit . " 抵扣金额: " . $deductmoney . " 订单号: " . $ordersn ),5);
         }
         //添加折扣宝记录
         if( 0 < $discount1&&$discount1)
         {
-            m("member")->setCredit($member['openid'], "credit3", 0 - $discount1, array( "0", $_W["shopset"]["shop"]["name"] . "购物折扣宝抵扣 消费折扣宝: " . $discount1 . " 抵扣金额: " . $discount1 . " 订单号: " . $ordersn ));
+            m("member")->setCredit($member['openid'], "credit3", 0 - $discount1, array( "0", $_W["shopset"]["shop"]["name"] . "购物折扣宝抵扣 消费折扣宝: " . $discount1 . " 抵扣金额: " . $discount1 . " 订单号: " . $ordersn ),5);
         }
         if( 0 < $buyagainprice )
         {
@@ -7659,7 +7659,7 @@ class App_EweiShopV2Model
             }
             $fee = floatval($ps["fee"]);
             $shopset = m("common")->getSysset("shop");
-            $result = m("member")->setCredit($member['openid'], "credit2", 0 - $fee, array( $_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee ));
+            $result = m("member")->setCredit($member['openid'], "credit2", 0 - $fee, array( $_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee),5 );
             m('pay')->creditpay_log($openid, $fee, $orderid,'credit');
             if( is_error($result) )
             {
@@ -7708,7 +7708,7 @@ class App_EweiShopV2Model
                 }
                 $fee = floatval($ps["fee"]);
                 $shopset = m("common")->getSysset("shop");
-                $result = m("member")->setCredit($openid, "RVC", 0 - $fee, array($_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee));
+                $result = m("member")->setCredit($openid, "RVC", 0 - $fee, array($_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee),5);
                 m('pay')->creditpay_log($openid, $fee, $orderid,'RVC');
                 if (is_error($result)) {
                     return ['status'=>AppError::$OrderPayFail, 'msg'=>$result["message"],'data'=>[]];

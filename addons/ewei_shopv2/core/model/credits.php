@@ -17,7 +17,7 @@ class Credits_EweiShopV2Model
 			$addwhere.=" and remark_type=4";
 		}elseif ($type==4){
 			//订单消费
-			$addwhere.=" and remark like '%消费%'";
+			$addwhere.=" and remark = 5";
 		}
 
 		$condition = " and (openid=:openid or user_id = :user_id) and credittype=:credittype and module=:module   ".$addwhere;
@@ -42,7 +42,7 @@ class Credits_EweiShopV2Model
 	        $addwhere.=" and remark_type=4";
 	    }elseif ($type==4){
 	        //订单消费
-	        $addwhere.=" and remark like '%消费%'";
+	        $addwhere.=" and remark = 5 ";
 	    }
 	    
 	    $condition = " and (openid=:openid or user_id = :user_id) and credittype=:credittype and module=:module   ".$addwhere;
