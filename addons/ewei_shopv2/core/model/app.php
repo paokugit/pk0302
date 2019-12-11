@@ -880,7 +880,7 @@ class App_EweiShopV2Model
         $data["credit4"]=$member["credit4"] ? $member['credit4'] : 0;
         $data["bind"] = empty($member["weixin"])||empty($member["mobile"]) ? 0 : 1;
         //折扣宝提现金额
-        $data["tixian"] = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where (user_id = :user_id or openid = :openid) and credittype = :credittype and remark = :remark",array(":user_id"=>$user_id,":openid"=>$member['openid'],":credittype"=>"credit3",":remark"=>8));
+        $data["tixian"] = pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where (user_id = :user_id or openid = :openid) and credittype = :credittype and remark_type = 8",array(":user_id"=>$user_id,":openid"=>$member['openid'],":credittype"=>"credit3"));
         $data["tixian"] = $data["tixian"] < 0 ? abs($data["tixian"]) : 0;
         return $data;
     }

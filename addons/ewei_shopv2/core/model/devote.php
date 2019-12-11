@@ -31,7 +31,7 @@ class Devote_EweiShopV2Model{
             $count=floor($sum["count"]/30);
             $jl=$count*30;
             //查询是否已奖励
-            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark = :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>6));
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark_type = 6",array(":openid"=>$parent["openid"],":credittype"=>"credit4"));
             if (empty($log)){
                 
                 //奖励
@@ -52,7 +52,7 @@ class Devote_EweiShopV2Model{
             $count=floor($shop["count"]/10);
             //查询是否已奖励
             $jl=$count*10;
-            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark = :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>6));
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark_type = 6 ",array(":openid"=>$parent["openid"],":credittype"=>"credit4"));
            
             if (empty($log)){
                 //奖励

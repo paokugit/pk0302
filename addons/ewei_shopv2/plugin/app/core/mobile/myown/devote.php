@@ -24,7 +24,7 @@ class Devote_EweiShopV2Page extends AppMobilePage{
                 $res["bind"]=1;
             }
             //折扣宝提现金额
-            $res["tixian"]=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark = :remark",array(":openid"=>$openid,":credittype"=>"credit3",":remark"=>8));
+            $res["tixian"]=pdo_fetchcolumn("select sum(num) from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark_type = 8",array(":openid"=>$openid,":credittype"=>"credit3"));
             if (!$res["tixian"]){
                 $res["tixian"]=0;
             }

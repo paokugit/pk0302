@@ -112,7 +112,9 @@ class Shop_EweiShopV2Page extends AppMobilePage
     {
         global $_GPC;
         $token = $_GPC['token'];
-        $user_id = m()->getLoginToken();
+        $user_id = m('app')->getLoginToken($token);
+        $id = $_GPC['id'];
+        $data = m()->shop_goods_comment_list();
     }
 
     /**
