@@ -31,11 +31,11 @@ class Devote_EweiShopV2Model{
             $count=floor($sum["count"]/30);
             $jl=$count*30;
             //查询是否已奖励
-            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>"推荐付费会员,达到".$jl."人"));
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark = :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>6));
             if (empty($log)){
                 
                 //奖励
-                m('member')->setCredit($parent["openid"], 'credit4', 60, "推荐付费会员,达到".$jl."人");
+                m('member')->setCredit($parent["openid"], 'credit4', 60, "推荐付费会员,达到".$jl."人",6);
                 //消息提醒
                 $dd["keyword1"]=60;
                 $dd["keyword2"]="推荐付费会员,达到".$jl."人";
@@ -52,11 +52,11 @@ class Devote_EweiShopV2Model{
             $count=floor($shop["count"]/10);
             //查询是否已奖励
             $jl=$count*10;
-            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark like :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>"推荐店主".$jl."人"));
+            $log=pdo_fetch("select * from ".tablename("ewei_shop_member_credit_record")." where openid=:openid and credittype=:credittype and remark = :remark",array(":openid"=>$parent["openid"],":credittype"=>"credit4",":remark"=>6));
            
             if (empty($log)){
                 //奖励
-                m('member')->setCredit($parent["openid"], 'credit4', 1000, "推荐店主".$jl."人");
+                m('member')->setCredit($parent["openid"], 'credit4', 1000, "推荐店主".$jl."人",6);
                 
                 //消息提醒
                 $dd["keyword1"]=1000;
@@ -86,7 +86,7 @@ class Devote_EweiShopV2Model{
         $ddt=date("Y-m-d");
         if ($jl["start_date"]<=$ddt&&$jl["end_date"]>=$ddt){
             //添加记录奖励
-            m('member')->setCredit($member["openid"], 'credit4', $jl["num"], "推荐新用户获取");
+            m('member')->setCredit($member["openid"], 'credit4', $jl["num"], "推荐新用户获取",7);
             
             //消息提醒
             $dd["keyword1"]=$jl["num"];

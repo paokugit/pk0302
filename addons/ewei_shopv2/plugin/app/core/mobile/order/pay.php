@@ -273,7 +273,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
             }
 			$fee = floatval($ps["fee"]);
 			$shopset = m("common")->getSysset("shop");
-			$result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee ));
+			$result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee ),5);
 			$this->creditpay_log($openid, $fee, $orderid,'credit');
 			if( is_error($result) ) 
 			{
@@ -322,7 +322,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
                 }
                 $fee = floatval($ps["fee"]);
                 $shopset = m("common")->getSysset("shop");
-                $result = m("member")->setCredit($openid, "RVC", 0 - $fee, array($_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee));
+                $result = m("member")->setCredit($openid, "RVC", 0 - $fee, array($_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee),5);
                 $this->creditpay_log($openid, $fee, $orderid,'RVC');
                 if (is_error($result)) {
                     app_error(AppError::$OrderPayFail, $result["message"]);
@@ -802,7 +802,7 @@ class Pay_EweiShopV2Page extends AppMobilePage
             }
             $fee = floatval($ps["fee"]);
             $shopset = m("common")->getSysset("shop");
-            $result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee ));
+            $result = m("member")->setCredit($openid, "credit2", 0 - $fee, array( $_W["member"]["uid"], $shopset["name"] . "APP 消费" . $fee ),5);
             $this->creditpay_log($openid, $fee, $orderid);
             if( is_error($result) )
             {

@@ -522,8 +522,8 @@ class Log_EweiShopV2Page extends WebPage
 		if( 0 < $log["money"] ) 
 		{
 		    if ($log["title"]=="折扣宝提现"){
-			m("member")->setCredit($log["openid"], "credit3", $log["money"], array( 0, "折扣宝提现退回" ));
-			m("member")->setCredit($log["openid"], "credit4", $log["money"], array( 0, "折扣宝提现退回" ));
+			m("member")->setCredit($log["openid"], "credit3", $log["money"], array( 0, "折扣宝提现退回" ),8);
+			m("member")->setCredit($log["openid"], "credit4", $log["money"], array( 0, "折扣宝提现退回" ),8);
 			
 		    }else{
 		        m("member")->setCredit($log["openid"], "credit2", $log["money"], array( 0, "余额提现退回" ));
