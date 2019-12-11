@@ -219,7 +219,7 @@ class Member_EweiShopV2Model
 		$member = $this->getMember($openid);
 		return $member["id"];
 	}
-	public function setCredit($openid = "", $credittype = "credit1", $credits = 0, $log = array( )) 
+	public function setCredit($openid = "", $credittype = "credit1", $credits = 0, $log = array( ),$remark_type = 0)
 	{
 		global $_W;
 		
@@ -320,9 +320,10 @@ class Member_EweiShopV2Model
             $log_data["remark"] = $log_data["remark"];
 			
 		}
-		$log_data["openid"]=$member["openid"];
-		$log_data["user_id"]=$member["id"];
-		
+		$log_data["openid"] = $member["openid"];
+		$log_data["user_id"] = $member["id"];
+		$log_data["remark_type"] = $remark_type;
+
 		pdo_insert("mc_credits_record", $log_data);
 		$member_log_table_flag = pdo_tableexists("ewei_shop_member_credit_record");
 		pdo_insert("ewei_shop_member_credit_record", $log_data);

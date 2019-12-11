@@ -110,7 +110,9 @@ class Shop_EweiShopV2Page extends AppMobilePage
      */
     public function shop_goods_comment_list()
     {
-
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m()->getLoginToken();
     }
 
     /**
