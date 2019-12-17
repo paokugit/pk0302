@@ -63,7 +63,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($goods_id)){
             apperror(1,"","商品id不可为空");
         }
-        $good=pdo_fetch("select id,description,ccate,title,freight,thumb_url,price,groupsprice,single,singleprice,groupnum,content,more_spec,merchid,gid from ".tablename("ewei_shop_groups_goods")." where id=:goods_id and status=1 and deleted=0",array(":goods_id"=>$goods_id));
+        $good=pdo_fetch("select id,description,ccate,title,freight,stock,thumb_url,price,groupsprice,single,singleprice,groupnum,content,more_spec,merchid,gid,quality,seven from ".tablename("ewei_shop_groups_goods")." where id=:goods_id and status=1 and deleted=0",array(":goods_id"=>$goods_id));
         if (empty($good)){
             apperror(1,"","商品不存在");
         }
@@ -75,15 +75,24 @@ class Index_EweiShopV2Page extends AppMobilePage
             apperror(1,"","用户不存在");
         }
         }
+        $good["services"]=array();
+        if ($good["quality"]==1){
+            $good["services"][]="正品保证";
+            unset($good["quality"]);
+        }
+        if ($good["seven"]==1){
+            $good["services"][]="七天无理由退换";
+            unset($good["seven"]);
+        }
         $thumb_url=iunserializer($good["thumb_url"]);
         $good["thumb_url"]=array();
         foreach ($thumb_url as $k=>$v){
-            $good["thumb_url"][$k]["image"]=tomedia($v);
+            $good["thumb_url"][$k]=tomedia($v);
         }
         if ($type==1){
             $good["content"]=m("appnews")->img($good["content"]);
             foreach ($good["content"] as $k=>$v){
-                $good["content"][$k]=tomedia($v);
+                $good["content"][$k]["image"]=tomedia($v);
             }
         }
         //获取商家
@@ -110,7 +119,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         }
         //获取拼团信息
         $good["group"]=array();
-        $good["group"]["count"]=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_groups_order")." where goodid=:goodid and status>0",array(":goodid"=>$goods_id)); 
+        $good["group"]["count"]=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_groups_order")." where goodid=:goodid and status>0 and endtime>:endtime",array(":goodid"=>$goods_id,":endtime"=>time())); 
         $good["group"]["list"]=m("appnews")->group_list($goods_id,0,2);
         
         //获取评价
@@ -137,8 +146,55 @@ class Index_EweiShopV2Page extends AppMobilePage
         if ($good["more_spec"]==0){
             apperror(0,"该商品无规格属性");
         }
-        $list=pdo_fetchall("select id,title,price,single_price,stock from ".tablename("ewei_shop_groups_goods_option")." where groups_goods_id=:groups_goods_id order by id asc",array(":groups_goods_id"=>$goods_id));
-        $res["list"]=$list;
+        $signal=$_GPC["single"];
+        if ($signal==1&&$good["single"]!=1){
+            apperror(1,"","该商品不可单购");
+        }
+        $res["goods"]["id"]=$good["id"];
+        $res["goods"]["marketprice"]=$signal?$good["singleprice"]:$good["groupsprice"];
+        $res["goods"]["thumb"]=tomedia($good["thumb"]);
+        $res["goods"]["total"]=$good["stock"];
+        $res["goods"]["maxprice"]=$signal?$good["singleprice"]:$good["groupsprice"];
+        $res["goods"]["minprice"]=$signal?$good["singleprice"]:$good["groupsprice"];
+        //获取规格
+        $res["specs"]=pdo_fetchall("select id,title from ".tablename("ewei_shop_goods_spec")." where goodsid=:goodsid order by id asc",array(":goodsid"=>$good["gid"]));
+        foreach ($res["specs"] as $k=>$v){
+          
+            $res["specs"][$k]["goodsid"]=$goods_id;
+            //获取规格列表
+            $res["specs"][$k]["items"]=pdo_fetchall("select id,specid,title,thumb from ".tablename("ewei_shop_goods_spec_item")." where specid=:specid order by id asc",array(":specid"=>$v["id"]));
+            foreach ($res["specs"][$k]["items"] as $kk=>$vv){
+                $res["specs"][$k]["items"][$kk]["thumb"]=tomedia($vv);
+            }
+        }
+        $res["options"]=pdo_fetchall("select * from ".tablename("ewei_shop_groups_goods_option")." where groups_goods_id=:groups_goods_id order by id asc",array(":groups_goods_id"=>$goods_id));
+        foreach ($res["options"] as $k=>$v){
+            $res["options"][$k]["goodsid"]=$v["groups_goods_id"];
+            if ($signal==1){
+                $res["options"][$k]["marketprice"]=$v["single_price"];
+                if ($v["single_price"]>$res["goods"]["maxprice"]){
+                    $res["goods"]["maxprice"]=$v["single_price"];
+                }
+                if ($v["single_price"]<$res["goods"]["minprice"]){
+                    $res["goods"]["minprice"]=$v["single_price"];
+                }
+            }else{
+                $res["options"][$k]["marketprice"]=$v["price"];
+                if ($v["price"]>$res["goods"]["maxprice"]){
+                    $res["goods"]["maxprice"]=$v["price"];
+                }
+                if ($v["price"]<$res["goods"]["minprice"]){
+                    $res["goods"]["minprice"]=$v["price"];
+                }
+            }
+           //获取图片
+           $option=pdo_get("ewei_shop_goods_option",array("id"=>$v["goods_option_id"]));
+           $res["options"][$k]["thumb"]=tomedia($option["thumb"]);
+        }
+        
+        
+//         $option=pdo_fetchall("select * from ".tablename("ewei_shop_groups_goods_option")." where ")
+        
         apperror(0,"",$res);
     }
     //拼团列表
@@ -153,15 +209,16 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($good)){
             apperror(1,"","商品不存在");
         }
-        $page=$_GPC["page"]?$_GPC["page"]:1;
-        $first=($page-1)*20;
-        $list=m("appnews")->group_list($goods_id,$first,20);
+        $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_groups_order")." where goodid=:goodid and status=1 and success=0 and heads=1 and is_team=1 and endtime>:endtime",array(":goodid"=>$goods_id,":endtime"=>time()));
+        
+//         $page=$_GPC["page"]?$_GPC["page"]:1;
+//         $first=($page-1)*20;
+        $list=m("appnews")->group_list($goods_id,0,$total);
         $res["list"]=$list;
-        $res["page"]=$page;
-        $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_groups_order")." where goodid=:goodid and status=1 and success=0 and heads=1 and is_team=1",array(":goodid"=>$goods_id));
-        $res["total"]=$total;
-        $res["pagesize"]=20;
-        $res["pagetotal"]=ceil($total/20);
+//         $res["page"]=$page;    
+//         $res["total"]=$total;
+//         $res["pagesize"]=20;
+//         $res["pagetotal"]=ceil($total/20);
         apperror(0,"",$res);
     }
     //评价列表
@@ -172,6 +229,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($goods_id)){
             apperror(1,"","商品id不可为空");
         }
+//         $openid=$_GPC["openid"]
         $page=$_GPC["page"]?$_GPC["page"]:1;
         $first=($page-1)*20;
         $label=$_GPC["label"]?$_GPC["label"]:"";

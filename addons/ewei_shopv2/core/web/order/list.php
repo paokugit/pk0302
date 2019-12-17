@@ -587,6 +587,7 @@ class List_EweiShopV2Page extends WebPage
 				$gi=0;
 				foreach( $order_goods as &$og ) 
 				{
+				   
 				    //获取商品售后
 				    if ($og["refundid"]!=0&&!empty($og["refundid"])){
 				        if (!in_array($og["refundid"], $good_refundid)){
@@ -599,7 +600,7 @@ class List_EweiShopV2Page extends WebPage
 				            }else{
 				                $good_refundid[$gi]["status"]=1;
 				            }
-				            $i+=1;
+				            $gi+=1;
 				        }
 				    }
 				    
@@ -720,6 +721,7 @@ class List_EweiShopV2Page extends WebPage
 					
 				}
 				//商品售后申请
+				
 				$value["good_refundid"]=$good_refundid;
 // 				var_dump($good_refundid);
 				unset($og);

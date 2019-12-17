@@ -608,21 +608,17 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        global $_GPC;
        //规格
        $spec_id=$_GPC["spec_id"];
-       
-           $count=count($spec_id);
-           if ($count==1){
-               $option=pdo_get("ewei_shop_goods_option",array("specs"=>$spec_id[0]));
-           }else {
-               $specs=implode("_", $spec_id);
-               $option=pdo_get("ewei_shop_goods_option",array("specs"=>$specs));
-           }
+       $cart_id=$_GPC["cart_id"];
+       $total=$_GPC["total"]?$_GPC["total"]:1;
+       $cart=pdo_get("ewei_shop_member_cart",array("id"=>$cart_id));
+          
+       $option=pdo_get("ewei_shop_goods_option",array("id"=>$spec_id,"goodsid"=>$cart["goodsid"]));
+          
 //            var_dump($option);
            if (empty($option)){
                apperror(1,"规格id不正确");
            }
-       $cart_id=$_GPC["cart_id"];
-       $total=$_GPC["total"]?$_GPC["total"]:1;
-       $cart=pdo_get("ewei_shop_member_cart",array("id"=>$cart_id));
+      
        if (empty($cart)){
            apperror(1,"购物车id不正确");
        }
@@ -671,7 +667,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
                pdo_delete("ewei_shop_member_cart",array("id"=>$cart_id));
                apperror(0,"",$list);
            }else{
-               apperror(1,"");
+               apperror(1,"更新失败！");
            }
        }
        
@@ -756,5 +752,118 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            $res["total"]=0;
        }
        apperror(0,"",$res);
+   }
+   //消息
+   public function news(){
+       global $_W;
+       global $_GPC;
+       $openid = $_GPC['openid'];
+       $type=$_GPC["type"]?$_GPC["type"]:0;//1表示app接口
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       if (!$member["openid"]){
+           $member["openid"]=0;
+       }
+       $list["logistic"]=0;
+       $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_notice")." where status=1");
+       //获取已读数据
+       $view=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_notice")." n left join ".tablename("ewei_shop_notice_view")." v on v.notice_id=n.id where n.status=1 and v.user_id=:user_id",array(":user_id"=>$member["id"]));
+       $list["notice"]=$total-$view;
+       //评论留言
+       $comment=pdo_fetchall("select *  from ".tablename("ewei_shop_member_drcomment")." where (comment_openid=:comment_openid or comment_openid=:user_id) and is_del=0 and is_view=0",array(":comment_openid"=>$member["openid"],":user_id"=>$member["id"]));
+//        var_dump($comment);
+       $i=0;
+       foreach ($comment as $k=>$v){
+           $log=pdo_fetch("select * from ".tablename("ewei_shop_member_drcomment")." where (openid=:openid or user_id=:user_id) and type=2 and parent_id=:parent_id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":parent_id"=>$v["id"]));
+           if (empty($log)){
+               $i=$i+1;
+           }
+       }
+       $list["comment"]=$i;
+       apperror(0,"",$list);
+   }
+   //系统消息
+   public function notice(){
+       global $_W;
+       global $_GPC;
+       $page=$_GPC["page"]?$_GPC["page"]:1;
+       $first=($page-1)*20;
+       $openid=$_GPC["openid"];
+       $type=$_GPC["type"]?$_GPC["type"]:0;//1表示app接口
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       if (!$member["openid"]){
+           $member["openid"]=0;
+       }
+       $list=pdo_fetchall("select id,title,thumb from ".tablename("ewei_shop_notice")." where status=1 order by displayorder desc limit ".$first.",20");
+       foreach ($list as $k=>$v){
+           $list[$k]["thumb"]=tomedia($v["thumb"]);
+           $log=pdo_get("ewei_shop_notice_view",array("user_id"=>$member["id"],"notice_id"=>$v["id"]));
+           if ($log){
+               $list[$k]["view"]=1;
+           }else{
+               $list[$k]["view"]=0;
+           }
+       }
+       $res["list"]=$list;
+       $res["page"]=$page;
+       $res["pagesize"]=20;
+       $res["total"]=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_notice")." where status=1");
+       $res["pagetotal"]=ceil($res["total"]/20);
+       apperror(0,"",$res);
+   }
+   //详情
+   public function notice_detail(){
+       global $_W;
+       global $_GPC;
+       $openid=$_GPC["openid"];
+       $type=$_GPC["type"]?$_GPC["type"]:0;//1表示app接口
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       $notice_id=$_GPC["notice_id"];
+       $notice=pdo_get("ewei_shop_notice",array("id"=>$notice_id,"status"=>1));
+       if ($notice){
+           $log=pdo_get("ewei_shop_notice_view",array("notice_id"=>$notice_id,"user_id"=>$member["id"]));
+           if (empty($log)){
+               $l["user_id"]=$member["id"];
+               $l["notice_id"]=$notice_id;
+               $l["createtime"]=time();
+               pdo_insert("ewei_shop_notice_view",$l);  
+           }
+           pdo_update('ewei_shop_notice',['click_num'=>bcadd($notice['click_num'],1)],['id'=>$notice_id]);
+           $notice["thumb"]=tomedia($notice["thumb"]);
+           $res["detail"]=$notice;
+           apperror(0,"",$res);
+       }else{
+           apperror(1,"id不正确");
+       }
+   }
+   //通知消息--全部已读
+   public function notice_read(){
+       global $_W;
+       global $_GPC;
+       $openid=$_GPC["openid"];
+       $type=$_GPC["type"]?$_GPC["type"]:0;//1表示app接口
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       $notice_id=$_GPC["notice_id"];
+       if (!is_array($notice_id)){
+           apperror(1,"","消息id必须为数组");
+       }
+       foreach ($notice_id as $k=>$v){
+           $l["user_id"]=$member["id"];
+           $l["notice_id"]=$v;
+           $l["createtime"]=time();
+           pdo_insert("ewei_shop_notice_view",$l);  
+       }
+       apperror(0,"成功");
    }
 }

@@ -182,9 +182,9 @@ class App_EweiShopV2Model
             $length = mb_strlen($item['nickname']);
             //如果昵称长度小于等于3  就截取1位 并拼接***   如果昵称大于4  截取第1位和最后1位
             if($length <= 3){
-                $item['nickname'] = mb_substr($item['nickname'],0,1)."***";
+                $item['nickname'] = mb_substr($item['nickname'],0,1,'utf-8')."***";
             }elseif($length >= 4){
-                $item['nickname'] = mb_substr($item['nickname'],0,1)."***".mb_substr($item['nickname'],-1,1);
+                $item['nickname'] = mb_substr($item['nickname'],0,1,'utf-8')."***".mb_substr($item['nickname'],-1,1,'utf-8');
             }
         }
         $data['rank'] = ['log'=>$log,'page'=>$page,'total'=>$total];

@@ -37,6 +37,8 @@ class Notice_EweiShopV2Page extends AppMobilePage
 		$id = intval($_GPC['id']);
 		$merchid = intval($_GPC['merchid']);
 		$merch_plugin = p('merch');
+		$openid=$_GPC["openid"];
+		$member=m("appnews")->member($openid,0);
 		if ($merch_plugin && !empty($merchid)) {
 			$notice = pdo_fetch('select * from ' . tablename('ewei_shop_merch_notice') . ' where id=:id and uniacid=:uniacid and merchid=:merchid and status=1', array(':id' => $id, ':uniacid' => $_W['uniacid'], ':merchid' => $merchid));
 		}
@@ -44,6 +46,10 @@ class Notice_EweiShopV2Page extends AppMobilePage
 			$notice = pdo_fetch('select * from ' . tablename('ewei_shop_notice') . ' where id=:id and uniacid=:uniacid and status=1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
 			//浏览下详情 加一次点击浏览次数
 			pdo_update('ewei_shop_notice',['click_num'=>bcadd($notice['click_num'],1)],['id'=>$id]);
+			$l["user_id"]=$member["id"];
+			$l["notice_id"]=$id;
+			$l["createtime"]=time();
+			pdo_insert("ewei_shop_notice_view",$l);  
 		}
 		app_json(array(
 			'notice' => array('title' => $notice['title'], 'createtime' => date('Y-m-d H:i', $notice['createtime']), 'detail' => $notice['detail'])

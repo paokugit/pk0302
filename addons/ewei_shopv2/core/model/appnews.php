@@ -32,10 +32,11 @@ class Appnews_EweiShopV2Model
    //拼团列表
    public function group_list($goods_id,$first,$total){
        $good=pdo_fetch("select id,ccate,title,freight,thumb_url,price,groupsprice,single,singleprice,groupnum,content,more_spec,merchid,gid from ".tablename("ewei_shop_groups_goods")." where id=:goods_id and status=1 and deleted=0",array(":goods_id"=>$goods_id));
-       $group=pdo_fetchcolumn("select * from ".tablename("ewei_shop_groups_order")." where goodid=:goodid and status=1 and success=0 and heads=1 and is_team=1 order by createtime desc limit ".$first.",".$total,array(":goodid"=>$goods_id));
+       $group=pdo_fetchall("select * from ".tablename("ewei_shop_groups_order")." where goodid=:goodid and status=1 and success=0 and heads=1 and is_team=1 and endtime>:endtime order by createtime desc limit ".$first.",".$total,array(":goodid"=>$goods_id,":endtime"=>time()));
+//        var_dump($group);die;
        $list=array();
        foreach ($group as $k=>$v){
-           $list[$k]["teamid"]=$group["id"];
+           $list[$k]["teamid"]=$v["id"];
            $list[$k]["endtime"]=$v["endtime"];
            if ($v["user_id"]){
                $m=pdo_get("ewei_shop_member",array("id"=>$v["user_id"]));
@@ -45,8 +46,8 @@ class Appnews_EweiShopV2Model
            $list[$k]["nickname"]=$m["nickname"]?$m["nickname"]:"昵称";
            //获取总数量
            $count=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_groups_order")." where is_team=1 and status=1 and teamid=:teamid",array(":teamid"=>$v["id"]));
-           $list[$k]["count"]=$count;
-           $list[$k]["number"]=$good["groupnum"]-$count;
+           $list[$k]["count"]=$count+1;
+           $list[$k]["number"]=$good["groupnum"]-$count-1;
            //获取头像
            $team=pdo_fetchall("select openid,user_id from ".tablename("ewei_shop_group_order")." where status=1 and (id=:teamid or teamid=:teamid) and is_team=1",array(":teamid"=>$v["id"]));
            $good["group"]["list"][$k]["avatar"]=array();
@@ -146,4 +147,5 @@ class Appnews_EweiShopV2Model
       
        return $res;
    }
+   
 }

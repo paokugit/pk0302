@@ -694,12 +694,14 @@ class My_EweiShopV2Page extends AppMobilePage{
         if (!$member){
             apperror(1,"不存在该用户");
         }
-        
+        if (empty($member["openid"])){
+            $member["openid"]=0;
+        }
         $page=$_GPC["page"];
         $first=($page-1)*8;
 //         $list=pdo_fetchall("select id,openid,content,is_del,is_view,create_time,comment_openid,type,classA_id,parent_id from ".tablename("ewei_shop_member_drcomment")." where comment_openid=:comment_openid order by create_time desc limit ".$first.",8",array(":comment_openid"=>$openid));
         $list=pdo_fetchall("select id,openid,user_id,content,is_del,is_view,create_time,comment_openid,type,classA_id,parent_id from ".tablename("ewei_shop_member_drcomment")." where (comment_openid=:comment_openid or comment_openid=:user_id) order by create_time desc limit ".$first.",8",array(":comment_openid"=>$member["openid"],":user_id"=>$member["id"]));
-        $a=pdo_fetch("select count(*) as a from ".tablename("ewei_shop_member_drcomment")." where comment_openid=:comment_openid",array(":comment_openid"=>$openid));
+        $a=pdo_fetch("select count(*) as a from ".tablename("ewei_shop_member_drcomment")." where (comment_openid=:comment_openid or comment_openid=:user_id)",array(":comment_openid"=>$member["openid"],":user_id"=>$member["id"]));
         foreach ($list as $k=>$v){
             $list[$k]["create_time"]=$this->timeFormat($v["create_time"]);
             //获取评论人信息

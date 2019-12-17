@@ -228,7 +228,6 @@ class Member_EweiShopV2Model
 		$uid = mc_openid2uid($openid);
 		}
 		$member = $this->getMember($openid);
-// 		var_dump($openid);
 		
 		if( empty($uid) ) 
 		{
@@ -245,6 +244,7 @@ class Member_EweiShopV2Model
 				$log = array( 0, $log );
 			}
 		}
+	
 // 		if( $credittype == "credit1" && empty($log[0]) && 0 < $credits ) 
 // 		{
 // 			$shopset = m("common")->getSysset("trade");

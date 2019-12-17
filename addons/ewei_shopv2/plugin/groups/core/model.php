@@ -90,8 +90,10 @@ class GroupsModel extends PluginModel
 		$record = array( );
 		$record["status"] = "1";
 		$record["type"] = $type;
+		$goods=pdo_get("ewei_shop_groups_goods",array("id"=>$order["goodid"]));
 		$params = array( ":teamid" => $order["teamid"], ":uniacid" => $uniacid, ":success" => 0, ":status" => 1 );
-		pdo_update("ewei_shop_groups_order", array( "pay_type" => $type, "status" => 1, "paytime" => TIMESTAMP, "starttime" => TIMESTAMP, "apppay" => ($app ? 1 : 0) ), array( "orderno" => $orderno ));
+		$time=date('Y-m-d H:i:s', strtotime('+'.$goods["endtime"].'hour'));
+		pdo_update("ewei_shop_groups_order", array( "pay_type" => $type, "status" => 1, "paytime" => TIMESTAMP, "starttime" => TIMESTAMP,"endtime"=>$time, "apppay" => ($app ? 1 : 0) ), array( "orderno" => $orderno ));
 		pdo_update("ewei_shop_groups_paylog", array( "status" => 1 ), array( "tid" => $orderno ));
 		$this->sendTeamMessage($order["id"]);
 		if( !empty($order["is_team"]) ) 
