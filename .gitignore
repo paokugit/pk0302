@@ -22,3 +22,4 @@ favicon.ico
 1.微擎安装教程.docx
 .DS_Store
 __MACOSX
+*.sql
