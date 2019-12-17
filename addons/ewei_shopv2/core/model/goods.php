@@ -571,14 +571,16 @@ class Goods_EweiShopV2Model
 		$count = pdo_fetchcolumn('select count(*) from ' . tablename('ewei_shop_member_favorite') . ' where goodsid=:goodsid and deleted=0 and (openid=:openid or user_id = :user_id) and uniacid=:uniacid limit 1', array(':goodsid' => $id, ':openid' => $member['openid'], ':user_id' => $member['id'], ':uniacid' => $uniacid));
 		return 0 < $count ? 1 : 0;
 	}
-	public function addHistory($goodsid = 0) 
+
+	public function addHistory($user_id,$goodsid = 0)
 	{
 		global $_W;
+		$member = m('member')->getMember($user_id);
 		pdo_query('update ' . tablename('ewei_shop_goods') . ' set viewcount=viewcount+1 where id=:id and uniacid=\'' . $_W[uniacid] . '\' ', array(':id' => $goodsid));
-		$history = pdo_fetch('select id,times from ' . tablename('ewei_shop_member_history') . ' where goodsid=:goodsid and uniacid=:uniacid and openid=:openid limit 1', array(':goodsid' => $goodsid, ':uniacid' => $_W['uniacid'], ':openid' => $_W['openid']));
+		$history = pdo_fetch('select id,times from ' . tablename('ewei_shop_member_history') . ' where goodsid=:goodsid and uniacid=:uniacid and (openid=:openid or user_id = :user_id) limit 1', array(':goodsid' => $goodsid, ':uniacid' => $_W['uniacid'], ':openid' => $member['openid'],':user_id'=>$member['id']));
 		if (empty($history)) 
 		{
-			$history = array('uniacid' => $_W['uniacid'], 'openid' => $_W['openid'], 'goodsid' => $goodsid, 'deleted' => 0, 'createtime' => time(), 'times' => 1);
+			$history = array('uniacid' => $_W['uniacid'], 'openid' => $member['openid'], 'user_id' => $member['id'], 'goodsid' => $goodsid, 'deleted' => 0, 'createtime' => time(), 'times' => 1);
 			pdo_insert('ewei_shop_member_history', $history);
 		}
 		else 
@@ -586,19 +588,20 @@ class Goods_EweiShopV2Model
 			pdo_update('ewei_shop_member_history', array('deleted' => 0, 'times' => $history['times'] + 1), array('id' => $history['id']));
 		}
 	}
-	public function getCartCount($isnewstore = 0) 
+	public function getCartCount($user_id,$isnewstore = 0)
 	{
+		$member = m('member')->getMember($user_id);
 		global $_W;
-		global $_GPC;
 		$paras = array(':uniacid' => $_W['uniacid']);
-		$paras[':openid'] = $_W['openid'];
+		$paras[':openid'] = $member['openid'];
+		$paras[':user_id'] = $member['id'];
 		$sqlcondition = '';
 		if ($isnewstore != 0) 
 		{
 			$sqlcondition = ' and isnewstore=:isnewstore';
 			$paras[':isnewstore'] = $isnewstore;
 		}
-		$count = pdo_fetchcolumn('select sum(total) from ' . tablename('ewei_shop_member_cart') . ' where uniacid=:uniacid and openid=:openid ' . $sqlcondition . ' and deleted=0 limit 1', $paras);
+		$count = pdo_fetchcolumn('select sum(total) from ' . tablename('ewei_shop_member_cart') . ' where uniacid=:uniacid and (openid=:openid or user_id = :user_id) ' . $sqlcondition . ' and deleted=0 limit 1', $paras);
 		return $count;
 	}
 	public function getSpecThumb($specs) 
