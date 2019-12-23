@@ -17,21 +17,21 @@ class Order_EweiShopV2Page extends AppMobilePage
        if(empty($user_id)) app_error1(2,'登录失效',[]);
        //商品id
        $id = $_GPC['id'];
-//       $goods = $_GPC['goods'] ? $_GPC['goods'] : [];
-//       $packageid = $_GPC['packageid'] ? $_GPC['packageid'] : 0;
+       $goods = $_GPC['goods'] ? $_GPC['goods'] : [];
+       $packageid = $_GPC['packageid'] ? $_GPC['packageid'] : 0;
        //商品属性id
        $optionid = $_GPC['optionid'];
-//       $bargain_id = $_GPC['bargain_id'] ? $_GPC['bargain_id'] : 0;
+       $bargain_id = $_GPC['bargain_id'] ? $_GPC['bargain_id'] : 0;
        //购买数量
        $total = $_GPC['total'];
-//       $giftid = $_GPC['giftid'] ? $_GPC['giftid'] : 0;
-//       $fromquick = $_GPC['fromquick'] ? $_GPC['fromquick'] : 0;
-//       $selectDate = $_GPC['selectDate'] ? $_GPC['selectDate'] : 0;
-//       $gdid = $_GPC['gdid'] ? $_GPC['gdid'] :0;
+       $giftid = $_GPC['giftid'] ? $_GPC['giftid'] : 0;
+       $fromquick = $_GPC['fromquick'] ? $_GPC['fromquick'] : 0;
+       $selectDate = $_GPC['selectDate'] ? $_GPC['selectDate'] : 0;
+       $gdid = $_GPC['gdid'] ? $_GPC['gdid'] :0;
        //购物车id
        $cartid = $_GPC['cartid'] ? $_GPC['cardid'] : 0;
-//       $data = m('app')->order_create1($user_id,$id,$goods,$packageid,$optionid,$bargain_id,$total,$giftid,$fromquick,$selectDate,$gdid,$cartid);
-       $data = m('app')->order_create($user_id,$id,$optionid,$total,$cartid);
+       $data = m('app')->order_create($user_id,$id,$goods,$packageid,$optionid,$bargain_id,$total,$giftid,$fromquick,$selectDate,$gdid,$cartid);
+       //$data = m('app')->order_create($user_id,$id,$optionid,$total);
        app_error1($data['status'],$data['msg'],$data['data']);
    }
 
@@ -47,16 +47,16 @@ class Order_EweiShopV2Page extends AppMobilePage
        if(empty($user_id)) app_error1(2,'登录失效',[]);
        //要切换的地址id
        $addressid = $_GPC['address_id'];
-       //商品信息
-       $goods = $_GPC['goods'];
+       //商品信息  goodsid  total  optionid
+       $goods = $_GPC['goods'] ? $_GPC['goods'] : [];
        //优惠券id
-       $couponid = $_GPC['couponid'];
-       $packageid = $_GPC['packageid'];
+       $couponid = $_GPC['couponid'] ? $_GPC['couponid'] : 0;
+       $packageid = $_GPC['packageid'] ? $_GPC['packageid'] : 0;
        //总价
-       $totalprice = $_GPC['totalprice'];
-       $dflag = $_GPC['dflag'];
-       $cardid = $_GPC['cardid'];
-       $bargain_id = $_GPC['bargain_id'];
+       $totalprice = $_GPC['totalprice'] ? $_GPC['totalprice'] : 0;
+       $dflag = $_GPC['dflag'] ? $_GPC['dflag'] : 0;
+       $cardid = $_GPC['cardid'] ? $_GPC['cardid'] : 0;
+       $bargain_id = $_GPC['bargain_id'] ? $_GPC['bargain_id'] :0;
        $data = m('app')->order_caculate($user_id,$addressid,$goods,$packageid,$totalprice,$dflag,$cardid,$bargain_id,$couponid);
        app_error1($data['status'],$data['msg'],$data['data']);
    }
@@ -73,14 +73,14 @@ class Order_EweiShopV2Page extends AppMobilePage
        if(empty($user_id)) app_error1(2,'登录失效',[]);
        $address_id = $_GPC['address_id'];
        $goods = $_GPC['goods'];
-       $cardid = $_GPC['cardid'];
-       $packageid = $_GPC['packageid'];
+       $cardid = $_GPC['cardid'] ? $_GPC['cardid'] : 0;
+       $packageid = $_GPC['packageid'] ? $_GPC['packageid'] : 0;
        $dispatchid = $_GPC['dispatchid'];
        $dispatchtype = $_GPC['dispatchtype'];
-       $carrierid = $_GPC['carrierid'];
-       $bargain_id = $_GPC['bargain_id'];
+       $carrierid = $_GPC['carrierid'] ? $_GPC['carrierid'] : 0;
+       $bargain_id = $_GPC['bargain_id'] ? $_GPC['bargain_id'] : 0;
        $giftid = $_GPC['giftid'];
-       $gdid = $_GPC['giftid'];
+       $gdid = $_GPC['giftid'] ? $_GPC['giftid'] : 0;
        $carrier = $_GPC['carriers'];
        $mid = $_GPC['mid'];
        $invoicename = $_GPC['invoicename'];

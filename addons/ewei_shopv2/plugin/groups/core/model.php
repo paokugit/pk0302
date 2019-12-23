@@ -89,7 +89,12 @@ class GroupsModel extends PluginModel
 		}
 		$record = array( );
 		$record["status"] = "1";
+		if ($type=="credit2"){
+		$record["type"] = "credit";
+		$type="credit";
+		}else{
 		$record["type"] = $type;
+		}
 		$goods=pdo_get("ewei_shop_groups_goods",array("id"=>$order["goodid"]));
 		$params = array( ":teamid" => $order["teamid"], ":uniacid" => $uniacid, ":success" => 0, ":status" => 1 );
 		$time=date('Y-m-d H:i:s', strtotime('+'.$goods["endtime"].'hour'));

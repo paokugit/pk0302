@@ -51,6 +51,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $choice = m('app')->choice();
         //消息弹窗
         $level = m('app')->notice($user_id,$level_id);
+        //app_error1(0,'',['bushu'=>$bushu,'merch'=>$merch,'near'=>$near,'seckill'=>$seckill,'look_buy'=>$look_buy,'every'=>$every,'choice'=>$choice,'level'=>$level]);
         app_error1(0,'',['bushu'=>$bushu,'icon'=>$icon,'merch'=>$merch,'near'=>$near,'seckill'=>$seckill,'look_buy'=>$look_buy,'every'=>$every,'choice'=>$choice,'level'=>$level]);
     }
 

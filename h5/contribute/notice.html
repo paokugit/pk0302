@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1, user-scalable=0">
+    <link rel="stylesheet" type="text/css" href="../media.css" />
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: #FFFFFF;
+            font-size: 62.5%;
+        }
+        .headline{
+            margin: 1rem;
+            font-size: 1.8rem;
+            text-align: center;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+        }
+        .news-time{
+            margin: 0 20px;
+            padding-bottom: 10px;
+            text-align: center;
+            font-size: 1.3rem;
+            color: #b8b8b8;
+            border-bottom: 1px solid #f1f1f1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="details">
+        <div class="headline"></div>
+        <div class="news-time"></div>
+        <div class="news-text"></div>
+    </div>
+
+
+    <script src="../jquery-1.8.0.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../share.js"></script>
+    <script>
+        console.log(n);
+        var url = window.location.href;
+        var theRequest = new Object();
+        var ind = url.indexOf("?")+1;
+        var str = url.substr(ind);
+        var arr = str.split('&');
+        for ( var i = 0; i < arr.length; i++) {
+            theRequest[arr[i].split("=")[0]] = unescape(arr[i].split("=")[1]);  
+        }
+
+        $.ajax({
+            url: n + '/app/ewei_shopv2_api.php?i=1&r=app.personcenter.notice_detail&comefrom=wxapp',
+            dataType: 'json', //服务器返回json格式数据
+            type: 'POST', //HTTP请求类型
+            data: {
+                openid: theRequest.openid,
+                type: theRequest.type,
+                notice_id: theRequest.notice_id
+            },
+            success: function (data) {
+                console.log(data);
+                if (data.error == 0) {
+                    $('.headline').text(data.data.detail.title);
+                    $('.news-time').text('发布时间：'+data.data.detail.createtime);
+                    $('.news-text').html(data.data.detail.detail);
+                } else if (data.error == 1) {
+                    alert(data.message);
+                }
+            },
+            error: function (xhr, type, errorThrown) {
+                console.log('456');
+            }
+        });
+
+    </script>
+</body>
+
+</html>

@@ -2051,6 +2051,7 @@ class Goods_EweiShopV2Page extends AppMobilePage
     /**
      * 可购买的会员级别
      * @param $cids
+     * @return string
      */
     public function canByLevels($cids){
         if(count($cids)>1 && in_array(1,$cids)) return "健康达人以上级别专享";

@@ -642,6 +642,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        $my=pdo_fetch("select * from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and goodsid=:goodsid and optionid=:optionid and deleted=0 and id!=:id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":goodsid"=>$cart["goodsid"],":optionid"=>$option["id"],":id"=>$cart_id));
        $d["optionid"]=$option["id"];
        $d["total"]=$total;
+       $d["marketprice"]=$option["marketprice"];
        }else{
            $my=pdo_fetch("select * from ".tablename("ewei_shop_member_cart")." where (openid=:openid or user_id=:user_id) and goodsid=:goodsid  and deleted=0 and id!=:id",array(":openid"=>$member["openid"],":user_id"=>$member["id"],":goodsid"=>$cart["goodsid"],":id"=>$cart_id));
            
@@ -799,7 +800,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        if (!$member["openid"]){
            $member["openid"]=0;
        }
-       $list=pdo_fetchall("select id,title,thumb from ".tablename("ewei_shop_notice")." where status=1 order by displayorder desc limit ".$first.",20");
+       $list=pdo_fetchall("select id,title,thumb,createtime from ".tablename("ewei_shop_notice")." where status=1 order by displayorder desc limit ".$first.",20");
        foreach ($list as $k=>$v){
            $list[$k]["thumb"]=tomedia($v["thumb"]);
            $log=pdo_get("ewei_shop_notice_view",array("user_id"=>$member["id"],"notice_id"=>$v["id"]));
@@ -808,7 +809,12 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            }else{
                $list[$k]["view"]=0;
            }
+           $list[$k]["createtime"]=date("y/m/d",$v["createtime"]);
+           $list[$k]["source"]="来自跑库";
+           $list[$k]["type"]="系统通知";
+           $list[$k]["url"]="http://192.168.3.102/h5/contribute/notice.html";
        }
+       
        $res["list"]=$list;
        $res["page"]=$page;
        $res["pagesize"]=20;
@@ -818,6 +824,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
    }
    //详情
    public function notice_detail(){
+       header('Access-Control-Allow-Origin:*');
        global $_W;
        global $_GPC;
        $openid=$_GPC["openid"];
@@ -838,6 +845,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            }
            pdo_update('ewei_shop_notice',['click_num'=>bcadd($notice['click_num'],1)],['id'=>$notice_id]);
            $notice["thumb"]=tomedia($notice["thumb"]);
+           $notice["createtime"]=date("Y-m-d H:i:s",$notice["createtime"]);
            $res["detail"]=$notice;
            apperror(0,"",$res);
        }else{
@@ -854,15 +862,17 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        if (!$member){
            apperror(1,"用户不存在");
        }
-       $notice_id=$_GPC["notice_id"];
-       if (!is_array($notice_id)){
-           apperror(1,"","消息id必须为数组");
-       }
-       foreach ($notice_id as $k=>$v){
+       $list=pdo_fetchall("select * from ".tablename("ewei_shop_notice")." where status=1 ");
+       
+       foreach ($list as $k=>$v){
+           $log=pdo_get("ewei_shop_notice_view",array("notice_id"=>$v["id"],"user_id"=>$member["id"]));
+           if (empty($log)){
            $l["user_id"]=$member["id"];
-           $l["notice_id"]=$v;
+           $l["notice_id"]=$v["id"];
            $l["createtime"]=time();
            pdo_insert("ewei_shop_notice_view",$l);  
+           }
+          
        }
        apperror(0,"成功");
    }

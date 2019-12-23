@@ -69,6 +69,17 @@
             </div>
 	</div>
 	<div class="form-group">
+		<label class="col-sm-2 control-label must">购买权限</label>
+		<div class="col-sm-7"  style="padding-right:0;" >
+                 <select name="level" style="width:150px;height:30px;">
+                  <option value="0">全部</option>
+                  {loop $levels $level}
+				<option value="{$level['id']}" {if $detail['level']==$level['id']}selected{/if}>{$level['levelname']}</option>
+				{/loop}
+                 </select>
+            </div>
+	</div>
+	<div class="form-group">
 		<label class="col-sm-2 control-label must">商品详情</label>
 		<div class="col-sm-9 col-xs-12">
 			{$detail["appintroduce"]}

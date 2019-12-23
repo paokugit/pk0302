@@ -448,10 +448,13 @@ class Order_EweiShopV2Page extends MerchWebPage
 			show_json(1);
 		}
 		$address = iunserializer($item["address"]);
-		if( !is_array($address) ) 
+		if( !is_array($address)||empty($address) ) 
 		{
 			$address = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_member_address") . " WHERE id = :id and uniacid=:uniacid", array( ":id" => $item["addressid"], ":uniacid" => $_W["uniacid"] ));
+// 		    var_dump($address);
 		}
+// 		var_dump($item["addressid"]);
+// 		var_dump($address);
 		$express_list = m("express")->getExpressList();
 		include($this->template());
 	}
@@ -514,7 +517,7 @@ class Order_EweiShopV2Page extends MerchWebPage
 			}
 		}
 		$address = iunserializer($item["address"]);
-		if( !is_array($address) ) 
+		if( !is_array($address)||empty($address) ) 
 		{
 			$address = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_member_address") . " WHERE id = :id and uniacid=:uniacid", array( ":id" => $item["addressid"], ":uniacid" => $_W["uniacid"] ));
 		}
