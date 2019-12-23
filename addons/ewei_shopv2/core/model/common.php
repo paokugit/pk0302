@@ -194,6 +194,7 @@ class Common_EweiShopV2Model
 		m("cache")->set("sysset", $setdata, $uniacid);
 		$this->setGlobalSet($uniacid);
 	}
+
 	public function setGlobalSet($uniacid = 0) 
 	{
 		$sysset = $this->getSysset("", $uniacid);
@@ -209,6 +210,14 @@ class Common_EweiShopV2Model
 		m("cache")->set("globalset", $sysset, $uniacid);
 		return $sysset;
 	}
+
+    /**
+     * @param $params
+     * @param array $alipay
+     * @param int $type
+     * @param string $openid
+     * @return array
+     */
 	public function alipay_build($params, $alipay = array( ), $type = 0, $openid = "") 
 	{
 		global $_W;
@@ -357,6 +366,12 @@ class Common_EweiShopV2Model
 		$set["sign"] = md5($string);
 		return array( "url" => ALIPAY_GATEWAY . "?" . http_build_query($set, "", "&") );
 	}
+
+    /**
+     * @param array $params
+     * @param null $return
+     * @return array|mixed
+     */
 	public function publicAliPay($params = array( ), $return = NULL) 
 	{
 		if( is_numeric($params["sign_type"]) ) 
@@ -425,6 +440,12 @@ class Common_EweiShopV2Model
 		$result = json_decode(iconv("GBK", "UTF-8//IGNORE", $response["content"]), true);
 		return $result;
 	}
+
+    /**
+     * @param $key
+     * @param bool $public
+     * @return mixed|string
+     */
 	public function chackKey($key, $public = true) 
 	{
 		if( empty($key) ) 
@@ -451,6 +472,12 @@ class Common_EweiShopV2Model
 		$key = wordwrap($key, 64, "\n", true);
 		return str_replace("{key}", $key, $head_end);
 	}
+
+    /**
+     * @param $params
+     * @param $config
+     * @return array|mixed
+     */
 	public function AliPayBarcode($params, $config) 
 	{
 		global $_W;
@@ -490,6 +517,12 @@ class Common_EweiShopV2Model
 		}
 		return error($result[$key]["code"], $result[$key]["msg"] . ":" . $result[$key]["sub_msg"]);
 	}
+
+    /**
+     * @param $params
+     * @param $config
+     * @return array|mixed
+     */
 	public function AliPayWap($params, $config) 
 	{
 		global $_W;
@@ -508,6 +541,12 @@ class Common_EweiShopV2Model
 		$result = $this->publicAliPay($config, 1);
 		return $result;
 	}
+
+    /**
+     * @param $out_trade_no
+     * @param $config
+     * @return array|mixed
+     */
 	public function AliPayQuery($out_trade_no, $config) 
 	{
 		$biz_content = array( );
@@ -541,6 +580,12 @@ class Common_EweiShopV2Model
 		}
 		return error($result[$key]["code"], $result[$key]["msg"] . ":" . $result[$key]["sub_msg"]);
 	}
+
+    /**
+     * @param $out_trade_no
+     * @param $config
+     * @return array|mixed
+     */
 	public function AliPayRefundQuery($out_trade_no, $config) 
 	{
 		$biz_content = array( );
@@ -560,6 +605,12 @@ class Common_EweiShopV2Model
 		}
 		return error($result[$key]["code"], $result[$key]["msg"] . ":" . $result[$key]["sub_msg"]);
 	}
+
+    /**
+     * @param $app_code
+     * @param $config
+     * @return array|mixed
+     */
 	public function AlipayOpenAuthTokenAppRequest($app_code, $config) 
 	{
 		$biz_content = array( );
@@ -579,6 +630,12 @@ class Common_EweiShopV2Model
 		}
 		return error($result[$key]["code"], $result[$key]["msg"] . ":" . $result[$key]["sub_msg"]);
 	}
+
+    /**
+     * @param $app_auth_token
+     * @param $config
+     * @return array|mixed
+     */
 	public function AlipayOpenAuthTokenAppQueryRequest($app_auth_token, $config) 
 	{
 		$biz_content = array( );
@@ -597,6 +654,11 @@ class Common_EweiShopV2Model
 		}
 		return error($result[$key]["code"], $result[$key]["msg"] . ":" . $result[$key]["sub_msg"]);
 	}
+
+    /**
+     * @param $arr
+     * @return array|string
+     */
 	public function ToXml($arr) 
 	{
 		if( !is_array($arr) || count($arr) <= 0 ) 
@@ -618,6 +680,11 @@ class Common_EweiShopV2Model
 		$xml .= "</xml>";
 		return $xml;
 	}
+
+    /**
+     * @param $xml
+     * @return array|mixed
+     */
 	public function FromXml($xml) 
 	{
 		if( !$xml ) 
@@ -628,6 +695,11 @@ class Common_EweiShopV2Model
 		$arr = json_decode(json_encode(simplexml_load_string($xml, "SimpleXMLElement", LIBXML_NOCDATA)), true);
 		return $arr;
 	}
+
+    /**
+     * @param $arr
+     * @return string
+     */
 	public function ToUrlParams($arr) 
 	{
 		$buff = "";
@@ -641,11 +713,21 @@ class Common_EweiShopV2Model
 		$buff = trim($buff, "&");
 		return $buff;
 	}
+
+    /**
+     * @param $title
+     * @return null|string|string[]
+     */
 	public function changeTitle($title) 
 	{
 		$title = preg_replace("/[^\\x{4e00}-\\x{9fa5}A-Za-z0-9_]/u", "", $title);
 		return $title;
 	}
+
+    /**
+     * @param bool $isapp
+     * @return array|null
+     */
 	public function public_build($isapp = false) 
 	{
 		global $_W;
@@ -672,6 +754,13 @@ class Common_EweiShopV2Model
 		$this->public_build = array( $set, $payments );
 		return $this->public_build;
 	}
+
+    /**
+     * @param $params
+     * @param $wechat
+     * @param int $type
+     * @return array|mixed
+     */
 	public function wechat_build($params, $wechat, $type = 0) 
 	{
 		global $_W;
@@ -728,6 +817,13 @@ class Common_EweiShopV2Model
 		$payment["apikey"] = trim($wechat["apikey"]);
 		return $this->wechat_jspay($params, $payment, $type);
 	}
+
+    /**
+     * @param $params
+     * @param $wechat
+     * @param int $type
+     * @return array
+     */
 	public function wechat_jspay($params, $wechat, $type = 0) 
 	{
 		global $_W;
@@ -794,7 +890,13 @@ class Common_EweiShopV2Model
 		$wOpt["paySign"] = strtoupper(md5(trim($string)));
 		return $wOpt;
 	}
-	//微信支付
+
+    /**
+     * @param $params
+     * @param $wechat
+     * @param int $type
+     * @return array
+     */
 	public function wechat_child_build($params, $wechat, $type = 0) 
 	{
 		global $_W;
@@ -945,6 +1047,14 @@ class Common_EweiShopV2Model
 	    $wOpt["paySign"] = strtoupper(md5($string));
 	    return $wOpt;
 	}
+
+    /**
+     * @param $params
+     * @param $wechat
+     * @param int $type
+     * @param null $diy
+     * @return array|mixed
+     */
 	public function wechat_native_build($params, $wechat, $type = 0, $diy = NULL) 
 	{
 		global $_W;
@@ -1035,7 +1145,13 @@ class Common_EweiShopV2Model
 		$result = json_decode(json_encode($xml), true);
 		return $result;
 	}
-	//微信支付
+
+    /**
+     * @param $params
+     * @param $wechat
+     * @param int $type
+     * @return array|mixed
+     */
 	public function wechat_native_child_build($params, $wechat, $type = 0) 
 	{
 		global $_W;
@@ -1101,6 +1217,12 @@ class Common_EweiShopV2Model
 		$result = json_decode(json_encode($xml), true);
 		return $result;
 	}
+
+    /**
+     * @param $auth_code
+     * @param $wechat
+     * @return array|mixed
+     */
 	public function authCodeToOpenid($auth_code, $wechat) 
 	{
 		$package = array( );
@@ -1136,6 +1258,11 @@ class Common_EweiShopV2Model
 		$result = json_decode(json_encode($xml), true);
 		return $result;
 	}
+
+    /**
+     * @param $params
+     * @return array|bool
+     */
 	public function sendredpack($params) 
 	{
 		global $_W;
@@ -1279,6 +1406,13 @@ class Common_EweiShopV2Model
 		}
 		return error(-2, $error);
 	}
+
+    /**
+     * @param $params
+     * @param $wechat
+     * @param int $type
+     * @return array|mixed
+     */
 	public function wechat_micropay_build($params, $wechat, $type = 0) 
 	{
 		global $_W;
@@ -1367,6 +1501,13 @@ class Common_EweiShopV2Model
 		}
 		return $result;
 	}
+
+    /**
+     * @param $out_trade_no
+     * @param int $money
+     * @param $wechat
+     * @return array|mixed
+     */
 	public function wechat_order_query($out_trade_no, $money = 0, $wechat) 
 	{
 		$package = array( );
@@ -1415,6 +1556,7 @@ class Common_EweiShopV2Model
 		}
 		return $result;
 	}
+
 	public function getAccount() 
 	{
 		global $_W;
@@ -1426,6 +1568,13 @@ class Common_EweiShopV2Model
 		$acid = pdo_fetchcolumn("SELECT acid FROM " . tablename("account_wechats") . " WHERE `uniacid`=:uniacid LIMIT 1", array( ":uniacid" => $_W["uniacid"] ));
 		return WeAccount::create($acid);
 	}
+
+    /**
+     * @param $table
+     * @param $field
+     * @param $prefix
+     * @return string
+     */
 	public function createNO($table, $field, $prefix) 
 	{
 		$billno = date("YmdHis") . random(6, true);
@@ -1440,6 +1589,12 @@ class Common_EweiShopV2Model
 		}
 		return $prefix . $billno;
 	}
+
+    /**
+     * @param string $detail
+     * @param bool $enforceQiniu
+     * @return mixed|string
+     */
 	public function html_images($detail = "", $enforceQiniu = false) 
 	{
 		$detail = htmlspecialchars_decode($detail);
@@ -1459,6 +1614,11 @@ class Common_EweiShopV2Model
 		}
 		return $detail;
 	}
+
+    /**
+     * @param string $detail
+     * @return mixed|string
+     */
 	public function html_to_images($detail = "") 
 	{
 		$detail = htmlspecialchars_decode($detail);
@@ -1478,6 +1638,11 @@ class Common_EweiShopV2Model
 		}
 		return $detail;
 	}
+
+    /**
+     * @param $arr
+     * @return mixed
+     */
 	public function array_images($arr) 
 	{
 		foreach( $arr as &$a ) 
@@ -1487,6 +1652,7 @@ class Common_EweiShopV2Model
 		unset($a);
 		return $arr;
 	}
+
 	public function getSec($uniacid = 0) 
 	{
 		global $_W;

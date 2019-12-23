@@ -1,155 +1,155 @@
 <?php
 class Shop_EweiShopV2Model
 {
-	/**
-	 * 获取商品分类
-	 * @global type $_W
-	 * @return type
-	 */
-	public function getCategory($refresh = false)
-	{
-		global $_W;
-		$allcategory = m('cache')->getArray('allcategory');
-		if (empty($allcategory) || $refresh) {
-			$parents = array();
-			$children = array();
-			$category = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_category') . ' WHERE uniacid =:uniacid AND enabled=1 ORDER BY parentid ASC, displayorder DESC', array(':uniacid' => $_W['uniacid']));
-
-			foreach ($category as $index => $row) {
-				if (!empty($row['parentid'])) {
-					if ($row[$row['parentid']]['parentid'] == 0) {
-						$row[$row['parentid']]['level'] = 2;
-					}
-					else {
-						$row[$row['parentid']]['level'] = 3;
-					}
-
-					$children[$row['parentid']][] = $row;
-					unset($category[$index]);
-				}
-				else {
-					$row['level'] = 1;
-					$parents[] = $row;
-				}
-			}
-
-			$allcategory = array('parent' => $parents, 'children' => $children);
-			m('cache')->set('allcategory', $allcategory);
-		}
-
-		return $allcategory;
-	}
-
-	public function getFullCategory($fullname = false, $enabled = false)
-	{
-		global $_W;
-		$allcategorynames = m('cache')->getArray('allcategorynames');
-		$shopset = m('common')->getSysset('shop');
-		$allcategory = array();
-		$sql = 'SELECT * FROM ' . tablename('ewei_shop_category') . ' WHERE uniacid=:uniacid ';
-
-		if ($enabled) {
-			$sql .= ' AND enabled=1';
-		}
-
-		$sql .= ' ORDER BY parentid ASC, displayorder DESC';
-		$category = pdo_fetchall($sql, array(':uniacid' => $_W['uniacid']));
-		$category = set_medias($category, array('thumb', 'advimg'));
-
-		if (empty($category)) {
-			return array();
-		}
-
-		foreach ($category as &$c) {
-			if (empty($c['parentid'])) {
-				$allcategory[] = $c;
-
-				foreach ($category as &$c1) {
-					if ($c1['parentid'] != $c['id']) {
-						continue;
-					}
-
-					if ($fullname) {
-						$c1['name'] = $c['name'] . '-' . $c1['name'];
-					}
-
-					$allcategory[] = $c1;
-
-					foreach ($category as &$c2) {
-						if ($c2['parentid'] != $c1['id']) {
-							continue;
-						}
-
-						if ($fullname) {
-							$c2['name'] = $c1['name'] . '-' . $c2['name'];
-						}
-
-						$allcategory[] = $c2;
-
-						foreach ($category as &$c3) {
-							if ($c3['parentid'] != $c2['id']) {
-								continue;
-							}
-
-							if ($fullname) {
-								$c3['name'] = $c2['name'] . '-' . $c3['name'];
-							}
-
-							$allcategory[] = $c3;
-						}
-
-						unset($c3);
-					}
-
-					unset($c2);
-				}
-
-				unset($c1);
-			}
-
-			unset($c);
-		}
-
-		return $allcategory;
-	}
-
-	public function checkClose()
-	{
-		if (strexists($_SERVER['REQUEST_URI'], '/web/')) {
-			return NULL;
-		}
-
-		global $_S;
-		global $_W;
-
-		if ($_W['plugin'] == 'mmanage') {
-			return NULL;
-		}
-
-		$close = $_S['close'];
-
-		if (!empty($close['flag'])) {
-			if (!empty($close['url'])) {
-				header('location: ' . $close['url']);
-				exit();
-			}
-
-			exit("<!DOCTYPE html>\r\n\t\t\t\t\t<html>\r\n\t\t\t\t\t\t<head>\r\n\t\t\t\t\t\t\t<meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=0'>\r\n\t\t\t\t\t\t\t<title>抱歉，商城暂时关闭</title><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=0'><link rel='stylesheet' type='text/css' href='https://res.wx.qq.com/connect/zh_CN/htmledition/style/wap_err1a9853.css'>\r\n\t\t\t\t\t\t</head>\r\n\t\t\t\t\t\t<body>\r\n\t\t\t\t\t\t<style type='text/css'>\r\n\t\t\t\t\t\tbody { background:#fbfbf2; color:#333;}\r\n\t\t\t\t\t\timg { display:block; width:100%;}\r\n\t\t\t\t\t\t.header {\r\n\t\t\t\t\t\twidth:100%; padding:10px 0;text-align:center;font-weight:bold;}\r\n\t\t\t\t\t\t</style>\r\n\t\t\t\t\t\t<div class='page_msg'>\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\t<div class='inner'><span class='msg_icon_wrp'><i class='icon80_smile'></i></span>" . $close['detail'] . "</div></div>\r\n\t\t\t\t\t\t</body>\r\n\t\t\t\t\t</html>");
-		}
-	}
-
-	public function getAllCategory($refresh = false)
-	{
-		global $_W;
-		$allcategory = m('cache')->getArray('allcategoryarr');
-		if (empty($allcategory) || $refresh) {
-			$allcategory = pdo_fetchall('SELECT id,parentid,uniacid,name,thumb FROM ' . tablename('ewei_shop_category') . (' WHERE uniacid = \'' . $_W['uniacid'] . '\''), array(), 'id');
-			m('cache')->set('allcategoryarr', $allcategory);
-		}
-
-		return $allcategory;
-	}
-
+    /**
+     * 获取商品分类
+     * @global type $_W
+     * @return type
+     */
+    public function getCategory($refresh = false)
+    {
+        global $_W;
+        $allcategory = m('cache')->getArray('allcategory');
+        if (empty($allcategory) || $refresh) {
+            $parents = array();
+            $children = array();
+            $category = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_category') . ' WHERE uniacid =:uniacid AND enabled=1 ORDER BY parentid ASC, displayorder DESC', array(':uniacid' => $_W['uniacid']));
+            
+            foreach ($category as $index => $row) {
+                if (!empty($row['parentid'])) {
+                    if ($row[$row['parentid']]['parentid'] == 0) {
+                        $row[$row['parentid']]['level'] = 2;
+                    }
+                    else {
+                        $row[$row['parentid']]['level'] = 3;
+                    }
+                    
+                    $children[$row['parentid']][] = $row;
+                    unset($category[$index]);
+                }
+                else {
+                    $row['level'] = 1;
+                    $parents[] = $row;
+                }
+            }
+            
+            $allcategory = array('parent' => $parents, 'children' => $children);
+            m('cache')->set('allcategory', $allcategory);
+        }
+        
+        return $allcategory;
+    }
+    
+    public function getFullCategory($fullname = false, $enabled = false)
+    {
+        global $_W;
+        $allcategorynames = m('cache')->getArray('allcategorynames');
+        $shopset = m('common')->getSysset('shop');
+        $allcategory = array();
+        $sql = 'SELECT * FROM ' . tablename('ewei_shop_category') . ' WHERE uniacid=:uniacid ';
+        
+        if ($enabled) {
+            $sql .= ' AND enabled=1';
+        }
+        
+        $sql .= ' ORDER BY parentid ASC, displayorder DESC';
+        $category = pdo_fetchall($sql, array(':uniacid' => $_W['uniacid']));
+        $category = set_medias($category, array('thumb', 'advimg'));
+        
+        if (empty($category)) {
+            return array();
+        }
+        
+        foreach ($category as &$c) {
+            if (empty($c['parentid'])) {
+                $allcategory[] = $c;
+                
+                foreach ($category as &$c1) {
+                    if ($c1['parentid'] != $c['id']) {
+                        continue;
+                    }
+                    
+                    if ($fullname) {
+                        $c1['name'] = $c['name'] . '-' . $c1['name'];
+                    }
+                    
+                    $allcategory[] = $c1;
+                    
+                    foreach ($category as &$c2) {
+                        if ($c2['parentid'] != $c1['id']) {
+                            continue;
+                        }
+                        
+                        if ($fullname) {
+                            $c2['name'] = $c1['name'] . '-' . $c2['name'];
+                        }
+                        
+                        $allcategory[] = $c2;
+                        
+                        foreach ($category as &$c3) {
+                            if ($c3['parentid'] != $c2['id']) {
+                                continue;
+                            }
+                            
+                            if ($fullname) {
+                                $c3['name'] = $c2['name'] . '-' . $c3['name'];
+                            }
+                            
+                            $allcategory[] = $c3;
+                        }
+                        
+                        unset($c3);
+                    }
+                    
+                    unset($c2);
+                }
+                
+                unset($c1);
+            }
+            
+            unset($c);
+        }
+        
+        return $allcategory;
+    }
+    
+    public function checkClose()
+    {
+        if (strexists($_SERVER['REQUEST_URI'], '/web/')) {
+            return NULL;
+        }
+        
+        global $_S;
+        global $_W;
+        
+        if ($_W['plugin'] == 'mmanage') {
+            return NULL;
+        }
+        
+        $close = $_S['close'];
+        
+        if (!empty($close['flag'])) {
+            if (!empty($close['url'])) {
+                header('location: ' . $close['url']);
+                exit();
+            }
+            
+            exit("<!DOCTYPE html>\r\n\t\t\t\t\t<html>\r\n\t\t\t\t\t\t<head>\r\n\t\t\t\t\t\t\t<meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=0'>\r\n\t\t\t\t\t\t\t<title>抱歉，商城暂时关闭</title><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=0'><link rel='stylesheet' type='text/css' href='https://res.wx.qq.com/connect/zh_CN/htmledition/style/wap_err1a9853.css'>\r\n\t\t\t\t\t\t</head>\r\n\t\t\t\t\t\t<body>\r\n\t\t\t\t\t\t<style type='text/css'>\r\n\t\t\t\t\t\tbody { background:#fbfbf2; color:#333;}\r\n\t\t\t\t\t\timg { display:block; width:100%;}\r\n\t\t\t\t\t\t.header {\r\n\t\t\t\t\t\twidth:100%; padding:10px 0;text-align:center;font-weight:bold;}\r\n\t\t\t\t\t\t</style>\r\n\t\t\t\t\t\t<div class='page_msg'>\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\t<div class='inner'><span class='msg_icon_wrp'><i class='icon80_smile'></i></span>" . $close['detail'] . "</div></div>\r\n\t\t\t\t\t\t</body>\r\n\t\t\t\t\t</html>");
+        }
+    }
+    
+    public function getAllCategory($refresh = false)
+    {
+        global $_W;
+        $allcategory = m('cache')->getArray('allcategoryarr');
+        if (empty($allcategory) || $refresh) {
+            $allcategory = pdo_fetchall('SELECT id,parentid,uniacid,name,thumb FROM ' . tablename('ewei_shop_category') . (' WHERE uniacid = \'' . $_W['uniacid'] . '\''), array(), 'id');
+            m('cache')->set('allcategoryarr', $allcategory);
+        }
+        
+        return $allcategory;
+    }
+    
     /**
      * @param int $type
      * @return array
@@ -161,7 +161,7 @@ class Shop_EweiShopV2Model
         $icon = pdo_fetchall('select * from '.tablename('ewei_shop_icon').'where uniacid = :uniacid and type = :type order by displayorder asc',[':uniacid'=>$uniacid,':type'=>$type]);
         return set_medias($icon,'image');
     }
-
+    
     /**
      * @param $goodsList
      * @param $pages
@@ -198,7 +198,7 @@ class Shop_EweiShopV2Model
                     $newGoodsList[$key]['adv']=0;
                     $newGoodsList[$key]['main_target']="";
                     $newGoodsList[$key]['substandard']="";
-
+                    
                 }else{
                     $a=pdo_get("ewei_shop_goodtop",array("id"=>$gid));
                     $gd=pdo_get("ewei_shop_goods",array("id"=>$a["goodid"]));
@@ -254,7 +254,7 @@ class Shop_EweiShopV2Model
         }
         return $newGoodsList;
     }
-
+    
     /**
      * 判断是否包含
      * @param $arary
@@ -269,7 +269,7 @@ class Shop_EweiShopV2Model
         }
         return 0;
     }
-
+    
     /**
      * @param null $url
      * @param bool $vid
@@ -302,7 +302,7 @@ class Shop_EweiShopV2Model
         $videopath = ((isset($fvideo['ul']['ui'][1]) && !(empty($fvideo['ul']['ui'][1]['url'])) ? $fvideo['ul']['ui'][1]['url'] : $fvideo['ul']['ui'][0]['url']));
         return $videopath . $fvideo['fn'] . '?vkey=' . $fvideo['fvkey'];
     }
-
+    
     /**
      * @param $url
      * @return string|void
@@ -317,7 +317,7 @@ class Shop_EweiShopV2Model
         parse_str($params['query']);
         return $vid;
     }
-
+    
     /**
      * 可购买的会员级别
      * @param $cids
@@ -331,7 +331,7 @@ class Shop_EweiShopV2Model
         if(count($cids)>1 && in_array(2,$cids)) return "星选达人以上级别专享";
         return "您当前会员等级没有购买权限";
     }
-
+    
     /**
      * @param $openid
      * @return bool|string
@@ -352,7 +352,7 @@ class Shop_EweiShopV2Model
         $level = pdo_fetch("select * from " . tablename("ewei_shop_commission_level") . " where uniacid=:uniacid and id=:id limit 1", array( ":uniacid" => $_W["uniacid"], ":id" => $member["agentlevel"] ));
         return $level;
     }
-
+    
     /**
      * @param $goods
      * @param $level
@@ -411,7 +411,7 @@ class Shop_EweiShopV2Model
         }
         return $commission;
     }
-
+    
     /**
      * @param $url
      * @return array
@@ -449,12 +449,13 @@ class Shop_EweiShopV2Model
         }
         return array('url' => $url);
     }
-
+    
     /**
      * @param $goodid
+     * @param $user_id
      * @return array
      */
-    public function getCouponsbygood($goodid)
+    public function getCouponsbygood($goodid,$user_id = 0)
     {
         global $_W;
         global $_GPC;
@@ -551,6 +552,20 @@ class Shop_EweiShopV2Model
                 $row = com("coupon")->setCoupon($row, time());
                 //$row["thumb"] = tomedia($row["thumb"]);
                 $row["timestr"] = "永久有效";
+                $row['timestart'] = date('Y-m-d',$row['timestart']);
+                $row['timeend'] = date('Y-m-d',$row['timeend']);
+                if(!empty($user_id)){
+                    $member = m('member')->getMember($user_id);
+                    $coupon = pdo_fetch('select * from '.tablename('ewei_shop_coupon_data').' where couponid = :couponid and (openid = :openid or user_id = :user_id) ',[':user_id'=>$member['id'],':openid'=>$member['openid'],':couponid'=>$row['id']]);
+                    //状态  如果没有状态  0未领取 used==0  已领取未使用1  其他等于2
+                    if(empty($coupon)){
+                        $row['coupon_status'] = 0;
+                    }elseif ($coupon['used'] == 0){
+                        $row['coupon_status'] = 1;
+                    }else{
+                        $row['coupon_status'] = 2;
+                    }
+                }
                 if( empty($row["timelimit"]) )
                 {
                     if( !empty($row["timedays"]) )
@@ -574,14 +589,14 @@ class Shop_EweiShopV2Model
                     $row["backstr"] = "立减";
                     $row["backmoney"] = (double) $row["deduct"];
                     //$row["backpre"] = true;
-//                    if( $row["enough"] == "0" )
-//                    {
-//                        $row["color"] = "org ";
-//                    }
-//                    else
-//                    {
-//                        $row["color"] = "blue";
-//                    }
+                    //                    if( $row["enough"] == "0" )
+                        //                    {
+                        //                        $row["color"] = "org ";
+                        //                    }
+                    //                    else
+                        //                    {
+                        //                        $row["color"] = "blue";
+                        //                    }
                 }
                 else
                 {
@@ -595,14 +610,14 @@ class Shop_EweiShopV2Model
                     {
                         if( $row["backtype"] == 2 )
                         {
-//                            if( $row["coupontype"] == "0" )
-//                            {
-//                                $row["color"] = "red ";
-//                            }
-//                            else
-//                            {
-//                                $row["color"] = "pink ";
-//                            }
+                            //                            if( $row["coupontype"] == "0" )
+                                //                            {
+                                //                                $row["color"] = "red ";
+                                //                            }
+                            //                            else
+                                //                            {
+                                //                                $row["color"] = "pink ";
+                                //                            }
                             if( 0 < $row["backredpack"] )
                             {
                                 $row["backstr"] = "返现";
@@ -714,7 +729,7 @@ class Shop_EweiShopV2Model
         }
         return array_values($list);
     }
-
+    
     /**
      * @return array
      */
@@ -732,7 +747,7 @@ class Shop_EweiShopV2Model
         }
         return array( "is_openmerch" => $is_openmerch, "merch_plugin" => $merch_plugin, "merch_data" => $merch_data );
     }
-
+    
     /**
      * @param $goods
      * @param bool $is_seckill
@@ -788,7 +803,7 @@ class Shop_EweiShopV2Model
         }
         return $ret;
     }
-
+    
     /**
      * @param $id
      * @param string $keywords
@@ -810,23 +825,26 @@ class Shop_EweiShopV2Model
             $params[':keywords'] = '%' . trim($keywords) . '%';
         }
         $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_goods').' where '.$condition.' ',$params);
-        $list = pdo_fetchall('select id,title,thumb,marketprice,productprice,issendfree,total,agent_devote from '.tablename('ewei_shop_goods').' where '.$condition.' order by '.$order.' limit '.$pindex.','.$pageSize,$params);
+        $list = pdo_fetchall('select id,title,thumb,marketprice,productprice,issendfree,total,agent_devote,istime,timestart,timeend from '.tablename('ewei_shop_goods').' where '.$condition.' order by '.$order.' limit '.$pindex.','.$pageSize,$params);
         foreach ($list as $key =>$value){
             $list[$key]['sendfree'] = $value['issendfree'] == 1 ? "包邮" : $value['total'];
             $order_count = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_order').'o join '.tablename('ewei_shop_order_goods').'og on og.orderid = o.id where og.goodsid = :goodsid and o.uniacid = :uniacid and o.status = 1',[':goodsid'=>$value['id'],':uniacid'=>$uniacid]);
             $list[$key]['order'] = $order_count > 9999 ? ($order_count/10000).'万' : $order_count;
             $list[$key]['thumb'] = tomedia($value['thumb']);
+            $list[$key]['adv'] = 0;
         }
         $count = pdo_count('ewei_shop_choice',['uniacid'=>$uniacid,'status'=>1,'icon_id'=>$id]);
         $pindex = rand(0,max(0,$count-1));
         $choice = pdo_fetch(' select * from '.tablename('ewei_shop_choice').' where uniacid = "'.$uniacid.'" and status = 1 and icon_id = "'.$id.'" limit '.$pindex.', 1');
-//        $choice_ids = pdo_getall('ewei_shop_choice',['uniacid'=>$uniacid,'status'=>1,'icon_id'=>$id],'id');
-//        $choice_id = array_column($choice_ids,'id');
-//        $chid = $choice_id[array_rand($choice_id,1)];
-//        $choice = pdo_fetch(' select thumb,image from '.tablename('ewei_shop_choice').' where uniacid = "'.$uniacid.'" and id = "'.$chid.'" ');
+        //        $choice_ids = pdo_getall('ewei_shop_choice',['uniacid'=>$uniacid,'status'=>1,'icon_id'=>$id],'id');
+        //        $choice_id = array_column($choice_ids,'id');
+        //        $chid = $choice_id[array_rand($choice_id,1)];
+        //        $choice = pdo_fetch(' select thumb,image from '.tablename('ewei_shop_choice').' where uniacid = "'.$uniacid.'" and id = "'.$chid.'" ');
         if(!empty($choice)){
             $choice["thumb"] = tomedia($choice['thumb']);
             $choice["image"] = tomedia($choice['image']);
+            $choice["content"] = htmlspecialchars_decode($choice['content']);
+            $choice["adv"] = 1;
         }
         if($choice) array_push($list,$choice);
         $pagetotal = ceil(($total + 1)/($pageSize + 1));
@@ -835,7 +853,7 @@ class Shop_EweiShopV2Model
 }
 
 if (!defined('IN_IA')) {
-	exit('Access Denied');
+    exit('Access Denied');
 }
 
 ?>

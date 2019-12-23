@@ -99,8 +99,8 @@ class Credit_EweiShopV2Page extends WebPage
 			ini_set("memory_limit", "-1");
 		}
 		$list = pdo_fetchall($sql, $params);
-
-		if( $list && $search_flag == 0 ) 
+		if( $list) 
+// 		if( $list && $search_flag == 0 ) 
 		{
 			foreach( $list as $key => $val ) 
 			{
@@ -123,6 +123,7 @@ class Credit_EweiShopV2Page extends WebPage
 		                $list[$key]["mobile"] = $member["mobile"];
 		                $list[$key]["weixin"] = $member["weixin"];
 		                $list[$key]["createtime"] = date("Y-m-d H:i", $val["createtime"]);
+// 		                var_dump($list[$key]["createtime"]);
 		                $list[$key]["groupname"] = (empty($groupname) ? "无分组" : $groupname);
 		                $list[$key]["levelname"] = (empty($levelname) ? "普通会员" : $levelname);
 		                if( $val["credittype"] == "credit1" ) {
@@ -156,6 +157,7 @@ class Credit_EweiShopV2Page extends WebPage
             }
             foreach( $list as &$row )
             {
+                
                 //unset($row);
                 $columns = array( );
                 $columns[] = array( "title" => "类型", "field" => "credittype", "width" => 12 );

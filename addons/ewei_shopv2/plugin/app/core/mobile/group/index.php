@@ -229,11 +229,18 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($goods_id)){
             apperror(1,"","商品id不可为空");
         }
-//         $openid=$_GPC["openid"]
+        $openid=$_GPC["openid"];
+        $type=$_GPC["type"]?$_GPC["type"]:0;
+        if ($openid){
+             $member=m("appnews")->member($openid,$type);
+        }else{
+            $member=array();
+        }
+        
         $page=$_GPC["page"]?$_GPC["page"]:1;
         $first=($page-1)*20;
         $label=$_GPC["label"]?$_GPC["label"]:"";
-        $res=m("appnews")->group_comment($goods_id,$first,20,$label);
+        $res=m("appnews")->group_comment($goods_id,$first,20,$label,$member["id"]);
         $res["page"]=$page;
         apperror(0,"",$res);
     }

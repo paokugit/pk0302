@@ -108,7 +108,6 @@ class Util_EweiShopV2Model
 		$s = 2 * asin(sqrt(pow(sin($a / 2), 2) + cos($radLat1) * cos($radLat2) * pow(sin($b / 2), 2)));
 		$s = $s * $er;
 		$s = round($s * 1000);
-
 		if (1 < $len_type) {
 			$s /= 1000;
 		}

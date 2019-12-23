@@ -1,6 +1,6 @@
-<?php  if( !defined("IN_IA") ) 
+<?php  if( !defined("IN_IA") )
 {
-	exit( "Access Denied" );
+    exit( "Access Denied" );
 }
 require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
 class Shop_EweiShopV2Page extends AppMobilePage
@@ -35,7 +35,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         ];
         app_error1(0,"",['adv'=>$adv,'shop'=>$shop,'cate'=>$cate]);
     }
-
+    
     /**
      * 商城首页的商品分页
      */
@@ -53,7 +53,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $goods = m('app')->shop_shop_goods($type,$sort,$page,$cate);
         app_error1(0,"",$goods);
     }
-
+    
     /**
      * 分类页面
      */
@@ -63,7 +63,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_cate();
         app_error1(0,"",$data);
     }
-
+    
     /**
      * 商品搜索
      */
@@ -88,7 +88,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_search($keywords,$cate,$page,$isnew,$ishot,$isrecommand,$isdiscount,$istime,$issendfree,$order,$by);
         app_error1(0,"",$data);
     }
-
+    
     /**
      * 商品详情
      */
@@ -99,24 +99,122 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $id = $_GPC['id'];
         //登录token验证
         $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
+        $app_type = $_GPC['app_type'] ? $_GPC['app_type'] : 1;
         //$user_id
+        if($app_type == 1){
+            $user_id = m('app')->getLoginToken($token);
+        }else{
+            $user_id = $token;
+        }
         $data = m('app')->shop_goods_detail($user_id,$id,$this->merch_user);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
-
+    
+    /**
+     * 商品评论的标签
+     */
+    public function shop_goods_comment_label()
+    {
+        global $_GPC;
+        $id = $_GPC['id'];
+        //商品信息
+        $goods = pdo_fetch('select * from '.tablename('ewei_shop_goods').' where status = 1 and deleted = 0 and total > 0 and id = :id ',[':id'=>$id]);
+        //商品标签
+        $label = pdo_fetchcolumn('select label from '.tablename('ewei_shop_category').' where id = :id ',[':id'=>$goods['ccate']]);
+        $category = explode(',',$label);
+        //标签的类别
+        $labels = [];
+        $count_all = 0;
+        foreach ($category as $key=>$value){
+            $labels[$key]['label_id'] = $key + 1;
+            $labels[$key]['label'] = $value;
+            //计算这个属性有几个
+            $count = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_order_comment').'where label like :label ',[':label'=>"%".$value."%"]);
+            $labels[$key]['label_count'] = $count;
+        }
+        $total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_order_comment').'where deleted = 0 and goodsid = :goodsid ',[':goodsid'=>$id]);
+        $hao_total = pdo_fetchcolumn('select count(1) from '.tablename('ewei_shop_order_comment').'where deleted = 0 and goodsid = :goodsid and `level` > 2 ',[':goodsid'=>$id]);
+        //查找所有的评论信息  并计算平均评分
+        $comment = pdo_fetchall('select * from '.tablename('ewei_shop_order_comment').'where deleted = 0 and goodsid = :goodsid',[':goodsid'=>$id]);
+        $levels = array_column($comment,'level');
+        $hao_rate = empty($comment) ? "100%" : round($hao_total/$total,2)*100 ."%";
+        $level = empty($comment) ? 5 : round(array_sum($levels)/$total,2);
+        //全部的及数量
+        $label_all = ['label_id'=>0,'label'=>"全部",'label_count'=>$total];
+        //array_push()  PHP给数组后面追加元素   array_unshift()  php给数组前面追加元素
+        array_unshift($labels,$label_all);
+        if(empty($label)) $labels = [];
+        app_error1(0,'',['labels'=>$labels,'level'=>$level,'hao_rate'=>$hao_rate]);
+    }
+    
     /**
      * 商品评价
      */
     public function shop_goods_comment_list()
     {
         global $_GPC;
+        //用户信息
         $token = $_GPC['token'];
-        $user_id = m('app')->getLoginToken($token);
+        $app_type = $_GPC['app_type'] ? $_GPC['app_type'] : 1;
+        if($app_type == 1){
+            $user_id = m('app')->getLoginToken($token);
+        }else{
+            $user_id = $token;
+        }
+        //商品id  和  标签  分页
         $id = $_GPC['id'];
-        $data = m()->shop_goods_comment_list();
+        //全部标签传0  除了全部  传标签内容
+        $label = $_GPC['label'] ? $_GPC['label'] : 0;
+        $page = max(1,$_GPC['page']);
+        //评价列表
+        $data = m('app')->shop_goods_comment_list($user_id,$id,$label,$page);
+        app_error1($data['status'],$data['msg'],$data['data']);
     }
-
+    
+    /**
+     * 商品评价点赞
+     */
+    public function shop_goods_comment_fav()
+    {
+        global $_GPC;
+        //$uniacid
+        global $_W;
+        $uniacid  = $_W['uniacid'];
+        //用户信息
+        $app_type = $_GPC['app_type'] ? $_GPC['app_type'] : 1;
+        $token = $_GPC['token'];
+        if($app_type == 1){
+            $user_id = m('app')->getLoginToken($token);
+        }else{
+            $user_id = $token;
+        }
+        if($user_id == 0) app_error1(2,'登录信息失效',[]);
+        $member = m('member')->getMember($user_id);
+        //商品id  和 评论信息
+        $id = $_GPC['id'];
+        $comment = pdo_fetch('select * from '.tablename('ewei_shop_order_comment').'where deleted = 0 and goodsid = :goodsid ',[':goodsid'=>$id]);
+        if($comment) app_error1(1,'不存在改评价',[]);
+        //点赞状态
+        $fav = pdo_fetch('select * from '.tablename('ewei_shop_order_comment_fav').' where ocid = :ocid and (openid = :openid or user_id = :user_id) ',[':ocid'=>$id,':openid'=>$member['openid'],':user_id'=>$member['id']]);
+        $status = empty($fav) || $fav['status'] == 0 ? 1 : 0;
+        $msg = empty($fav) || $fav['status'] == 0 ? "点赞成功" : "取消点赞成功";
+        //已有点赞  更新状态  没有  添加数据
+        if($fav){
+            pdo_update('ewei_shop_order_comment_fav',['status'=>$status],['id'=>$fav['id']]);
+        }else{
+            $add = [
+                'uniacid'=>$uniacid,
+                'openid'=>$member['openid'],
+                'user_id'=>$member['id'],
+                'ocid'=>$id,
+                'status'=>$status,
+                'createtime'=>time(),
+            ];
+            pdo_insert('ewei_shop_order_comment_fav',$add);
+        }
+        app_error1(0,$msg,[]);
+    }
+    
     /**
      * 获得商品的属性
      */
@@ -125,12 +223,13 @@ class Shop_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $id = intval($_GPC["id"]);
+        $cartid = $_GPC['cartid'] ? $_GPC['cartid'] : 0;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        $data = m('app')->shop_goods_options($user_id,$id);
+        $data = m('app')->shop_goods_options($user_id,$id,$cartid);
         app_error1(0,'',$data);
     }
-
+    
     /**
      * 加入购物车
      */
@@ -148,7 +247,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_add_cart($user_id,$id,$optionid,$total);
         app_error1($data['status'],"",empty($data['data']) ? $data['data'] : []);
     }
-
+    
     /**
      * 购物车列表的选中状态
      */
@@ -188,7 +287,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
             }
         }
     }
-
+    
     /**
      * 活动的banner
      */
@@ -201,26 +300,26 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_cate_banner($id);
         app_error1(0,"",$data);
     }
-
-   /**
-    * 活动列表
-    */
-   public function shop_cate_list()
-   {
-       header("Access-Control-Allow-Origin:*");
+    
+    /**
+     * 活动列表
+     */
+    public function shop_cate_list()
+    {
+        header("Access-Control-Allow-Origin:*");
         global $_GPC;
         // 这个传id最好吧  然后 根据id查类别  cate == 1fruit水果美食   2city同城  3cash零元兑  4task任务赚  5share分享赚   6rank网红榜单
         $id = $_GPC['id'];
         if(empty($id)) app_error1(1,"参数错误",[]);
         $page = max(1,$_GPC['page']);
         $keywords = $_GPC['keywords'];
-       //order  类型  综合不传   销量sales  价格 minprice  by  升序asc   降序desc
+        //order  类型  综合不传   销量sales  价格 minprice  by  升序asc   降序desc
         $type = empty($_GPC['type']) ? 3 : $_GPC['type'];
         $sort = empty($_GPC['sort']) ? "desc" : $_GPC['sort'];
         $data = m('app')->shop_cate_list($id,$keywords,$page,$type,$sort);
         app_error1(0,"",$data);
-   }
-
+    }
+    
     /**
      * 任务领钱
      */
@@ -233,17 +332,17 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_task_list($user_id);
         app_error1(0,'',$data);
     }
-
+    
     /**
      * 同城
      */
     public function shop_same_city()
     {
         global $_GPC;
-//        //用户信息
-//        $token = $_GPC['token'];
-//        $user_id = m('app')->getLoginToken($token);
-//        $member = m('member')->getMember($user_id);
+        //用户信息
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        $member = m('member')->getMember($user_id);
         //类型  city_type == 1 附近的商店   附近的商品
         $city_type = $_GPC['city_type'] ? $_GPC['city_type'] : 1;
         $page = max(1,$_GPC['page']);
@@ -257,7 +356,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_same_city($user_id,$city_type,$lng,$lat,$page,$keywords,$type,$sort,$range);
         app_error1(0,'',$data);
     }
-
+    
     /**
      *  ta的店 动态 列表
      */
@@ -275,12 +374,12 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_shop_list($user_id,$type,$page,$merch_id);
         app_error1(0,'',$data);
     }
-
-   /**
-    * 他的店动态详情
-    */
-   public function shop_shop_detail()
-   {
+    
+    /**
+     * 他的店动态详情
+     */
+    public function shop_shop_detail()
+    {
         header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $id = $_GPC['id'];
@@ -289,10 +388,10 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $user_id = m('app')->getLoginToken($token);
         $data = m('app')->shop_shop_detail($user_id,$id);
         app_error1(0,"",$data);
-   }
-
+    }
+    
     /**
-     * 评论列表
+     * 动态详情的评论列表
      */
     public function shop_shop_comment()
     {
@@ -306,7 +405,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_shop_comment($user_id,$id,$page);
         app_error1(0,"",$data);
     }
-
+    
     /**
      * 评论详情
      */
@@ -326,10 +425,10 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_shop_comment_detail($user_id,$comment_id,$page,$type);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
-
-   /**
-    * 动态文章  文章评论的点赞
-    */
+    
+    /**
+     * 动态文章  文章评论的点赞
+     */
     public function shop_choice_fav()
     {
         header("Access-Control-Allow-Origin:*");
@@ -345,7 +444,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_choice_fav($user_id,$id,$type);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
-
+    
     /**
      * 动态文章评论  评论已有的评论
      */
@@ -365,7 +464,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_choice_comment($user_id,$parent_id,$content,$type);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
-
+    
     /**
      * RVC充值
      */
@@ -382,7 +481,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('game')->rvc_pay($user_id,$amount,$type);
         app_error1($data['status'],$data['message'],$data['data']);
     }
-
+    
     /**
      * 会员RVC信息首页
      */
@@ -396,7 +495,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_rvc($user_id);
         app_error1(0,'',['data' => $data]);
     }
-
+    
     /**
      * RVC收支明细
      */

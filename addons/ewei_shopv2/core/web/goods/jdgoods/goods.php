@@ -169,6 +169,7 @@ class Goods_EweiShopV2Page extends WebPage
             }
             $data["onsale"]=$_GPC["onsale"];
             $data["virtual_sales"]=$_GPC["virtual_sales"];
+            $data["level"]=$_GPC["level"];
             if (pdo_update("ewei_shop_jdgoods",$data,array("id"=>$id))){
                 plog('jdgoods.post', '编辑优品商品 ID'.$id );
                 show_json(1, array('url' => webUrl('goods/jdgoods/goods')));
@@ -178,6 +179,7 @@ class Goods_EweiShopV2Page extends WebPage
         }
        
         $cate=pdo_fetchall("select * from ".tablename("ewei_shop_jdgoods_cate")." order by sort desc");
+        $levels=pdo_fetchall("select * from ".tablename("ewei_shop_commission_level")." where id<6 order by id asc");
         include $this->template();
     }
 }

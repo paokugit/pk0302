@@ -29,7 +29,7 @@ class Team_EweiShopV2Page extends AppMobilePage
             apperror(1,"","库存数量不足");
         }
         if ($option_id){
-            $option=pdo_get("ewei_shop_groups_goods_option",array("id"=>$option_id));
+            $option=pdo_get("ewei_shop_groups_goods_option",array("id"=>$option_id,"groups_goods_id"=>$goods_id));
             if (empty($option)){
                 apperror(1,"","规格不存在");
             }
@@ -115,6 +115,10 @@ class Team_EweiShopV2Page extends AppMobilePage
         $data["merchid"]=$good["merchid"];
         pdo_insert("ewei_shop_groups_order",$data);
         $order_id=pdo_insertid();
+        if ($single==0&&$team_id==0){
+            pdo_update("ewei_shop_groups_order",array("teamid"=>$order_id),array("id"=>$order_id));
+            
+        }
         $order_good["uniacid"]=$_W["uniacid"];
         $order_good["goods_id"]=$good["gid"];
         $order_good["groups_goods_id"]=$goods_id;
@@ -201,10 +205,62 @@ class Team_EweiShopV2Page extends AppMobilePage
         }
        
            m("member")->setCredit($member["id"],$credittype,0-$order["price"]-$order["freight"],"拼团订单：".$order["orderno"]."购买商品消费",5);
-           $log = array( "type"=>$credittype,"uniacid" => $_W["uniacid"], "openid" => $member["openid"],"user_id"=>$member["id"],"module" => "groups", "tid" => $order["orderno"], "credit" => $order["credit"], "creditmoney" => $order["creditmoney"], "fee" => $order["price"]+ $order["freight"], "status" => 0 );
+           $log=pdo_get("ewei_shop_groups_paylog",array("tid"=>$order["orderno"]));
+           if ($log){
+              $d["status"]=1;
+              $d["type"]=$credittype;
+              pdo_update("ewei_shop_groups_paylog",$d,array("id"=>$log["id"]));
+           }else{
+           $log = array( "type"=>$credittype,"uniacid" => $_W["uniacid"], "openid" => $member["openid"],"user_id"=>$member["id"],"module" => "groups", "tid" => $order["orderno"], "credit" => $order["credit"], "creditmoney" => $order["creditmoney"], "fee" => $order["price"]+ $order["freight"], "status" => 1 );
             pdo_insert("ewei_shop_groups_paylog",$log);
+           }
             p("groups")->payResult($order["orderno"], $credittype,$type);
             apperror(0,"支付成功");
         
     }
+    //小程序
+    public function small_program(){
+        global $_W;
+        global $_GPC;
+        $order_id=$_GPC["order_id"];
+        $order=pdo_get("ewei_shop_groups_order",array("id"=>$order_id));
+        if (empty($order)){
+            apperror(1,"","订单id不正确");
+        }
+        if ($order["status"]>=1){
+            apperror(1,"该订单不可重复支付");
+        }
+        $openid=$_GPC["openid"];
+        $type=$_GPC["type"]?$_GPC["type"]:0;
+        $member=m("appnews")->member($openid,$type);
+        if (!$member){
+            apperror(1,"用户不存在");
+        }
+        if ($member["id"]!=$order["user_id"]){
+            apperror(1,"无权限访问该订单");
+        }
+        if ($order["success"]==-1||$order["status"]==-1){
+            apperror(1,"该活动已失效");
+        }
+        $log=pdo_get("ewei_shop_groups_paylog",array("tid"=>$order["orderno"]));
+        if (empty($log)){
+        $log = array( "uniacid" =>$_W["uniacid"], "openid" => $member["openid"],"user_id"=>$member["id"],"module" => "groups", "tid" => $order["orderno"], "credit" => $order["credit"], "creditmoney" => $order["creditmoney"], "fee" => $order["price"] - $order["creditmoney"] + $order["freight"], "status" => 0 );
+        pdo_insert("ewei_shop_groups_paylog", $log);
+        }
+        $payinfo = array( "openid" => $_W["openid_wa"], "title" => "拼团订单", "tid" => $order["orderno"], "fee" => $order["price"] - $order["creditmoney"] + $order["freight"] );
+        $res = $this->model->wxpay($payinfo, 19);
+        if( !is_error($res) )
+        {
+            $wechat = array( "success" => true, "payinfo" => $res );
+            if( !empty($res["package"]) && strexists($res["package"], "prepay_id=") )
+            {
+                $prepay_id = str_replace("prepay_id=", "", $res["package"]);
+                pdo_update("ewei_shop_groups_order", array( "wxapp_prepay_id" => $prepay_id ), array( "id" => $order_id, "uniacid" => $_W["uniacid"] ));
+            }
+        }
+        
+        $l["pay"]=$res;
+        apperror(0,"",$l);
+    }
+    
 }

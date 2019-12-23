@@ -444,7 +444,7 @@ class Order_EweiShopV2Page extends PluginWebPage
 			show_json(1);
 		}
 		$address = iunserializer($item["address"]);
-		if( !is_array($address) ) 
+		if( !is_array($address)||empty($address) ) 
 		{
 			$address = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_member_address") . " WHERE id = :id and uniacid=:uniacid", array( ":id" => $item["addressid"], ":uniacid" => $_W["uniacid"] ));
 		}
@@ -510,7 +510,7 @@ class Order_EweiShopV2Page extends PluginWebPage
 			}
 		}
 		$address = iunserializer($item["address"]);
-		if( !is_array($address) ) 
+		if( !is_array($address)||empty($address) ) 
 		{
 			$address = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_member_address") . " WHERE id = :id and uniacid=:uniacid", array( ":id" => $item["addressid"], ":uniacid" => $_W["uniacid"] ));
 		}

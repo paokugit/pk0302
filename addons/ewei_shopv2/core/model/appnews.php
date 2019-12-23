@@ -46,8 +46,8 @@ class Appnews_EweiShopV2Model
            $list[$k]["nickname"]=$m["nickname"]?$m["nickname"]:"昵称";
            //获取总数量
            $count=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_groups_order")." where is_team=1 and status=1 and teamid=:teamid",array(":teamid"=>$v["id"]));
-           $list[$k]["count"]=$count+1;
-           $list[$k]["number"]=$good["groupnum"]-$count-1;
+           $list[$k]["count"]=$count;
+           $list[$k]["number"]=$good["groupnum"]-$count;
            //获取头像
            $team=pdo_fetchall("select openid,user_id from ".tablename("ewei_shop_group_order")." where status=1 and (id=:teamid or teamid=:teamid) and is_team=1",array(":teamid"=>$v["id"]));
            $good["group"]["list"][$k]["avatar"]=array();
@@ -64,7 +64,7 @@ class Appnews_EweiShopV2Model
        return $list;
    }
    //评价
-   public function group_comment($goods_id,$first,$num,$label){
+   public function group_comment($goods_id,$first,$num,$label,$user_id){
        $good=pdo_get("ewei_shop_groups_goods",array("id"=>$goods_id));
        $condition="and  checked=0 and deleted=0 and (goodsid=:gid or group_goodsid=:good_id)";
        $param=array(":gid"=>$good["gid"],":good_id"=>$goods_id);
@@ -104,6 +104,16 @@ class Appnews_EweiShopV2Model
            $list[$k]["images"]=array();
            foreach ($image as $kk=>$vv){
                $list[$k]["images"][$kk]=tomedia($vv);
+           }
+           if ($user_id){
+               $log=pdo_get("ewei_shop_order_comment_fav",array("user_id"=>$user_id,"ocid"=>$v["id"],"status"=>1));
+               if ($log){
+                   $list[$k]["zan"]=1;
+               }else{
+                   $list[$k]["zan"]=0;
+               }
+           }else{
+               $list[$k]["zan"]=0;
            }
        }
        //获取商品规格

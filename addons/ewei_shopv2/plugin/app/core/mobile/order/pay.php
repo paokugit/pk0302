@@ -96,18 +96,18 @@ class Pay_EweiShopV2Page extends AppMobilePage
 			$cash = array( "success" => $order["cash"] == 1 && isset($set["pay"]) && $set["pay"]["cash"] == 1 && $order["isverify"] == 0 && $order["isvirtual"] == 0 );
 		}
 		$alipay = array( "success" => false );
-		if( !empty($set["pay"]["nativeapp_alipay"]) && 0 < $order["price"] && !$this->iswxapp ) 
-		{
-			$params = array( "out_trade_no" => $log["tid"], "total_amount" => $order["price"], "subject" => $set["shop"]["name"] . "订单", "body" => $_W["uniacid"] . ":0:NATIVEAPP" );
-			$sec = m("common")->getSec();
-			$sec = iunserializer($sec["sec"]);
-			$alipay_config = $sec["nativeapp"]["alipay"];
-			if( !empty($alipay_config) ) 
-			{
-				$res = $this->model->alipay_build($params, $alipay_config);
-				$alipay = array( "success" => true, "payinfo" => $res );
-			}
-		}
+//		if( !empty($set["pay"]["nativeapp_alipay"]) && 0 < $order["price"] && !$this->iswxapp )
+//		{
+//			$params = array( "out_trade_no" => $log["tid"], "total_amount" => $order["price"], "subject" => $set["shop"]["name"] . "订单", "body" => $_W["uniacid"] . ":0:NATIVEAPP" );
+//			$sec = m("common")->getSec();
+//			$sec = iunserializer($sec["sec"]);
+//			$alipay_config = $sec["nativeapp"]["alipay"];
+//			if( !empty($alipay_config) )
+//			{
+//				$res = $this->model->alipay_build($params, $alipay_config);
+//				$alipay = array( "success" => true, "payinfo" => $res );
+//			}
+//		}
 		app_json(array( "order" => array( "id" => $order["id"], "ordersn" => $order["ordersn"], "price" => $order["price"], "title" => $set["shop"]["name"] . "订单" ), "credit" => $credit,"RVC" => $RVC, "wechat" => $wechat, "alipay" => $alipay, "cash" => $cash ));
 	}
 	public function complete() 

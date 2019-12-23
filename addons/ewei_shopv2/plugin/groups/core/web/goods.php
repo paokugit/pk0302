@@ -62,7 +62,8 @@ class Goods_EweiShopV2Page extends PluginWebPage
 		global $_GPC;
 		$id = intval($_GPC["id"]);
 		$item = pdo_fetch("SELECT g.*,c.name as catename FROM " . tablename("ewei_shop_groups_goods") . " as g\r\n\t\t\t\tleft join " . tablename("ewei_shop_groups_category") . " as c on c.id = g.category\r\n\t\t\t\tWHERE g.id =:id and g.uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":id" => $id ));
-		$category = pdo_fetchall("select id,name,thumb from " . tablename("ewei_shop_groups_category") . " where uniacid=:uniacid order by displayorder desc", array( ":uniacid" => $_W["uniacid"] ));
+// 		$category = pdo_fetchall("select id,name,thumb from " . tablename("ewei_shop_groups_category") . " where uniacid=:uniacid order by displayorder desc", array( ":uniacid" => $_W["uniacid"] ));
+		$category = m('shop')->getFullCategory(true, true);
 		$group_goods_id = $item["id"];
 		if( !empty($item["thumb"]) ) 
 		{

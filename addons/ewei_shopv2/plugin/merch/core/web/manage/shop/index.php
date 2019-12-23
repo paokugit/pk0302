@@ -6,7 +6,6 @@ class Index_EweiShopV2Page extends MerchWebPage
 	{
 		global $_W;
 		global $_GPC;
-
 		if (!empty($_W['shopversion'])) {
 			if (mcv('shop.adv')) {
 				header('location: ' . webUrl('shop/adv'));
@@ -76,6 +75,7 @@ class Index_EweiShopV2Page extends MerchWebPage
 			$merchid = $_W['merchid'];
 			$url = mobileUrl('merch', array('id' => $merchid), true);
 			$qrcode = m('qrcode')->createQrcode($url);
+			var_dump($qrcode);exit;
 			include $this->template();
 		}
 	}

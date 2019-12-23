@@ -306,9 +306,9 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         }
         //判断用户是否可以多次领取
         $l=pdo_fetch("select * from ".tablename("ewei_shop_coupon_data")." where couponid=:couponid and (openid=:openid or user_id=:user_id) and used=0",array(":couponid"=>$id,":openid"=>$member["openid"],":user_id"=>$member["id"]));
-        if ($l){
-            apperror(1,"不可多次领取");
-        }
+//         if ($l){
+//             apperror(1,"不可多次领取");
+//         }
         $d["uniacid"]=1;
         $d["openid"]=$member["openid"];
         $d["gettype"]=1;
@@ -361,8 +361,8 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         if (empty($order)){
             $order=" order by createtime desc ";
         }
-//         $list=pdo_fetchall("select id,title,marketprice,thumb,total,sales,ishot,istime from ".tablename("ewei_shop_goods")." where 1  ".$condition.$order."  limit ".$first.",20",array(":merchid"=>$merch_id));
-        $list=pdo_fetchall("select id,title,marketprice,thumb,total,sales,ishot,istime,issendfree,remote_dispatchprice from ".tablename("ewei_shop_goods")." where 1  ".$condition.$order."  limit ".$first.",20");
+         $list=pdo_fetchall("select id,title,marketprice,thumb,total,sales,ishot,istime from ".tablename("ewei_shop_goods")." where 1  ".$condition.$order."  limit ".$first.",20",array(":merchid"=>$merch_id));
+//         $list=pdo_fetchall("select id,title,marketprice,thumb,total,sales,ishot,istime,issendfree,remote_dispatchprice from ".tablename("ewei_shop_goods")." where 1  ".$condition.$order."  limit ".$first.",20");
         
         $list=set_medias($list, array( "thumb" ));
         $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_goods")." where 1 ".$condition);
@@ -426,6 +426,32 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         }
         $res["list"]=$list;
         apperror(0,"",$res);
+    }
+    //活动
+    public function activity(){
+        global $_GPC;
+        global $_W;
+        $merch_id=$_GPC["merch_id"]?$_GPC["merch_id"]:0;
+        $time=pdo_fetchall("select id,thumb,title,marketprice,sales,total from ".tablename("ewei_shop_goods")." where status=1 and merchid=:merchid and istime=1 and timestart<=:time and timeend>time order by sales desc limit 5",array(":merchid"=>$merch_id,":time"=>time()));
+        foreach ($time as $k=>$v){
+            $time[$k]["thumb"]=tomedia($v["thumb"]);
+        }
+        if ($time){
+        $list["time"]=$time;
+        }else{
+            $list["time"]=array();
+        }
+        //获取拼团
+        $group=pdo_fetchall("select id,title,groupnum,sales,thumb,groupsprice,freight from ".tablename("ewei_shop_groups_goods")." where merchid=:merchid and  stock>0 and status=1 order by sales desc",array(":merchid"=>$merch_id));
+        foreach ($group as $k=>$v){
+            $group[$k]["thumb"]=tomedia($v["thumb"]);
+        }
+        if ($group){
+        $list["group"]=$group;
+        }else{
+            $list["group"]=array();
+        }
+        apperror(0,"",$list);
     }
 }
  

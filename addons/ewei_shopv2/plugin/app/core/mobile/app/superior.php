@@ -78,7 +78,7 @@ class Superior_EweiShopV2Page extends AppMobilePage
             apperror(1,"商品id不可为空");
         }
         //获取商品
-        $detail=pdo_fetch("select id,name,saleUnit,weight,imagePath,productArea,wareQD,param,sku,brandName,upc,appintroduce,jdprice,ptprice,price,isdelete,onsale from ".tablename("ewei_shop_jdgoods")." where id=:id ",array(":id"=>$id));
+        $detail=pdo_fetch("select id,level,name,saleUnit,weight,imagePath,productArea,wareQD,param,sku,brandName,upc,appintroduce,jdprice,ptprice,price,isdelete,onsale from ".tablename("ewei_shop_jdgoods")." where id=:id ",array(":id"=>$id));
         if (empty($detail)){
             apperror(1,"商品id不正确");
         }
@@ -257,6 +257,9 @@ class Superior_EweiShopV2Page extends AppMobilePage
         if ($good["isdelete"]==1||$good["onsale"]==0){
             apperror(1,"该商品已下架");
         }
+        if ($member["agentlevel"]<$good["level"]){
+            apperror(1,"你暂无权限购买此商品");
+        }
         //获取三方价格
         $price=m("jdgoods")->batch_price($good["sku"]);
 //         var_dump($price);
@@ -387,6 +390,12 @@ class Superior_EweiShopV2Page extends AppMobilePage
        global $_W;
        $order_id=$_GPC["orderid"];
        $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
+       $member=pdo_get("ewei_shop_member",array("id"=>$order["user_id"]));
+       $order_goods=pdo_get("ewei_shop_order_goods",array("orderid"=>$order["id"]));
+       $good=pdo_get("ewei_shop_jdgoods",array("id"=>$order_goods["goodsid"]));
+       if ($good["level"]>$member["agentlevel"]){
+           apperror(1,"你暂无权限购买此商品");
+       }
        if (empty($order)){
            apperror(1,"订单id不正确");
        }
