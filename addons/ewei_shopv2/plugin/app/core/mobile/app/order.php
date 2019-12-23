@@ -30,7 +30,9 @@ class Order_EweiShopV2Page extends AppMobilePage
        $gdid = $_GPC['gdid'] ? $_GPC['gdid'] :0;
        //购物车id
        $cartid = $_GPC['cartid'] ? $_GPC['cardid'] : 0;
-       $data = m('app')->order_create($user_id,$id,$goods,$packageid,$optionid,$bargain_id,$total,$giftid,$fromquick,$selectDate,$gdid,$cartid);
+
+       $data = m('app')->order_create1($user_id,$id,$goods,$packageid,$optionid,$bargain_id,$total,$giftid,$fromquick,$selectDate,$gdid,$cartid);
+
        //$data = m('app')->order_create($user_id,$id,$optionid,$total);
        app_error1($data['status'],$data['msg'],$data['data']);
    }
