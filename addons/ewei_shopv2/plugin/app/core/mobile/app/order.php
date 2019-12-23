@@ -20,7 +20,7 @@ class Order_EweiShopV2Page extends AppMobilePage
        $goods = $_GPC['goods'] ? $_GPC['goods'] : [];
        $packageid = $_GPC['packageid'] ? $_GPC['packageid'] : 0;
        //商品属性id
-       $optionid = $_GPC['optionid'];
+       $optionid = $_GPC['optionid'] ?  $_GPC['optionid'] : 0;
        $bargain_id = $_GPC['bargain_id'] ? $_GPC['bargain_id'] : 0;
        //购买数量
        $total = $_GPC['total'];
@@ -30,7 +30,7 @@ class Order_EweiShopV2Page extends AppMobilePage
        $gdid = $_GPC['gdid'] ? $_GPC['gdid'] :0;
        //购物车id
        $cartid = $_GPC['cartid'] ? $_GPC['cardid'] : 0;
-       $data = m('app')->order_create1($user_id,$id,$goods,$packageid,$optionid,$bargain_id,$total,$giftid,$fromquick,$selectDate,$gdid,$cartid);
+       $data = m('app')->order_create($user_id,$id,$goods,$packageid,$optionid,$bargain_id,$total,$giftid,$fromquick,$selectDate,$gdid,$cartid);
        //$data = m('app')->order_create($user_id,$id,$optionid,$total);
        app_error1($data['status'],$data['msg'],$data['data']);
    }
@@ -68,31 +68,44 @@ class Order_EweiShopV2Page extends AppMobilePage
    {
        header("Access-Control-Allow-Origin:*");
        global $_GPC;
+       //用户的token   信息的user_id
        $token = $_GPC['token'];
        $user_id = m('app')->getLoginToken($token);
        if(empty($user_id)) app_error1(2,'登录失效',[]);
+       //地址id
        $address_id = $_GPC['address_id'];
+       //商品信息
        $goods = $_GPC['goods'];
+       //是否从购物车来的  是传1   不是传0
+       $fromcart = $_GPC['fromcart'] ? $_GPC['fromcart'] : 0;
+       //用户的留言信息
+       $remark = $_GPC['remark'] ? $_GPC['remark'] : "";
+       //卡路里
+       $deduct1 = $_GPC['deduct1'] ? $_GPC['deduct1'] : 0;
+       //折扣宝
+       $discount1 = $_GPC['discount1'] ? $_GPC['discount1'] : 0;
+       //优惠券id
+       $couponid = $_GPC['couponid'] ? $_GPC['couponid'] : 0;
+       //邀请人的信息
+       $mid = $_GPC['mid'];
        $cardid = $_GPC['cardid'] ? $_GPC['cardid'] : 0;
+       //套餐id
        $packageid = $_GPC['packageid'] ? $_GPC['packageid'] : 0;
-       $dispatchid = $_GPC['dispatchid'];
-       $dispatchtype = $_GPC['dispatchtype'];
+       //配送id  和 配送类型
+       $dispatchid = $_GPC['dispatchid'] ? $_GPC['dispatchid'] :0;
+       $dispatchtype = $_GPC['dispatchtype'] ? $_GPC['dispatchtype'] : 0;
+       //到店自取的话   店铺的id
        $carrierid = $_GPC['carrierid'] ? $_GPC['carrierid'] : 0;
        $bargain_id = $_GPC['bargain_id'] ? $_GPC['bargain_id'] : 0;
-       $giftid = $_GPC['giftid'];
+       $giftid = $_GPC['giftid'] ? $_GPC['giftid'] : 0;
        $gdid = $_GPC['giftid'] ? $_GPC['giftid'] : 0;
-       $carrier = $_GPC['carriers'];
-       $mid = $_GPC['mid'];
-       $invoicename = $_GPC['invoicename'];
-       $fromcart = $_GPC['fromcart'];
-       $fromquick = $_GPC["fromquick"];
-       $remark = $_GPC['remark'];
-       $discount1 = $_GPC['discount1'];
-       $receipttime = $_GPC['receipttime'];
-       $deduct1 = $_GPC['deduct1'];
-       $deduct2 = $_GPC['deduct2'];
-       $diydata = $_GPC['diydata'];
-       $couponid = $_GPC['couponid'];
+       $carrier = $_GPC['carriers'] ? $_GPC['carriers'] : 0;
+       $invoicename = $_GPC['invoicename'] ? $_GPC['invoicename'] : 0;
+       $fromquick = $_GPC["fromquick"] ? $_GPC["fromquick"] : 0;
+       $receipttime = $_GPC['receipttime'] ? $_GPC['receipttime'] : "";
+       //余额抵扣
+       $deduct2 = $_GPC['deduct2'] ? $_GPC['deduct2'] : 0;
+       $diydata = $_GPC['diydata'] ? $_GPC['diydata'] : 0;
        $data = m('app')->order_submit($user_id,$address_id,$goods,$cardid,$packageid,$dispatchid,$dispatchtype,$carrierid,$bargain_id,$giftid,$gdid,$carrier,$mid,$invoicename,$fromquick,$fromcart,$discount1,$remark,$receipttime,$deduct1,$deduct2,$diydata,$couponid);
        app_error1($data['status'],$data['msg'],$data['data']);
    }
@@ -104,11 +117,14 @@ class Order_EweiShopV2Page extends AppMobilePage
     {
         header("Access-Control-Allow-Origin:*");
         global $_GPC;
+        //用户的token   信息的user_id
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
         if(empty($user_id)) app_error1(2,'登录失效',[]);
-        $orderid = $_GPC['orderid'];
-        $data = m('app')->order_pay($user_id,$orderid);
+        //订单id
+        $order_id = $_GPC['order_id'];
+        $iswxapp = $this->iswxapp;
+        $data = m('app')->order_pay($user_id,$order_id,$iswxapp);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
 
@@ -119,12 +135,15 @@ class Order_EweiShopV2Page extends AppMobilePage
     {
         header("Access-Control-Allow-Origin:*");
         global $_GPC;
+        //用户的token   信息的user_id
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
         if(empty($user_id)) app_error1(2,'登录失效',[]);
-        $type = $_GPC['type'];
+        //支付类型
+        $type = $_GPC['type'] ? $_GPC['type'] : "credit";
+        //订单id
         $id = $_GPC['id'];
-        $data = m('app')->order_complete($user_id,$type,$id);
+        $data = m('app')->order_complete($user_id,$id,$type);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
 }

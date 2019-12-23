@@ -3142,5 +3142,170 @@ class Order_EweiShopV2Model
         }
         return $return_array;
     }
+
+    /**
+     * @param $orderid
+     * @param $openid
+     * @return array
+     */
+    public function success($orderid,$openid)
+    {
+        global $_W;
+        global $_GPC;
+        //$openid = $_W["openid"];
+        $uniacid = $_W["uniacid"];
+        $member = m("member")->getMember($openid, true);
+        if( empty($orderid) )
+        {
+            app_error1(AppError::$ParamsError,'',[]);
+        }
+//        //订单绑定推荐会员
+//        if($_GPC['mid'] && !$member['agentid']){
+//            $agentmemberInfo = pdo_get('ewei_shop_member', array('id' =>$_GPC['mid']));
+//            if($agentmemberInfo)  m('member')->setagent(array('agentopenid'=>trim($agentmemberInfo["openid"]),'openid'=>$member['openid']));
+//        }
+        $order = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where id=:id and uniacid=:uniacid and (openid=:openid or user_id = :user_id) limit 1", array( ":id" => $orderid, ":uniacid" => $uniacid, ":openid" => $member['openid'],':user_id'=>$member['id'] ));
+        $merchid = $order["merchid"];
+        $goods = pdo_fetchall("select og.goodsid,g.cates,og.price,g.title,g.thumb,og.total,g.credit,og.optionid,og.optionname as optiontitle,g.isverify,g.storeids from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on g.id=og.goodsid " . " where og.orderid=:orderid and og.uniacid=:uniacid ", array( ":uniacid" => $uniacid, ":orderid" => $orderid ));
+        $address = false;
+        if( !empty($order["addressid"]) )
+        {
+            $address = iunserializer($order["address"]);
+            if( !is_array($address) )
+            {
+                $address = pdo_fetch("select * from  " . tablename("ewei_shop_member_address") . " where id=:id limit 1", array( ":id" => $order["addressid"] ));
+            }
+        }
+        $carrier = @iunserializer($order["carrier"]);
+        if( !is_array($carrier) || empty($carrier) )
+        {
+            $carrier = false;
+        }
+        $store = false;
+        if( !empty($order["storeid"]) )
+        {
+            if( 0 < $merchid )
+            {
+                $store = pdo_fetch("select * from  " . tablename("ewei_shop_merch_store") . " where id=:id limit 1", array( ":id" => $order["storeid"] ));
+            }
+            else
+            {
+                $store = pdo_fetch("select * from  " . tablename("ewei_shop_store") . " where id=:id limit 1", array( ":id" => $order["storeid"] ));
+            }
+        }
+        $stores = false;
+        if( $order["isverify"] )
+        {
+            $storeids = array( );
+            foreach( $goods as $g )
+            {
+                if( !empty($g["storeids"]) )
+                {
+                    $storeids = array_merge(explode(",", $g["storeids"]), $storeids);
+                }
+            }
+            if( empty($storeids) )
+            {
+                if( 0 < $merchid )
+                {
+                    $stores = pdo_fetchall("select * from " . tablename("ewei_shop_merch_store") . " where  uniacid=:uniacid and merchid=:merchid and status=1 and `type` in (2,3)", array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid ));
+                }
+                else
+                {
+                    $stores = pdo_fetchall("select * from " . tablename("ewei_shop_store") . " where  uniacid=:uniacid and status=1 and `type` in (2,3)", array( ":uniacid" => $_W["uniacid"] ));
+                }
+            }
+            else
+            {
+                if( 0 < $merchid )
+                {
+                    $stores = pdo_fetchall("select * from " . tablename("ewei_shop_merch_store") . " where id in (" . implode(",", $storeids) . ") and uniacid=:uniacid and merchid=:merchid and status=1", array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid ));
+                }
+                else
+                {
+                    $stores = pdo_fetchall("select * from " . tablename("ewei_shop_store") . " where id in (" . implode(",", $storeids) . ") and uniacid=:uniacid and status=1", array( ":uniacid" => $_W["uniacid"] ));
+                }
+            }
+        }
+        $text = "";
+        if( !empty($address) )
+        {
+            $text = "您的包裹整装待发";
+        }
+        if( !empty($order["dispatchtype"]) && empty($order["isverify"]) )
+        {
+            $text = "您可以到您选择的自提点取货了";
+        }
+        if( !empty($order["isverify"]) )
+        {
+            $text = "您可以到适用门店去使用了";
+        }
+        if( !empty($order["virtual"]) )
+        {
+            $text = "您购买的商品已自动发货";
+        }
+        if( !empty($order["isvirtual"]) && empty($order["virtual"]) )
+        {
+            if( !empty($order["isvirtualsend"]) )
+            {
+                $text = "您购买的商品已自动发货";
+            }
+            else
+            {
+                $text = "您已经支付成功";
+            }
+        }
+        if( $_GPC["result"] == "seckill_refund" )
+        {
+            $icon = "e75a";
+        }
+        else
+        {
+            if( !empty($address) )
+            {
+                $icon = "e623";
+            }
+            if( !empty($order["dispatchtype"]) && empty($order["isverify"]) )
+            {
+                $icon = "e7b9";
+            }
+            if( !empty($order["isverify"]) )
+            {
+                $icon = "e7b9";
+            }
+            if( !empty($order["virtual"]) )
+            {
+                $icon = "e7a1";
+            }
+            if( !empty($order["isvirtual"]) && empty($order["virtual"]) )
+            {
+                if( !empty($order["isvirtualsend"]) )
+                {
+                    $icon = "e7a1";
+                }
+                else
+                {
+                    $icon = "e601";
+                }
+            }
+        }
+        $seckill_color = "";
+        if( 0 < $order["seckilldiscountprice"] )
+        {
+            $where = " WHERE uniacid=:uniacid AND type = 5";
+            $params = array( ":uniacid" => $_W["uniacid"] );
+            $page = pdo_fetch("SELECT * FROM " . tablename("ewei_shop_wxapp_page") . $where . " LIMIT 1 ", $params);
+            if( !empty($page) )
+            {
+                $data = base64_decode($page["data"]);
+                $diydata = json_decode($data, true);
+                $seckill_color = $diydata["page"]["seckill"]["color"];
+            }
+        }
+        $result = array("goods"=>$goods[0], "order" => array( "id" => $orderid,  "status" => ($order["paytype"] == 3 ? "订单提交支付" : "订单支付成功"), "text" => $text, "price" => $order["price"] ), "paytype" => ($order["paytype"] == 3 ? "需到付" : "实付金额".$order["price"]), "carrier" => $carrier, "address" => $address );
+        $result['goods'] = $goods[0];
+        app_error1(0,'',$result);
+    }
+
 }
 ?>

@@ -552,6 +552,8 @@ class Shop_EweiShopV2Model
                 $row = com("coupon")->setCoupon($row, time());
                 //$row["thumb"] = tomedia($row["thumb"]);
                 $row["timestr"] = "永久有效";
+                $row['timestart'] = date('Y-m-d',$row['timestart']);
+                $row['timeend'] = date('Y-m-d',$row['timeend']);
                 if(!empty($user_id)){
                     $member = m('member')->getMember($user_id);
                     $coupon = pdo_fetch('select * from '.tablename('ewei_shop_coupon_data').' where couponid = :couponid and (openid = :openid or user_id = :user_id) ',[':user_id'=>$member['id'],':openid'=>$member['openid'],':couponid'=>$row['id']]);

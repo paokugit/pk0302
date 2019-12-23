@@ -39,7 +39,7 @@ class Index_EweiShopV2Page extends MerchWebPage
 		{
 			return $_W["siteroot"] . "addons/ewei_shopv2/data/storecode/".$filename . "?v=1.0";
 		}
-		$qrcode = p("app")->getCodeUnlimit(array( "scene" => "&id=".$merchid."&fromid=".$merchid, "page" => 'pages/changce/merch/detail',"width"=>$width));
+		$qrcode = p("app")->getCodeUnlimit(array( "scene" => "&id=".$merchid."&fromid=".$merchid, "page" => 'packageA/pages/changce/merch/detail',"width"=>$width));
 		if( !is_error($qrcode) )
 		{
 			$qrcode = imagecreatefromstring($qrcode);
