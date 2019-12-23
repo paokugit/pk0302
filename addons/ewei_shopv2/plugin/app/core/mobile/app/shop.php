@@ -1,6 +1,6 @@
 <?php  if( !defined("IN_IA") )
 {
-    exit( "Access Denied" );
+	exit( "Access Denied" );
 }
 require(EWEI_SHOPV2_PLUGIN . "app/core/page_mobile.php");
 class Shop_EweiShopV2Page extends AppMobilePage
@@ -35,7 +35,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         ];
         app_error1(0,"",['adv'=>$adv,'shop'=>$shop,'cate'=>$cate]);
     }
-    
+
     /**
      * 商城首页的商品分页
      */
@@ -53,7 +53,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $goods = m('app')->shop_shop_goods($type,$sort,$page,$cate);
         app_error1(0,"",$goods);
     }
-    
+
     /**
      * 分类页面
      */
@@ -63,7 +63,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_cate();
         app_error1(0,"",$data);
     }
-    
+
     /**
      * 商品搜索
      */
@@ -88,7 +88,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_search($keywords,$cate,$page,$isnew,$ishot,$isrecommand,$isdiscount,$istime,$issendfree,$order,$by);
         app_error1(0,"",$data);
     }
-    
+
     /**
      * 商品详情
      */
@@ -109,7 +109,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_goods_detail($user_id,$id,$this->merch_user);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
-    
+
     /**
      * 商品评论的标签
      */
@@ -146,7 +146,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         if(empty($label)) $labels = [];
         app_error1(0,'',['labels'=>$labels,'level'=>$level,'hao_rate'=>$hao_rate]);
     }
-    
+
     /**
      * 商品评价
      */
@@ -170,7 +170,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_goods_comment_list($user_id,$id,$label,$page);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
-    
+
     /**
      * 商品评价点赞
      */
@@ -214,7 +214,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         }
         app_error1(0,$msg,[]);
     }
-    
+
     /**
      * 获得商品的属性
      */
@@ -229,7 +229,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_goods_options($user_id,$id,$cartid);
         app_error1(0,'',$data);
     }
-    
+
     /**
      * 加入购物车
      */
@@ -247,7 +247,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_add_cart($user_id,$id,$optionid,$total);
         app_error1($data['status'],"",empty($data['data']) ? $data['data'] : []);
     }
-    
+
     /**
      * 购物车列表的选中状态
      */
@@ -287,7 +287,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
             }
         }
     }
-    
+
     /**
      * 活动的banner
      */
@@ -300,26 +300,26 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_cate_banner($id);
         app_error1(0,"",$data);
     }
-    
-    /**
-     * 活动列表
-     */
-    public function shop_cate_list()
-    {
-        header("Access-Control-Allow-Origin:*");
+
+   /**
+    * 活动列表
+    */
+   public function shop_cate_list()
+   {
+       header("Access-Control-Allow-Origin:*");
         global $_GPC;
         // 这个传id最好吧  然后 根据id查类别  cate == 1fruit水果美食   2city同城  3cash零元兑  4task任务赚  5share分享赚   6rank网红榜单
         $id = $_GPC['id'];
         if(empty($id)) app_error1(1,"参数错误",[]);
         $page = max(1,$_GPC['page']);
         $keywords = $_GPC['keywords'];
-        //order  类型  综合不传   销量sales  价格 minprice  by  升序asc   降序desc
+       //order  类型  综合不传   销量sales  价格 minprice  by  升序asc   降序desc
         $type = empty($_GPC['type']) ? 3 : $_GPC['type'];
         $sort = empty($_GPC['sort']) ? "desc" : $_GPC['sort'];
         $data = m('app')->shop_cate_list($id,$keywords,$page,$type,$sort);
         app_error1(0,"",$data);
-    }
-    
+   }
+
     /**
      * 任务领钱
      */
@@ -332,7 +332,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_task_list($user_id);
         app_error1(0,'',$data);
     }
-    
+
     /**
      * 同城
      */
@@ -356,7 +356,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_same_city($user_id,$city_type,$lng,$lat,$page,$keywords,$type,$sort,$range);
         app_error1(0,'',$data);
     }
-    
+
     /**
      *  ta的店 动态 列表
      */
@@ -374,12 +374,12 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_shop_list($user_id,$type,$page,$merch_id);
         app_error1(0,'',$data);
     }
-    
-    /**
-     * 他的店动态详情
-     */
-    public function shop_shop_detail()
-    {
+
+   /**
+    * 他的店动态详情
+    */
+   public function shop_shop_detail()
+   {
         header("Access-Control-Allow-Origin:*");
         global $_GPC;
         $id = $_GPC['id'];
@@ -388,8 +388,8 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $user_id = m('app')->getLoginToken($token);
         $data = m('app')->shop_shop_detail($user_id,$id);
         app_error1(0,"",$data);
-    }
-    
+   }
+
     /**
      * 动态详情的评论列表
      */
@@ -405,7 +405,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_shop_comment($user_id,$id,$page);
         app_error1(0,"",$data);
     }
-    
+
     /**
      * 评论详情
      */
@@ -425,10 +425,10 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_shop_comment_detail($user_id,$comment_id,$page,$type);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
-    
-    /**
-     * 动态文章  文章评论的点赞
-     */
+
+   /**
+    * 动态文章  文章评论的点赞
+    */
     public function shop_choice_fav()
     {
         header("Access-Control-Allow-Origin:*");
@@ -444,7 +444,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_choice_fav($user_id,$id,$type);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
-    
+
     /**
      * 动态文章评论  评论已有的评论
      */
@@ -464,7 +464,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_choice_comment($user_id,$parent_id,$content,$type);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
-    
+
     /**
      * RVC充值
      */
@@ -481,7 +481,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('game')->rvc_pay($user_id,$amount,$type);
         app_error1($data['status'],$data['message'],$data['data']);
     }
-    
+
     /**
      * 会员RVC信息首页
      */
@@ -495,7 +495,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_rvc($user_id);
         app_error1(0,'',['data' => $data]);
     }
-    
+
     /**
      * RVC收支明细
      */
