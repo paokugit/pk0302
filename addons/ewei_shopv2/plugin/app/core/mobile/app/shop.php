@@ -137,8 +137,8 @@ class Shop_EweiShopV2Page extends AppMobilePage
         //查找所有的评论信息  并计算平均评分
         $comment = pdo_fetchall('select * from '.tablename('ewei_shop_order_comment').'where deleted = 0 and goodsid = :goodsid',[':goodsid'=>$id]);
         $levels = array_column($comment,'level');
-        $hao_rate = empty($comment) ? 0 : round($hao_total/$total,2)*100 ."%";
-        $level = empty($comment) ? 0 : round(array_sum($levels)/$total,2);
+        $hao_rate = empty($comment) ? "100%" : round($hao_total/$total,2)*100 ."%";
+        $level = empty($comment) ? 5 : round(array_sum($levels)/$total,2);
         //全部的及数量
         $label_all = ['label_id'=>0,'label'=>"全部",'label_count'=>$total];
         //array_push()  PHP给数组后面追加元素   array_unshift()  php给数组前面追加元素
@@ -223,9 +223,10 @@ class Shop_EweiShopV2Page extends AppMobilePage
         global $_W;
         global $_GPC;
         $id = intval($_GPC["id"]);
+        $cartid = $_GPC['cartid'] ? $_GPC['cartid'] : 0;
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        $data = m('app')->shop_goods_options($user_id,$id);
+        $data = m('app')->shop_goods_options($user_id,$id,$cartid);
         app_error1(0,'',$data);
     }
 
@@ -338,10 +339,10 @@ class Shop_EweiShopV2Page extends AppMobilePage
     public function shop_same_city()
     {
         global $_GPC;
-//        //用户信息
-//        $token = $_GPC['token'];
-//        $user_id = m('app')->getLoginToken($token);
-//        $member = m('member')->getMember($user_id);
+        //用户信息
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        $member = m('member')->getMember($user_id);
         //类型  city_type == 1 附近的商店   附近的商品
         $city_type = $_GPC['city_type'] ? $_GPC['city_type'] : 1;
         $page = max(1,$_GPC['page']);
