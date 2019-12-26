@@ -162,6 +162,8 @@ class List_EweiShopV2Page extends MerchWebPage
 		global $_W;
 		global $_GPC;
 		$merchid = $_W['merchid'];
+		$pttype=$_GPC["pttype"];
+		var_dump($pttype);
 		$item = $this->model->getMerchPrice($merchid, 1);
 		$list = $this->model->getMerchPriceList($merchid);
 		$order_num = count($list);

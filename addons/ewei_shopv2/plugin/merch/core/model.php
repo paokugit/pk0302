@@ -1331,6 +1331,7 @@ class MerchModel extends PluginModel
         $list = $this->getMerchPrice($merchid, 1);
 //         var_dump($list);die;
         $data["status0"] = $list["realprice"];
+        $data["ptstatus0"]=$list["ptrealprice"];
         $orderids = $list["orderids"];
         $params = array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid );
         $condition = " and uniacid=:uniacid and merchid=:merchid";
@@ -1536,7 +1537,14 @@ class MerchModel extends PluginModel
         $ptorder=pdo_fetchall("select * from ".tablename("ewei_shop_groups_order")." where status=3 and merchid=:merchid",array(":merchid"=>$merchid));
         $list["ptorderprice"]=0;
         $list["ptorderid"]=array();
-        
+        $list["ptrealprice"]=0;
+        $list["ptrealpricerate"]=0;
+        foreach ($ptorder as $k=>$v){
+            $list["ptorderid"][$k]=$v["id"];
+            $list["ptorderprice"]=$v["price"]+$v["freight"];
+            $list["ptrealprice"]=$v["price"]+$v["freight"];
+        }
+        $list["ptrealpricerate"]=((100 - floatval($list["payrate"])) * $list["ptrealprice"]) / 100;
         return $list;
     }
 

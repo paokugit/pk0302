@@ -131,7 +131,7 @@
                             </div>
 
                         </a>
-                        <a href="{php echo merchUrl('apply/list/add',array('type'=>1))}">
+                        <a href="{php echo merchUrl('apply/list/add',array('pttype'=>1))}">
 
                             <div class="col-sm-3 forum-info">
 
@@ -149,7 +149,7 @@
 
                                 <i class="commission4">--</i><br/>
 
-                                <a class="btn btn-primary btn-sm" href="{php echo merchUrl('apply/list/add',array('type'=>1))}" style="color: #fff">申请提现</a>
+                                <a class="btn btn-primary btn-sm" href="{php echo merchUrl('apply/list/add',array('pttype'=>1))}" style="color: #fff">申请提现</a>
 
                             </div>
 
@@ -496,6 +496,9 @@
                     $("span.status0").text(res.status0+"元");
 
                     $(".commission").text("已扣除佣金："+res.commission+"元");
+                    $("span.ptstatus0").text(res.ptstatus0+"元");
+
+                    $(".commission4").text("已扣除佣金："+res.commission+"元");
 
                     $("span.status1").text(res.status1+"元");
 
