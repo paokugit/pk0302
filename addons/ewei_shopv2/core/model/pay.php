@@ -135,7 +135,7 @@ class Pay_EweiShopV2Model
      * @param $type
      * @return mixed
      */
-    public function app_pay($data,$type = 0)
+    public function wxchat_apppay($data,$type = 0)
     {
         global $_W;
         $config = pdo_fetch('select * from '.tablename('ewei_shop_payment').' where id=:id and uniacid=:uniacid',[':id'=>1,':uniacid'=>$_W['uniacid']]);
@@ -187,6 +187,64 @@ class Pay_EweiShopV2Model
     }
 
     /**
+     * @param $out_trade_no
+     * @param int $money
+     * @return array|bool
+     */
+    public function isWeixinPay($out_trade_no, $money = 0)
+    {
+        global $_W;
+        global $_GPC;
+        $data = m('common')->getSysset('app');
+        $sec = m('common')->getSec();
+        $sec = iunserializer($sec['sec']);
+        $url = 'https://api.mch.weixin.qq.com/pay/orderquery';
+        $pars = array();
+        $pars['appid'] = $data['appid'];
+        $pars['mch_id'] = $sec['wxapp']['mchid'];
+        $pars['nonce_str'] = random(32);
+        $pars['out_trade_no'] = $out_trade_no;
+        ksort($pars, SORT_STRING);
+        $string1 = '';
+        foreach ($pars as $k => $v) {
+            $string1 .= $k . '=' . $v . '&';
+        }
+        $string1 .= 'key=' . $sec['wxapp']['apikey'];
+        $pars['sign'] = strtoupper(md5($string1));
+        $xml = array2xml($pars);
+        load()->func('communication');
+        $resp = ihttp_post($url, $xml);
+        if (is_error($resp)) {
+            return error(-2, $resp['message']);
+        }
+        if (empty($resp['content'])) {
+            return error(-2, '网络错误');
+        }
+        $xml = '<?xml version="1.0" encoding="utf-8"?>' . $resp['content'];
+        $dom = new DOMDocument();
+        if ($dom->loadXML($xml)) {
+            $xpath = new DOMXPath($dom);
+            $code = $xpath->evaluate('string(//xml/return_code)');
+            $ret = $xpath->evaluate('string(//xml/result_code)');
+            $trade_state = $xpath->evaluate('string(//xml/trade_state)');
+            if ((strtolower($code) == 'success') && (strtolower($ret) == 'success') && (strtolower($trade_state) == 'success')) {
+                $total_fee = intval($xpath->evaluate('string(//xml/total_fee)')) / 100;
+                if ($total_fee != $money) {
+                    return error(-1, '金额出错');
+                }
+                return true;
+            }
+            if ($xpath->evaluate('string(//xml/return_msg)') == $xpath->evaluate('string(//xml/err_code_des)')) {
+                $error = $xpath->evaluate('string(//xml/return_msg)');
+            } else {
+                $error = $xpath->evaluate('string(//xml/return_msg)') . ' | ' . $xpath->evaluate('string(//xml/err_code_des)');
+            }
+            return error(-2, $error);
+        }
+        return error(-1, '未知错误');
+    }
+
+    /**
 	 * APP支付宝支付
      * @param $params
      * @param array $config
@@ -206,7 +264,7 @@ class Pay_EweiShopV2Model
         }
         $string1 = rtrim($string1, '&');
         //$pkeyid = openssl_pkey_get_private(m('common')->chackKey($config['private_key'], false));
-        $pkeyid = openssl_pkey_get_private(m('common')->chackKey($config['public_key_rsa2'], false));
+        $pkeyid = openssl_pkey_get_private(m('common')->chackKey($config['private_key_rsa2'], false));
         if ($pkeyid === false) {
             return error(-1, '提供的私钥格式不对');
         }

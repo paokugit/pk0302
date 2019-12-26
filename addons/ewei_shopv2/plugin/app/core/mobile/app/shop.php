@@ -352,7 +352,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $sort = empty($_GPC['sort']) ? "desc" : $_GPC['sort'];
         $lng = $_GPC['lng'];
         $lat = $_GPC['lat'];
-        $range = $_GPC['range'] ? $_GPC['range'] : 5;
+        $range = $_GPC['range'] ? $_GPC['range'] : 100000;
         $data = m('app')->shop_same_city($user_id,$city_type,$lng,$lat,$page,$keywords,$type,$sort,$range);
         app_error1(0,'',$data);
     }

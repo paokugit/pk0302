@@ -309,8 +309,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         header('Access-Control-Allow-Origin:*');
         global $_GPC;
         $type = $_GPC['type'] ? $_GPC['type'] : 1;
+        $merchid = $_GPC['merchid'] ? $_GPC['merchid'] : 0;
         $page = max(1,$_GPC['page']);
-        $data = m('app')->seckill($type,$page);
+        $data = m('app')->seckill($type,$page,$merchid);
         app_error1(0,'',$data);
     }
 
