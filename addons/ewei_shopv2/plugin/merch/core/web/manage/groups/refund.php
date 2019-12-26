@@ -397,6 +397,7 @@ class Refund_EweiShopV2Page extends MerchWebPage
 				{
 					if( $refundstatus == 5 ) 
 					{
+					    //商家重新发货
 						$change_refund["rexpress"] = $_GPC["rexpress"];
 						$change_refund["rexpresscom"] = $_GPC["rexpresscom"];
 						$change_refund["rexpresssn"] = trim($_GPC["rexpresssn"]);
@@ -430,6 +431,7 @@ class Refund_EweiShopV2Page extends MerchWebPage
 						{
 							if( $refundstatus == 1 ) 
 							{
+							    //同意退款
 								$ordersn = $item["orderno"];
 								if( !empty($item["ordersn2"]) ) 
 								{
@@ -443,8 +445,11 @@ class Refund_EweiShopV2Page extends MerchWebPage
 								$totalmoney = $order["price"] + $order["freight"];
 								if( $order["pay_type"] == "credit" ) 
 								{
-									m("member")->setCredit($item["openid"], "credit2", $realprice, array( 0, $shopset["name"] . "退款: " . $realprice . "元 订单号: " . $item["orderno"] ));
+									m("member")->setCredit($item["user_id"], "credit2", $realprice, array( 0, $shopset["name"] . "退款: " . $realprice . "元 订单号: " . $item["orderno"] ));
 									$result = true;
+								}elseif ($order["pay_type"]=="rvc"){
+								    m("member")->setCredit($item["user_id"], "rvc", $realprice, array( 0, $shopset["name"] . "退款: " . $realprice . "元 订单号: " . $item["orderno"] ));
+								    $result = true;
 								}
 								else 
 								{

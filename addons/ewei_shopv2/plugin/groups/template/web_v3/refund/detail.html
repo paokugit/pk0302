@@ -346,7 +346,23 @@
 
                             </tr>
 
+                           {if $refund["rtype"]==2&&$refund["goods_option_id"]!=0}
+                           
+                           <tr>
 
+                                <td style='width:80px'>更换规格：</td>
+
+                                <td>{$refund['option']}</td>
+
+                            </tr>
+                            <tr>
+
+                                <td style='width:80px'>商品数量：</td>
+
+                                <td>{$refund['total']}</td>
+
+                            </tr>
+                           {/if}
 
                             {if !empty($refund['images'])}
 

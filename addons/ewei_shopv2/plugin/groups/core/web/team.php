@@ -78,7 +78,7 @@ class Team_EweiShopV2Page extends PluginWebPage
 			$teams[$key]["starttime"] = date("Y-m-d H:i", $value["starttime"]);
 			$hours = $value["endtime"];
 			$date = date("Y-m-d H:i:s", $value["starttime"]);
-			$teams[$key]["endtime"] = date("Y-m-d H:i", strtotime(" " . $date . " + " . $hours . " hour"));
+			$teams[$key]["endtime"] = date("Y-m-d H:i", $value["endtime"]);
 		}
 		if( $sort == "desc" ) 
 		{

@@ -876,4 +876,21 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        }
        apperror(0,"成功");
    }
+   //头像
+   public function avatar(){
+       global $_W;
+       global $_GPC;
+       $openid=$_GPC["openid"];
+       $type=$_GPC["type"]?$_GPC["type"]:0;//1表示app接口
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       $avatar=tomedia($_GPC["avatar"]);
+       if (pdo_update("ewei_shop_member",array("avatar"=>$avatar),array("id"=>$member["id"]))){
+           apperror(0,"成功");
+       }else{
+           apperror(1,"失败");
+       }
+   }
 }

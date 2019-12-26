@@ -401,11 +401,12 @@ class Order_EweiShopV2Page extends AppMobilePage
        }
        $refund["uniacid"]=$_W["uniacid"];
        $refund["refundaddressid"]=$order["addressid"];
-       if ($order["refundstatus"]==0){
+       if ($order["refundstate"]==0){
            pdo_insert("ewei_shop_groups_order_refund",$refund);
            $refundid = pdo_insertid();
            pdo_update("ewei_shop_groups_order", array( "refundid" => $refundid, "refundstate" => 1 ), array( "id" => $order_id, "uniacid" => $_W["uniacid"] ));
        }else{
+           
            pdo_update("ewei_shop_groups_order", array( "refundstate" => 1 ), array( "id" => $order_id, "uniacid" => $_W["uniacid"] ));
            pdo_update("ewei_shop_groups_order_refund", $refund, array( "id" => $order["refundid"], "uniacid" => $_W["uniacid"] ));
        }
@@ -438,6 +439,131 @@ class Order_EweiShopV2Page extends AppMobilePage
        }else{
            apperror(1,"取消失败");
        }
+   }
+   //换货--提交
+   public function exchange_submit(){
+       global $_W;
+       global $_GPC;
+       $openid=$_GPC["openid"];
+       $type=$_GPC["type"]?$_GPC["type"]:0;
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       $order_id=$_GPC["order_id"];
+       $order=pdo_get("ewei_shop_groups_order",array("id"=>$order_id));
+       if (empty($order)){
+           apperror(1,"订单id不正确");
+       }
+       if ($order["status"]!=2){
+           apperror(1,"该订单暂不可申请换货");
+       }
+       if ($member["id"]!=$order["user_id"]){
+           apperror(1,"无权限访问该订单");
+       }
+       $goods_option_id=$_GPC["optionid"];
+       if ($order["more_spec"]==1&&empty($goods_option_id)){
+           apperror(1,"请选择更换的规格");
+       }
+       $option=pdo_get("ewei_shop_groups_goods_option",array("id"=>$goods_option_id,"groups_goods_id"=>$order["goodid"]));
+       if (empty($option)){
+           apperror(1,"规格id不正确");
+       }
+       $ordergood=pdo_get("ewei_shop_groups_order_goods",array("groups_order_id"=>$order_id));
+       $total=$_GPC["total"]?$_GPC["total"]:1;
+       if ($ordergood["total"]<$total){
+           apperror(1,"更换数量不可大于购买数量");
+       }
+       $rtype=2;
+       $refund["rtype"]=$rtype;
+       $refund["reason"]=$_GPC["reason"];
+       $refund["refundno"] = m("common")->createNO("groups_order_refund", "refundno", "PR");
+       $refund["orderid"]=$order_id;
+       $refund["openid"]=$member["openid"];
+       $refund["user_id"]=$member["id"];
+       $refund["applycredit"] = $order["credit"];
+       $refund["applytime"] = time();
+       $refund["applyprice"]=$order["price"];
+       $refund["uniacid"]=$_W["uniacid"];
+       $refund["refundaddressid"]=$order["addressid"];
+       $refund["total"]=$total;
+       $refund["goods_option_id"]=$goods_option_id;
+       $refund["option"]=$option["title"];
+       if ($order["refundstate"]==0){
+           pdo_insert("ewei_shop_groups_order_refund",$refund);
+           $refundid = pdo_insertid();
+           pdo_update("ewei_shop_groups_order", array( "refundid" => $refundid, "refundstate" => 2 ), array( "id" => $order_id, "uniacid" => $_W["uniacid"] ));
+       }else{
+           pdo_update("ewei_shop_groups_order", array( "refundstate" => 2 ), array( "id" => $order_id, "uniacid" => $_W["uniacid"] ));
+           pdo_update("ewei_shop_groups_order_refund", $refund, array( "id" => $order["refundid"], "uniacid" => $_W["uniacid"] ));
+       }
+       $res["refundid"]=$refundid?$refundid:$order["refundid"];
+       apperror(0,"",$res);
+   }
+   //客户寄物品--快递
+   public function submit_express(){
+       global $_W;
+       global $_GPC;
+       $openid=$_GPC["openid"];
+       $type=$_GPC["type"]?$_GPC["type"]:0;
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       $refund_id=$_GPC["refund_id"];
+       $refund=pdo_get("ewei_shop_groups_order_refund",array("id"=>$refund_id));
+       if (empty($refund)){
+           apperror(1,"售后id不正确");
+       }
+       $data["expresscom"]=$_GPC["expresscom"];
+       $data["express"]=$_GPC["express"];
+       $data["expresssn"]=$_GPC["expresssn"];
+       $data["sendtime"]=time();
+       $data["refundstatus"]=4;
+       if (pdo_update("ewei_shop_groups_order_refund",$data,array("id"=>$refund_id))){
+           apperror(0,"成功");
+       }else{
+           apperror(1,"失败");
+       }
+   }
+   //售后进度
+   public function sale_progress(){
+       global $_W;
+       global $_GPC;
+       $openid=$_GPC["openid"];
+       $type=$_GPC["type"]?$_GPC["type"]:0;
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       $refund_id=$_GPC["refund_id"];
+       $refund=pdo_get("ewei_shop_groups_order_refund",array("id"=>$refund_id));
+       if (empty($refund)){
+           apperror(1,"售后id不正确");
+       }
+       $order=pdo_get("ewei_shop_groups_order",array("id"=>$refund["orderid"]));
+       $list["ordersn"]=$order["orderno"];
+       
+       $list["id"]=$refund["id"];
+       $list["status"]=$refund["refundstatus"];
+       $list["rtype"]=$refund["rtype"];
+       $list["createtime"]=date("Y-m-d H:i:s",$refund["applytime"]);
+       $list["price"]=$refund["applyprice"];
+       if ($refund["refundstatus"]!=-1){
+           $list["operatetime"]=$refund["operatetime"]?date("Y-m-d H:i:d",$refund["operatetime"]):"";
+       }else{
+           $list["operatetime"]=$refund["endtime"]?date("Y-m-d H:i:d",$refund["endtime"]):"";
+       }
+       $list["expresssn"]=$refund["expresssn"];
+       $list["expresscom"]=$refund["expresscom"];
+       $list["sendtime"]=$refund["sendtime"]?date("Y-m-d H:i:s",$refund["sendtime"]):"";
+       $list["reason"]=$refund["reason"];
+       if ($refund["rtype"]==0||$refund["rtype"]==1){
+           $list["time"]=$refund["refundtime"]?date("Y-m-d H:i:s",$refund["refundtime"]):"";
+       }else{
+           $list["time"]=$refund["returntime"]?date("Y-m-d H:i:s",$refund["returntime"]):"";
+       }
+       apperror(0,"",$list);
    }
    
 }

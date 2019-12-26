@@ -432,9 +432,12 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         global $_GPC;
         global $_W;
         $merch_id=$_GPC["merch_id"]?$_GPC["merch_id"]:0;
-        $time=pdo_fetchall("select id,thumb,title,marketprice,sales,total from ".tablename("ewei_shop_goods")." where status=1 and merchid=:merchid and istime=1 and timestart<=:time and timeend>time order by sales desc limit 5",array(":merchid"=>$merch_id,":time"=>time()));
+//         $time=pdo_fetchall("select id,thumb,title,marketprice,sales,productprice,total from ".tablename("ewei_shop_goods")." where status=1 and merchid=:merchid and istime=1 and timestart<=:time and timeend>:time order by sales desc limit 5",array(":merchid"=>$merch_id,":time"=>time()));
+        $time=pdo_fetchall("select id,thumb,title,marketprice,sales,productprice,total from ".tablename("ewei_shop_goods")." where status=1 and  istime=1 and timestart<=:time and timeend>:time order by sales desc limit 5",array(":time"=>time()));
+        
         foreach ($time as $k=>$v){
             $time[$k]["thumb"]=tomedia($v["thumb"]);
+            $time[$k]["total"]=$v["total"]+$v["sales"];
         }
         if ($time){
         $list["time"]=$time;
@@ -442,14 +445,14 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
             $list["time"]=array();
         }
         //获取拼团
-        $group=pdo_fetchall("select id,title,groupnum,sales,thumb,groupsprice,freight from ".tablename("ewei_shop_groups_goods")." where merchid=:merchid and  stock>0 and status=1 order by sales desc",array(":merchid"=>$merch_id));
+        $group=pdo_fetchall("select id,title,groupnum,sales,thumb,groupsprice,freight,stock from ".tablename("ewei_shop_groups_goods")." where merchid=:merchid and  stock>0 and status=1 order by sales desc",array(":merchid"=>$merch_id));
         foreach ($group as $k=>$v){
             $group[$k]["thumb"]=tomedia($v["thumb"]);
         }
         if ($group){
         $list["group"]=$group;
         }else{
-            $list["group"]=array();
+        $list["group"]=array();
         }
         apperror(0,"",$list);
     }

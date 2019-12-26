@@ -114,7 +114,7 @@
 
                                 <div>
 
-                                    <small>可提现金额</small>
+                                    <small>可提现金额(普通订单)</small>
 
                                 </div>
 
@@ -127,6 +127,29 @@
                                 <i class="commission">--</i><br/>
 
                                 <a class="btn btn-primary btn-sm" href="{php echo merchUrl('apply/list/add')}" style="color: #fff">申请提现</a>
+
+                            </div>
+
+                        </a>
+                        <a href="{php echo merchUrl('apply/list/add',array('type'=>1))}">
+
+                            <div class="col-sm-3 forum-info">
+
+                                <div>
+
+                                    <small>可提现金额(拼团订单)</small>
+
+                                </div>
+
+                                 <span class="views-number ptstatus0">
+
+                                    --
+
+                                </span><br/>
+
+                                <i class="commission4">--</i><br/>
+
+                                <a class="btn btn-primary btn-sm" href="{php echo merchUrl('apply/list/add',array('type'=>1))}" style="color: #fff">申请提现</a>
 
                             </div>
 

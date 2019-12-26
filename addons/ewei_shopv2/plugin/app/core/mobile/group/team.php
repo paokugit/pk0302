@@ -15,57 +15,57 @@ class Team_EweiShopV2Page extends AppMobilePage
         $goods_id=$_GPC["goods_id"];
         $good=pdo_fetch("select * from ".tablename("ewei_shop_groups_goods")." where id=:id",array(":id"=>$goods_id));
         if (empty($good)){
-            apperror(1,"","商品id不正确");
+            apperror(1,"商品id不正确");
         }
         if ($good["status"]==0){
-            apperror(1,"","该商品已下架");
+            apperror(1,"该商品已下架");
         }
         $option_id=$_GPC["option_id"];
         if ($good["more_spec"]==1&&empty($option_id)){
-            apperror(1,"","该商品是多规格商品");
+            apperror(1,"该商品是多规格商品");
         }
         $total=$_GPC["total"]?$_GPC["total"]:1;
         if ($good["more_spec"]==0&&$good["stock"]<$total){
-            apperror(1,"","库存数量不足");
+            apperror(1,"库存数量不足");
         }
         if ($option_id){
             $option=pdo_get("ewei_shop_groups_goods_option",array("id"=>$option_id,"groups_goods_id"=>$goods_id));
             if (empty($option)){
-                apperror(1,"","规格不存在");
+                apperror(1,"规格不存在");
             }
             if ($option["stock"]<$total){
-                apperror(1,"","该规格库存数量不足");
+                apperror(1,"该规格库存数量不足");
             }
         }   
         $single=$_GPC["single"]?$_GPC["single"]:0;
         if ($single==1&&$good["single"]==0){
-            apperror(1,"","该商品不支持单独购买");
+            apperror(1,"该商品不支持单独购买");
         }
         $team_id=$_GPC["team_id"]?$_GPC["team_id"]:0;
         $openid=$_GPC["openid"];
         if (empty($openid)){
-            apperror(1,"","用户信息不可为空");
+            apperror(1,"用户信息不可为空");
         }
         $type=$_GPC["type"]?$_GPC["type"]:0;
         $member=m("appnews")->member($openid,$type);
         if (!$member){
-            apperror(1,"","不存在用户");
+            apperror(1,"不存在用户");
         }
         
         if ($team_id!=0){
             $order=pdo_get("ewei_shop_groups_order",array("id"=>$team_id,"heads"=>1));
             if (empty($order)){
-                apperror(1,"","团队id不正确");
+                apperror(1,"团队id不正确");
             }
             if ($order["success"]==1){
-                apperror(1,"","该团队已组团成功，请选择其他团队");
+                apperror(1,"该团队已组团成功，请选择其他团队");
             }
             if ($order["endtime"]<time()){
-                apperror(1,"","该组团已截止");
+                apperror(1,"该组团已截止");
             }
             $mo=pdo_fetch("select * from ".tablename("ewei_shop_groups_order")." where (id=:id or teamid=:id) and is_team=1 and status=1 and user_id=:user_id",array(":id"=>$team_id,":user_id"=>$member["id"]));
             if ($mo){
-                apperror(1,"","不可重复参与同意团队");
+                apperror(1,"不可重复参与同意团队");
             }
         }
         $data["uniacid"]=$_W["uniacid"];
@@ -73,7 +73,7 @@ class Team_EweiShopV2Page extends AppMobilePage
         $data["user_id"]=$member["id"];
         $data["orderno"]=m("common")->createNO("groups_order", "orderno", "PT");
         if (empty($_GPC["addressid"])){
-            apperror(1,"","收货地址id未传");
+            apperror(1,"收货地址id未传");
         }
         $data["addressid"]=$_GPC["addressid"];
         if ($single==1){
@@ -131,6 +131,8 @@ class Team_EweiShopV2Page extends AppMobilePage
         pdo_insert("ewei_shop_groups_order_goods",$order_good);
         $res["order_id"]=$order_id;
         $res["price"]=$data["price"];
+        $res["RVC"]=$member["RVC"];
+        $res["credit2"]=$member["credit2"];
         apperror(0,"",$res);
     }
     //团队详情
@@ -140,7 +142,7 @@ class Team_EweiShopV2Page extends AppMobilePage
         $team_id=$_GPC["team_id"];
         $order=pdo_fetch("select * from ".tablename("ewei_shop_groups_order")." where id=:id and heads=1 and status=1",array(":id"=>$team_id));
         if (empty($order)){
-            apperror(1,"","团队id不正确");
+            apperror(1,"团队id不正确");
         }
         $list["team_id"]=$team_id;
         $list["groupnum"]=$order["groupnum"];
@@ -152,7 +154,7 @@ class Team_EweiShopV2Page extends AppMobilePage
         $type=$_GPC["type"]?$_GPC["type"]:0;
         $member=m("appnews")->member($openid,$type);
         if (!$member){
-            apperror(1,"","用户不存在");
+            apperror(1,"用户不存在");
         }
         $list["partake"]=0;
         //获取团队
@@ -182,7 +184,7 @@ class Team_EweiShopV2Page extends AppMobilePage
         $order_id=$_GPC["order_id"];
         $order=pdo_get("ewei_shop_groups_order",array("id"=>$order_id));
         if (empty($order)){
-            apperror(1,"","订单id不正确");
+            apperror(1,"订单id不正确");
         }
         if ($order["status"]>=1){
             apperror(1,"该订单不可重复支付");
@@ -207,16 +209,19 @@ class Team_EweiShopV2Page extends AppMobilePage
            m("member")->setCredit($member["id"],$credittype,0-$order["price"]-$order["freight"],"拼团订单：".$order["orderno"]."购买商品消费",5);
            $log=pdo_get("ewei_shop_groups_paylog",array("tid"=>$order["orderno"]));
            if ($log){
-              $d["status"]=1;
+            
               $d["type"]=$credittype;
               pdo_update("ewei_shop_groups_paylog",$d,array("id"=>$log["id"]));
            }else{
-           $log = array( "type"=>$credittype,"uniacid" => $_W["uniacid"], "openid" => $member["openid"],"user_id"=>$member["id"],"module" => "groups", "tid" => $order["orderno"], "credit" => $order["credit"], "creditmoney" => $order["creditmoney"], "fee" => $order["price"]+ $order["freight"], "status" => 1 );
+           $log = array( "type"=>$credittype,"uniacid" => $_W["uniacid"], "openid" => $member["openid"],"user_id"=>$member["id"],"module" => "groups", "tid" => $order["orderno"], "credit" => $order["credit"], "creditmoney" => $order["creditmoney"], "fee" => $order["price"]+ $order["freight"] );
             pdo_insert("ewei_shop_groups_paylog",$log);
            }
-            p("groups")->payResult($order["orderno"], $credittype,$type);
+            $r=p("groups")->payResult($order["orderno"],$credittype,$type);
+            if ($r){
             apperror(0,"支付成功");
-        
+            }else{
+            apperror(1,"支付失败");
+            }
     }
     //小程序
     public function small_program(){
@@ -225,7 +230,7 @@ class Team_EweiShopV2Page extends AppMobilePage
         $order_id=$_GPC["order_id"];
         $order=pdo_get("ewei_shop_groups_order",array("id"=>$order_id));
         if (empty($order)){
-            apperror(1,"","订单id不正确");
+            apperror(1,"订单id不正确");
         }
         if ($order["status"]>=1){
             apperror(1,"该订单不可重复支付");
@@ -262,5 +267,55 @@ class Team_EweiShopV2Page extends AppMobilePage
         $l["pay"]=$res;
         apperror(0,"",$l);
     }
-    
+    //确认订单
+    public function comfirm_order(){
+        global $_W;
+        global $_GPC;
+        $goods_id=$_GPC["goods_id"];
+        $good=pdo_fetch("select id,title,groupsprice,singleprice,thumb,more_spec,merchid,freight,seven from ".tablename("ewei_shop_groups_goods")." where id=:id",array(":id"=>$goods_id));
+        $good["thumb"]=tomedia($good["thumb"]);
+        if (empty($good)){
+            apperror(1,"商品id不正确");
+        }
+        if ($good["merchid"]){
+            $merch=pdo_get("ewei_shop_merch_user",array("id"=>$good["merchid"]));
+            $good["merchname"]=$merch["merchname"];
+        }else{
+            $good["merchname"]="跑库自营";
+        }
+        $openid=$_GPC["openid"];
+        $type=$_GPC["type"]?$_GPC["type"]:0;
+        $member=m("appnews")->member($openid,$type);
+        if (!$member){
+            apperror(1,"openid不正确");
+        }
+        $optionid=$_GPC["optionid"];
+        if ($good["more_spec"]==1&&empty($optionid)){
+            apperror(1,"商品未选择规格");
+        }
+        if ($optionid){
+            $option=pdo_get("ewei_shop_groups_goods_option",array("groups_goods_id"=>$goods_id,"id"=>$optionid));
+            if (empty($option)){
+                apperror(1,"规格不正确");
+            }
+            $good["option"]["single_price"]=$option["single_price"];
+            $good["option"]["price"]=$option["price"];
+            $good["option"]["title"]=$option["title"];
+            $op=pdo_get("ewei_shop_goods_option",array("id"=>$option["goods_option_id"]));
+            $good["option"]["thumb"]=tomedia($op["thumb"]);
+        }else{
+            $good["option"]=array();
+        }
+        if (empty($member["openid"])){
+            $member["openid"]=0;
+        }
+        //获取地址
+        $address=pdo_fetch("select id,realname,mobile,province,city,area,address from ".tablename("ewei_shop_member_address")." where (user_id=:user_id or openid=:openid) and deleted=0 order by isdefault desc limit 1",array(":user_id"=>$member["id"],":openid"=>$member["openid"]));
+        if ($address){
+            $good["address"]=$address;
+        }else{
+            $good["address"]=array();
+        }
+        apperror(0,"",$good);
+    }
 }

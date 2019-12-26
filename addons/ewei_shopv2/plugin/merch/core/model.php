@@ -1329,6 +1329,7 @@ class MerchModel extends PluginModel
         global $_W;
         $data = array(  );
         $list = $this->getMerchPrice($merchid, 1);
+//         var_dump($list);die;
         $data["status0"] = $list["realprice"];
         $orderids = $list["orderids"];
         $params = array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid );
@@ -1531,6 +1532,11 @@ class MerchModel extends PluginModel
 
         $list["realpricerate"] = ((100 - floatval($list["payrate"])) * $list["realprice"]) / 100;
         $list["merchcouponprice"] = $merchcouponprice;
+        //获取拼团订单
+        $ptorder=pdo_fetchall("select * from ".tablename("ewei_shop_groups_order")." where status=3 and merchid=:merchid",array(":merchid"=>$merchid));
+        $list["ptorderprice"]=0;
+        $list["ptorderid"]=array();
+        
         return $list;
     }
 
