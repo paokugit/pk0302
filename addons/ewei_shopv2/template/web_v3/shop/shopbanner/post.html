@@ -90,7 +90,7 @@
             <!--</div>-->
             <div class="col-sm-9 col-xs-12 ">
                 {ife 'shop.shopbanner' $item}
-                <input type="text" id='link' name="link" class="form-control" value="{$item['link']}" data-rule-required="true" />
+                <input type="text" id='link' name="link" class="form-control" value="{$item['link']}" />
                 {else}
                 <div class='form-control-static'>{$item['link']}</div>
                 {/if}

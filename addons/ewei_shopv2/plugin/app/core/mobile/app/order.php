@@ -85,7 +85,7 @@ class Order_EweiShopV2Page extends AppMobilePage
         //折扣宝
         $discount1 = $_GPC['discount1'] ? $_GPC['discount1'] : 0;
         //优惠券id
-        $couponid = $_GPC['couponid'] ? $_GPC['couponid'] : 0;
+        $couponid = $_GPC['couponid'] ? $_GPC['couponid'] : [];
         //邀请人的信息
         $mid = $_GPC['mid'];
         $cardid = $_GPC['cardid'] ? $_GPC['cardid'] : 0;
@@ -143,7 +143,14 @@ class Order_EweiShopV2Page extends AppMobilePage
         $type = $_GPC['type'] ? $_GPC['type'] : "credit";
         //订单id
         $id = $_GPC['id'];
-        $data = m('app')->order_complete($user_id,$id,$type);
+        $alidata = $_GPC['data'] ? $_GPC['data'] : "";
+        $alidata = explode('&',$alidata);
+        foreach ($alidata as $ali){
+            $ali_param[] = explode('=',$ali);
+        }
+        $params = array_column($ali_param,'1','0');
+        var_dump($params);exit;
+        $data = m('app')->order_complete($user_id,$id,$type,$alidata);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
 }
