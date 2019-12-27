@@ -162,11 +162,15 @@ class List_EweiShopV2Page extends MerchWebPage
 		global $_W;
 		global $_GPC;
 		$merchid = $_W['merchid'];
-		$pttype=$_GPC["pttype"];
-		var_dump($pttype);
+		$pttype=$_GPC["pttype"]?$_GPC["pttype"]:0;
+//  		var_dump($pttype);die;
 		$item = $this->model->getMerchPrice($merchid, 1);
-		$list = $this->model->getMerchPriceList($merchid);
+		$list = $this->model->getMerchPriceList($merchid,0,0,0,$pttype);
+		if ($pttype==0){
 		$order_num = count($list);
+		}else{
+		    $order_num=count($item["ptorderid"]);
+		}
 		$set = m('common')->getPluginset('merch');
 		if (empty($set)) 
 		{
@@ -289,18 +293,31 @@ class List_EweiShopV2Page extends MerchWebPage
 			$insert['uniacid'] = $_W['uniacid'];
 			$insert['merchid'] = $merchid;
 			$insert['applyno'] = m('common')->createNO('merch_bill', 'applyno', 'MO');
+			if ($pttype==0){
 			$insert['orderids'] = iserializer($item['orderids']);
+			}else{
+			    $insert["orderids"]=iserializer($item["ptorderid"]);
+			}
 			$insert['ordernum'] = $order_num;
+			if ($pttype==0){
 			$insert['price'] = $item['price'];
 			$insert['realprice'] = $item['realprice'];
 			$insert['realpricerate'] = $item['realpricerate'];
 			$insert['finalprice'] = $item['finalprice'];
 			$insert['orderprice'] = $item['orderprice'];
 			$insert['payrateprice'] = round(($item['realpricerate'] * $item['payrate']) / 100, 2);
+			}else{
+			    $insert['price'] = $item['ptprice'];
+			    $insert['realprice'] = $item['ptrealprice'];
+			    $insert['realpricerate'] = $item['ptrealpricerate'];
+			    $insert['orderprice'] = $item['ptorderprice'];
+			    $insert['payrateprice'] = round(($item['ptrealpricerate'] * $item['payrate']) / 100, 2);
+			}
 			$insert['payrate'] = $item['payrate'];
 			$insert['applytime'] = time();
 			$insert['status'] = 1;
 			$insert['applytype'] = $applytype;
+			$insert["pttype"]=$pttype;
 			pdo_insert('ewei_shop_merch_bill', $insert);
 			$billid = pdo_insertid();
 			foreach ($list as $k => $v ) 
@@ -311,10 +328,16 @@ class List_EweiShopV2Page extends MerchWebPage
 				$insert_data['billid'] = $billid;
 				$insert_data['orderid'] = $orderid;
 				$insert_data['ordermoney'] = $v['realprice'];
+				$insert_data["pttype"]=$pttype;
 				pdo_insert('ewei_shop_merch_billo', $insert_data);
+				
 				$change_order_data = array();
 				$change_order_data['merchapply'] = 1;
+				if ($pttype==0){
 				pdo_update('ewei_shop_order', $change_order_data, array('id' => $orderid));
+				}else{
+				    pdo_update('ewei_shop_groups_order', $change_order_data, array('id' => $orderid));
+				}
 			}
 			$merch_user = pdo_fetch('select * from ' . tablename('ewei_shop_merch_user') . ' where uniacid=:uniacid and id=' . $merchid, array(':uniacid' => $_W['uniacid']));
 			$this->model->sendMessage(array('merchname' => $merch_user['merchname'], 'money' => $insert['realprice'], 'realname' => $merch_user['realname'], 'mobile' => $merch_user['mobile'], 'applytime' => time()), 'merch_apply_money');

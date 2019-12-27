@@ -6,6 +6,8 @@
 <form {ifp 'apply.list.post'}action="" method="post"{/if} class="form-horizontal form-validate" enctype="multipart/form-data" id="apply_add">
 
 <div class="row">
+    
+    {if $pttype==0}
     <div class="col-sm-6 ">
         <div class="summary_box float-e-margins" style="border: 1px solid #e7eaec">
             <div class="summary_title">
@@ -40,7 +42,42 @@
             </div>
         </div>
     </div>
+    {else}
+     <div class="col-sm-6 ">
+        <div class="summary_box float-e-margins" style="border: 1px solid #e7eaec">
+            <div class="summary_title">
+                <label class="label label-primary  pull-right" style="margin: 15px 20px 0 0 ">抽成比例 {$item['payrate']}%</label>
+                <span class="text-default title_inner">可提现金额(抽成后)</span>
+            </div>
+            <div class="summary flex">
+                <div class="flex1 flex column">
+                    <h2 class="no-margins yesterday-count text-danger"><span id="bonusmoney_pay">{php echo number_format($item['ptrealpricerate'],2)}</span> 元</h2>
+                    <small>抽成前的金额: {$item['ptrealprice']} 元</small>
+                </div >
+            </div>
+        </div>
+    </div>
 
+
+    <div class="col-sm-6 ">
+        <div class="summary_box float-e-margins" style="border: 1px solid #e7eaec">
+            <div class="summary_title">
+                <span class="text-default title_inner">订单金额</span>
+            </div>
+            <div class="summary flex">
+                <div class="flex1 flex column">
+                   <!-- 
+                    <h2 class="no-margins yesterday-count text-danger"><span id="">{$item['orderprice']} 元</span> </h2>
+                    
+                    -->
+                     <h2 class="no-margins yesterday-count text-danger"><span id="">{$item['ptrealprice']} 元</span> </h2>
+                    
+                    <small>订单个数: {$order_num} 个</small>
+                </div >
+            </div>
+        </div>
+    </div>
+    {/if}
     <!--<div class="col-sm-6">-->
         <!--<div style="border: 1px solid #e7eaec" class="ibox float-e-margins">-->
             <!--<div class="ibox-title">-->
@@ -69,7 +106,7 @@
 </div>
 
 {if $item['realprice'] > 0}
-
+<input type="hidden" value="{$pttype}" name="pttype">
 <div class="form-group">
     <label class="col-md control-label">提现方式</label>
     <div class="col-sm-9 col-xs-12">

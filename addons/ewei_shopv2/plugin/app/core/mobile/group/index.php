@@ -94,6 +94,8 @@ class Index_EweiShopV2Page extends AppMobilePage
             foreach ($good["content"] as $k=>$v){
                 $good["content"][$k]["image"]=tomedia($v);
             }
+        }else{
+            $good["content"]=m('common')->html_to_images($good['content']);
         }
         //获取商家
         if ($good["merchid"]!=0){
@@ -128,7 +130,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         $good["comment"]["list"]=$comment["list"][0];
         $good["comment"]["label"]=$comment["label"];
         $good["comment"]["rate"]=$comment["rate"];
-        
+       
         apperror(0,"",$good);
     }
     //选择规格

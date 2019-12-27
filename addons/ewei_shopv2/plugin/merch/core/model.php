@@ -1534,7 +1534,7 @@ class MerchModel extends PluginModel
         $list["realpricerate"] = ((100 - floatval($list["payrate"])) * $list["realprice"]) / 100;
         $list["merchcouponprice"] = $merchcouponprice;
         //获取拼团订单
-        $ptorder=pdo_fetchall("select * from ".tablename("ewei_shop_groups_order")." where status=3 and merchid=:merchid",array(":merchid"=>$merchid));
+        $ptorder=pdo_fetchall("select * from ".tablename("ewei_shop_groups_order")." where status=3 and merchid=:merchid and merchapply<=0",array(":merchid"=>$merchid));
         $list["ptorderprice"]=0;
         $list["ptorderid"]=array();
         $list["ptrealprice"]=0;
@@ -1548,7 +1548,7 @@ class MerchModel extends PluginModel
         return $list;
     }
 
-    public function getMerchPriceList($merchid, $orderid = 0, $flag = 0 ,$type = 0)
+    public function getMerchPriceList($merchid, $orderid = 0, $flag = 0 ,$type = 0,$pttype=0)
     {
         global $_W;
         $merch_data = m("common")->getPluginset("merch");
@@ -1565,10 +1565,16 @@ class MerchModel extends PluginModel
         {
             $deduct_commission = 0;
         }
-
+        if ($pttype==0){
         $condition = " and u.uniacid=:uniacid and u.id=:merchid and o.status=3 and o.isparent=0 and o.paytype<>3 and type = '".$type."'";
         //$condition = " and u.uniacid=:uniacid and u.id=:merchid and o.status=3 and o.isparent=0 and o.paytype<>3 ";
         $params = array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid );
+        }else{
+            
+            $condition = " and u.uniacid=:uniacid and u.id=:merchid and o.status=3";
+            //$condition = " and u.uniacid=:uniacid and u.id=:merchid and o.status=3 and o.isparent=0 and o.paytype<>3 ";
+            $params = array( ":uniacid" => $_W["uniacid"], ":merchid" => $merchid );
+        }
         switch( $flag ) 
         {
             case 0:
@@ -1598,7 +1604,7 @@ class MerchModel extends PluginModel
             $condition .= " and o.id=:id Limit 1";
             $params["id"] = $orderid;
         }
-
+        if ($pttype==0){
         $con = "o.id,u.merchname,u.payrate,o.price,o.goodsprice,o.dispatchprice,discountprice," . "o.deductprice,o.discount_price,o.deductcredit2,o.isdiscountprice,o.deductenough,o.changeprice,o.agentid,o.seckilldiscountprice," . "o.merchdeductenough,o.merchisdiscountprice,o.couponmerchid,o.couponprice,o.couponmerchid,o.ordersn,o.finishtime,o.merchapply,o.id as orderid";
         $sql = "select " . $con . " from " . tablename("ewei_shop_merch_user") . " u " . " left join " . tablename("ewei_shop_order") . " o on u.id=o.merchid" . " where 1 " . $condition;
         $order = pdo_fetchall($sql, $params);
@@ -1647,7 +1653,33 @@ class MerchModel extends PluginModel
         {
             return $order[0];
         }
-
+        }else{
+            //拼团
+            
+            $con = "o.id,u.merchname,u.payrate,o.price as goodsprice,o.orderno as ordersn,o.finishtime,o.merchapply,o.id as orderid,o.freight";
+            $sql = "select " . $con . " from " . tablename("ewei_shop_merch_user") . " u " . " left join " . tablename("ewei_shop_groups_order") . " o on u.id=o.merchid" . " where 1 " . $condition;
+            $order = pdo_fetchall($sql, $params);
+            foreach( $order as &$list )
+            {
+               
+                $list["price"]=$list["goodsprice"]+$list["freight"];
+                $list["refundprice"]=0;
+                $list["commission"] = 0;
+                
+                $list["orderprice"] = $list["goodsprice"]+$list["freight"];
+                // $list["realprice"] = $list["orderprice"] - $list["merchdeductenough"] - $list["merchisdiscountprice"] - $merchcouponprice;
+                $list["realprice"] = $list["goodsprice"]+$list["freight"];
+                
+                $list["realpricerate"] = ((100 - floatval($list["payrate"])) * $list["realprice"]) / 100;
+                $list["merchcouponprice"] = 0;
+            }
+            unset($list);
+            if( !empty($orderid) )
+            {
+                return $order[0];
+            }
+            
+        }
         return $order;
     }
 

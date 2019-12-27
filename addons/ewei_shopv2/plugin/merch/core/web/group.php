@@ -68,6 +68,7 @@ class Group_EweiShopV2Page extends PluginWebPage
 		}
 
 		$item = pdo_fetch('select * from ' . tablename('ewei_shop_merch_group') . ' where id=:id and uniacid=:uniacid limit 1', array(':id' => $id, ':uniacid' => $_W['uniacid']));
+		
 		include $this->template();
 	}
 

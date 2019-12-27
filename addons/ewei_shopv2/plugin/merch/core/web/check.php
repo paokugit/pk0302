@@ -186,7 +186,7 @@ class Check_EweiShopV2Page extends PluginWebPage
 		foreach( $orderids as $key => $orderid ) 
 		{
 			//$data = $this->model->getMerchPriceList($item["merchid"], $orderid, 10 ,$id);
-			$data = $this->model->getMerchPriceList($item["merchid"], $orderid, 10 ,$item['type']);
+			$data = $this->model->getMerchPriceList($item["merchid"], $orderid, 10 ,$item['type'],$item["pttype"]);
 			if( !empty($data) )
 			{
 				$flag = 1;
@@ -304,9 +304,16 @@ class Check_EweiShopV2Page extends PluginWebPage
 		$change_data["handpay"] = $handpay;
 		pdo_update("ewei_shop_merch_bill", $change_data, array( "id" => $id ));
 		$orderids = iunserializer($item["passorderids"]);
+		if ($item["pttype"]==0){
 		foreach( $orderids as $key => $orderid ) 
 		{
 			pdo_update("ewei_shop_order", array( "merchapply" => 3 ), array( "id" => $orderid ));
+		}
+		}else{
+		    foreach( $orderids as $key => $orderid )
+		    {
+		        pdo_update("ewei_shop_groups_order", array( "merchapply" => 3 ), array( "id" => $orderid ));
+		    }
 		}
 		show_json(1);
 	}
@@ -354,6 +361,7 @@ class Check_EweiShopV2Page extends PluginWebPage
 			pdo_update("ewei_shop_merch_bill", $change_data, array( "id" => $id ));
 			foreach( $orderids as $key => $orderid ) 
 			{
+			   if ($item["pttype"]==0){
 				if( in_array($orderid, $bpid) ) 
 				{
 					pdo_update("ewei_shop_order", array( "merchapply" => 2 ), array( "id" => $orderid ));
@@ -362,6 +370,19 @@ class Check_EweiShopV2Page extends PluginWebPage
 				{
 					pdo_update("ewei_shop_order", array( "merchapply" => -1 ), array( "id" => $orderid ));
 				}
+			   }else{
+			       
+			       if( in_array($orderid, $bpid) )
+			       {
+			           pdo_update("ewei_shop_groups_order", array( "merchapply" => 2 ), array( "id" => $orderid ));
+			       }
+			       else
+			       {
+			           pdo_update("ewei_shop_groups_order", array( "merchapply" => -1 ), array( "id" => $orderid ));
+			       }
+			       
+			       
+			   }
 			}
 		}
 		else 
@@ -372,9 +393,16 @@ class Check_EweiShopV2Page extends PluginWebPage
 				$change_data["invalidtime"] = time();
 				$change_data["status"] = -1;
 				pdo_update("ewei_shop_merch_bill", $change_data, array( "id" => $id ));
+				if ($item["pttype"]==0){
 				foreach( $orderids as $key => $orderid ) 
 				{
 					pdo_update("ewei_shop_order", array( "merchapply" => -1 ), array( "id" => $orderid ));
+				}
+				}else{
+				    foreach( $orderids as $key => $orderid )
+				    {
+				        pdo_update("ewei_shop_groups_order", array( "merchapply" => -1 ), array( "id" => $orderid ));
+				    }
 				}
 			}
 		}

@@ -15,8 +15,12 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
         if ($member_id==0){
             apperror(1,"无此用户");
         }
-        $member=pdo_fetch("select nickname,avatar,credit1,credit2,credit3,credit4,agentlevel,is_open,expire_time,mobile,weixin,rvc,qiandao,gender from ".tablename("ewei_shop_member")." where id=:id",array(":id"=>$member_id));
-       
+        $member=pdo_fetch("select nickname,avatar,credit1,credit2,credit3,credit4,agentlevel,is_open,expire_time,mobile,weixin,rvc,qiandao,gender,password from ".tablename("ewei_shop_member")." where id=:id",array(":id"=>$member_id));
+        if (empty($member["password"])){
+            $member["password"]=0;
+        }else{
+            $member["password"]=1;
+        }
         //消息条数
         $member["news"]=0;
         //签到
@@ -893,4 +897,22 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            apperror(1,"失败");
        }
    }
+   //修改用户名
+   public function nickname(){
+       global $_W;
+       global $_GPC;
+       $openid=$_GPC["openid"];
+       $type=$_GPC["type"]?$_GPC["type"]:0;//1表示app接口
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       $nickname=$_GPC["nickname"];
+       if (pdo_update("ewei_shop_member",array("nickname"=>$nickname),array("id"=>$member["id"]))){
+           apperror(0,"成功");
+       }else{
+           apperror(1,"失败");
+       }
+   }
+   
 }

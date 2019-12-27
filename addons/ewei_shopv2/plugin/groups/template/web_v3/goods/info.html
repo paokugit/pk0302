@@ -4,7 +4,7 @@
         {ife 'groups.goods' $item}
         {php echo tpl_ueditor('content',$item['content'],array('height'=>'200'))}
         {else}
-        <textarea id='detail' name='content' style='display:none;'>{$item['content']}</textarea>
+        <textarea id='detail' style='display:none'>{$item['content']}</textarea>
         <a href="javascript:preview_html('#detail')" class="btn btn-default">查看内容</a>
         {/if}
     </div>

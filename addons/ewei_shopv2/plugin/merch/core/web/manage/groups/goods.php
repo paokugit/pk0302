@@ -65,6 +65,7 @@ class Goods_EweiShopV2Page extends MerchWebPage
 		global $_GPC;
 		$id = intval($_GPC["id"]);
 		$item = pdo_fetch("SELECT g.*,c.name as catename FROM " . tablename("ewei_shop_groups_goods") . " as g\r\n\t\t\t\tleft join " . tablename("ewei_shop_groups_category") . " as c on c.id = g.category\r\n\t\t\t\tWHERE g.id =:id and g.uniacid=:uniacid limit 1", array( ":uniacid" => $_W["uniacid"], ":id" => $id ));
+		$item["content"]=m('common')->html_to_images($item['content']);
 		$category = m('shop')->getFullCategory(true, true);
 // 		var_dump($category);
 		$group_goods_id = $item["id"];
@@ -92,6 +93,8 @@ class Goods_EweiShopV2Page extends MerchWebPage
 		{
 		    
 			$data = array( "uniacid" => $_W["uniacid"], "displayorder" => intval($_GPC["displayorder"]), "gid" => intval($_GPC["gid"]), "title" => trim($_GPC["title"]), "category" => intval($_GPC["category"]), "thumb" => "", "thumb_url" => "", "price" => floatval($_GPC["price"]), "groupsprice" => floatval($_GPC["groupsprice"]), "single" => intval($_GPC["single"]), "singleprice" => floatval($_GPC["singleprice"]), "goodsnum" => (intval($_GPC["goodsnum"]) < 1 ? 1 : intval($_GPC["goodsnum"])), "purchaselimit" => intval($_GPC["purchaselimit"]), "units" => trim($_GPC["units"]), "stock" => intval($_GPC["stock"]), "showstock" => intval($_GPC["showstock"]), "sales" => intval($_GPC["sales"]), "teamnum" => intval($_GPC["teamnum"]), "dispatchtype" => intval($_GPC["dispatchtype"]), "freight" => floatval($_GPC["freight"]), "status" => intval($_GPC["status"]), "isindex" => intval($_GPC["isindex"]), "groupnum" => intval($_GPC["groupnum"]), "endtime" => intval($_GPC["endtime"]), "description" => trim($_GPC["description"]), "goodssn" => trim($_GPC["goodssn"]), "productsn" => trim($_GPC["productsn"]), "content" => m("common")->html_images($_GPC["content"]), "createtime" => $_W["timestamp"], "share_title" => trim($_GPC["share_title"]), "share_icon" => trim($_GPC["share_icon"]), "share_desc" => trim($_GPC["share_desc"]), "followneed" => intval($_GPC["followneed"]), "followtext" => trim($_GPC["followtext"]), "followurl" => trim($_GPC["followurl"]), "goodsid" => intval($_GPC["goodsid"]), "deduct" => floatval($_GPC["deduct"]), "isdiscount" => intval($_GPC["isdiscount"]), "discount" => intval($_GPC["discount"]), "headstype" => intval($_GPC["headstype"]), "headsmoney" => floatval($_GPC["headsmoney"]), "headsdiscount" => intval($_GPC["headsdiscount"]), "isverify" => intval($_GPC["isverify"]), "verifytype" => intval($_GPC["verifytype"]), "verifynum" => intval($_GPC["verifynum"]), "storeids" => (is_array($_GPC["storeids"]) ? implode(",", $_GPC["storeids"]) : ""), "more_spec" => intval($_GPC["more_spec"]), "is_ladder" => intval($_GPC["is_ladder"]),"merchid"=>$_W["merchid"],"seven"=>$_GPC["seven"],"quality"=>$_GPC["quality"]);
+			/* var_dump($_GPC["content"]);
+			var_dump($data["content"]);die; */
 			$cateid=$_GPC["cates"];
 			if ($cateid){
 			    $data["ccate"]=$cateid;

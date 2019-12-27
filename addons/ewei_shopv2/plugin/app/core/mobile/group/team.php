@@ -122,7 +122,7 @@ class Team_EweiShopV2Page extends AppMobilePage
         $order_good["uniacid"]=$_W["uniacid"];
         $order_good["goods_id"]=$good["gid"];
         $order_good["groups_goods_id"]=$goods_id;
-        $order_good["groups_goods_option_id"]=$option["groups_goods_option_id"];
+        $order_good["groups_goods_option_id"]=$option_id;
         $order_good["groups_order_id"]=$order_id;
         $order_good["price"]=$price;
         $order_good["option_name"]=$option["title"];

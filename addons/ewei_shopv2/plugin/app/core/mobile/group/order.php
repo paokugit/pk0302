@@ -19,13 +19,17 @@ class Order_EweiShopV2Page extends AppMobilePage
         }
         $page=$_GPC["page"]?$_GPC["page"]:1;
         $first=($page-1)*20;
-        $status=$_GPC["status"];//0待付款 1代发货 2待收货 4待成团
+        $status=$_GPC["status"];//0待付款 1代发货 2待收货 4待成团 5待评价 6退换货 7全部
         $condition=" and deleted=0 and uniacid=:uniacid and user_id=:user_id";
         $param=array(":uniacid"=>$_W["uniacid"],":user_id"=>$member["id"]);
-        if ($status!=""){
+        if ($status!=""&&$status!=7){
             $status=intval($status);
             switch ($status){
                 case 4: $condition.=" and status=1 and is_team=1 and success=0";
+                break;
+                case 5: $condition.=" and status=3 and iscomment=0";
+                break;
+                case 6: $condition.=" and refundstate!=0 and status!=3";
                 break;
                 default: $condition.=" and status=".$status;
             }
@@ -565,5 +569,48 @@ class Order_EweiShopV2Page extends AppMobilePage
        }
        apperror(0,"",$list);
    }
-   
+   //个人中心--拼团
+   public function my(){
+       global $_W;
+       global $_GPC;
+       $openid=$_GPC["openid"];
+       $type=$_GPC["type"]?$_GPC["type"]:0;
+       $member=m("appnews")->member($openid,$type);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       
+       $order=pdo_fetchall("select * from ".tablename("ewei_shop_groups_order")." where user_id=:user_id and endtime>:endtime and is_team=1 and success=0 and status=1  order by  endtime asc limit 5",array(":endtime"=>time(),":user_id"=>$member["id"]));
+      
+       $list=array();
+       foreach ($order as $k=>$v){
+           
+           $list[$k]["teamid"]=$v["id"];
+           $list[$k]["endtime"]=$v["endtime"];
+         
+           //获取总数量
+           $count=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_groups_order")." where is_team=1 and status=1 and teamid=:teamid",array(":teamid"=>$v["id"]));
+           $list[$k]["count"]=$count;
+           $list[$k]["groupnum"]=$v["groupnum"];
+           $list[$k]["number"]=$v["groupnum"]-$count;
+           //获取头像
+           $team=pdo_fetchall("select openid,user_id from ".tablename("ewei_shop_groups_order")." where  is_team=1 and status=1 and teamid=:teamid",array(":teamid"=>$v["id"]));
+           $list[$k]["avatar"]=array();
+           $list[$k]["userid"]=array();
+           foreach ($team as $kk=>$vv){
+               if ($vv["user_id"]){
+                   $team_member=pdo_get("ewei_shop_member",array("id"=>$vv["user_id"]));
+               }else{
+                   $team_member=pdo_get("ewei_shop_member",array("openid"=>$vv["openid"]));
+               }
+               
+               $list[$k]["avatar"][$kk]=$team_member["avatar"];
+               $list[$k]["userid"][$kk]=$team_member["id"];
+           }
+           $good=pdo_get("ewei_shop_groups_goods",array("id"=>$v["goodid"]));
+           $list[$k]["thumb"]=tomedia($good["thumb"]);
+       }
+       $res["list"]=$list;
+       apperror(0,"",$list);
+   }
 }
