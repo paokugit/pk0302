@@ -176,5 +176,63 @@ class Login_EweiShopV2Page extends AppMobilePage
             app_error1(1,$resault["message"],[]);
         }
     }
+
+    /**
+     * 设置新密码
+     */
+    public function set_pwd()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        //获取token  并且获取user_id  判断登录是否失效
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if(empty($user_id)) app_error1(2,'登录信息失效',[]);
+        //用户信息
+        $member = m('member')->getMember($user_id);
+        //老密码 新密码  确认新密码
+        $old_pwd = $_GPC['old_pwd'];
+        //判断老密码是否正确
+        if(!empty($member['password']) && $member['password'] != md5(base64_encode($old_pwd))) app_error1(1,'旧密码错误',[]);
+        $pwd =$_GPC['pwd'];
+        $password = $_GPC['password'];
+        //密码正则
+        if(!preg_match('/^[a-zA-Z0-9]{8,20}$/',$pwd)) app_error1(1,"密码必须大小写加数字8到20位",[]);
+        //新密码和确认新密码是否一致
+        if($pwd != $password) app_error1(1,'两次新密码不一致',[]);
+        //更改密码
+        pdo_update('ewei_shop_member',['password'=>md5(base64_encode($pwd))],['id'=>$member['id']]);
+        app_error1(0,'修改成功',[]);
+    }
+
+    /**
+     * 更换手机号
+     */
+    public function change_mobile()
+    {
+        header('Access-Control-Allow-Origin:*');
+        global $_GPC;
+        //获取token  并且获取user_id  判断登录是否失效
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if(empty($user_id)) app_error1(2,'登录信息失效',[]);
+        //用户信息
+        $member = m('member')->getMember($user_id);
+        //接受手机号   验证码  国家id
+        $mobile = $_GPC['mobile'];
+        $code = $_GPC['code'];
+        $country_id = $_GPC['country_id'];
+        //短信类型
+        $tp_id = $country_id != 44 && !empty($country_id) ? 3 : 1;
+        //查找短息的发送的记录
+        $sms = pdo_get('core_sendsms_log',['mobile'=>$mobile,'content'=>$code,'tp_id'=>$tp_id]);
+        if(!$sms) app_error1(1,"短信验证码不正确");
+        if($sms['result'] == 1) app_error1(1,"该短信已验证");
+        //更改短信验证码的验证状态
+        pdo_update('core_sendsms_log',['result'=>1],['id'=>$sms['id']]);
+        //更改手机号
+        pdo_update('ewei_shop_member',['mobile'=>$mobile],['id'=>$member['id']]);
+        app_error1(0,'修改成功',[]);
+    }
 }
 ?>

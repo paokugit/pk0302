@@ -126,7 +126,7 @@ class Index_EweiShopV2Page extends WebPage
 			show_json(1, array('url' => webUrl('sale/gift/edit', array('type' => $type, 'id' => $id))));
 		}
 
-		$item = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_gift') . ' WHERE uniacid = ' . $uniacid . ' and id = ' . $id . ' ');
+		$item = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_goods') . ' WHERE uniacid = ' . $uniacid . ' and status = 2 and total > 0 and deleted = 0 ');
 
 		if (!empty($item['thumb'])) {
 			$item = set_medias($item, array('thumb'));
