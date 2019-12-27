@@ -222,6 +222,7 @@ class Login_EweiShopV2Page extends AppMobilePage
         $mobile = $_GPC['mobile'];
         $code = $_GPC['code'];
         $country_id = $_GPC['country_id'];
+        if(pdo_exists('ewei_shop_member',['mobile'=>$mobile])) app_error1(1,'该手机号已存在',[]);
         //短信类型
         $tp_id = $country_id != 44 && !empty($country_id) ? 3 : 1;
         //查找短息的发送的记录
