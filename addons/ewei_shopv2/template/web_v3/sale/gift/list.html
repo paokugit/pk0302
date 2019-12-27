@@ -11,15 +11,15 @@
         {$item['displayorder']}
         {/if}
     </td>
-    <td>
-        <img src="{php echo tomedia($item['thumb'])}" style="width:40px;height:40px;padding:1px;border:1px solid #ccc;"  onerror="this.src='../addons/ewei_shopv2/static/images/nopic.png'"/>
-    </td>
     <td class='full' style="overflow-x: hidden">
         {ifp 'sale.gift.edit'}
         <a href='javascript:;' data-toggle='ajaxEdit' data-href="{php echo webUrl('sale/gift/change',array('typechange'=>'title','id'=>$item['id']))}" >{$item['title']}</a>
         {else}
         {$item['title']}
         {/if}
+    </td>
+    <td>
+        <img src="{php echo tomedia($item['thumb'])}" style="width:40px;height:40px;padding:1px;border:1px solid #ccc;"  onerror="this.src='../addons/ewei_shopv2/static/images/nopic.png'"/>
     </td>
     <td  style="overflow:visible;">
         <span class='label {if $item['status']==1}label-primary{else}label-default{/if}'

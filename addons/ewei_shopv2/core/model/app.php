@@ -5392,12 +5392,18 @@ class App_EweiShopV2Model
                 //    $merch_array[$merchid]["goods"][] = $goods[$key]["id"];
                 //}
                 //商品赠品   查找赠品  活动类型是指定商品
-                $goods_gift = pdo_fetchall(' select * from '.tablename('ewei_shop_gift').' where activity = 1 and status = 1 ');
+                $goods_gift = pdo_fetchall(' select * from '.tablename('ewei_shop_gift').' where activity = 2 and status = 1 ');
                 foreach ($goods_gift as $k => $item){
                     //把赠品的商品弄成出  看看他在不在里面
                     $gift_goodsid = explode(',',$item['goodsid']);
                     //如果当前商品在指定的商品的数组中  就把赠品放在里面
-                    $goods[$key]['gift_goods'][] = in_array($value['goodsid'],$gift_goodsid) ? $goods_gift[$k] : [];
+                    $good_gift = in_array($value['goodsid'],$gift_goodsid) ? $goods_gift[$k] : [];
+                    $goods_gift['giftgoodsid'] = explode(',',$good_gift['giftgoodsid']);
+                    foreach ($goods_gift['giftgoodsid'] as $val){
+                        $good_gift = pdo_fetch('select id,title,thumb,marketprice from '.tablename('ewei_shop_goods').'where id = :id and status = 2 and total > 0 ',[':id'=>$val]);
+                        $good_gift['thumb'] = tomedia($good_gift['thumb']);
+                    }
+                    $goods[$key]['gift_goods'][] = $good_gift;
                 }
                 $option = array( );
                 $packagegoods = array( );
@@ -5482,14 +5488,18 @@ class App_EweiShopV2Model
             $allgoods[$k]["shopname"] = $v["shopname"];
             foreach( $v["goods"] as $g )
             {
-                $service = [];
-                if($g['seven']) $service[] = "7天无理由退换" ;
-                if($g['quality']) $service[] = "正品保证" ;
-                $allgoods[$k]["goods"][] = array( "id" => $g["goodsid"], "goodsid" => $g["goodsid"],'gift_goods'=>$g['gift_goods'], "service"=>$service, "title" => $g["title"], "thumb" => tomedia($g["thumb"]), "optionid" => (int) $g["optionid"], "optiontitle" => $g["optiontitle"],"is_remote"=>$isdispatcharea == 1 && $is_remote == 0 ? 0 : 1,"isdispatcharea"=>$isdispatcharea,"dispatchprice"=>$g['dispatchprice'],'remote_dispatchprice'=>$g['remote_dispatchprice'], "hasdiscount" => empty($g["isnodiscount"]) && !empty($g["dflag"]), "total" => $g["total"], "price" => ($g["unitprice"] < $g["marketprice"] ? (double) $g["marketprice"] : (double) $g["unitprice"]), "marketprice" => (double) $g["marketprice"], "total_price"=>$g['marketprice'] * $g['total'],"merchid" => $g["merchid"], "cates" => $g["cates"], "unit" => $g["unit"], "totalmaxbuy" => $g["totalmaxbuy"], "minbuy" => $g["minbuy"], "promotionprice" => (($g["unitprice"] < $g["marketprice"] ? (double) $g["marketprice"] : (double) $g["unitprice"])) - $g["isdiscountprice"] );
+                $v['merchid'] = $g['merchid'];
+                $allgoods[$k]["goods"][] = array( "id" => $g["goodsid"], "goodsid" => $g["goodsid"],'gift_goods'=>$g['gift_goods'], "seven"=>$g['seven'], "title" => $g["title"], "thumb" => tomedia($g["thumb"]), "optionid" => (int) $g["optionid"], "optiontitle" => $g["optiontitle"],"is_remote"=>$isdispatcharea == 1 && $is_remote == 0 ? 0 : 1,"isdispatcharea"=>$isdispatcharea,"dispatchprice"=>$g['dispatchprice'],'remote_dispatchprice'=>$g['remote_dispatchprice'], "hasdiscount" => empty($g["isnodiscount"]) && !empty($g["dflag"]), "total" => $g["total"], "price" => ($g["unitprice"] < $g["marketprice"] ? (double) $g["marketprice"] : (double) $g["unitprice"]), "marketprice" => (double) $g["marketprice"], "total_price"=>$g['marketprice'] * $g['total'],"merchid" => $g["merchid"], "cates" => $g["cates"], "unit" => $g["unit"], "totalmaxbuy" => $g["totalmaxbuy"], "minbuy" => $g["minbuy"], "promotionprice" => (($g["unitprice"] < $g["marketprice"] ? (double) $g["marketprice"] : (double) $g["unitprice"])) - $g["isdiscountprice"] );
             }
             $total_price = array_sum(array_column($allgoods[$k]['goods'],'total_price'));
             //店铺优惠券
-            $allgoods[$k]['coupon'] = pdo_fetchall('select id,couponname,enough,deduct,timestart,timeend from '.tablename('ewei_shop_coupon').'where enough < :enough and timestart < :t_time and timeend > :t_time and status = 0 and merchid = :merchid ',[':enough'=>$total_price,':t_time'=>time(),':merchid'=>$v['merchid']]);
+            $allgoods[$k]['coupon'] = pdo_fetchall('select id,couponname,enough,deduct,FROM_UNIXTIME(timestart,"%Y-%m-%d") as timestart,FROM_UNIXTIME(timeend,"%Y-%m-%d") as timeend from '.tablename('ewei_shop_coupon').'where enough <= :enough and timestart < :t_time and timeend > :t_time and status = 0 and merchid = :merchid ',[':enough'=>$total_price,':t_time'=>time(),':merchid'=>$v['merchid']]);
+//            foreach ($allgoods[$k]['coupon'] as $key => $item){
+//                $status = pdo_fetch('select * from '.tablename('ewei_shop_coupon_data').' where （openid = :openid or user_id = :user_id）and used = 0 and couponid = :couponid ',[':openid'=>$member['openid'],':user_id'=>$member['id'],':couponid'=>$item['id']]);
+//                if(empty($status)){
+//                    unset($allgoods[$k]['coupon'][$key]);
+//                }
+//            }
         }
         $sysset = m("common")->getSysset("trade");
         
@@ -5499,7 +5509,7 @@ class App_EweiShopV2Model
             $discount=$credit3;
         }
         //$result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "showTab" => 0 < count($carrier_list) && !$isverify && !$isvirtual, "showAddress" => !$isverify && !$isvirtual, "isverify" => $isverify, "isvirtual" => $isvirtual, "set_realname" => $sysset["set_realname"], "set_mobile" => $sysset["set_mobile"], "carrierInfo" => (!empty($carrier_list) ? $carrier_list[0] : false), "storeInfo" => false, "address" => $address, "goods" => $allgoods, "merchid" => $merch_id, "packageid" => $packageid, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle, "changenum" => $changenum, "hasinvoice" => (bool) $hasinvoice, "invoicename" => $invoicename, "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "discount"=>$discount,"deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" =>$flag == true? 0 :$goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => $flag == true ? $dispatch_price :round($realprice, 2), "total" => $total, "buyagain" => round($buyagain, 2), "fromcart" => (int) $fromcart, "isonlyverifygoods" => $isonlyverifygoods, "isforceverifystore" => $isforceverifystore, "city_express_state" => (empty($dispatch_array["city_express_state"]) ? 0 : $dispatch_array["city_express_state"]), "canusecard" => $canusecard, "card_info" => $card_info, "carddiscountprice" => $carddiscountprice, "card_free_dispatch" => $card_free_dispatch );
-        $result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "address" => $address, "goods" => $allgoods, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle,  "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "discount"=>$discount,"deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids), "fields" => (!empty($order_formInfo) ? $fields : false), "f_data" => (!empty($order_formInfo) ? $f_data : false), "dispatch_price" => $dispatch_price, "goodsprice" =>$flag == true? 0 :$goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => $flag == true ? $dispatch_price :round($realprice, 2), "total" => $total,  "fromcart" => (int) $fromcart);
+        $result = array( "member" => array( "realname" => $member["realname"], "mobile" => $member["carrier_mobile"] ), "address" => $address, "goods" => $allgoods, "fullbackgoods" => $fullbackgoods, "giftid" => $giftid, "gift" => $gift, "gifts" => $gifts, "gifttitle" => $gifttitle,  "couponcount" => (int) $couponcount, "deductcredit" => $deductcredit, "deductmoney" => $deductmoney, "discount"=>$discount,"deductcredit2" => $deductcredit2, "stores" => $stores, "storeids" => implode(",", $storeids),  "dispatch_price" => $dispatch_price, "goodsprice" =>$flag == true? 0 :$goodsprice,"goodsdeduct"=>$goodsdeduct ,"taskdiscountprice" => $taskdiscountprice, "discountprice" => $discountprice, "isdiscountprice" => $isdiscountprice, "showenough" => (empty($saleset["showenough"]) ? false : true), "enoughmoney" => $saleset["enoughmoney"], "enoughdeduct" => $saleset["enoughdeduct"], "merch_showenough" => (empty($merch_saleset["merch_showenough"]) ? false : true), "merch_enoughmoney" => (double) $merch_saleset["merch_enoughmoney"], "merch_enoughdeduct" => (double) $merch_saleset["merch_enoughdeduct"], "merchs" => (array) $merchs, "realprice" => $flag == true ? $dispatch_price :round($realprice, 2), "total" => $total,  "fromcart" => (int) $fromcart);
         if( $iscycel )
         {
             $cycelset = m("common")->getSysset("cycelbuy");
@@ -6494,14 +6504,10 @@ class App_EweiShopV2Model
                     $data["task_goods"] = $task_goods_data["task_goods"];
                 }
             }
-            //商品所属的店铺id
-            $merchid = $data["merchid"];
-            $merch_array[$merchid]["goods"][] = $data["goodsid"];
-            //如果有店铺id  则代表是店铺
-            $ismerch = 0 < $merchid ? 1 : 0;
-            $merch_array[$merchid]['ismerch'] = 0 < $merchid ? 1 : 0;
             $virtualid = $data["virtual"];
+            //库存
             $data["stock"] = $data["total"];
+            //购买数量
             $data["total"] = $goodstotal;
             //是否支持货到付款   2支持 1不支持
             if( $data["cash"] != 2 )
@@ -6694,6 +6700,12 @@ class App_EweiShopV2Model
             {
                 $data["marketprice"] = 0;
             }
+            //商品所属的店铺id
+            $merchid = $data["merchid"];
+            $merch_array[$merchid]["goods"][] = ['id'=>$data["goodsid"],'total'=>$goodstotal,'marketprice'=>$data['marketprice'],'credit3_deduct'=>$data['deduct_type'] == 2 ? $data['deduct'] : 0];
+            //如果有店铺id  则代表是店铺
+            $ismerch = 0 < $merchid ? 1 : 0;
+            $merch_array[$merchid]['ismerch'] = 0 < $merchid ? 1 : 0;
             //秒杀的信息
             if( $data["seckillinfo"] && $data["seckillinfo"]["status"] == 0 )
             {
@@ -6716,7 +6728,9 @@ class App_EweiShopV2Model
             }
             else
             {
+                //该商品的  单价  *  个数
                 $gprice = $data["marketprice"] * $goodstotal;
+                //总价加起来
                 $goodsprice += $gprice;
                 $prices = m("order")->getGoodsDiscountPrice($data, $level);
                 if( empty($packageid) )
@@ -6964,7 +6978,7 @@ class App_EweiShopV2Model
         }
         $totalprice -= $deductenough;
         //优惠券id
-        $couponid = intval($couponid);
+        //$couponid = intval($couponid);
         $goodsdata_coupon = array( );
         $goodsdata_coupon_temp = array( );
         foreach( $allgoods as $g )
@@ -7729,7 +7743,72 @@ class App_EweiShopV2Model
         unset($_SESSION[$member['openid'] . "_order_create"]);
         return ['status'=>0,'msg'=>'','data'=>["orderid" => $orderid,'couponid_id'=>$couponid_id,'couponid' =>$couponid]];
     }
-    
+
+
+    public function order_submit_new($user_id,$addressid,$goods,$discount1,$mid)
+    {
+        global $_W;
+        $uniacid = $_W["uniacid"];
+        $member = m("member")->getMember($user_id);
+        //用户是否加入黑名单
+        if( $member["isblack"] == 1 )
+        {
+            return ['status'=>AppError::$UserIsBlack,'msg'=>'','data'=>[]];
+        }
+        //如果商品信息是json  先去除上斜杠 然后再转译
+        if( is_string($goods) )
+        {
+            $goodsstring = htmlspecialchars_decode(str_replace("\\", "", $goods));
+            $goods = @json_decode($goodsstring, true);
+        }
+        //地址信息
+        $address = pdo_fetch('select * from '.tablename('ewei_shop_member_address').'where uniacid = :uniacid and id = :id ',[':id'=>$addressid,':uniacid'=>$uniacid]);
+        $is_remote = 1;
+        foreach ($goods as $key=>$val){
+            //店铺id
+            $merchid = $val['merhcid'];
+            //优惠券信息
+            $coupon = pdo_fetch(' select * from '.tablename('ewei_shop_coupon_data').' cd join '.tablename('ewei_shop_coupon').'cou on cou.id = cd.couponid where (cd.openid = :openid or cd.user_id = :user_id) and cd.couponid = :couponid and cd.used = 0 and cou.timestart < t_time and cou.timeend > t_time',[':user_id'=>$member['id'],':openid'=>$member['openid'],':couponid'=>$val['couponid'],'t_time'=>time()]);
+            $total_price = 0;
+            foreach ($val['goods'] as $k=>$v) {
+                //商品信息
+                $goods = pdo_fetch('select * from '.tablename('ewei_shop_goods') . ' where id = :id and status = 1 and total > 0 and deleted = 0 and merchid = :merhcid ', [':id' => $v['goodsid']]);
+                //地址数组 以及  选中的地址省份 是否在数组内
+                $areas = explode(';',$goods['areas']);
+                if(in_array($address['province'],$areas)){
+                    $dispatch_price = $goods['dispatchprice'];
+                }else{
+                    $dispatch_price = $goods['dispatchprice'] + $goods['remote_dispatchprice'];
+                    if($goods['is_remote'] == 0) return ['status'=>0,'msg'=>'存在不支持偏远地区的商品','data'=>[]];
+                }
+                //该属性的信息
+                $option = pdo_fetch('select * from '.tablename('ewei_shop_goods_option').' where id = :id and total > 0 and goodsid = :goodsid ',[':id'=>$v['optionid'],':goodsid'=>$v['goodsid']]);
+                //如果属性不存在  就要商品的价格   如果存在 就要属性价格
+                $marketprice = empty($option) ? $goods['marketprice'] : $option['marketprice'];
+                //订单金额  累加
+                $total_price += $marketprice * $v['total'];
+                //商品id  用户的openid  该商品的选中数  属性id  还有属性名 和  该商品的金额
+                $order_goods['openid'] = $member['openid'];
+                $order_goods['goodsid'] = $v['goodsid'];
+                $order_goods['total'] = $v['total'];
+                $order_goods['optionid'] = empty($option) ? 0 : $option['id'];
+                $order_goods['optionname'] = empty($option) ? "" : $option['title'];
+                $order_goods['price'] = $marketprice * $v['total'];
+                $order_goods['realprice'] = $marketprice * $v['total'];
+                $order_goods['oldprice'] = $marketprice * $v['total'];
+                //创建订单时间  店铺id  邮费
+                $order_goods['createtime'] = time();
+                $order_goods['merchid'] = $v['merchid'];
+                $order_goods['dispatchprice'] = $dispatch_price;
+                $order_goods['gift'] = $v['is_gift'];
+                $order_goods['good_giftid'] = $v['good_giftid'];
+            }
+            //$merchid == 0  就是平台商品 就是  SH订单号   shop   != 0  店铺商品   ME 订单号  merch
+            $ordersn = $merchid == 0 ? m("common")->createNO("order", "ordersn", "SH") : m("common")->createNO("order", "ordersn".$merchid, "ME");
+
+        }
+    }
+
     /**
      * @param $user_id
      * @param $orderid
