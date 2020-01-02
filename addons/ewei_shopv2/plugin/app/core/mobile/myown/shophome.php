@@ -248,7 +248,11 @@ class Shophome_EweiShopV2Page extends AppMobilePage{
         }
         //获取公告
         $notice=pdo_fetch("select title from ".tablename("ewei_shop_merch_notice")." where merchid=:merchid",array(":merchid"=>$merch_id));
+        if (empty($list["notice"])){
+            $list["notice"]="";
+        }else{
         $list["notice"]=$notice["title"];
+        }
         //获取优惠券
         $coupon=pdo_fetchall("select id,enough,deduct from ".tablename("ewei_shop_coupon")." where merchid=:merchid and status=1 and total>0 and ((timelimit=1 and timestart<=:time and timeend>=:time) or timelimit=0) order by createtime desc limit 2",array(":merchid"=>$merch_id,":time"=>time()));
         $list["coupon"]=$coupon;

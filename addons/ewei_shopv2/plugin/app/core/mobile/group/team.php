@@ -318,4 +318,22 @@ class Team_EweiShopV2Page extends AppMobilePage
         }
         apperror(0,"",$good);
     }
+    //收银台
+    public function cashier(){
+        global $_W;
+        global $_GPC;
+        $order_id=$_GPC["order_id"];
+        $order=pdo_get("ewei_shop_groups_order",array("id"=>$order_id));
+        if (empty($order)){
+            apperror(1,"订单id不正确");
+        }
+        if ($order["status"]!=0){
+            apperror(1,"该订单暂不可支付");
+        }
+        $d["price"]=$order["price"]+$order["freight"];
+        $member=pdo_get("ewei_shop_member",array("id"=>$order["user_id"]));
+        $d["RVC"]=$member["RVC"];
+        $d["credit2"]=$member["credit2"];
+        apperror(0,"",$d);
+    }
 }

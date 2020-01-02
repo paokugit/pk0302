@@ -1372,7 +1372,7 @@ class MerchModel extends PluginModel
             $data["commission1"] = round($commission1, 2);
         }
         //待结算金额
-        $sql = "select sum(realprice) as totalmoney from " . tablename("ewei_shop_merch_bill") . " where 1 " . $condition . " and status=2 and creditstatus =2";
+         $sql = "select sum(realprice) as totalmoney from " . tablename("ewei_shop_merch_bill") . " where 1 " . $condition . " and status=2 and creditstatus =2";     
         $status2 = pdo_fetchall($sql, $params);
         $status2price = 0;
         $status2orderids = array(  );
@@ -1539,10 +1539,11 @@ class MerchModel extends PluginModel
         $list["ptorderid"]=array();
         $list["ptrealprice"]=0;
         $list["ptrealpricerate"]=0;
+        $list["ptorderprice"]=0;
         foreach ($ptorder as $k=>$v){
             $list["ptorderid"][$k]=$v["id"];
-            $list["ptorderprice"]=$v["price"]+$v["freight"];
-            $list["ptrealprice"]=$v["price"]+$v["freight"];
+            $list["ptorderprice"]=$list["ptorderprice"]+$v["price"]+$v["freight"];
+            $list["ptrealprice"]=$list["ptrealprice"]+$v["price"]+$v["freight"];
         }
         $list["ptrealpricerate"]=((100 - floatval($list["payrate"])) * $list["ptrealprice"]) / 100;
         return $list;

@@ -68,7 +68,10 @@ class Comment_EweiShopV2Page extends AppMobilePage
 		    if ($v["ccate"]!=0){
 		        $cate=pdo_get("ewei_shop_category",array("id"=>$v["ccate"]));
 		        if ($cate["label"]){
-		        $goods[$k]["label"]=explode(",", $cate["label"]);
+ 		        $label=explode(",", $cate["label"]);
+ 		        foreach ($label as $kk=>$v){
+ 		            $goods[$k]["label"][$kk]["name"]=$v;
+ 		        }
 		        }else{
 		         $goods[$k]["label"]=array();
 		        }

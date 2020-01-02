@@ -216,7 +216,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $goodsids=implode(",", $goodid);
 //         var_dump($order_goodsid);
 //         var_dump($order_goods);die;
-        $rtype = intval($_GPC['rtype']);//0退款 1退款退货
+        $rtype = $_GPC['rtype'];//0退款 1退款退货
         if ($count==$c){
             //整体订单提交退款申请
             $refund = array('uniacid' => $_W['uniacid'], 'merchid' => $order['merchid'], 'rtype' => $rtype, 'reason' => trim($_GPC['reason']), 'content' =>trim($_GPC['content']));
@@ -528,11 +528,11 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
             {
                 case 0: $condition .= " and status=0 and paytype!=3";
                 break;
-                case 2: $condition .= " and (status=2 or status=0 and paytype=3)";
+                case 2: $condition .= " and (status=2 or (status=0 and paytype=3))";
                 break;
                 case 3:$condition .= " and status=3 and iscomment=0";
                 break;
-                case 4: $condition .= " and refundstate>0";
+                case 4: $condition .= " and refundstate>0 ";
                 break;
                 case 5: $condition .= " and userdeleted=1 ";
                 break;
@@ -573,7 +573,7 @@ class Orderrefund_EweiShopV2Page extends AppMobilePage
         $res["list"][$k]["refundstate"]=$v["refundstate"];
         $res["list"][$k]["refundid"]=$v["refundid"];
         //判断
-        if ($v["refundid"]&&$v["refundstatus"]!=0){
+        if ($v["refundid"]&&$v["refundstate"]!=0){
         $r=pdo_get("ewei_shop_order_refund",array("id"=>$v["refundid"]));
         $res["list"][$k]["rtype"]=$r["rtype"];// 0 退款(仅退款不退货) 1 退款退货 2 换货
         }else{

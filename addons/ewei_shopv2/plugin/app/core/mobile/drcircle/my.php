@@ -31,7 +31,7 @@ class My_EweiShopV2Page extends AppMobilePage{
         $page=$_GPC["page"];
         $first=($page-1)*10;
         $good_id=$_GPC["goods_id"];
-        $goods=pdo_fetchall("select id,title,thumb,productprice,marketprice from ".tablename("ewei_shop_goods")." where status=1 and deleted=0 and merchid=:merchid and checked=0 order by id desc limit ".$first." , 10",array(":merchid"=>$merch["id"]));
+        $goods=pdo_fetchall("select id,title,thumb,productprice,marketprice,sales,subtitle from ".tablename("ewei_shop_goods")." where status=1 and deleted=0 and merchid=:merchid and checked=0 order by id desc limit ".$first." , 10",array(":merchid"=>$merch["id"]));
         foreach ($goods as $k=>$v){
             $goods[$k]["thumb"]=tomedia($v["thumb"]);
             if ($good_id){

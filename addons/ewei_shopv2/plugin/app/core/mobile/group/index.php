@@ -61,18 +61,18 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $goods_id=$_GPC["goods_id"];
         if (empty($goods_id)){
-            apperror(1,"","商品id不可为空");
+            apperror(1,"商品id不可为空");
         }
         $good=pdo_fetch("select id,description,ccate,title,freight,stock,thumb_url,price,groupsprice,single,singleprice,groupnum,content,more_spec,merchid,gid,quality,seven from ".tablename("ewei_shop_groups_goods")." where id=:goods_id and status=1 and deleted=0",array(":goods_id"=>$goods_id));
         if (empty($good)){
-            apperror(1,"","商品不存在");
+            apperror(1,"商品不存在");
         }
         $type=$_GPC["type"]?$_GPC["type"]:0;
         $openid=$_GPC["openid"];
         if ($openid){
         $member=m("appnews")->member($openid,$type);
         if (!$member){
-            apperror(1,"","用户不存在");
+            apperror(1,"用户不存在");
         }
         }
         $good["services"]=array();
@@ -139,18 +139,18 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $goods_id=$_GPC["goods_id"];
         if (empty($goods_id)){
-            apperror(1,"","商品id不可为空");
+            apperror(1,"商品id不可为空");
         }
         $good=pdo_fetch("select * from ".tablename("ewei_shop_groups_goods")." where id=:goods_id and status=1 and deleted=0",array(":goods_id"=>$goods_id));
         if (empty($good)){
-            apperror(1,"","商品不存在");
+            apperror(1,"商品不存在");
         }
         if ($good["more_spec"]==0){
             apperror(0,"该商品无规格属性");
         }
         $signal=$_GPC["single"];
         if ($signal==1&&$good["single"]!=1){
-            apperror(1,"","该商品不可单购");
+            apperror(1,"该商品不可单购");
         }
         $res["goods"]["id"]=$good["id"];
         $res["goods"]["marketprice"]=$signal?$good["singleprice"]:$good["groupsprice"];
@@ -205,11 +205,11 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $goods_id=$_GPC["goods_id"];
         if (empty($goods_id)){
-            apperror(1,"","商品id不可为空");
+            apperror(1,"商品id不可为空");
         }
         $good=pdo_fetch("select * from ".tablename("ewei_shop_groups_goods")." where id=:goods_id and status=1 and deleted=0",array(":goods_id"=>$goods_id));
         if (empty($good)){
-            apperror(1,"","商品不存在");
+            apperror(1,"商品不存在");
         }
         $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_groups_order")." where goodid=:goodid and status=1 and success=0 and heads=1 and is_team=1 and endtime>:endtime",array(":goodid"=>$goods_id,":endtime"=>time()));
         
@@ -229,7 +229,7 @@ class Index_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $goods_id=$_GPC["goods_id"];
         if (empty($goods_id)){
-            apperror(1,"","商品id不可为空");
+            apperror(1,"商品id不可为空");
         }
         $openid=$_GPC["openid"];
         $type=$_GPC["type"]?$_GPC["type"]:0;

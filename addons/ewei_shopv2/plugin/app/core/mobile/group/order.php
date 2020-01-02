@@ -31,6 +31,8 @@ class Order_EweiShopV2Page extends AppMobilePage
                 break;
                 case 6: $condition.=" and refundstate!=0 and status!=3";
                 break;
+                case 1: $condition.=" and ((status=1 and is_team=0) or (status=1 and is_team=1 and success=1))";
+                break;
                 default: $condition.=" and status=".$status;
             }
         }
@@ -49,8 +51,10 @@ class Order_EweiShopV2Page extends AppMobilePage
             if ($v["merchid"]!=0){
             $merch=pdo_get("ewei_shop_merch_user",array("id"=>$v["merchid"]));
             $list[$k]["merchname"]=$merch["merchname"];
+            $list[$k]["mobile"]=$merch["mobile"];
             }else{
-                $list[$k]["merchname"]="跑库自营";
+                $list[$k]["merchname"]="跑库自营";  
+                $list[$k]["mobile"]="";
             }
             //获取商品
             $list[$k]["goods"]=pdo_fetchall("select og.id,g.id as goods_id,og.total,og.option_name,g.title,g.thumb,g.groupsprice,g.singleprice,g.seven from ".tablename("ewei_shop_groups_order_goods")." og left join ".tablename("ewei_shop_groups_goods")." g on og.groups_goods_id=g.id where og.groups_order_id=:order_id",array(":order_id"=>$v["id"]));
@@ -145,7 +149,7 @@ class Order_EweiShopV2Page extends AppMobilePage
         global $_GPC;
         $order_id=$_GPC["order_id"];
         
-        $order=pdo_fetch("select id,orderno,express,expresssn,price,freight,status,goodid,is_team,endtime,specs,refundid,refundstate,heads,teamid,merchid,groupnum,iscomment,success,addressid,paytime,pay_type,createtime  from ".tablename("ewei_shop_groups_order")." where id=:id",array(":id"=>$order_id));
+        $order=pdo_fetch("select id,orderno,express,expresssn,price,freight,status,goodid,is_team,endtime,specs,refundid,refundstate,heads,teamid,merchid,groupnum,iscomment,success,addressid,paytime,pay_type,createtime,sendtime  from ".tablename("ewei_shop_groups_order")." where id=:id",array(":id"=>$order_id));
         $order["createtime"]=date("Y-m-d H:i:s",$order["createtime"]);
         if ($order["paytime"]!=0){
         $order["paytime"]=date("Y-m-d H:i:s",$order["paytime"]);
@@ -160,6 +164,11 @@ class Order_EweiShopV2Page extends AppMobilePage
         }else{
             $order["refundstatus"]="";
             $order["rtype"]="";
+        }
+        if ($order["sendtime"]){
+            $order["sendtime"]=date("Y-m-d H:i:s",$order["sendtime"]);
+        } else{
+            $order["sendtime"]="";
         }
         
         //获取地址
@@ -272,7 +281,11 @@ class Order_EweiShopV2Page extends AppMobilePage
        if ($v["ccate"]!=0){
            $cate=pdo_get("ewei_shop_category",array("id"=>$v["ccate"]));
            if ($cate["label"]){
-               $list["goods"][$k]["label"]=explode(",", $cate["label"]);
+//                $list["goods"][$k]["label"]=explode(",", $cate["label"]);
+               $label=explode(",", $cate["label"]);
+               foreach ($label as $kk=>$v){
+                   $list["goods"][$k]["label"][$kk]["name"]=$v;
+               }
            }else{
                $list["goods"][$k]["label"]=array();
            }
