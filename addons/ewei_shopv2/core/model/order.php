@@ -3307,5 +3307,390 @@ class Order_EweiShopV2Model
         app_error1(0,'',$result);
     }
 
+    /**
+     * @param $orderid
+     * @param $user_id
+     * @return array|bool
+     */
+    public function order_pay($orderid,$user_id)
+    {
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $member = m('member')->getMember($user_id);
+        //查找订单信息  并且 报错订单信息
+        $order = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where id=:id and uniacid=:uniacid and (openid=:openid or user_id = :user_id) limit 1", array( ":id" => $orderid, ":uniacid" => $uniacid, ":openid" => $member['openid'] , ':user_id'=>$member['id'] ));
+        if( empty($order) )
+        {
+            return ['status'=>AppError::$OrderNotFound,'msg'=>'','data'=>[]];
+        }
+        //订单状态  已取消
+        if( $order["status"] == -1 )
+        {
+            return ['status'=>AppError::$OrderCannotPay,'msg'=>'','data'=>[]];
+        }
+        else
+        {
+            //订单状态已支付
+            if( 1 <= $order["status"] )
+            {
+                return ['status'=>AppError::$OrderAlreadyPay,'msg'=>'','data'=>[]];
+            }
+        }
+        //订单预支付记录
+        $log = pdo_fetch("SELECT * FROM " . tablename("core_paylog") . " WHERE `uniacid`=:uniacid AND `module`=:module AND `tid`=:tid limit 1", array( ":uniacid" => $uniacid, ":module" => "ewei_shopv2", ":tid" => $order["ordersn"] ));
+        if( !empty($log) && $log["status"] != "0" )
+        {
+            return ['status'=>AppError::$OrderAlreadyPay,'msg'=>'','data'=>[]];
+        }
+        if( !empty($log) && $log["status"] == "0" )
+        {
+            pdo_delete("core_paylog", array( "plid" => $log["plid"] ));
+            $log = NULL;
+        }
+        //lihanwen   店主优惠券
+        if($order['couponid']>0){
+            $coupon_info = pdo_fetch("SELECT couponid FROM " . tablename("ims_ewei_shop_coupon_data") . " WHERE `uniacid`=:uniacid AND `id`=:id limit 1", array( ":uniacid" => $uniacid, ":id" => $order['couponid']));
+            if($coupon_info['couponid']==2){//店主会员免费商品
+                $order["price"] = 0.00;
+            }
+        }
+        //如果订单的预支付记录不存在 插入订单
+        if( empty($log) )
+        {
+            $log = array( "uniacid" => $uniacid, "openid" => $member["openid"], "module" => "ewei_shopv2", "tid" => $order["ordersn"], "fee" => $order["price"], "status" => 0 );
+            pdo_insert("core_paylog", $log);
+            $plid = pdo_insertid();
+        }
+        return $order;
+    }
+
+    /**
+     * @param $orderid
+     * @param $user_id
+     * @param string $type
+     * @param string $iswxapp
+     * @return array
+     */
+    public function order_complete($orderid,$user_id,$type = "credit",$iswxapp)
+    {
+        $set = m("common")->getSysset(array( "shop", "pay" ));
+        $set["pay"]["weixin"] = (!empty($set["pay"]["weixin_sub"]) ? 1 : $set["pay"]["weixin"]);
+        $set["pay"]["weixin_jie"] = (!empty($set["pay"]["weixin_jie_sub"]) ? 1 : $set["pay"]["weixin_jie"]);
+        global $_W;
+        $uniacid = $_W['uniacid'];
+        $member = m('member')->getMember($user_id);
+        //查找订单信息
+        $order = pdo_fetch("select * from " . tablename("ewei_shop_order") . " where id=:id and uniacid=:uniacid and (openid=:openid or user_id = :user_id) limit 1", array( ":id" => $orderid, ":uniacid" => $uniacid, ":openid" => $member['openid'],':user_id'=>$member['id'] ));
+        if( empty($order) )
+        {
+            return ['status'=>AppError::$OrderNotFound,'msg'=>'','data'=>[]];
+        }
+        //订单状态大于1  不应该已经是  已支付吗
+        if( 1 <= $order["status"] )
+        {
+            m('order')->success($orderid,$user_id);
+        }
+        //
+        $log = pdo_fetch("SELECT * FROM " . tablename("core_paylog") . " WHERE `uniacid`=:uniacid AND `module`=:module AND `tid`=:tid limit 1", array( ":uniacid" => $uniacid, ":module" => "ewei_shopv2", ":tid" => $order["ordersn"] ));
+        if( empty($log) )
+        {
+            return ['status'=>AppError::$OrderPayFail,'msg'=>'','data'=>[]];
+        }
+        $order_goods = pdo_fetchall("select og.id,g.title, og.goodsid,og.optionid,g.total as stock,og.total as buycount,g.status,g.deleted,g.maxbuy,g.usermaxbuy,g.istime,g.timestart,g.timeend,g.buylevels,g.buygroups,g.totalcnf from  " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_goods") . " g on og.goodsid = g.id " . " where og.orderid=:orderid and og.uniacid=:uniacid ", array( ":uniacid" => $_W["uniacid"], ":orderid" => $orderid ));
+        foreach( $order_goods as $data )
+        {
+            if( empty($data["status"]) || !empty($data["deleted"]) )
+            {
+                return ['status'=>AppError::$OrderPayFail, 'msg'=>$data["title"]."<br/> 已下架!",'data'=>[]];
+            }
+            $unit = (empty($data["unit"]) ? "件" : $data["unit"]);
+            if( 0 < $data["minbuy"] && $data["buycount"] < $data["minbuy"] )
+            {
+                return ['status'=>AppError::$OrderCreateMinBuyLimit, 'msg'=>$data["title"] . "<br/> " . $data["min"] . $unit . "起售!",'data'=>[]];
+            }
+            if( 0 < $data["maxbuy"] && $data["maxbuy"] < $data["buycount"] )
+            {
+                return ['status'=>AppError::$OrderCreateOneBuyLimit, 'msg'=>$data["title"] . "<br/> 一次限购 " . $data["maxbuy"] . $unit . "!",'data'=>[]];
+            }
+            if( 0 < $data["usermaxbuy"] )
+            {
+                $order_goodscount = pdo_fetchcolumn("select ifnull(sum(og.total),0)  from " . tablename("ewei_shop_order_goods") . " og " . " left join " . tablename("ewei_shop_order") . " o on og.orderid=o.id " . " where og.goodsid=:goodsid and  o.status>=1 and (o.openid=:openid or o.user_id = :user_id)  and og.uniacid=:uniacid ", array( ":goodsid" => $data["goodsid"], ":uniacid" => $uniacid, ":openid" => $member['openid'] ,':user_id'=>$member['id'] ));
+                if( $data["usermaxbuy"] <= $order_goodscount )
+                {
+                    return ['status'=>AppError::$OrderCreateMaxBuyLimit, 'msg'=>$data["title"] . "<br/> 最多限购 " . $data["usermaxbuy"] . $unit,'data'=>[]];
+                }
+            }
+            //限购秒杀商品
+            if( $data["istime"] == 1 )
+            {
+                //限购秒杀未开始
+                if( time() < $data["timestart"] )
+                {
+                    return ['status'=>AppError::$OrderCreateTimeNotStart, 'msg'=>$data["title"] . "<br/> 限购时间未到!",'data'=>[]];
+                }
+                //限购秒杀一结束
+                if( $data["timeend"] < time() )
+                {
+                    return ['status'=>AppError::$OrderCreateTimeEnd, 'msg'=>$data["title"] . "<br/> 限购时间已过!",'data'=>[]];
+                }
+            }
+            //判断会员等级是否有购买权限
+            if( $data["buylevels"] != "" )
+            {
+                $buylevels = explode(",", $data["buylevels"]);
+                if( !in_array($member["agentlevel"], $buylevels) )
+                {
+                    return ['status'=>AppError::$OrderCreateMemberLevelLimit, 'msg'=>"您的会员等级无法购买<br/>" . $data["title"] . "!",'data'=>[]];
+                }
+            }
+            //判断会员分组购买权限
+            if( $data["buygroups"] != "" )
+            {
+                $buygroups = explode(",", $data["buygroups"]);
+                if( !in_array($member["groupid"], $buygroups) )
+                {
+                    return ['status'=>AppError::$OrderCreateMemberGroupLimit, 'msg'=>"您所在会员组无法购买<br/>" . $data["title"] . "!", 'data'=>[]];
+                }
+            }
+            // totalcnf  减库存方式 0 拍下减库存 1 付款减库存 2 永不减库存
+            if( $data["totalcnf"] == 1 )
+            {
+                //如果是支付立减  如果有属性id  查找该属性的库存
+                if( !empty($data["optionid"]) )
+                {
+                    $option = pdo_fetch("select id,title,marketprice,goodssn,productsn,stock,`virtual` from " . tablename("ewei_shop_goods_option") . " where id=:id and goodsid=:goodsid and uniacid=:uniacid  limit 1", array( ":uniacid" => $uniacid, ":goodsid" => $data["goodsid"], ":id" => $data["optionid"] ));
+                    if( !empty($option) && $option["stock"] != -1 && empty($option["stock"]) )
+                    {
+                        return ['status'=>AppError::$OrderCreateStockError, 'msg'=>$data["title"] . "<br/>" . $option["title"] . " 库存不足!", 'data'=>[]];
+                    }
+                }
+                else
+                {
+                    //如果是库存-1  如果 没有库存 报错
+                    if( $data["stock"] != -1 && empty($data["stock"]) )
+                    {
+                        return ['status'=>AppError::$OrderCreateStockError, 'msg'=>$data["title"] . "<br/>" . " 库存不足!", 'data'=>[]];
+                    }
+                }
+            }
+        }
+        //礼包商品的支付
+        if(pdo_exists('ewei_shop_gift_log',['order_sn'=>$order['ordersn']])){
+            $gift = pdo_get('ewei_shop_gift_log',['order_sn'=>$order['ordersn']]);
+            //查看这个礼包记录的周始末
+            $week = m('util')->week($gift['createtime']);
+            //如果当前时间在周始末  则可以领取  并更新状态为2 领取成功 如果不在也更新状态  为0 取消
+            if(time() >= $week['start'] && $week['end'] >= time()){
+                pdo_update('ewei_shop_gift_log',['status'=>2],['order_sn'=>$order['ordersn']]);
+            }else{
+                pdo_update('ewei_shop_gift_log',['status'=>0],['order_sn'=>$order['ordersn']]);
+                app_error(AppError::$OrderPayFail, "该订单是".$week['start']."--".$week['end']."礼包的商品，已经过了购买期");
+            }
+        }
+        //货到付款
+        if( $type == "cash" )
+        {
+            //货到付款没有开启
+            if( empty($set["pay"]["cash"]) )
+            {
+                return ['status'=>AppError::$OrderPayFail, 'msg'=>"未开启货到付款",'data'=>[]];
+            }
+            m("order")->setOrderPayType($order["id"], 3);
+            $ret = array( );
+            $ret["result"] = "success";
+            $ret["type"] = "cash";
+            $ret["from"] = "return";
+            $ret["tid"] = $log["tid"];
+            $ret["user"] = $order["openid"];
+            $ret["fee"] = $order["price"];
+            $ret["weid"] = $_W["uniacid"];
+            $ret["uniacid"] = $_W["uniacid"];
+            $res = $pay_result = m("order")->payResult($ret);
+            $result = m("notice")->sendOrderMessage($orderid);
+            if($res && $result) return ['status'=>0,'msg'=>'','data'=>[]];
+            //m('order')->success($orderid,$user_id);
+        }
+        $ps = array( );
+        $ps["tid"] = $log["tid"];
+        $ps["user"] = $member['openid'];
+        $ps["fee"] = $log["fee"];
+        $ps["title"] = $log["title"];
+        //如果支付金额小于0  则报错  金额错误
+        if( $ps["fee"] < 0 )
+        {
+            return ['status'=>AppError::$OrderPayFail, 'msg'=>"金额错误", 'data'=>[]];
+        }
+        //余额支付
+        if( $type == "credit" )
+        {
+            //未开始余额支付
+            if( empty($set["pay"]["credit"]) && 0 < $ps["fee"] )
+            {
+                return ['status'=>AppError::$OrderPayFail, 'msg'=>"未开启余额支付", 'data'=>[]];
+            }
+            //当前用户的余额
+            $credits = $member["credit2"];
+            //余额 和 订单金额 对比
+            if( $credits < $ps["fee"] )
+            {
+                return ['status'=>AppError::$OrderPayFail, 'msg'=>"余额不足,请充值",'data'=>[]];
+            }
+            $fee = floatval($ps["fee"]);
+            $shopset = m("common")->getSysset("shop");
+            $result = m("member")->setCredit($member['openid'], "credit2", 0 - $fee, array( $_W["member"]["uid"], $shopset["name"] . "APP 消费余额" . $fee),5 );
+            m('pay')->creditpay_log($member['openid'], $fee, $orderid,'credit');
+            //支付失败  及  失败原因
+            if( is_error($result) )
+            {
+                return ['status'=>AppError::$OrderPayFail, 'msg'=>$result["message"] ,'data'=>[]];
+            }
+            $record = array( );
+            $record["status"] = "1";
+            $record["type"] = "credit2";
+            pdo_update("core_paylog", $record, array( "plid" => $log["plid"] ));
+            $ret = array( );
+            $ret["result"] = "success";
+            $ret["type"] = $log["type"];
+            $ret["from"] = "return";
+            $ret["tid"] = $log["tid"];
+            $ret["user"] = $log["openid"];
+            $ret["fee"] = $log["fee"];
+            $ret["weid"] = $log["weid"];
+            $ret["uniacid"] = $log["uniacid"];
+            @session_start();
+            $_SESSION[EWEI_SHOPV2_PREFIX . "_order_pay_complete"] = 1;
+            $res = m("order")->setOrderPayType($order["id"], 1);
+            $pay_result = m("order")->payResult($ret);
+            if($res && $pay_result) return ['status'=>0,'msg'=>'','data'=>[]];
+            //m('order')->success($orderid,$user_id);
+        }
+        else {
+            //RVC 支付
+            if ($type == "RVC") {
+                //用户RVC余额
+                $credits = $member["RVC"];
+                if ($credits < $ps["fee"]) {
+                    return ['status'=>AppError::$OrderPayFail, 'msg'=>"RVC不足,请充值",'data'=>[]];
+                }
+                $fee = floatval($ps["fee"]);
+                $shopset = m("common")->getSysset("shop");
+                $result = m("member")->setCredit($member['openid'], "RVC", 0 - $fee, array($_W["member"]["uid"], $shopset["name"] . "APP 消费 RVC" . $fee),5);
+                m('pay')->creditpay_log($member['openid'], $fee, $orderid,'RVC');
+                if (is_error($result)) {
+                    return ['status'=>AppError::$OrderPayFail, 'msg'=>$result["message"],'data'=>[]];
+                }
+                $record = array();
+                $record["status"] = "1";
+                $record["type"] = "RVC";
+                pdo_update("core_paylog", $record, array("plid" => $log["plid"]));
+                $ret = array();
+                $ret["result"] = "success";
+                $ret["type"] = $log["type"];
+                $ret["from"] = "return";
+                $ret["tid"] = $log["tid"];
+                $ret["user"] = $log["openid"];
+                $ret["fee"] = $log["fee"];
+                $ret["weid"] = $log["weid"];
+                $ret["uniacid"] = $log["uniacid"];
+                @session_start();
+                $_SESSION[EWEI_SHOPV2_PREFIX . "_order_pay_complete"] = 1;
+                $res = m("order")->setOrderPayType($order["id"], 6);
+                $pay_result = m("order")->payResult($ret);
+                if($res && $pay_result) return ['status'=>0,'msg'=>'','data'=>[]];
+                //m('order')->success($orderid,$user_id);
+            } else {
+                if ($type == "wechat") {
+                    if (empty($set["pay"]["wxapp"]) && $iswxapp) {
+                        return ['status'=>AppError::$OrderPayFail, 'msg'=>"未开启微信支付",'data'=>[]];
+                    }
+                    $ordersn = $order["ordersn"];
+                    if (!empty($order["ordersn2"])) {
+                        $ordersn .= "GJ" . sprintf("%02d", $order["ordersn2"]);
+                    }
+                    //订单查询接口
+                    $payquery = m('pay')->isWeixinPay($ordersn, $order["price"]);
+                    if (!is_error($payquery)) {
+                        $record = array();
+                        $record["status"] = "1";
+                        $record["type"] = "wechat";
+                        pdo_update("core_paylog", $record, array("plid" => $log["plid"]));
+                        m("order")->setOrderPayType($order["id"], 21);
+                        $ret = array();
+                        $ret["result"] = "success";
+                        $ret["type"] = "wechat";
+                        $ret["from"] = "return";
+                        $ret["tid"] = $log["tid"];
+                        $ret["user"] = $log["openid"];
+                        $ret["fee"] = $log["fee"];
+                        $ret["weid"] = $log["weid"];
+                        $ret["uniacid"] = $log["uniacid"];
+                        //$ret["deduct"] = intval($_GPC["deduct"]) == 1;
+                        $pay_result = m("order")->payResult($ret);
+                        @session_start();
+                        $_SESSION[EWEI_SHOPV2_PREFIX . "_order_pay_complete"] = 1;
+                        $res = pdo_update("ewei_shop_order", array("apppay" => 2), array("id" => $order["id"]));
+                        //m('order')->success($orderid,$user_id);
+                        if($res && $pay_result) return ['status'=>0,'msg'=>'','data'=>[]];
+                    }
+                    return ['status'=>AppError::$OrderPayFail,'msg'=>'','data'=>[]];
+                } else {
+                    if ($type == "alipay") {
+                        if (empty($set["pay"]["app_alipay"])) {
+                            return ['status'=>AppError::$OrderPayFail, 'msg'=>"未开启支付宝支付",'data'=>[]];
+                        }
+                        $sec = m("common")->getSec();
+                        $sec = iunserializer($sec["sec"]);
+                        //支付宝公钥
+                        //$public_key = $sec["nativeapp"]["alipay"]["public_key"];
+                        $public_key_rsa2 = $sec["app_alipay"]["public_key_rsa2"];
+                        //if (empty($public_key)) {
+                        if (empty($public_key_rsa2)) {
+                            return ['status'=>AppError::$OrderPayFail, 'msg'=>"支付宝公钥为空",'data'=>[]];
+                        }
+                        //$alidata = htmlspecialchars_decode($alidata);
+                        //$alidata = json_decode($alidata, true);
+                        $alidata = explode('&',$alidata);
+                        $ali_param = [];
+                        foreach ($alidata as $ali){
+                            $ali_param[] = explode('=',$ali);
+                        }
+                        $params = array_column($ali_param,'1','0');
+                        $newalidata['app_id'] = $params['app_id'];
+                        $newalidata['biz_content'] = $params['biz_content'];
+                        $newalidata['charset'] = $params['charset'];
+                        $newalidata['format'] = $params['format'];
+                        $newalidata['method'] = $params['method'];
+                        $newalidata['notify_url'] = $params['notify_url'];
+                        $newalidata['timestamp'] = $params['timestamp'];
+                        $newalidata["sign_type"] = $params["sign_type"];
+                        $newalidata["sign"] = $params["sign"];
+                        //$alisign = m("finance")->RSAVerify($newalidata, $public_key, false, true);
+                        $alisign = m("finance")->RSAVerify($newalidata, $public_key_rsa2, false, true);
+                        if ($alisign) {
+                            $record = array();
+                            $record["status"] = "1";
+                            $record["type"] = "alipay";
+                            pdo_update("core_paylog", $record, array("plid" => $log["plid"]));
+                            $ret = array();
+                            $ret["result"] = "success";
+                            $ret["type"] = "alipay";
+                            $ret["from"] = "return";
+                            $ret["tid"] = $log["tid"];
+                            $ret["user"] = $log["openid"];
+                            $ret["fee"] = $log["fee"];
+                            $ret["weid"] = $log["weid"];
+                            $ret["uniacid"] = $log["uniacid"];
+                            //$ret["deduct"] = intval($_GPC["deduct"]) == 1;
+                            $res = m("order")->setOrderPayType($order["id"], 22);
+                            $pay_result = m("order")->payResult($ret);
+                            $result = pdo_update("ewei_shop_order", array("apppay" => 2), array("id" => $order["id"]));
+                            if($res && $pay_result && $result) return ['status'=>0,'msg'=>'','data'=>[]];
+                            //m('order')->success($order["id"],$user_id);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 ?>

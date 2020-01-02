@@ -146,9 +146,11 @@ class Order_EweiShopV2Page extends AppMobilePage
         $user_id = m('app')->getLoginToken($token);
         if(empty($user_id)) app_error1(2,'登录失效',[]);
         //订单id
-        $order_id = $_GPC['order_id'];
+        $order_id = $_GPC['order_id'] ? $_GPC['order_id'] : [];
+        //总订单号
+        $order_sn = $_GPC['order_sn'];
         $iswxapp = $this->iswxapp;
-        $data = m('app')->order_pay($user_id,$order_id,$iswxapp);
+        $data = m('app')->order_pay($user_id,$order_id,$order_sn,$iswxapp);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
     
@@ -166,15 +168,17 @@ class Order_EweiShopV2Page extends AppMobilePage
         //支付类型
         $type = $_GPC['type'] ? $_GPC['type'] : "credit";
         //订单id
-        $id = $_GPC['id'];
+        $id = $_GPC['id'] ? $_GPC['id'] : [];
+        //总订单号
+        $order_sn = $_GPC['order_sn'];
         $alidata = $_GPC['data'] ? $_GPC['data'] : "";
-        $alidata = explode('&',$alidata);
-        foreach ($alidata as $ali){
-            $ali_param[] = explode('=',$ali);
-        }
-        $params = array_column($ali_param,'1','0');
-        var_dump($params);exit;
-        $data = m('app')->order_complete($user_id,$id,$type,$alidata);
+//        $alidata = explode('&',$alidata);
+//        foreach ($alidata as $ali){
+//            $ali_param[] = explode('=',$ali);
+//        }
+//        $alidata = array_column($ali_param,'1','0');
+        $iswxapp = $this->iswxapp;
+        $data = m('app')->order_complete($user_id,$id,$order_sn,$type,$alidata,$iswxapp);
         app_error1($data['status'],$data['msg'],$data['data']);
     }
 }

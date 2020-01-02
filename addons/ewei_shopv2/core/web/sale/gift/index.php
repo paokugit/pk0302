@@ -57,7 +57,7 @@ class Index_EweiShopV2Page extends WebPage
 		$uniacid = intval($_W['uniacid']);
 		$type = trim($_GPC['type']);
 		$id = intval($_GPC['id']);
-
+		$gifts = pdo_fetchall('select * from '.tablename('ewei_shop_goods').'where status = 2 and deleted = 0 and total > 0 ');
 		if ($_W['ispost']) {
 			if (empty($id)) {
 				$activity = intval($_GPC['activity']);
@@ -126,7 +126,7 @@ class Index_EweiShopV2Page extends WebPage
 			show_json(1, array('url' => webUrl('sale/gift/edit', array('type' => $type, 'id' => $id))));
 		}
 
-		$item = pdo_fetchall('SELECT * FROM ' . tablename('ewei_shop_goods') . ' WHERE uniacid = ' . $uniacid . ' and status = 2 and total > 0 and deleted = 0 ');
+		$item = pdo_fetch('SELECT * FROM ' . tablename('ewei_shop_gift') . ' WHERE uniacid = ' . $uniacid . ' and id = ' . $id . ' ');
 
 		if (!empty($item['thumb'])) {
 			$item = set_medias($item, array('thumb'));

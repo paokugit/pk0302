@@ -205,6 +205,10 @@ class EweiShopWechatPay
                                                                                                         $this->acceleration();
                                                                                                     }elseif ($this->type=="98"){
                                                                                                         $this->jdorder();
+                                                                                                    }else{
+                                                                                                        if($this->type == 36){
+                                                                                                            $this->app_order();
+                                                                                                        }
                                                                                                     }
                                                                                                 }
                                                                                             }
@@ -1368,6 +1372,64 @@ class EweiShopWechatPay
         }
         echo false;
         
+    }
+
+    /**
+     * app订单回调
+     */
+    public function app_order()
+    {
+        $input = file_get_contents('php://input');
+        $obj = simplexml_load_string($input, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $data = json_decode(json_encode($obj), true);
+        if (!$data) {
+            exit("FAIL");
+        }
+        $res = $this->check_sign($data);
+        if (!$res) {
+            exit("FAIL");
+        }
+        $ordersn = $data['out_trade_no'];  //获得订单信息
+        $order = pdo_fetchall('select * from '.tablename('ewei_shop_order').'where order_sn = :order_sn',[':order_sn'=>$ordersn]);
+        foreach ($order as $key=>$value){
+            $sql = "SELECT * FROM " . tablename("core_paylog") . " WHERE `module`=:module AND `tid`=:tid  limit 1";
+            $params = array( );
+            $params[":tid"] = $value['ordersn'];
+            $params[":module"] = "ewei_shopv2";
+            $log = pdo_fetch($sql, $params);
+            if( !empty($log) && $log["status"] == "0" )
+            {
+                $site = WeUtility::createModuleSite($log["module"]);
+                if( !is_error($site) )
+                {
+                    $method = "payResult";
+                    if( method_exists($site, $method) )
+                    {
+                        $ret = array( );
+                        $ret["acid"] = $log["acid"];
+                        $ret["uniacid"] = $log["uniacid"];
+                        $ret["result"] = "success";
+                        $ret["type"] = $log["type"];
+                        $ret["from"] = "return";
+                        $ret["tid"] = $log["tid"];
+                        $ret["user"] = $log["openid"];
+                        $ret["fee"] = $log["fee"];
+                        $ret["tag"] = $log["tag"];
+                        pdo_update("ewei_shop_order", array( "paytype" => 21, "apppay" => 2 ), array( "ordersn" => $log["tid"], "uniacid" => $log["uniacid"] ));
+                        $result = $site->$method($ret);
+                        if( $result )
+                        {
+                            $log["tag"] = iunserializer($log["tag"]);
+                            $log["tag"]["transaction_id"] = $this->get["transaction_id"];
+                            $record = array( );
+                            $record["status"] = "1";
+                            $record["tag"] = iserializer($log["tag"]);
+                            pdo_update("core_paylog", $record, array( "plid" => $log["plid"] ));
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 ?>
