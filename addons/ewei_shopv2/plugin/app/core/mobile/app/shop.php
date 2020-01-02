@@ -512,5 +512,17 @@ class Shop_EweiShopV2Page extends AppMobilePage
         $data = m('app')->shop_rvc_log($user_id,$pindex,$type);
         app_error1(0,"",$data);
     }
+
+    /**
+     * 获取海报链接
+     */
+    public function poster_image()
+    {
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('member')->getLoginToken($token);
+        if(empty($user_id)) app_error1(2,'登录失效',[]);
+
+    }
 }
 ?>

@@ -99,7 +99,7 @@
                     {loop $goods $g}
                     <div class="multi-item" data-id="{$g['id']}" data-name="goodsid" id="{$g['id']}">
                         <img class="img-responsive img-thumbnail" src="{php echo tomedia($g['thumb'])}" onerror="this.src='../addons/ewei_shopv2/static/images/nopic.png'" style="width:100px;height:100px;">
-                        <div class="img-nickname">{$g['title']}</div>
+                        <div class="img-nick">{$g['title']}</div>
                         <input type="hidden" value="{$g['id']}" name="goodsid[]">
                         <em onclick="removeHtml({$g['id']})" class="close">×</em>
                         <div style="clear:both;"></div>
@@ -110,7 +110,7 @@
                 <script>
                     $(function(){
                         var title = '';
-                        $('.img-nickname').each(function(){
+                        $('.img-nick').each(function(){
                             title += $(this).html()+';';
                         });
                         $('#goodsid_text').val(title);
@@ -122,7 +122,7 @@
                         });
                     })
                     function goods_show(data) {
-//                        console.log(data);
+                       //console.log(data);
                         if(data.act == 1){
                             var html = '<div class="multi-item" data-id="'+data.id+'" data-name="goodsid" id="'+data.id+'">'
                                 +'<img class="img-responsive img-thumbnail" src="'+data.thumb+'" onerror="this.src=\'../addons/ewei_shopv2/static/images/nopic.png\'" style="width:100px;height:100px;">'
@@ -187,7 +187,7 @@
         <div class="form-group">
             <label class="col-lg control-label">选择赠品</label>
             <div class="col-sm-9 col-xs-12">
-                {ife 'goods' $item}
+                {ife 'goods' $gifts}
                 <?php echo tpl_selector('giftgoodsid',
                         array('multi'=>1,
                 'type'=>'image',
