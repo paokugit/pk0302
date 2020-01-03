@@ -130,7 +130,7 @@ class Team_EweiShopV2Page extends AppMobilePage
         $order_good["total"]=$total;
         pdo_insert("ewei_shop_groups_order_goods",$order_good);
         $res["order_id"]=$order_id;
-        $res["price"]=$data["price"];
+        $res["price"]=$data["price"]+$data["freight"];
         $res["RVC"]=$member["RVC"];
         $res["credit2"]=$member["credit2"];
         apperror(0,"",$res);
@@ -202,7 +202,7 @@ class Team_EweiShopV2Page extends AppMobilePage
             apperror(1,"该活动已失效");
         }
         $credittype=$_GPC["credittype"];
-        if ($member[$credittype]<$order["price"]){
+        if ($member[$credittype]<$order["price"]+$order["freight"]){
             apperror(1,"账户余额不足");
         }
        

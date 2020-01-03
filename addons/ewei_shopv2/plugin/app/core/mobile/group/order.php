@@ -369,11 +369,16 @@ class Order_EweiShopV2Page extends AppMobilePage
            apperror(1,"不存在该订单");
        }
        $list["order_id"]=$order["id"];
+       if ($order["status"]==1){
        $list["price"]=$order["price"]+$order["freight"];
+       }else{
+           $list["price"]=$order["price"];
+       }
        $list["freight"]=$order["freight"];
+       $list["is_team"]=$order["is_team"];
        //获取商品
        //获取商品
-       $list["goods"]=pdo_fetchall("select g.id as goods_id,og.total,og.option_name,g.title,g.thumb from ".tablename("ewei_shop_groups_order_goods")." og left join ".tablename("ewei_shop_groups_goods")." g on og.groups_goods_id=g.id where og.groups_order_id=:order_id",array(":order_id"=>$order_id));
+       $list["goods"]=pdo_fetchall("select g.id as goods_id,og.total,og.option_name,g.title,g.thumb,g.more_spec from ".tablename("ewei_shop_groups_order_goods")." og left join ".tablename("ewei_shop_groups_goods")." g on og.groups_goods_id=g.id where og.groups_order_id=:order_id",array(":order_id"=>$order_id));
        foreach ($list["goods"] as $k=>$v){
            $list["goods"][$k]["thumb"]=tomedia($v["thumb"]);
        }
@@ -411,6 +416,7 @@ class Order_EweiShopV2Page extends AppMobilePage
        $refund["user_id"]=$member["id"];
        $refund["applycredit"] = $order["credit"];
        $refund["applytime"] = time();
+       $refund["content"]=$_GPC["content"];
        if ($order["status"]==1){
            $refund["applyprice"]=$order["price"]+$order["freight"];
        }else{
@@ -494,6 +500,7 @@ class Order_EweiShopV2Page extends AppMobilePage
        $rtype=2;
        $refund["rtype"]=$rtype;
        $refund["reason"]=$_GPC["reason"];
+       $refund["content"]=$_GPC["content"];
        $refund["refundno"] = m("common")->createNO("groups_order_refund", "refundno", "PR");
        $refund["orderid"]=$order_id;
        $refund["openid"]=$member["openid"];
