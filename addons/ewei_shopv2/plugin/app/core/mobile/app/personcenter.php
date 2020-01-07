@@ -316,6 +316,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
    }
    //设置--关于跑库（隐私注册|软许）
    public  function about(){
+       header('Access-Control-Allow-Origin:*');
        global $_GPC;
        global $_W;
        $id=$_GPC["id"];
@@ -323,6 +324,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            apperror(1,"id未传入");
        }
        $notice=pdo_get("ewei_shop_member_devote",array("id"=>$id));
+       $notice["content"]=htmlspecialchars_decode($notice["content"]);
        if (empty($notice)){
            apperror(1,"id不正确");
        }

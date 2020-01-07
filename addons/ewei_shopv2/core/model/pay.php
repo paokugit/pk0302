@@ -138,11 +138,11 @@ class Pay_EweiShopV2Model
     public function wxchat_apppay($data,$type = 0)
     {
         global $_W;
-        $config = pdo_fetch('select * from '.tablename('ewei_shop_payment').' where id=:id and uniacid=:uniacid',[':id'=>1,':uniacid'=>$_W['uniacid']]);
-        $wxpay = m('common')->getSysset('app');   //用来获得小程序的APPID
+        $sec = m("common")->getSec();
+        $config = iunserializer($sec["sec"])["app_wechat"];
         $params = [];
-        $params['appid'] = $wxpay['appid'];
-        $params['mch_id'] = $config['sub_mch_id'];
+        $params['appid'] = $config['appid'];
+        $params['mch_id'] = $config['merchid'];
         $params['nonce_str'] = $data['random'];
         $params['out_trade_no'] = $data['out_order'];
         $params['total_fee'] = $data['money'] * 100;
@@ -169,14 +169,15 @@ class Pay_EweiShopV2Model
             return error(-3, strval($result['err_code']) . ': ' . strval($result['err_code_des']));
         }
         if($result['return_code'] == "SUCCESS" && $result['result_code'] == "SUCCESS"){
-            pdo_update('ewei_shop_order',['wxapp_prepay_id'=>$result['prepay_id']],['ordersn'=>$params['out_trade_no']]);
-            $array = array(
+            pdo_update('ewei_shop_order',['wxapp_prepay_id'=>$result['prepay_id']],['order_sn'=>$params['out_trade_no']]);
+            $array = [
+                'prepayid' => $result['prepay_id'],
                 'appId' => $result['appid'],
-                'package' => 'prepay_id='.$result['prepay_id'],
-                'nonceStr' => $result['nonce_str'],
-                'timeStamp' => (string)time(),
-                'signType'=>'MD5'
-            );
+                'partnerid' => $result['mch_id'],
+                'package' => 'Sign=WXPay',
+                'noncestr' => $result['nonce_str'],
+                'timestamp' => (string)time(),
+            ];
             //第二次生成签名
             $string2 = $this->buildParams($array);
             $string2 .= "key=" . $config["apikey"];

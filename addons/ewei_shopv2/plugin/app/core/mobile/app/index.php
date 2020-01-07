@@ -249,7 +249,9 @@ class Index_EweiShopV2Page extends AppMobilePage
         {
             app_error1(AppError::$PosterCreateFail, "海报生成失败",[]);
         }
-        app_error1(0,'',array( "url" => $imgurl));
+        $data = ['title'=>'免费领礼包啦，商品免费领到手','image'=>"https://www.paokucoin.com/img/backgroup/free.jpg","path"=>"/packageA/pages/gift/gift?invitedid=".$member['openid']];
+        $data['imgurl'] = $imgurl;
+        app_error1(0,'',$data);
     }
 
     /**
@@ -332,6 +334,20 @@ class Index_EweiShopV2Page extends AppMobilePage
         //app逻辑
         $page = max(1,$_GPC['page']);
         $data = m('app')->look_buy($user_id,$page,6);
+        app_error1(0,'',$data);
+    }
+
+    /**
+     * 边看边买的分享
+     */
+    public function look_buy_share()
+    {
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        $video_id = $_GPC['video_id'];
+        $goodsid = pdo_getcolumn('ewei_shop_look_buy',['id'=>$video_id],'goods_id');
+        $data = m('app')->look_buy_share($video_id,$goodsid,$user_id);
         app_error1(0,'',$data);
     }
 
@@ -614,6 +630,41 @@ class Index_EweiShopV2Page extends AppMobilePage
     }
 
     /**
+     * 好友捐赠分享
+     */
+    public function index_friend_share()
+    {
+        //用户信息
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
+        $member = m('member')->getMember($user_id);
+        //分享人id
+        $mid = $user_id;
+        //好友捐赠所有的图
+        $idarray = pdo_fetchall("select id from ".tablename("ewei_shop_share_help"));
+        //随机获取他的键
+        $k = array_rand($idarray);
+        //得到键所对应的id
+        $id = $idarray[$k]["id"];
+        //查询的好友捐赠的id
+        $data = pdo_get('ewei_shop_share_help',['id'=>$id],['title','image']);
+        //分享的缩略图
+        $data['image'] = tomedia($data['image']);
+        //小程序分享链接
+        $data['path'] = "/packageA/pages/helphand/helpshare/helpshare";
+        //海报
+        $imgurl = m('qrcode')->HelpPoster($member,$mid,['back'=>'/addons/ewei_shopv2/static/images/1.png','type'=>"helpposter",'title'=>'快来帮我助力一下','desc'=>'微信步数兑现金，收入可提现！','con'=>'每一步，都值得鼓励','url'=>'packageA/pages/helphand/helpshare/helpshare']);
+        if( empty($imgurl))
+        {
+            app_error(AppError::$PosterCreateFail, "海报生成失败");
+        }
+        $data['imgurl'] = $imgurl;
+        app_error1(0,'',$data);
+    }
+
+    /**
      * 好友助力助力榜
      */
     public function index_friend_list()
@@ -658,6 +709,23 @@ class Index_EweiShopV2Page extends AppMobilePage
         $user_id = m('app')->getLoginToken($token);
         $type = $_GPC['type'] ? $_GPC['type'] : 2;
         $data = m('app')->index_game($user_id,$type);
+        app_error1(0,'',$data);
+    }
+
+    /**
+     * 转盘分享
+     */
+    public function index_game_share()
+    {
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0) app_error1(2,"登录信息失效",[]);
+        $data = [
+            'path'=>'/pages/index/index?scene='.$user_id,
+            'title'=>'原来微信步数可以当钱用，快来和我一起薅羊毛',
+            'image'=>'https://www.paokucoin.com/img/backgroup/lottary.png',
+        ];
         app_error1(0,'',$data);
     }
 

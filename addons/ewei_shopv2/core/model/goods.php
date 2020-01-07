@@ -272,6 +272,7 @@ class Goods_EweiShopV2Model
             }
             //判断是否是赏金任务的商品
             $list[$lk]["isreward"] =  m('reward')->good($lv['id']);
+            $list[$lk]['adv'] = 0;
 		}
 		$list = set_medias($list, 'thumb');
 		return array('list' => $list, 'total' => $total);
