@@ -15,7 +15,7 @@ class Login_EweiShopV2Page extends AppMobilePage
         $mobile = $_GPC['mobile'];
         $code = $_GPC['code'];
         $type = $_GPC['type'];
-        $pwd = preg_replace('# #','',$_GPC['password']);
+        $pwd = preg_replace('# #','',$_GPC['pwd']);
         $country_id = $_GPC['country_id'];
         //$type == 1  注册   $type == 2 忘记密码
         //正则验证手机号的格式
@@ -44,8 +44,9 @@ class Login_EweiShopV2Page extends AppMobilePage
             //注册
             $member = pdo_get('ewei_shop_member',['mobile'=>$mobile]);
             if(!empty($member)){
-                //pdo_update('ewei_shop_member',['password'=>md5(base64_encode($pwd.$member['salt']))],['mobile'=>$mobile]);
-                pdo_update('ewei_shop_member',['password'=>md5(base64_encode($pwd))],['mobile'=>$mobile]);
+	    	//pdo_update('ewei_shop_member',['password'=>md5(base64_encode($pwd.$member['salt']))],['mobile'=>$mobile]);
+                //pdo_update('ewei_shop_member',['password'=>md5(base64_encode($pwd))],['mobile'=>$mobile]);
+                app_error1(1,'手机号已注册',[]);
             }else{
                 $salt = random(16);
                 //pdo_insert('ewei_shop_member',['mobile'=>$mobile,'password'=>md5(base64_encode($pwd.$salt)),'createtime'=>time(),'status'=>1,'salt'=>$salt]);
@@ -140,6 +141,37 @@ class Login_EweiShopV2Page extends AppMobilePage
     {
         $data = pdo_fetchall("select id,phonecode,name_zh from ".tablename("sms_country")." where name_zh=:name_zh1 or name_zh=:name_zh2 or name_zh=:name_zh3",array(":name_zh1"=>"中国",":name_zh2"=>"马来西亚",":name_zh3"=>"泰国"));
         app_error1(0,"",['data'=>$data]);
+    }
+
+    /**
+     * 手机号是否存在
+     */
+    public function mobile()
+    {
+        global $_GPC;
+        $mobile = $_GPC['mobile'];
+        //type  == 1 注册   == 2 忘记密码
+        $type = $_GPC['type'] ? $_GPC['type'] : 1;
+        $member = pdo_get('ewei_shop_member',['uniacid'=>1,'mobile'=>$mobile]);
+        //如果是注册   用户存在  则报错 手机号已存在
+        if($type == 1 ){
+            if($member) app_error1(1,'手机号已存在',[]);
+        }elseif($type == 2){
+            //如果用户不存在  是忘记密码  手机号未注册
+            if(!$member) app_error1(1,'手机号未注册',[]);
+        }
+        app_error1(0,'',[]);
+    }
+
+    /**
+     * 手机号是否存在
+     */
+    public function mobile_reg()
+    {
+        global $_GPC;
+        $mobile = $_GPC['mobile'];
+        $member = pdo_get('ewei_shop_member',['uniacid'=>1,'mobile'=>$mobile]);
+        app_error1(0,'',['is_reg'=>$member ? 1 : 0]);
     }
 
     /**
@@ -245,25 +277,38 @@ class Login_EweiShopV2Page extends AppMobilePage
         //用户信息
         $token = $_GPC['token'];
         $user_id = m('app')->getLoginToken($token);
-        if(empty($user_id)) app_error1(2,'登录信息失效',[]);
+        //if(empty($user_id)) app_error1(2,'登录信息失效',[]);
         $member = m('member')->getMember($user_id);
         //请求的code
         $code = $_GPC['code'];
+        //$type == 1 登录  $type == 2绑定微信
+        $type = $_GPC['type'] ? $_GPC['type'] : 1;
         //APPID   和   appsecret
         $appid = "wx60621be200d12658";
         $secret = "8feb476f19350701b934faa5eaa78396";
         $grant_type = "authorization_code";
         //获取access_token
         $access_url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=".$appid."&secret=".$secret."&code=".$code."&grant_type=".$grant_type;
-        $access_response = ihttp_post($access_url);
-        $access_token = json_decode($access_response)['access_token'];
+        $access_response = ihttp_get($access_url)['content'];
+        if(json_decode($access_response,true)['errcode'] != 0){
+            $status = json_decode($access_response,true)['errcode'];
+            $msg = json_decode($access_response,true)['errmsg'];
+            app_error1($status,$msg,[]);
+        }
+        $access_token = json_decode($access_response,true)['access_token'];
+        $openid = json_decode($access_response,true)['openid'];
         //获取用户的unionID
-        $union_url = "https://api.weixin.qq.com/sns/auth?access_token=".$access_token;
-        $union_response = ihttp_post($union_url);
+        $union_url = "https://api.weixin.qq.com/sns/userinfo?access_token=".$access_token."&openid=".$openid;
+        $union_response = ihttp_get($union_url)['content'];
+        if(json_decode($union_response,true)['errcode'] != 0){
+            $status = json_decode($union_response,true)['errcode'];
+            $msg = json_decode($union_response,true)['errmsg'];
+            app_error1($status,$msg,[]);
+        }
         //用户的unionid  nickname  headimgurl
-        $unionid = json_decode($union_response)['unionid'];
-        $nickname = json_decode($union_response)['nickname'];
-        $headimgurl = json_decode($union_response)['headimgurl'];
+        $unionid = json_decode($union_response,true)['unionid'];
+        $nickname = json_decode($union_response,true)['nickname'];
+        $headimgurl = json_decode($union_response,true)['headimgurl'];
         //是否存在这个微信unionid
         $exists = pdo_get('ewei_shop_member',['unionid'=>$unionid]);
         //绑定微信
@@ -275,8 +320,12 @@ class Login_EweiShopV2Page extends AppMobilePage
                     'wx_nickname'=>$nickname,
                     'wx_headimgurl'=>$headimgurl
                 ];
-                $param['nickname'] = empty($member['nickname']) ? $nickname : "";
-                $param['headimgurl'] = empty($member['headimgurl']) ? $headimgurl : "";
+                if(empty($member['nickname'])){
+                    $param['nickname'] = $nickname;
+                }
+                if(empty($member['headimgurl'])){
+                    $param['headimgurl'] = $headimgurl;
+                }
                 pdo_update('ewei_shop_member',$param,['id'=>$member['id']]);
                 app_error1(0,'',[]);
             }else{
@@ -315,6 +364,81 @@ class Login_EweiShopV2Page extends AppMobilePage
         //微信昵称 微信头像
         $nickname = $_GPC['nickname'];
         $headimgurl = $_GPC['headimgurl'];
+        //是否存在这个微信unionid
+        $exists = pdo_get('ewei_shop_member',['unionid'=>$unionid]);
+        //绑定微信
+        if($type == 2){
+            //不存在  更新unionid  微信昵称
+            if(!$exists){
+                $param = [
+                    'unionid'=>$unionid,
+                    'wx_nickname'=>$nickname,
+                    'wx_headimgurl'=>$headimgurl
+                ];
+                if(empty($member['nickname'])){
+                    $param['nickname'] = $nickname;
+                }
+                if(empty($member['headimgurl'])){
+                    $param['headimgurl'] = $headimgurl;
+                }
+                pdo_update('ewei_shop_member',$param,['id'=>$member['id']]);
+                app_error1(0,'',[]);
+            }else{
+                app_error1(1,'用户已存在 不可绑定',[]);
+            }
+        }elseif ($type == 1){
+            $app_salt = random(36);
+            $salt = random(16);
+            //如果不存在  就插入数据  昵称 头像 微信昵称 微信头像  unionid  等
+            if(!$exists){
+                pdo_insert('ewei_shop_member',['app_salt'=>$app_salt,'unionid'=>$unionid,'wx_headimgurl'=>$headimgurl,'nickname'=>$nickname,'headimgurl'=>$headimgurl,'wx_nickname'=>$nickname,'createtime'=>time(),'status'=>1,'salt'=>$salt]);
+                $user_id = pdo_insertid();
+                $token = m('app')->setLoginToken($user_id,$app_salt);
+            }else{
+                pdo_update('ewei_shop_member',['app_salt'=>$app_salt,'wx_headimgurl'=>$headimgurl,'wx_nickname'=>$nickname],['id'=>$exists['id']]);
+                $token = m('app')->setLoginToken($exists['id'],$app_salt);
+            }
+            app_error1(0,'',['token'=>$token]);
+        }
+    }
+
+    /**
+     * access_token 登录授权
+     */
+    public function access_login()
+    {
+        global $_GPC;
+        //用户信息
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        //if(empty($user_id)) app_error1(2,'登录信息失效',[]);
+        $member = m('member')->getMember($user_id);
+        //请求的access_token
+        $access_token = $_GPC['access_token'];
+        //请求的openid
+        $openid = $_GPC['openid'];
+        //$type == 1 登录  $type == 2绑定微信
+        $type = $_GPC['type'] ? $_GPC['type'] : 1;
+        //检验授权凭证（access_token）是否有效
+        $access_url = "https://api.weixin.qq.com/sns/auth?access_token=".$access_token."&openid=".$openid;
+        $access_response = ihttp_get($access_url)['content'];
+        if(json_decode($access_response,true)['errcode'] != 0){
+            $status = json_decode($access_response,true)['errcode'];
+            $msg = json_decode($access_response,true)['errmsg'];
+            app_error1($status,$msg,[]);
+        }
+        //获取用户的unionID
+        $union_url = "https://api.weixin.qq.com/sns/userinfo?access_token=".$access_token."&openid=".$openid;
+        $union_response = ihttp_get($union_url)['content'];
+        if(json_decode($union_response,true)['errcode'] != 0){
+            $status = json_decode($union_response,true)['errcode'];
+            $msg = json_decode($union_response,true)['errmsg'];
+            app_error1($status,$msg,[]);
+        }
+        //用户的unionid  nickname  headimgurl
+        $unionid = json_decode($union_response,true)['unionid'];
+        $nickname = json_decode($union_response,true)['nickname'];
+        $headimgurl = json_decode($union_response,true)['headimgurl'];
         //是否存在这个微信unionid
         $exists = pdo_get('ewei_shop_member',['unionid'=>$unionid]);
         //绑定微信

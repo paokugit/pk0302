@@ -1872,7 +1872,12 @@ class App_EweiShopV2Model
             $mobile = substr($item['mobile'],0,3)."****".substr($item['mobile'],7,4);
             $log[$key]['mobile'] = $item['mobile'] == "" ? "" : $mobile;
         }
-        return ['list'=>$list,'log'=>$log,'num'=>count($user)-count($free) > 0 ? count($user)-count($free) : 0,'credit1'=>$member['credit1'] ? $member['credit1'] : (string)0,'credit3'=>$member['credit3'] ? $member['credit3'] : (string)0];
+        $share = [
+            'path'=>'/pages/index/index?scene='.$user_id,
+            'title'=>'原来微信步数可以当钱用，快来和我一起薅羊毛',
+            'image'=>'https://www.paokucoin.com/img/backgroup/lottary.png',
+        ];
+        return ['list'=>$list,'share'=>$share,'log'=>$log,'num'=>count($user)-count($free) > 0 ? count($user)-count($free) : 0,'credit1'=>$member['credit1'] ? $member['credit1'] : (string)0,'credit3'=>$member['credit3'] ? $member['credit3'] : (string)0];
     }
     
     /**
@@ -2176,8 +2181,9 @@ class App_EweiShopV2Model
                     $goods_list[$index]["showprice"] = round($goods_list[$index]["minprice"] - $goods_list[$index]["deduct"], 2);
                 }
             }
-        }
-        return array( "list" => $goods_list, "total" => $goods["total"], "pagesize" => $args["pagesize"] );
+        }       
+        $pagetotal = ceil($goods['total']/$args['pagesize']);
+        return array( "list" => $goods_list, "total" => $goods["total"], "pagesize" => $args["pagesize"] ,'page'=>$page,'pagetotal'=>$pagetotal);
     }
     
     /**
@@ -2324,13 +2330,17 @@ class App_EweiShopV2Model
             }
             $thumbs = array_values($thumbs);
         }
-        //详情图图集
-        $app_thumb = iunserializer($goods['app_thumbs']);
-        foreach ($app_thumb as $value){
-            $app_thumbs[] = ['image'=>tomedia($value)];
-            //$app_thumbs[] = ['image'=> "https://www.paokucoin.com/attachment/".$value];
+//        //详情图图集
+//        $app_thumb = iunserializer($goods['app_thumbs']);
+//        foreach ($app_thumb as $value){
+//            $app_thumbs[] = ['image'=>tomedia($value)];
+//            //$app_thumbs[] = ['image'=> "https://www.paokucoin.com/attachment/".$value];
+//        }
+//        $goods['app_thumbs'] = $app_thumbs;
+        $goods['app_thumbs'] = m('appnews')->img($goods['content']);
+        foreach ($goods['app_thumbs'] as $key=>$val){
+            $goods['app_thumbs'][$key] = ['image'=>tomedia($val)];
         }
-        $goods['app_thumbs'] = $app_thumbs;
         //商品banner图集
         $goods["thumbs"] = set_medias($thumbs);
         $goods["thumbMaxWidth"] = 750;
@@ -2763,7 +2773,9 @@ class App_EweiShopV2Model
         //商品描述 或者短标题
         $goodsdesc = (!empty($goods["description"]) ? $goods["description"] : $goods["subtitle"]);
         //商品分享  标题  图片  描述 链接
-        $_W["shopshare"] = array( "title" => (!empty($goods["share_title"]) ? $goods["share_title"] : $goods["title"]), "imgUrl" => (!empty($goods["share_icon"]) ? tomedia($goods["share_icon"]) : tomedia($goods["thumb"])), "desc" => (!empty($goodsdesc) ? $goodsdesc : $_W["shopset"]["shop"]["name"]), "link" => mobileUrl("app/share", array( "type" => "goods", "id" => $goods["id"] ), true) );
+        $_W["shopshare"] = array( "title" => (!empty($goods["share_title"]) ? $goods["share_title"] : $goods["title"]), "image" => (!empty($goods["share_icon"]) ? tomedia($goods["share_icon"]) : tomedia($goods["thumb"])), "desc" => (!empty($goodsdesc) ? $goodsdesc : $_W["shopset"]["shop"]["name"]), "link" => mobileUrl("app/share", array( "type" => "goods", "id" => $goods["id"] ), true),'path' => "/pages/goods/detail/index?id=".$goods['id']."&mid=".$member['id'] );
+        $imgurl = $goods['id']==1467 ? m('qrcode')->createDevote($goods, $member) : m('qrcode')->createPosternew($goods, $member);
+	$_W["shopshare"]['imgurl'] =  $imgurl;
         $com = p("commission");
         if( $com )
         {
@@ -7987,7 +7999,9 @@ class App_EweiShopV2Model
                 if( !empty($res["package"]) && strexists($res["package"], "prepay_id=") )
                 {
                     $prepay_id = str_replace("prepay_id=", "", $res["package"]);
-                    pdo_update("ewei_shop_order", array( "wxapp_prepay_id" => $prepay_id ), array( "id" => $orderid, "uniacid" => $_W["uniacid"] ));
+                     foreach ($orderid as $val){
+                        pdo_update("ewei_shop_order", array( "wxapp_prepay_id" => $prepay_id ), array( "id" => $val, "uniacid" => $_W["uniacid"] ));
+                     }
                 }
             }
             else
@@ -8007,9 +8021,9 @@ class App_EweiShopV2Model
             {
                 $res = m('pay')->alipay_build($params, $alipay_config);
                 if(!is_error($res)){
-                    $alipay = array( "success" => true, "payinfo" => $res );
+                    $alipay = array( "success" => true, "ali_pay" => $res );
                 }else{
-                    $alipay['payinfo'] = $res;
+                    $alipay['ali_pay'] = $res;
                 }
             }
         }
@@ -8056,6 +8070,81 @@ class App_EweiShopV2Model
         foreach ($orderid as $key=>$value){
             m('order')->order_complete($value,$user_id,$type,$iswxapp);
         }
+    }
+
+    /**
+     * 边看边买分享
+     * @param $videoid
+     * @param $goodsid
+     * @param $user_id
+     * @return array
+     */
+    public function look_buy_share($videoid,$goodsid,$user_id)
+    {
+        global $_W;
+        set_time_limit(0);
+        @ini_set("memory_limit", "256M");
+        $path = IA_ROOT . "/addons/ewei_shopv2/data/sharegoods/";
+        if( !is_dir($path) )
+        {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $goods = pdo_fetch(" select * from " . tablename("ewei_shop_goods") . " where id=:id limit 1", array( ":id" => $goodsid ));
+        $md5 = md5(json_encode(array( "siteroot" => $_W["siteroot"],"id" => $goodsid,'minprice'=>$goods['minprice'])));
+        $filename = $md5 . ".png";
+        $filepath = $path . $filename;
+        if( is_file($filepath) )
+        {
+            $imgurl = $_W["siteroot"] . "addons/ewei_shopv2/data/sharegoods/".$filename;
+            return ['title'=>$goods['title'],'image'=>$imgurl,'path'=>'/packageA/pages/watchvideo/watchvideo?id='.$videoid];
+        }
+        //底部图
+        $target = imagecreatetruecolor(450,360);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+        $thumb = "/addons/ewei_shopv2/static/images/sharegoodsbg.png";
+        $thumb = m('qrcode')->createImage(tomedia($thumb));
+        imagecopyresized($target, $thumb, 0, 0, 0, 0, 450, 360, imagesx($thumb), imagesy($thumb));
+
+        //商品图
+        if( !empty($goods["thumb"]) )
+        {
+            if( stripos($goods["thumb"], "//") === false )
+            {
+                $thumb = m('qrcode')->createImage(tomedia($goods["thumb"]));
+            }
+            else
+            {
+                $thumbStr = substr($goods["thumb"], stripos($goods["thumb"], "//"));
+                $thumb = m('qrcode')->createImage(tomedia("https:" . $thumbStr));
+            }
+            imagecopyresized($target, $thumb, 11, 11, 0, 0, 280, 280, imagesx($thumb), imagesy($thumb));
+        }
+        //价格
+        $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/PINGFANG_BOLD.TTF";
+        if( !is_file($font) )
+        {
+            $font = IA_ROOT . "/addons/ewei_shopv2/static/fonts/msyh.ttf";
+        }
+        $goodsprice = m('qrcode')->goodsminprice($goods);
+        if($goodsprice==0){
+            $red = imagecolorallocate($target, 248, 5, 4);
+            imagettftext($target, 32, 0, 297, 124, $red, $font,'免费兑' );
+            //imagettftext($target, 32, 0, 318, 120, $red, $font, floatval($goods['minprice']));
+        }else{
+            //现价
+            $red = imagecolorallocate($target, 248, 5, 4);
+            imagettftext($target, 28, 0, 297, 124, $red, $font,'¥' );
+            imagettftext($target, 32, 0, 318, 120, $red, $font, floatval($goodsprice));
+        }
+        //原价
+        $black = imagecolorallocate($target, 51, 51, 51);
+        imagettftext($target, 20, 0, 297, 170, $black, $font,'¥'.floatval($goods['productprice']) );
+        imagepng($target, $filepath);
+        imagedestroy($target);
+        $imgurl =  $_W["siteroot"] . "addons/ewei_shopv2/data/sharegoods/".$filename . "?v=1.0";
+        return ['title'=>$goods['title'],'image'=>$imgurl,'path'=>'/packageA/pages/watchvideo/watchvideo?id='.$videoid.'&mid='.$user_id];
     }
 }
 

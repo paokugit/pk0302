@@ -111,6 +111,32 @@ class Shop_EweiShopV2Page extends AppMobilePage
     }
 
     /**
+     * 商品详情分享
+     */
+    public function shop_goods_detail_share()
+    {
+        global $_GPC;
+        $token = $_GPC['token'];
+        $user_id = m('app')->getLoginToken($token);
+        if($user_id == 0) app_error1(2,'登录信息失效',[]);
+        $member = m('member')->getMember($user_id);
+        $goodsid = $_GPC['goodsid'];
+        $goods = pdo_fetch('select * from '.tablename('ewei_shop_goods').' where id = :id and deleted = 0 and status = 1 and total > 0 ',[':id'=>$goodsid]);
+        $data = [
+            'path' => "/pages/goods/detail/index?id=".$goods['id']."&mid=".$member['id'],
+            'image' => !empty($goods["share_icon"]) ? tomedia($goods["share_icon"]) : tomedia($goods["thumb"]),
+            'title' => !empty($goods["share_title"]) ? $goods["share_title"] : $goods["title"],
+        ];
+        if($goodsid==1467){//金主海报
+            $imgurl = m('qrcode')->createDevote($goods, $member);
+        }else{
+            $imgurl = m('qrcode')->createPosternew($goods, $member);
+        }
+        $data['imgurl'] = $imgurl;
+        app_error1(0,'',$data);
+    }
+
+    /**
      * 商品评论的标签
      */
     public function shop_goods_comment_label()
@@ -276,7 +302,7 @@ class Shop_EweiShopV2Page extends AppMobilePage
             $condition = "(openid = :openid or user_id = :user_id)";
             $param = [':openid'=>$member['openid'],':user_id'=>$member['id']];
             //如果店铺全选或者全不选  加条件
-            if($merchid){
+            if($merchid != ""){
                 $condition .= 'and merchid = :merchid';
                 $param[':merchid'] = $merchid;
             }

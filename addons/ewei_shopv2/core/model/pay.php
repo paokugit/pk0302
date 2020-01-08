@@ -138,16 +138,16 @@ class Pay_EweiShopV2Model
     public function wxchat_apppay($data,$type = 0)
     {
         global $_W;
-        $config = pdo_fetch('select * from '.tablename('ewei_shop_payment').' where id=:id and uniacid=:uniacid',[':id'=>1,':uniacid'=>$_W['uniacid']]);
-        $wxpay = m('common')->getSysset('app');   //用来获得小程序的APPID
+        $sec = m("common")->getSec();
+        $config = iunserializer($sec["sec"])["app_wechat"];
         $params = [];
-        $params['appid'] = $wxpay['appid'];
-        $params['mch_id'] = $config['sub_mch_id'];
+        $params['appid'] = $config['appid'];
+        $params['mch_id'] = $config['merchid'];
         $params['nonce_str'] = $data['random'];
         $params['out_trade_no'] = $data['out_order'];
         $params['total_fee'] = $data['money'] * 100;
         $params['body'] = $data['body'];
-        $package['attach'] = $_W['uniacid'] . ':' . $type;
+        $params['attach'] = $_W['uniacid'] . ':' . $type;
         $params['spbill_create_ip'] = CLIENT_IP;
         $params['trade_type'] = 'APP';
         $params['notify_url'] = $data['url'];
@@ -169,19 +169,20 @@ class Pay_EweiShopV2Model
             return error(-3, strval($result['err_code']) . ': ' . strval($result['err_code_des']));
         }
         if($result['return_code'] == "SUCCESS" && $result['result_code'] == "SUCCESS"){
-            pdo_update('ewei_shop_order',['wxapp_prepay_id'=>$result['prepay_id']],['ordersn'=>$params['out_trade_no']]);
-            $array = array(
-                'appId' => $result['appid'],
-                'package' => 'prepay_id='.$result['prepay_id'],
-                'nonceStr' => $result['nonce_str'],
+            pdo_update('ewei_shop_order',['wxapp_prepay_id'=>$result['prepay_id']],['order_sn'=>$params['out_trade_no']]);
+            $array = [
+                'prepayid' => $result['prepay_id'],
+                'appid' => $result['appid'],
+                'partnerid' => $result['mch_id'],
+                'package' => 'Sign=WXPay',
+                'noncestr' => $params['nonce_str'],
                 'timeStamp' => (string)time(),
-                'signType'=>'MD5'
-            );
+            ];
             //第二次生成签名
             $string2 = $this->buildParams($array);
             $string2 .= "key=" . $config["apikey"];
-            $array["paySign"] = strtoupper(md5(trim($string2)));    //再次签名
-            unset($array['appId']);   //删除数组中的APPID
+            $array["sign"] = strtoupper(md5(trim($string2)));    //再次签名
+            unset($array['appid']);   //删除数组中的appid
             return $array;
         }
     }
