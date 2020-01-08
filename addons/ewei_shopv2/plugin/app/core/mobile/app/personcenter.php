@@ -793,7 +793,6 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
    }
    //系统消息
    public function notice(){
-       header("Access-Control-Allow-Origin:*");
        global $_W;
        global $_GPC;
        $page=$_GPC["page"]?$_GPC["page"]:1;
@@ -801,9 +800,9 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        $openid=$_GPC["openid"];
        $type=$_GPC["type"]?$_GPC["type"]:0;//1表示app接口
        $member=m("appnews")->member($openid,$type);
-       //if (!$member){
-       //    apperror(1,"用户不存在");
-       //}
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
        if (!$member["openid"]){
            $member["openid"]=0;
        }
@@ -837,9 +836,9 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
        $openid=$_GPC["openid"];
        $type=$_GPC["type"]?$_GPC["type"]:0;//1表示app接口
        $member=m("appnews")->member($openid,$type);
-       if (!$member){
-           apperror(1,"用户不存在");
-       }
+//       if (!$member){
+//           apperror(1,"用户不存在");
+//       }
        $notice_id=$_GPC["notice_id"];
        $notice=pdo_get("ewei_shop_notice",array("id"=>$notice_id,"status"=>1));
        if ($notice){
