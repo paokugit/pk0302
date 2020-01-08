@@ -74,7 +74,10 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (!$member){
             apperror(1,"用户不存在");
         }
+        }else{
+            $member=array();
         }
+       
         $good["services"]=array();
         if ($good["quality"]==1){
             $good["services"][]="正品保证";
@@ -119,20 +122,20 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (empty($good["relevant_good"])){
             $good["relevant_good"]=array();
         }
+       
         //获取拼团信息
         $good["group"]=array();
         $good["group"]["count"]=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_groups_order")." where goodid=:goodid and status>0 and endtime>:endtime",array(":goodid"=>$goods_id,":endtime"=>time())); 
         $good["group"]["list"]=m("appnews")->group_list($goods_id,0,2);
-        
         //获取评价
-        $comment=m("appnews")->group_comment($goods_id,0,1);
+        $comment=m("appnews")->group_comment($goods_id,0,2,"",$member["id"]);
         $good["comment"]["count"]=$comment["total"];
         $good["comment"]["list"]=$comment["list"][0];
         $good["comment"]["label"]=$comment["label"];
         $good["comment"]["rate"]=$comment["rate"];
-       
         apperror(0,"",$good);
     }
+   
     //选择规格
     public function option(){
         global $_W;

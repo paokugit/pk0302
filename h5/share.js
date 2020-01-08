@@ -1,2 +1,2 @@
-var m = 'http://192.168.3.104:8081';
-var n = 'http://192.168.3.102';
+var m = 'http://app.paokucoin.com/';
+var n = 'http://app.paokucoin.com/';

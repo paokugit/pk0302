@@ -76,9 +76,11 @@ class Appnews_EweiShopV2Model
            $condition=$condition." and label like :label"; 
            $param[":label"]="%".$label."%";
        }
+     
        $total=pdo_fetchcolumn("select count(*) from ".tablename("ewei_shop_order_comment")." where 1 ".$condition,$param);
        
        $list=pdo_fetchall("select id,openid,level,type,user_id,content,images,createtime,append_content,orderid,group_orderid from ".tablename("ewei_shop_order_comment")." where 1 ".$condition." order by createtime desc limit ".$first.",".$num,$param);
+       
        foreach ($list as $k=>$v){
            if ($v["anonymous"]==0){
                if ($v["user_id"]){
@@ -159,6 +161,186 @@ class Appnews_EweiShopV2Model
            $res["rate"]=100;
        }
       
+       return $res;
+   }
+   //拼团
+   public function groupfail_message($orderid=""){
+       if (empty($orderid)){
+           return  false;
+       }
+       $order=pdo_get("ewei_shop_groups_order",array("id"=>$orderid));
+       if (!$order){
+           return false;
+       }
+       $good=pdo_get("ewei_shop_groups_goods",array("id"=>$order["goodid"]));
+       $datas=array(
+           'keyword1'=>array(
+               'value'=>$order["orderno"],
+               'color' => '#ff510'
+           ),
+           'keyword2'=>array(
+               'value'=>$good["title"],
+               'color' => '#ff510'
+           ),
+           'keyword3'=>array(
+               'value'=>$order["price"]."元",
+               'color' => '#ff510'
+           ),
+           'keyword4'=>array(
+               'value'=>$order["price"]."元",
+               'color' => '#ff510'
+           ),
+           'keyword5'=>array(
+               'value'=>"未在规定时间内拼团成功",
+               'color' => '#ff510'
+           )
+       );
+       $page="packageA/pages/changce/spelltuan/orderDetails/orderDetails?order_id=".$orderid;
+       $res=p("app")->newsendMessage($order["openid"],$datas,$page,"GPpLHUPcyYhvioH2LCD7VHOfxBs_7ln_Xr2ZLDTfEZ8");
+       return $res;
+   }
+   //拼团成功
+   public function groupsuccess_message($orderid=""){
+       if (empty($orderid)){
+           return  false;
+       }
+       $order=pdo_get("ewei_shop_groups_order",array("id"=>$orderid));
+       if (!$order){
+           return false;
+       }
+       $good=pdo_get("ewei_shop_groups_goods",array("id"=>$order["goodid"]));
+       $datas=array(
+           'keyword1'=>array(
+               'value'=>$order["orderno"],
+               'color' => '#ff510'
+           ),
+           'keyword2'=>array(
+               'value'=>$good["title"],
+               'color' => '#ff510'
+           ),
+           'keyword3'=>array(
+               'value'=>$order["price"]."元",
+               'color' => '#ff510'
+           ),
+           'keyword4'=>array(
+               'value'=>date("Y-m-d H:i:s",$order["createtime"]),
+               'color' => '#ff510'
+           ),
+           'keyword5'=>array(
+               'value'=>date("Y-m-d",time()),
+               'color' => '#ff510'
+           )
+       );
+       $page="packageA/pages/changce/spelltuan/orderDetails/orderDetails?order_id=".$orderid;
+       $res=p("app")->newsendMessage($order["openid"],$datas,$page,"wZso9aJ5EdV54Lv9NA49b0Nr-x8s5vCm-zRTTokZg7I");
+       return $res;
+   }
+   //反馈问题
+   public function feedback($question_id=""){
+       if ($question_id==0){
+           return false;
+       }
+       $question=pdo_get("ewei_shop_notive_question",array("id"=>$question_id));
+       if (!$question){
+           return false;
+       }
+       if (empty($question["openid"])){
+           $member=pdo_get("ewei_shop_member",array("id"=>$question["user_id"]));
+           $openid=$member["openid"];
+       }else{
+           $openid=$question["openid"];
+       }
+       if ($openid){
+           $datas=array(
+               'keyword1'=>array(
+                   'value'=>$question["content"],
+                   'color' => '#ff510'
+               ),
+               'keyword2'=>array(
+                   'value'=>date("Y-m-d",$question["create_time"]),
+                   'color' => '#ff510'
+               ),
+               'keyword3'=>array(
+                   'value'=>"回复内容：".$question["answer"].",感谢您为我们提供宝贵的建议",
+                   'color' => '#ff510'
+               )
+           );
+           $res=p("app")->newsendMessage($openid,$datas,"","8vGrKvgioGJdY8HxJwsTUsYKQsbS1fDcseduK_x_sFE");
+           
+       }
+       return true;
+   }
+   //账户余额
+   public function balance_message($openid,$money,$reason,$remark){
+       $datas=array(
+           'keyword1'=>array(
+               'value'=>$money,
+               'color' => '#ff510'
+           ),
+           'keyword2'=>array(
+               'value'=>$reason,
+               'color' => '#ff510'
+           ),
+           'keyword3'=>array(
+               'value'=>date("Y-m-d H:i:s",time()),
+               'color' => '#ff510'
+           ),
+           'keyword4'=>array(
+               'value'=>$remark,
+               'color' => '#ff510'
+           )
+       );
+       $res=p("app")->newsendMessage($openid,$datas,"","OEbSLy7FngJdmPkXpz1Cas5dwuuyTF7ZuXKpQSOju5o");
+       return $res;
+   }
+   //订单发货
+   public function ordersend_message($order_id=""){
+       if (empty($order_id)){
+           return false;
+       }
+       $order=pdo_get("ewei_shop_order",array("id"=>$order_id));
+       if (!$order){
+           return false;
+       }
+       $good=pdo_fetchall("select goodsid from ".tablename("ewei_shop_order_goods")." where orderid=:orderid and status!=-1",array(":orderid"=>$order_id));
+       $goodname="";
+       foreach ($good as $k=>$v){
+           $g=pdo_get("ewei_shop_goods",array("id"=>$v["goodsid"]));
+           if (empty($goodname)){
+               $goodname=$g["title"];
+           }else{
+               $goodname=$goodname.",".$g["title"];
+           }
+       }
+       $datas=array(
+           'keyword1'=>array(
+               'value'=>$order["ordersn"],
+               'color' => '#ff510'
+           ),
+           'keyword2'=>array(
+               'value'=>$goodname,
+               'color' => '#ff510'
+           ),
+           'keyword3'=>array(
+               'value'=>$order["expresssn"],
+               'color' => '#ff510'
+           ),
+           'keyword4'=>array(
+               'value'=>$order["expresscom"],
+               'color' => '#ff510'
+           ),
+           'keyword5'=>array(
+               'value'=>date("Y-m-d H:i:s",$order["sendtime"]),
+               'color' => '#ff510'
+           )
+       );
+       if (empty($order["openid"])){
+           $member=pdo_get("ewei_shop_member",array("id"=>$order["user_id"]));
+           $openid=$member["openid"];
+       }else{
+           $openid=$order["openid"];
+       }
+       $res=p("app")->newsendMessage($openid,$datas,"","mNJmhTJDOy7HfI1egQzfMwwCzGCAGvWldtoJ6EmrYpg");
        return $res;
    }
    

@@ -1673,6 +1673,25 @@ if (!class_exists("AppModel")) {
                 , $str);
             return $str;
         }
+        
+        public function newsendMessage($openid = NULL, $datas = array(), $page ="", $template_id="")
+        {
+            global $_W;
+            if (empty($openid) || empty($datas)) {
+                return error(-1, 'openid或datas');
+            }
+           
+            $openid = str_replace('sns_wa_', '', $openid);
+            
+            $obj = json_encode(array('touser' => $openid, 'template_id' => $template_id, 'page' => $page, 'data' => $datas));
+            $accessToken = $this->getAccessToken();
+            if (is_error($accessToken)) {
+                return error(-1, 'accessToken获取失败');
+            }
+            load()->func('communication');
+            $result = ihttp_post('https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=' . $accessToken, $obj);
+            return $result;
+        }
     }
 }
 ?>

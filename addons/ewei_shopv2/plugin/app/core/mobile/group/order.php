@@ -161,9 +161,13 @@ class Order_EweiShopV2Page extends AppMobilePage
             $refund=pdo_get("ewei_shop_groups_order_refund",array("id"=>$order["refundid"]));
             $order["refundstatus"]=$refund["refundstatus"];
             $order["rtype"]=$refund["rtype"];
+            $order["refundtime"]=date("Y-m-d H:i:s",$order["applytime"]);
+            $order["applyprice"]=$refund["applyprice"];
         }else{
             $order["refundstatus"]="";
             $order["rtype"]="";
+            $order["refundtime"]="";
+            $order["applyprice"]=0;
         }
         if ($order["sendtime"]){
             $order["sendtime"]=date("Y-m-d H:i:s",$order["sendtime"]);

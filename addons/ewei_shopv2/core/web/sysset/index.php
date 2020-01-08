@@ -1323,6 +1323,7 @@ class Index_EweiShopV2Page extends WebPage
             $d["order"]["send"] = save_media($_POST["send"]);
             $d["order"]["received"] = save_media($_POST["received"]);
             $d["order"]["evaluated"] = save_media($_POST["evaluated"]);
+            $d["order"]["comment"]=save_media($_POST["comment"]);
             
             $d["server"]["fans"]=save_media($_POST["fans"]);
             $d["server"]["recommend"]=save_media($_POST["recommend"]);

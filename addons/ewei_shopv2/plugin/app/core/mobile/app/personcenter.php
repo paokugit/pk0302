@@ -15,7 +15,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
         if ($member_id==0){
             apperror(1,"无此用户");
         }
-        $member=pdo_fetch("select nickname,avatar,credit1,credit2,credit3,credit4,agentlevel,is_open,expire_time,mobile,weixin,rvc,qiandao,gender,password from ".tablename("ewei_shop_member")." where id=:id",array(":id"=>$member_id));
+        $member=pdo_fetch("select id as user_id,openid,nickname,avatar,credit1,credit2,credit3,credit4,agentlevel,is_open,expire_time,mobile,weixin,rvc,qiandao,gender,password from ".tablename("ewei_shop_member")." where id=:id",array(":id"=>$member_id));
         if (empty($member["password"])){
             $member["password"]=0;
         }else{
@@ -316,6 +316,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
    }
    //设置--关于跑库（隐私注册|软许）
    public  function about(){
+       header('Access-Control-Allow-Origin:*');
        global $_GPC;
        global $_W;
        $id=$_GPC["id"];
@@ -323,6 +324,7 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            apperror(1,"id未传入");
        }
        $notice=pdo_get("ewei_shop_member_devote",array("id"=>$id));
+       $notice["content"]=htmlspecialchars_decode($notice["content"]);
        if (empty($notice)){
            apperror(1,"id不正确");
        }
@@ -914,5 +916,76 @@ class Personcenter_EweiShopV2Page extends AppMobilePage
            apperror(1,"失败");
        }
    }
-   
+   //消息模板查询
+   public function message_sel(){
+       global $_W;
+       global $_GPC;
+       $openid=$_GPC["openid"];
+       $member=m("appnews")->member($openid,0);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       $template=pdo_fetchall("select id,title,templateid from ".tablename("ewei_shop_wxapp_message")." order by id asc");
+       foreach ($template as $k=>$v){
+           $log=pdo_get("ewei_shop_member_message",array("templateid"=>$v["templateid"],"user_id"=>$member["id"]));
+           if ($log){
+               $template[$k]["agree"]=1;
+           }else{
+               $template[$k]["agree"]=0;
+           }
+       }
+       $list["list"]=$template;
+       apperror(0,"",$list);
+   }
+   //模板消息--同意
+   public function message_agree(){
+       global $_W;
+       global $_GPC;
+       $openid=$_GPC["openid"];
+       $member=m("appnews")->member($openid,0);
+       if (!$member){
+           apperror(1,"用户不存在");
+       }
+       $templateid=$_GPC["templateid"];
+       if (!is_array($templateid)){
+           apperror(1,"模板id格式不正确");
+       }
+       foreach ($templateid as $k=>$v){
+           $template=pdo_get("ewei_shop_wxapp_message",array("id"=>$v));
+           if ($template){
+               $data["templateid"]=$template["templateid"];
+               $data["user_id"]=$member["id"];
+               $log=pdo_get("ewei_shop_member_message",$data);
+               if (empty($log)){
+                   pdo_insert("ewei_shop_member_message",$data);
+               }
+           }
+       }
+       apperror(0,"成功");
+   }
+   public function cs(){
+       global $_W;
+       global $_GPC;
+//        $openid="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
+       $datas=array(
+           'keyword1'=>array(
+               'value'=>"张三",
+               'color' => '#ff510'
+           ),
+           'keyword2'=>array(
+               'value'=>date("Y-m-d H:i:s",time()),
+               'color' => '#ff510'
+           ),
+           'keyword3'=>array(
+               'value'=>"测试",
+               'color' => '#ff510'
+           )
+           
+       );
+       $res=p("app")->newsendMessage($openid,$datas,"","-lelZj5v3WPwSulE_qDdmYn7UTUC92hQYYbljvBFcVE");
+//        var_dump($res);
+       $sec = m("common")->getSec();
+       $sec = iunserializer($sec["sec"]);
+       var_dump($sec);
+   }
 }

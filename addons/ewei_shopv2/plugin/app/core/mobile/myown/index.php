@@ -167,19 +167,21 @@ class Index_EweiShopV2Page extends AppMobilePage{
     }
     
     public function cd(){
-        $openid="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
-        //卡路里
-        //获取今日已兑换的卡路里
-        $starttime=strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
-        $endtime=strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
-        $count_list=pdo_fetchall("select num from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark_type=1 or remark_type=4) order by id desc",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime));
-        var_dump($count_list);
-        $count=array_sum(array_column($count_list, 'num'));
-        var_dump($count);
-        $order=array('26707','26773','27216','27866','27937','28285','28389','28399');
-        pdo_update("ewei_shop_merch_bill",array("orderids"=>iserializer($order)),array("id"=>169));
-        $d=pdo_get("ewei_shop_merch_bill",array("id"=>157));
-        var_dump(iunserializer($d["orderids"])); 
+//         $openid="sns_wa_owRAK467jWfK-ZVcX2-XxcKrSyng";
+//         //卡路里
+//         //获取今日已兑换的卡路里
+//         $starttime=strtotime(date("Y-m-d 23:59:59",strtotime('-1 day')));
+//         $endtime=strtotime(date("Y-m-d 00:00:00",strtotime('+1 day')));
+//         $count_list=pdo_fetchall("select num from ".tablename("mc_credits_record")." where openid=:openid and credittype=:credittype and createtime>=:starttime and createtime<=:endtime and num>0 and (remark_type=1 or remark_type=4) order by id desc",array(':openid'=>$openid,':credittype'=>"credit1",":starttime"=>$starttime,':endtime'=>$endtime));
+//         var_dump($count_list);
+//         $count=array_sum(array_column($count_list, 'num'));
+//         var_dump($count);
+//         $order=array('26707','26773','27216','27866','27937','28285','28389','28399');
+//         pdo_update("ewei_shop_merch_bill",array("orderids"=>iserializer($order)),array("id"=>169));
+//         $d=pdo_get("ewei_shop_merch_bill",array("id"=>157));
+//         var_dump(iunserializer($d["orderids"])); 
+           $template=pdo_get("ewei_shop_wxapp_tmessage",array("id"=>3));
+           var_dump(iunserializer($template["datas"]));
     }
     
     public function mycenter(){

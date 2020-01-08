@@ -336,4 +336,5 @@ class Team_EweiShopV2Page extends AppMobilePage
         $d["credit2"]=$member["credit2"];
         apperror(0,"",$d);
     }
+   
 }

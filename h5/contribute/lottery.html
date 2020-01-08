@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>幸运抽奖</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1, user-scalable=0">
+		<link rel="stylesheet" type="text/css" href="css/lottery.css"/>
+		<link rel="stylesheet" type="text/css" href="../media.css"/>
+	</head> 
+	<body>
+		
+		<div class="details">
+			<!-- 100%中奖图片 --> 
+			<div class="details-img">
+				<img src="img/zhuti620.170px@2x.png" >
+			</div>
+			
+			<!-- 中奖名单轮播 -->
+			<div class="details-slide">
+				<div class="slide-list">
+					<div class="list-swiper ani"> 
+						
+					</div>
+				</div>
+			</div>
+			
+			<!-- 抽奖动画 -->
+			<div class="lottery">
+			    <table border="0" cellpadding="0" cellspacing="0">
+			        <tr>
+			            <td class="lottery-unit">
+							<div class="cartoon sign0 cartoonCss">
+								<div class="figure figure0">0</div>
+								<div class="character">折扣宝</div>
+							</div>
+							<img src="img/02@2x.png" >
+						</td>
+			            <td class="lottery-unit">
+							<div class="cartoon sign1">
+								<div class="figure figure1">0</div>
+								<div class="character">折扣宝</div>
+							</div>
+							<img src="img/02@2x.png" >
+						</td>
+			            <td class="lottery-unit">
+							<div class="cartoon sign2">
+								<div class="figure figure2">0</div>
+								<div class="character">折扣宝</div>
+							</div>
+							<img src="img/02@2x.png" >
+						</td>
+			        </tr>
+			        <tr>
+			            <td class="lottery-unit">
+							<div class="cartoon sign7">
+								<div class="figure figure7">0</div>
+								<div class="character">折扣宝</div>
+							</div>
+							<img src="img/02@2x.png" >
+						</td>
+						
+			            <td><div class="divbtn"></div></td>
+						
+			            <td class="lottery-unit">
+							<div class="cartoon sign3">
+								<div class="figure figure3">0</div>
+								<div class="character">折扣宝</div>
+							</div>
+							<img src="img/02@2x.png" >
+						</td>
+			        </tr>
+			        <tr>
+			            <td class="lottery-unit">
+							<div class="cartoon sign6">
+								<div class="figure figure6">0</div>
+								<div class="character">折扣宝</div>
+							</div>
+							<img src="img/02@2x.png" >
+						</td>
+			            <td class="lottery-unit">
+							<div class="cartoon sign5">
+								<div class="figure figure5">0</div>
+								<div class="character">折扣宝</div>
+							</div>
+							<img src="img/02@2x.png" >
+						</td>
+			            <td class="lottery-unit">
+							<div class="cartoon sign4">
+								<div class="figure figure4">0</div>
+								<div class="character">折扣宝</div>
+							</div>
+							<img src="img/02@2x.png" >
+						</td>
+			        </tr> 
+			    </table>
+				<div class="kaluliyu">折扣宝余额 0</div>
+			</div>
+			
+			<!-- 邀请好友 -->
+			<div class="invite">
+				<div class="inviteBtn" onclick="inviteBtn()">邀请好友 +1次</div>
+			</div>
+			
+			<!-- 免费次数 -->
+			<div class="frequency">免费抽 <span>0</span> 次</div>
+			
+			<!-- 抽奖规则 -->
+			<div class="rule">
+				<img class="ruleImg" src="img/shuoming620.300px@2x.png" >
+			</div>
+			
+		</div>
+		
+		<div class="mask-relative vanish">
+			<div class="mask-con">
+				<div class="mask-text">
+					<div>
+						<div class="text-top-count">+0</div>
+						<div class="text-top-character">折扣宝</div>
+					</div>
+					<div>
+						<div class="text-bottom-btn" onclick="inviteBtn()"></div>
+					</div>
+				</div>
+				<div class="closeBtn">
+					<img src="img/guanbi%20(1).png" >
+				</div>
+			</div>
+		</div>
+		
+		
+		<script src="../jquery-1.8.0.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../share.js"></script>
+		<script src="js/lottery.js" type="text/javascript" charset="utf-8"></script>
+	</body>
+</html>
