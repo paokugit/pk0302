@@ -270,6 +270,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         $list = pdo_fetchall('select * from '.tablename('ewei_shop_choice').'where uniacid = :uniacid and status = 1 order by displayorder desc limit '.$pindex.','.$pageSize,[':uniacid'=>$uniacid]);
         foreach ($list as $key=>$value){
             $list[$key]['content'] = htmlspecialchars_decode($value['content']);
+            $list[$key]['image'] = tomedia($value['image']);
+            $list[$key]['thumb'] = tomedia($value['thumb']);
         }
         app_error1(0,'',['list'=>$list,'page'=>$page,'total'=>$total,'pageSize'=>$pageSize]);
     }
@@ -395,6 +397,8 @@ class Index_EweiShopV2Page extends AppMobilePage
         if (!empty($detail["detail_img"])) $detail["detail_img"] = tomedia($detail["detail_img"]);
         $detail["music"] = tomedia($detail["music"]);
         $detail["create_time"] = date("Y-m-d",$detail["create_time"]);
+        $detail['path'] = '/packageA/pages/skyread/details/details?id='.$id;
+	$detail['image'] = tomedia($detail["img"]);
         app_error1(0,'',$detail);
     }
 
@@ -626,6 +630,27 @@ class Index_EweiShopV2Page extends AppMobilePage
         //获取折扣宝奖励
         $discount=m('credits')->get_sum_creditdiscount(1,$user_id);
         $data['credit_pricediscount'] = $data['credit_sumdiscount'] = $discount ? $discount : 0;
+        //分享人id
+        $mid = $user_id;
+        //好友捐赠所有的图
+        $idarray = pdo_fetchall("select id from ".tablename("ewei_shop_share_help"));
+        //随机获取他的键
+        $k = array_rand($idarray);
+        //得到键所对应的id
+        $id = $idarray[$k]["id"];
+        //查询的好友捐赠的id
+        $data = pdo_get('ewei_shop_share_help',['id'=>$id],['title','image']);
+        //分享的缩略图
+        $data['image'] = tomedia($data['image']);
+        //小程序分享链接
+        $data['path'] = "/packageA/pages/helphand/helpshare/helpshare";
+        //海报
+        $imgurl = m('qrcode')->HelpPoster($member,$mid,['back'=>'/addons/ewei_shopv2/static/images/1.png','type'=>"helpposter",'title'=>'快来帮我助力一下','desc'=>'微信步数兑现金，收入可提现！','con'=>'每一步，都值得鼓励','url'=>'packageA/pages/helphand/helpshare/helpshare']);
+        if( empty($imgurl))
+        {
+            app_error(AppError::$PosterCreateFail, "海报生成失败");
+        }
+        $data['imgurl'] = $imgurl;
         app_error1(0,'',$data);
     }
 
@@ -678,8 +703,29 @@ class Index_EweiShopV2Page extends AppMobilePage
         //用户信息
         $memberInfo = m('member')->getMember($user_id);
         //助力榜列表
-        $helpList = m('getstep')->getHelpList($memberInfo["openid"]);
-        app_error1(0,'',$helpList);
+        $data = m('getstep')->getHelpList($memberInfo["openid"]);
+        //分享人id
+        $mid = $user_id;
+        //好友捐赠所有的图
+        $idarray = pdo_fetchall("select id from ".tablename("ewei_shop_share_help"));
+        //随机获取他的键
+        $k = array_rand($idarray);
+        //得到键所对应的id
+        $id = $idarray[$k]["id"];
+        //查询的好友捐赠的id
+        $data = pdo_get('ewei_shop_share_help',['id'=>$id],['title','image']);
+        //分享的缩略图
+        $data['image'] = tomedia($data['image']);
+        //小程序分享链接
+        $data['path'] = "/packageA/pages/helphand/helpshare/helpshare";
+        //海报
+        $imgurl = m('qrcode')->HelpPoster($member,$mid,['back'=>'/addons/ewei_shopv2/static/images/1.png','type'=>"helpposter",'title'=>'快来帮我助力一下','desc'=>'微信步数兑现金，收入可提现！','con'=>'每一步，都值得鼓励','url'=>'packageA/pages/helphand/helpshare/helpshare']);
+        if( empty($imgurl))
+        {
+            app_error(AppError::$PosterCreateFail, "海报生成失败");
+        }
+        $data['imgurl'] = $imgurl;
+        app_error1(0,'',$data);
     }
 
     /**

@@ -1872,7 +1872,12 @@ class App_EweiShopV2Model
             $mobile = substr($item['mobile'],0,3)."****".substr($item['mobile'],7,4);
             $log[$key]['mobile'] = $item['mobile'] == "" ? "" : $mobile;
         }
-        return ['list'=>$list,'log'=>$log,'num'=>count($user)-count($free) > 0 ? count($user)-count($free) : 0,'credit1'=>$member['credit1'] ? $member['credit1'] : (string)0,'credit3'=>$member['credit3'] ? $member['credit3'] : (string)0];
+        $share = [
+            'path'=>'/pages/index/index?scene='.$user_id,
+            'title'=>'原来微信步数可以当钱用，快来和我一起薅羊毛',
+            'image'=>'https://www.paokucoin.com/img/backgroup/lottary.png',
+        ];
+        return ['list'=>$list,'share'=>$share,'log'=>$log,'num'=>count($user)-count($free) > 0 ? count($user)-count($free) : 0,'credit1'=>$member['credit1'] ? $member['credit1'] : (string)0,'credit3'=>$member['credit3'] ? $member['credit3'] : (string)0];
     }
     
     /**
